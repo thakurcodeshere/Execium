@@ -370,12 +370,30 @@ export default function HomePage() {
         position: "relative", zIndex: 2, borderTop: "1px solid #181a1f",
         background: "#21252b", padding: "60px 48px 30px", color: "#abb2bf"
       }}>
-        <div style={{
-          maxWidth: 1200, margin: "0 auto", display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 40
+        <style dangerouslySetInnerHTML={{ __html: `
+          .footer-grid {
+            display: grid;
+            grid-template-columns: 2.2fr 1.2fr 1.2fr 1.2fr 1.2fr;
+            gap: 30px;
+          }
+          @media (max-width: 1024px) {
+            .footer-grid {
+              grid-template-columns: 1.5fr 1fr 1fr;
+              gap: 40px;
+            }
+          }
+          @media (max-width: 680px) {
+            .footer-grid {
+              grid-template-columns: 1fr;
+              gap: 30px;
+            }
+          }
+        `}} />
+        <div className="footer-grid" style={{
+          maxWidth: 1200, margin: "0 auto"
         }}>
-          {/* Logo Column (Takes double space on large displays) */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, gridColumn: "span 2" }}>
+          {/* Logo Column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{
                 width: 32, height: 32, borderRadius: 8,
