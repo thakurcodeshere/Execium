@@ -217,4 +217,4 @@ export const THEMES: Record<string, VSTheme> = {
 };
 
 export const THEME_LIST = Object.values(THEMES);
-export const DEFAULT_THEME_ID = 'dark-plus';
+export const DEFAULT_THEME_ID = 'one-dark-pro';
