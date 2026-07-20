@@ -58,7 +58,7 @@ const ARTICLES = [
   {icon:"🔬",color:"#10b981",tag:"Performance",time:"6 min",title:"Cache-Friendly Data Structures",excerpt:"How to structure C++ objects for CPU cache efficiency. We compare AoS vs SoA layouts, show profiling results, and demonstrate how cache misses silently kill performance in vector vs list traversal."},
   {icon:"⚡",color:"#f97316",tag:"C++20",time:"10 min",title:"Concepts: The Type System Revolution",excerpt:"C++20 Concepts finally give us readable template constraints. Learn how to write requires clauses, define named concepts, and replace cryptic SFINAE with expressive interfaces."},
   {icon:"🧵",color:"#06b6d4",tag:"Concurrency",time:"9 min",title:"Lock-Free Programming with Atomics",excerpt:"std::atomic enables safe shared state without mutex overhead. We cover memory ordering models — relaxed, acquire, release, seq_cst — with real-world examples for counters and ring buffers."},
-  {icon:"🎯",color:"#ec4899",tag:"Patterns",time:"7 min",title:"Design Patterns in Modern C++",desc:"Classic GoF patterns rewritten with lambdas, templates, and type erasure. Strategy, Observer, and CRTP — implemented in idiomatic C++17 with zero virtual overhead."},
+  {icon:"🎯",color:"#ec4899",tag:"Patterns",time:"7 min",title:"Design Patterns in Modern C++",excerpt:"Classic GoF patterns rewritten with lambdas, templates, and type erasure. Strategy, Observer, and CRTP — implemented in idiomatic C++17 with zero virtual overhead."},
 ];
 
 const CATS = ["All","Basics","OOP","STL","Memory","Modern","Concurrency","C++17","C++20","C++23","Advanced"];
@@ -69,10 +69,31 @@ const VER_COLOR: Record<string,string> = {
 export default function HomePage() {
   const [cat, setCat] = useState("All");
   const [search, setSearch] = useState("");
+  const [activeModal, setActiveModal] = useState<"about" | "faq" | "terms" | "privacy" | "contact" | "blog" | null>(null);
+  
+  // Contact Form states
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactMsg, setContactMsg] = useState("");
+  const [contactSubmitted, setContactSubmitted] = useState(false);
+
   const filtered = TOPICS.filter(t =>
     (cat === "All" || t.cat === cat) &&
     (!search || t.title.toLowerCase().includes(search.toLowerCase()) || t.desc.toLowerCase().includes(search.toLowerCase()))
   );
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contactEmail || !contactMsg) return;
+    setContactSubmitted(true);
+    setTimeout(() => {
+      setContactSubmitted(false);
+      setContactName("");
+      setContactEmail("");
+      setContactMsg("");
+      setActiveModal(null);
+    }, 2000);
+  };
 
   return (
     <div style={{minHeight:"100vh",background:"#03030a",position:"relative",overflow:"hidden",fontFamily:"'Inter',sans-serif"}}>
@@ -141,6 +162,51 @@ export default function HomePage() {
                 <span style={{fontSize:10,color:"#10b981",fontFamily:"'JetBrains Mono'"}}>✓ output: 13</span>
                 <span style={{fontSize:10,color:"#334155",fontFamily:"'JetBrains Mono'"}}>stack depth: 8</span>
                 <span style={{fontSize:10,color:"#334155",fontFamily:"'JetBrains Mono'"}}>ops: 41</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── GITHUB INTEGRATIONS FEATURE SHOWCASE ── */}
+      <section style={{padding:"80px 48px",background:"rgba(255,255,255,0.01)",borderTop:"1px solid rgba(255,255,255,0.03)",borderBottom:"1px solid rgba(255,255,255,0.03)",position:"relative",zIndex:2}}>
+        <div style={{maxWidth:1200,margin:"0 auto"}}>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:80,alignItems:"center"}}>
+            <div style={{background:"rgba(10,10,26,0.6)",border:"1px solid rgba(255,255,255,0.05)",borderRadius:16,padding:32,boxShadow:"0 20px 50px rgba(0,0,0,0.4)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
+                <div style={{width:40,height:40,borderRadius:10,background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <svg height="24" width="24" viewBox="0 0 16 16" fill="#fff"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                </div>
+                <div>
+                  <div style={{fontSize:15,fontWeight:800,color:"#fff"}}>GitHub Integrations</div>
+                  <div style={{fontSize:10,color:"#10b981",fontFamily:"'JetBrains Mono'"}}>CONNECTED & SYNCHRONIZED</div>
+                </div>
+              </div>
+              <div style={{fontFamily:"'JetBrains Mono'",fontSize:11,lineHeight:2.0,color:"#475569",background:"#05050a",borderRadius:8,padding:16,border:"1px solid rgba(255,255,255,0.03)"}}>
+                <div><span style={{color:"#a855f7"}}>$</span> gh auth status</div>
+                <div style={{color:"#e2e8f0"}}>✓ Logged in to github.com as thakurcodeshere</div>
+                <div><span style={{color:"#a855f7"}}>$</span> git commit -m "Fix memory leak"</div>
+                <div style={{color:"#10b981"}}>[main 62eeec4] Commit pushed successfully</div>
+                <div style={{color:"#334155"}}>To https://github.com/thakurcodeshere/Execium.git</div>
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:10,color:"#06b6d4",fontFamily:"'JetBrains Mono'",textTransform:"uppercase",letterSpacing:3,marginBottom:12}}>// Sync & Backup</div>
+              <h2 style={{fontSize:"clamp(28px,3.5vw,44px)",fontWeight:900,letterSpacing:"-1.5px",marginBottom:16,lineHeight:1.15}}>
+                Code on Execium.<br/><span className="gt-cold">Push straight to GitHub.</span>
+              </h2>
+              <p style={{fontSize:14,color:"#475569",lineHeight:1.75,marginBottom:28}}>
+                Save and manage your simulations inside public or private GitHub repositories. With built-in git tracking, you can push updates, branch workspaces, restore edit history, and host live C++ simulations in the cloud effortlessly.
+              </p>
+              <div style={{display:"flex",gap:16}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>🔗 Public & Private Repos</div>
+                  <p style={{fontSize:11,color:"#475569",lineHeight:1.6}}>Connect securely and fetch folders into browser sandboxes directly.</p>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>⚡ One-Click Commits</div>
+                  <p style={{fontSize:11,color:"#475569",lineHeight:1.6}}>Publish code changes to main branches in real time from the Studio.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -218,18 +284,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── ARTICLES ── */}
+      {/* ── ARTICLES / BLOG PREVIEW ── */}
       <section style={{padding:"60px 48px",position:"relative",zIndex:2,background:"rgba(255,255,255,.01)"}} id="articles">
         <div style={{maxWidth:1200,margin:"0 auto"}}>
-          <div style={{marginBottom:40}}>
-            <div style={{fontSize:10,color:"#06b6d4",fontFamily:"'JetBrains Mono'",textTransform:"uppercase",letterSpacing:3,marginBottom:10}}>// C++ Articles</div>
-            <h2 style={{fontSize:"clamp(28px,3.5vw,44px)",fontWeight:900,letterSpacing:"-1.5px"}}>
-              Learn From The <span className="gt-cold">Best Minds in C++</span>
-            </h2>
+          <div style={{marginBottom:40,display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
+            <div>
+              <div style={{fontSize:10,color:"#06b6d4",fontFamily:"'JetBrains Mono'",textTransform:"uppercase",letterSpacing:3,marginBottom:10}}>// C++ Articles</div>
+              <h2 style={{fontSize:"clamp(28px,3.5vw,44px)",fontWeight:900,letterSpacing:"-1.5px"}}>
+                Learn From The <span className="gt-cold">Best Minds in C++</span>
+              </h2>
+            </div>
+            <button onClick={() => setActiveModal("blog")} style={{
+              background:"rgba(6,182,212,0.12)",border:"1px solid rgba(6,182,212,0.3)",
+              color:"#06b6d4",fontFamily:"'JetBrains Mono'",fontSize:11,fontWeight:700,
+              padding:"8px 20px",borderRadius:8,cursor:"pointer",transition:"all 0.15s"
+            }}>View Full Blog →</button>
           </div>
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(320px,1fr))",gap:16}}>
             {ARTICLES.map(a=>(
               <div key={a.title}
+                onClick={() => setActiveModal("blog")}
                 style={{padding:24,borderRadius:14,background:"rgba(10,10,26,.8)",border:"1px solid rgba(255,255,255,.06)",cursor:"pointer",transition:"all .2s"}}
                 onMouseEnter={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor=a.color+"45";el.style.transform="translateY(-2px)";}}
                 onMouseLeave={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor="rgba(255,255,255,.06)";el.style.transform="translateY(0)";}}
@@ -294,13 +368,202 @@ export default function HomePage() {
       {/* Footer */}
       <footer style={{position:"relative",zIndex:2,borderTop:"1px solid rgba(255,255,255,.04)",padding:"20px 48px",display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:10,color:"#1e293b",fontSize:11,fontFamily:"'JetBrains Mono'"}}>
         <span>Execium Ω∞ — Computational Reality OS</span>
-        <div style={{display:"flex",gap:20}}>
-          <Link href="/guidelines" style={{color:"#334155",textDecoration:"none"}}>Guidelines</Link>
-          <Link href="/settings" style={{color:"#334155",textDecoration:"none"}}>Settings</Link>
-          <Link href="/login" style={{color:"#334155",textDecoration:"none"}}>Sign In</Link>
+        <div style={{display:"flex",gap:18,flexWrap:"wrap"}}>
+          <button onClick={() => setActiveModal("about")} style={{background:"none",border:"none",color:"#334155",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>About</button>
+          <button onClick={() => setActiveModal("faq")} style={{background:"none",border:"none",color:"#334155",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>FAQ</button>
+          <button onClick={() => setActiveModal("blog")} style={{background:"none",border:"none",color:"#334155",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>Blog</button>
+          <button onClick={() => setActiveModal("contact")} style={{background:"none",border:"none",color:"#334155",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>Contact Us</button>
+          <button onClick={() => setActiveModal("terms")} style={{background:"none",border:"none",color:"#334155",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>Terms</button>
+          <button onClick={() => setActiveModal("privacy")} style={{background:"none",border:"none",color:"#334155",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>Privacy</button>
         </div>
         <span>v∞.0 · Truth becomes visual</span>
       </footer>
+
+      {/* ── STUNNING GLASSMORPHIC MODALS OVERLAYS ── */}
+      {activeModal && (
+        <div style={{
+          position:"fixed",inset:0,background:"rgba(3,3,10,0.85)",backdropFilter:"blur(8px)",
+          display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,padding:20
+        }}>
+          <div style={{
+            background:"rgba(10,10,26,0.92)",border:"1px solid rgba(255,255,255,0.08)",
+            borderRadius:20,width:"100%",maxWidth:600,maxHeight:"85vh",overflowY:"auto",
+            padding:32,boxShadow:"0 30px 90px rgba(0,0,0,0.8)",position:"relative",
+            display:"flex",flexDirection:"column",gap:20
+          }}>
+            {/* Close Button */}
+            <button 
+              onClick={() => { setActiveModal(null); setContactSubmitted(false); }}
+              style={{
+                position:"absolute",top:20,right:20,background:"rgba(255,255,255,0.05)",
+                border:"none",color:"#64748b",width:28,height:28,borderRadius:"50%",
+                display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",
+                transition:"all 0.15s"
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = "rgba(239,68,68,0.15)"}
+              onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+            >✕</button>
+
+            {/* About Modal */}
+            {activeModal === "about" && (
+              <>
+                <h3 style={{fontSize:22,fontWeight:900,color:"#fff",letterSpacing:"-0.5px"}}>
+                  🤖 About Execium Ω∞
+                </h3>
+                <p style={{fontSize:13,color:"#94a3b8",lineHeight:1.8}}>
+                  Execium is a **Computational Reality Operating System** designed to remove the abstraction between writing code and physical computer operations.
+                </p>
+                <p style={{fontSize:13,color:"#94a3b8",lineHeight:1.8}}>
+                  Our mission is to help engineers master C++ by visualizing stack frame allocation, pointer maps, dynamic memory allocations, and visual timeline scrubbers in real time. We believe execution should never be invisible.
+                </p>
+                <div style={{height:1,background:"rgba(255,255,255,0.06)"}}/>
+                <div style={{display:"flex",gap:16}}>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:700,color:"#a855f7",marginBottom:4}}>Visual Reality</div>
+                    <p style={{fontSize:11,color:"#475569",lineHeight:1.5}}>No compiler simulation is abstract; we track variables down to their memory offsets.</p>
+                  </div>
+                  <div>
+                    <div style={{fontSize:13,fontWeight:700,color:"#06b6d4",marginBottom:4}}>Educational First</div>
+                    <p style={{fontSize:11,color:"#475569",lineHeight:1.5}}>A curriculum built to take students from initial basics to modern standard C++23.</p>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* FAQ Modal */}
+            {activeModal === "faq" && (
+              <>
+                <h3 style={{fontSize:22,fontWeight:900,color:"#fff",letterSpacing:"-0.5px"}}>
+                  ❓ Frequently Asked Questions
+                </h3>
+                <div style={{display:"flex",flexDirection:"column",gap:16,marginTop:8}}>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>How does the execution simulation engine work?</div>
+                    <p style={{fontSize:12,color:"#64748b",lineHeight:1.6}}>Execium analyzes syntax structures, tracks memory updates, variables, pointer offsets, and call frames, and feeds these traces directly into our graphical rendering interfaces.</p>
+                  </div>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>Can I link my GitHub repositories?</div>
+                    <p style={{fontSize:12,color:"#64748b",lineHeight:1.6}}>Yes! Execium features full GitHub integration, allowing you to load projects, commit code, and sync progress seamlessly.</p>
+                  </div>
+                  <div>
+                    <div style={{fontSize:14,fontWeight:700,color:"#e2e8f0",marginBottom:6}}>Is Execium suitable for custom projects?</div>
+                    <p style={{fontSize:12,color:"#64748b",lineHeight:1.6}}>Absolutely. You can clear the compiler, paste custom code snippets, and use the debugger tool flow to visualize standard templates in real time.</p>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Terms Modal */}
+            {activeModal === "terms" && (
+              <>
+                <h3 style={{fontSize:22,fontWeight:900,color:"#fff",letterSpacing:"-0.5px"}}>
+                  📄 Terms of Service
+                </h3>
+                <div style={{display:"flex",flexDirection:"column",gap:12,fontSize:12,color:"#94a3b8",lineHeight:1.75}}>
+                  <p>Welcome to Execium. By utilizing our platforms, compiler tools, and simulation sandboxes, you agree to comply with the following regulations.</p>
+                  <p><strong>1. Usage License:</strong> Execium allows educational use and personal sandbox testing of C++ code snippets. Reverse engineering the trace layout engine or embedding it without authorization is restricted.</p>
+                  <p><strong>2. Account Integrity:</strong> You are responsible for protecting access to synced auth tokens, including GitHub integration credentials.</p>
+                  <p><strong>3. Disclaimer:</strong> Simulations are designed for pedagogical clarity; minor differences may occur between visual tracing stack frames and native target optimizations under compilers like GCC or Clang.</p>
+                </div>
+              </>
+            )}
+
+            {/* Privacy Modal */}
+            {activeModal === "privacy" && (
+              <>
+                <h3 style={{fontSize:22,fontWeight:900,color:"#fff",letterSpacing:"-0.5px"}}>
+                  🔒 Privacy Policy
+                </h3>
+                <div style={{display:"flex",flexDirection:"column",gap:12,fontSize:12,color:"#94a3b8",lineHeight:1.75}}>
+                  <p>At Execium, user privacy is paramount. Your code snippets and workspaces are held locally inside browser storage sandboxes.</p>
+                  <p><strong>Data Sync:</strong> Integrating GitHub tokens stores auth keys securely client-side in secure cookie/localStorage models, communicating directly with GitHub APIs without passing keys to intermediate databases.</p>
+                  <p><strong>Telemetry:</strong> Next.js metrics gathered are fully anonymous and can be toggled off inside user configuration screens.</p>
+                </div>
+              </>
+            )}
+
+            {/* Contact Us Modal */}
+            {activeModal === "contact" && (
+              <>
+                <h3 style={{fontSize:22,fontWeight:900,color:"#fff",letterSpacing:"-0.5px"}}>
+                  ✉️ Contact Execium Team
+                </h3>
+                {contactSubmitted ? (
+                  <div style={{textAlign:"center",padding:"40px 0"}}>
+                    <div style={{fontSize:32,color:"#10b981",marginBottom:12}}>✓ Message Dispatched</div>
+                    <p style={{fontSize:13,color:"#94a3b8"}}>Thanks for reaching out! We'll get back to you shortly.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} style={{display:"flex",flexDirection:"column",gap:14,marginTop:8}}>
+                    <div style={{display:"flex",gap:12}}>
+                      <div style={{flex:1}}>
+                        <label style={{fontSize:10,color:"#475569",display:"block",marginBottom:6,fontFamily:"'JetBrains Mono'"}}>NAME</label>
+                        <input 
+                          type="text" value={contactName} onChange={e=>setContactName(e.target.value)}
+                          placeholder="Name" required
+                          style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 12px",color:"#fff",outline:"none",fontSize:13}}
+                        />
+                      </div>
+                      <div style={{flex:1}}>
+                        <label style={{fontSize:10,color:"#475569",display:"block",marginBottom:6,fontFamily:"'JetBrains Mono'"}}>EMAIL ADDRESS</label>
+                        <input 
+                          type="email" value={contactEmail} onChange={e=>setContactEmail(e.target.value)}
+                          placeholder="Email" required
+                          style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 12px",color:"#fff",outline:"none",fontSize:13}}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{fontSize:10,color:"#475569",display:"block",marginBottom:6,fontFamily:"'JetBrains Mono'"}}>YOUR MESSAGE</label>
+                      <textarea 
+                        value={contactMsg} onChange={e=>setContactMsg(e.target.value)}
+                        placeholder="Write message..." rows={4} required
+                        style={{width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:8,padding:"8px 12px",color:"#fff",outline:"none",fontSize:13,resize:"none"}}
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-exec" style={{width:"100%",padding:"12px 0",borderRadius:10,fontWeight:800,fontSize:13,marginTop:8}}>
+                      Send Message
+                    </button>
+                  </form>
+                )}
+              </>
+            )}
+
+            {/* Blog Modal */}
+            {activeModal === "blog" && (
+              <>
+                <h3 style={{fontSize:22,fontWeight:900,color:"#fff",letterSpacing:"-0.5px"}}>
+                  📝 Execium Engineering Blog
+                </h3>
+                <div style={{display:"flex",flexDirection:"column",gap:24,marginTop:12,maxHeight:"50vh",overflowY:"auto",paddingRight:8}}>
+                  <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)",paddingBottom:16}}>
+                    <span style={{fontSize:9,color:"#a855f7",fontFamily:"'JetBrains Mono'"}}>JULY 18, 2026</span>
+                    <h4 style={{fontSize:15,color:"#e2e8f0",margin:"4px 0 8px"}}>Visualizing the Stack vs Heap</h4>
+                    <p style={{fontSize:12,color:"#64748b",lineHeight:1.6}}>
+                      Why do recursion overflows crash at 8MB while the heap can swallow gigabytes? We break down visual timeline memory allocation traces and explain how memory engines represent variable references.
+                    </p>
+                  </div>
+                  <div style={{borderBottom:"1px solid rgba(255,255,255,0.04)",paddingBottom:16}}>
+                    <span style={{fontSize:9,color:"#06b6d4",fontFamily:"'JetBrains Mono'"}}>JULY 12, 2026</span>
+                    <h4 style={{fontSize:15,color:"#e2e8f0",margin:"4px 0 8px"}}>C++23: The Modern Revolution</h4>
+                    <p style={{fontSize:12,color:"#64748b",lineHeight:1.6}}>
+                      Modern C++ features like std::print and flat_map are finally simplifying legacy template structures. Learn how Execium integrates C++23 features into standard curriculum simulation runs.
+                    </p>
+                  </div>
+                  <div>
+                    <span style={{fontSize:9,color:"#10b981",fontFamily:"'JetBrains Mono'"}}>JUNE 28, 2026</span>
+                    <h4 style={{fontSize:15,color:"#e2e8f0",margin:"4px 0 8px"}}>Pointers are Just Numbers</h4>
+                    <p style={{fontSize:12,color:"#64748b",lineHeight:1.6}}>
+                      Demystifying memory addresses, raw pointer values, and dereference logic with visual boxes. Read about standard pointer arithmetic patterns and dangling references.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
 
       <FeedbackModal/>
     </div>
