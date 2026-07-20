@@ -18,6 +18,7 @@ interface Store {
   activePanel: Panel;
   _timer: ReturnType<typeof setInterval>|null;
   theme: VSTheme;
+  isCollapsed: boolean;
 
   loadProgram(id:string):void;
   setCode(code:string):void;
@@ -32,6 +33,8 @@ interface Store {
   toggleAI():void;
   setPanel(p:Panel):void;
   setTheme(id:string):void;
+  setCollapsed(collapsed:boolean):void;
+  toggleCollapsed():void;
 }
 
 export const useStore = create<Store>((set,get)=>({
@@ -41,6 +44,7 @@ export const useStore = create<Store>((set,get)=>({
   cur:0, playback:'idle', speed:1400,
   aiMode:'beginner', showAI:false, activePanel:'memory', _timer:null,
   theme: THEMES[DEFAULT_THEME_ID],
+  isCollapsed: true,
 
   loadProgram(id){
     const {_timer}=get();
@@ -108,4 +112,6 @@ export const useStore = create<Store>((set,get)=>({
   toggleAI(){set(s=>({showAI:!s.showAI}))},
   setPanel(p:Panel){set({activePanel:p})},
   setTheme(id:string){set({theme:THEMES[id]??THEMES[DEFAULT_THEME_ID]})},
+  setCollapsed(collapsed){set({isCollapsed:collapsed})},
+  toggleCollapsed(){set(s=>({isCollapsed:!s.isCollapsed}))},
 }));

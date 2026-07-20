@@ -9,7 +9,7 @@ import AIAgentPanel from "@/components/studio/AIAgentPanel";
 const CodeEditor = dynamic(() => import("@/components/studio/CodeEditor"), { ssr: false });
 
 export default function StudioPage() {
-  const { theme, showAI } = useStore();
+  const { theme, showAI, isCollapsed } = useStore();
   const T = theme;
 
   // Sidebar drag-to-resize states
@@ -78,8 +78,8 @@ export default function StudioPage() {
 
         {/* ── Bottom Section (Visualizers, Controls, and optional AI Agent) ── */}
         <div style={{
-          height: 380, flexShrink: 0, borderTop: `1px solid ${T.uiBorder}`,
-          display: "flex", minWidth: 0
+          height: isCollapsed ? 90 : 380, flexShrink: 0, borderTop: `1px solid ${T.uiBorder}`,
+          display: "flex", minWidth: 0, transition: "height 0.2s ease"
         }}>
           
           {/* ── 2: Left/Center Visualizers & Controls ── */}

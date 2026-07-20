@@ -7,7 +7,7 @@ import ConsoleOutput from "./ConsoleOutput";
 import MemoryUniverse from "./MemoryUniverse";
 import RecursionDim from "./RecursionDimension";
 import ExecutionWaterfall from "./ExecutionWaterfall";
-import { Play, Pause, SkipForward, SkipBack, RotateCcw, Sparkles } from "lucide-react";
+import { Play, Pause, SkipForward, SkipBack, RotateCcw, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 
 type VisualizerTab = 'flow' | 'waterfall' | 'memory' | 'recursion' | 'vars' | 'console';
 
@@ -21,7 +21,8 @@ const SPEEDS = [{ l: '0.5×', ms: 2800 }, { l: '1×', ms: 1400 }, { l: '2×', ms
 export default function LBarHorizontal() {
   const {
     steps, cur, playback, speed, play,
-    pause, fwd, bwd, restart, setSpeed, jump, theme, showAI, toggleAI
+    pause, fwd, bwd, restart, setSpeed, jump, theme, showAI, toggleAI,
+    isCollapsed, setCollapsed, toggleCollapsed
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<VisualizerTab>('flow');
@@ -50,19 +51,27 @@ export default function LBarHorizontal() {
       {/* ── Visualizer Tabs Bar ── */}
       <div style={{
         display: "flex", borderBottom: `1px solid ${T.uiBorder}`,
-        background: T.uiPanelHd, padding: "0 8px", alignItems: "center", flexShrink: 0
+        background: T.uiPanelHd, padding: "0 8px", alignItems: "center", flexShrink: 0,
+        height: 38
       }}>
         {tabs.map(t => (
           <button
             key={t.id}
-            onClick={() => setActiveTab(t.id)}
+            onClick={() => {
+              if (activeTab === t.id && !isCollapsed) {
+                setCollapsed(true);
+              } else {
+                setActiveTab(t.id);
+                setCollapsed(false);
+              }
+            }}
             style={{
               display: "flex", alignItems: "center", gap: 6, padding: "8px 14px",
-              border: "none", borderBottom: activeTab === t.id ? `2px solid ${t.col}` : "2px solid transparent",
-              background: activeTab === t.id ? `${t.col}12` : "transparent",
-              color: activeTab === t.id ? t.col : T.uiTextMuted, cursor: "pointer",
-              fontFamily: "'JetBrains Mono'", fontSize: 10, fontWeight: activeTab === t.id ? 800 : 400,
-              transition: "all 0.15s"
+              border: "none", borderBottom: activeTab === t.id && !isCollapsed ? `2px solid ${t.col}` : "2px solid transparent",
+              background: activeTab === t.id && !isCollapsed ? `${t.col}12` : "transparent",
+              color: activeTab === t.id && !isCollapsed ? t.col : T.uiTextMuted, cursor: "pointer",
+              fontFamily: "'JetBrains Mono'", fontSize: 10, fontWeight: activeTab === t.id && !isCollapsed ? 800 : 400,
+              transition: "all 0.15s", height: "100%"
             }}
           >
             <span style={{ fontSize: 12 }}>{t.icon}</span>
@@ -75,7 +84,7 @@ export default function LBarHorizontal() {
         {/* Step Badge */}
         {step && (
           <div style={{
-            display: "flex", gap: 6, paddingRight: 8, fontSize: 9,
+            display: "flex", gap: 6, paddingRight: 12, fontSize: 9,
             fontFamily: "'JetBrains Mono'", color: T.uiTextMuted
           }}>
             <span style={{ background: `${hlCol}15`, color: hlCol, border: `1px solid ${hlCol}30`, padding: "2px 6px", borderRadius: 4 }}>
@@ -83,21 +92,39 @@ export default function LBarHorizontal() {
             </span>
           </div>
         )}
+
+        {/* Toggle Collapse/Expand Chevron Button */}
+        <button
+          onClick={toggleCollapsed}
+          title={isCollapsed ? "Expand panel" : "Collapse panel"}
+          style={{
+            background: "none", border: "none", color: T.uiTextMuted,
+            cursor: "pointer", display: "flex", alignItems: "center",
+            padding: "0 12px", borderLeft: `1px solid ${T.uiBorder}`,
+            height: "100%", transition: "all 0.15s"
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = T.uiText}
+          onMouseLeave={e => e.currentTarget.style.color = T.uiTextMuted}
+        >
+          {isCollapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
       </div>
 
       {/* ── Visualizer Panels Content (Scrollable) ── */}
-      <div style={{ flex: 1, overflowY: "auto", minHeight: 0, background: T.uiBg }}>
-        {activeTab === 'flow' && <ExecutionFlow />}
-        {activeTab === 'waterfall' && <ExecutionWaterfall />}
-        {activeTab === 'memory' && <MemoryUniverse />}
-        {activeTab === 'recursion' && <RecursionDim />}
-        {activeTab === 'vars' && <VariablesPanel />}
-        {activeTab === 'console' && (
-          <div style={{ height: "100%", padding: 12, background: T.editorBg }}>
-            <ConsoleOutput />
-          </div>
-        )}
-      </div>
+      {!isCollapsed && (
+        <div style={{ flex: 1, overflowY: "auto", minHeight: 0, background: T.uiBg }}>
+          {activeTab === 'flow' && <ExecutionFlow />}
+          {activeTab === 'waterfall' && <ExecutionWaterfall />}
+          {activeTab === 'memory' && <MemoryUniverse />}
+          {activeTab === 'recursion' && <RecursionDim />}
+          {activeTab === 'vars' && <VariablesPanel />}
+          {activeTab === 'console' && (
+            <div style={{ height: "100%", padding: 12, background: T.editorBg }}>
+              <ConsoleOutput />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Bottom Temporal Controls / Status Horizontal Line ── */}
       <div style={{
