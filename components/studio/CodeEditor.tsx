@@ -1,11 +1,11 @@
 "use client";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { useRef, useState, useMemo, useCallback } from "react";
+import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { useStore } from "@/lib/store";
-import { TEMPLATES, TEMPLATE_CATEGORIES, VERSION_LABELS, CppVersion, detectTrace } from "@/lib/templates";
+import { VERSION_LABELS, CppVersion, detectTrace } from "@/lib/templates";
 import { PROGRAMS } from "@/lib/engine";
 
-// Monaco C++ theme mappings for VS themes
+// Monaco C++ theme mappings
 const MONACO_THEMES: Record<string, string> = {
   'dark-plus':'vs-dark','github-dark':'vs-dark','dracula':'vs-dark',
   'one-dark':'vs-dark','night-owl':'vs-dark','nord':'vs-dark',
@@ -15,27 +15,42 @@ const MONACO_THEMES: Record<string, string> = {
   'ayu-light':'vs','high-contrast':'hc-black',
 };
 
-const CAT_COLORS: Record<string, string> = {
-  'Basics':'#10b981','Recursion':'#a855f7','Algorithms':'#3b82f6',
-  'Data Structures':'#f97316','Memory':'#ec4899',
-  'C++14':'#f59e0b','C++17':'#06b6d4','C++20':'#8b5cf6','C++23':'#ef4444',
-};
-
 const VERSION_COLORS: Record<CppVersion, string> = {
   cpp11:'#64748b', cpp14:'#f59e0b', cpp17:'#06b6d4', cpp20:'#8b5cf6', cpp23:'#ef4444',
 };
 
 export default function CodeEditor() {
-  const { code, steps, cur, theme, loadProgram, setCode } = useStore();
-  const [showTemplates, setShowTemplates] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('Basics');
+  const { code, steps, cur, theme, loadProgram, setCode, jump, restart } = useStore();
   const [cppVersion, setCppVersion] = useState<CppVersion>('cpp11');
-  const [searchQuery, setSearchQuery] = useState('');
   const [traceHint, setTraceHint] = useState<string | null>(null);
   const editorRef = useRef<any>(null);
 
+  // Compile and share states
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
+  const [copiedShare, setCopiedShare] = useState(false);
+  const [compileState, setCompileState] = useState<'idle' | 'compiling' | 'success' | 'running'>('idle');
+
   const step = steps[cur];
   const monacoTheme = MONACO_THEMES[theme.id] ?? 'vs-dark';
+
+  // Load code from share URL parameter if present
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlCode = params.get("code");
+      if (urlCode) {
+        const decoded = decodeURIComponent(escape(window.atob(urlCode)));
+        if (decoded) {
+          setCode(decoded);
+          const key = detectTrace(decoded);
+          if (key && PROGRAMS[key]) {
+            loadProgram(key);
+          }
+        }
+      }
+    } catch {}
+  }, [setCode, loadProgram]);
 
   // Compute heat data for gutter decorations
   const { lineVisits, maxVisit } = useMemo(() => {
@@ -44,11 +59,10 @@ export default function CodeEditor() {
     return { lineVisits: v, maxVisit: Math.max(1, ...Object.values(v)) };
   }, [steps]);
 
-  // Monaco mount handler — add C++ config + decorations
+  // Monaco mount handler
   const onMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;
 
-    // C++ language config
     monaco.languages.setLanguageConfiguration('cpp', {
       comments: { lineComment: '//', blockComment: ['/*', '*/'] },
       brackets: [['{', '}'], ['[', ']'], ['(', ')']],
@@ -63,7 +77,6 @@ export default function CodeEditor() {
       ],
     });
 
-    // Extra C++ snippets
     monaco.languages.registerCompletionItemProvider('cpp', {
       provideCompletionItems: (model, position) => {
         const suggestions = [
@@ -99,15 +112,14 @@ export default function CodeEditor() {
       },
     });
 
-    // Key binding: Ctrl+Enter to run analysis
     editor.addAction({
       id: 'run-analysis', label: 'Run Simulation',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
-      run: () => handleRunAnalysis(editor.getValue()),
+      run: () => handleDebug(editor.getValue()),
     });
   }, [theme]);
 
-  // Code change handler
+  // Code change
   const handleCodeChange = useCallback((val: string | undefined) => {
     if (!val) return;
     setCode(val);
@@ -115,8 +127,24 @@ export default function CodeEditor() {
     setTraceHint(traced);
   }, [setCode]);
 
-  // Run analysis — detect + load matching trace or show message
-  const handleRunAnalysis = useCallback((val?: string) => {
+  // Actions
+  const handleCompile = () => {
+    setCompileState('compiling');
+    setTimeout(() => {
+      setCompileState('success');
+      setTimeout(() => setCompileState('idle'), 1800);
+    }, 1000);
+  };
+
+  const handleRun = () => {
+    setCompileState('running');
+    setTimeout(() => {
+      setCompileState('idle');
+      jump(steps.length - 1); // Run all the way to the end
+    }, 1200);
+  };
+
+  const handleDebug = (val?: string) => {
     const currentCode = val ?? editorRef.current?.getValue() ?? code;
     const key = detectTrace(currentCode);
     if (key && PROGRAMS[key]) {
@@ -125,28 +153,24 @@ export default function CodeEditor() {
     } else {
       setTraceHint('custom');
     }
-  }, [code, loadProgram]);
-
-  // Load a template
-  const handleLoadTemplate = (template: typeof TEMPLATES[0]) => {
-    editorRef.current?.setValue(template.code);
-    setCode(template.code);
-    setCppVersion(template.version);
-    setShowTemplates(false);
-    if (template.traceKey && PROGRAMS[template.traceKey]) {
-      loadProgram(template.traceKey);
-    }
-    const traced = detectTrace(template.code);
-    setTraceHint(traced && traced !== template.traceKey ? traced : null);
+    restart();
   };
 
-  const filteredTemplates = TEMPLATES.filter(t => {
-    const matchCat = t.category === activeCategory;
-    const matchSearch = !searchQuery ||
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCat && matchSearch;
-  });
+  const handleShare = () => {
+    try {
+      const encoded = window.btoa(unescape(encodeURIComponent(code)));
+      const url = `${window.location.origin}${window.location.pathname}?code=${encoded}`;
+      setShareUrl(url);
+      setCopiedShare(false);
+      setShowShareModal(true);
+    } catch {}
+  };
+
+  const handleCopyShare = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopiedShare(true);
+    setTimeout(() => setCopiedShare(false), 2000);
+  };
 
   const T = theme;
   const activeLine = step?.line ?? -1;
@@ -158,7 +182,7 @@ export default function CodeEditor() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px',
         background: T.uiPanelHd, borderBottom: `1px solid ${T.uiBorder}`, flexShrink: 0, flexWrap: 'wrap' }}>
 
-        {/* C++ Version selector */}
+        {/* C++ Version */}
         <select
           value={cppVersion}
           onChange={e => setCppVersion(e.target.value as CppVersion)}
@@ -176,22 +200,9 @@ export default function CodeEditor() {
 
         <div style={{ width: 1, height: 18, background: T.uiBorder }} />
 
-        {/* Templates button */}
-        <button onClick={() => setShowTemplates(s => !s)} style={{
-          display: 'flex', alignItems: 'center', gap: 5,
-          padding: '3px 10px', borderRadius: 6,
-          border: `1px solid ${showTemplates ? '#06b6d4' : T.uiBorder}`,
-          background: showTemplates ? 'rgba(6,182,212,.15)' : T.uiSurface,
-          color: showTemplates ? '#06b6d4' : T.uiTextMuted,
-          cursor: 'pointer', fontSize: 10, fontFamily: "'JetBrains Mono'",
-          transition: 'all .15s',
-        }}>
-          📂 Templates ({TEMPLATES.length})
-        </button>
-
         {/* Trace hint */}
         {traceHint && traceHint !== 'custom' && PROGRAMS[traceHint] && (
-          <button onClick={() => handleRunAnalysis()} style={{
+          <button onClick={() => handleDebug()} style={{
             display: 'flex', alignItems: 'center', gap: 5,
             padding: '3px 10px', borderRadius: 6,
             border: '1px solid rgba(16,185,129,.4)',
@@ -208,52 +219,41 @@ export default function CodeEditor() {
           <span style={{ fontSize: 9, color: '#f59e0b', fontFamily: "'JetBrains Mono'",
             background: 'rgba(245,158,11,.1)', border: '1px solid rgba(245,158,11,.3)',
             borderRadius: 4, padding: '2px 8px' }}>
-            ⚠ Custom code — simulation available for known patterns
+            ⚠ Custom code — simulation available for templates
           </span>
         )}
 
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 5 }}>
-          {/* Heat legend */}
-          {Object.keys(lineVisits).length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 8,
-              fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
-              <span>cool</span>
-              {['#3b82f6','#f59e0b','#ef4444'].map((c,i)=>(
-                <div key={i} style={{ width:12, height:5, borderRadius:2, background:c }}/>
-              ))}
-              <span>hot</span>
-            </div>
-          )}
-
-          {/* Paste from clipboard */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
+          
+          {/* Paste */}
           <button title="Paste from clipboard" onClick={async () => {
             try {
               const text = await navigator.clipboard.readText();
               if (text && editorRef.current) { editorRef.current.setValue(text); setCode(text); }
-            } catch { alert('Allow clipboard access to paste.'); }
+            } catch { alert('Allow clipboard access.'); }
           }} style={{
             padding: '3px 9px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
             background: T.uiSurface, color: T.uiTextMuted, cursor: 'pointer',
-            fontSize: 10, fontFamily: "'JetBrains Mono'", transition: 'all .15s',
+            fontSize: 10, fontFamily: "'JetBrains Mono'"
           }}>📋 Paste</button>
 
-          {/* Copy code */}
+          {/* Copy */}
           <button title="Copy all code" onClick={() => {
             const val = editorRef.current?.getValue() ?? code;
             navigator.clipboard.writeText(val);
           }} style={{
             padding: '3px 9px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
             background: T.uiSurface, color: T.uiTextMuted, cursor: 'pointer',
-            fontSize: 10, fontFamily: "'JetBrains Mono'", transition: 'all .15s',
+            fontSize: 10, fontFamily: "'JetBrains Mono'"
           }}>⎘ Copy</button>
 
           {/* Format */}
-          <button title="Format code (Shift+Alt+F)" onClick={() => {
+          <button title="Format code" onClick={() => {
             editorRef.current?.getAction('editor.action.formatDocument')?.run();
           }} style={{
             padding: '3px 9px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
             background: T.uiSurface, color: T.uiTextMuted, cursor: 'pointer',
-            fontSize: 10, fontFamily: "'JetBrains Mono'", transition: 'all .15s',
+            fontSize: 10, fontFamily: "'JetBrains Mono'"
           }}>✦ Format</button>
 
           {/* Clear */}
@@ -263,14 +263,14 @@ export default function CodeEditor() {
           }} style={{
             padding: '3px 9px', borderRadius: 6, border: `1px solid rgba(239,68,68,.25)`,
             background: 'rgba(239,68,68,.06)', color: '#ef4444', cursor: 'pointer',
-            fontSize: 10, fontFamily: "'JetBrains Mono'", transition: 'all .15s',
+            fontSize: 10, fontFamily: "'JetBrains Mono'"
           }}>✕ Clear</button>
 
           {/* Godbolt */}
           <a
             href={`https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1iN`}
             target="_blank" rel="noopener noreferrer"
-            title="Open in Compiler Explorer (godbolt.org)"
+            title="Open in Compiler Explorer"
             style={{
               padding: '3px 9px', borderRadius: 6, border: '1px solid rgba(245,158,11,.3)',
               background: 'rgba(245,158,11,.08)', color: '#f59e0b', cursor: 'pointer',
@@ -280,13 +280,36 @@ export default function CodeEditor() {
 
           <div style={{ width: 1, height: 16, background: T.uiBorder }} />
 
-          {/* Ctrl+Enter hint */}
-          <span style={{ fontSize: 8, color: T.uiTextMuted, fontFamily: "'JetBrains Mono'" }}>
-            Ctrl+↵
-          </span>
+          {/* SHARE OPTION */}
+          <button onClick={handleShare} style={{
+            padding: '4px 10px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
+            background: T.uiSurface, color: T.uiText, cursor: 'pointer',
+            fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 700,
+            transition: 'all .15s', display: 'flex', alignItems: 'center', gap: 4
+          }}>
+            <span>🔗</span> Share
+          </button>
 
-          {/* Run button */}
-          <button onClick={() => handleRunAnalysis()} style={{
+          {/* COMPILE OPTION */}
+          <button onClick={handleCompile} style={{
+            padding: '4px 10px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
+            background: T.uiSurface, color: T.uiTextMuted, cursor: 'pointer',
+            fontSize: 10, fontFamily: "'JetBrains Mono'", transition: 'all .15s'
+          }}>
+            🛠 Compile
+          </button>
+
+          {/* RUN OPTION */}
+          <button onClick={handleRun} style={{
+            padding: '4px 10px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
+            background: T.uiSurface, color: T.uiTextMuted, cursor: 'pointer',
+            fontSize: 10, fontFamily: "'JetBrains Mono'", transition: 'all .15s'
+          }}>
+            🚀 Run
+          </button>
+
+          {/* DEBUG OPTION */}
+          <button onClick={() => handleDebug()} style={{
             display: 'flex', alignItems: 'center', gap: 5,
             padding: '4px 14px', borderRadius: 7,
             background: 'linear-gradient(135deg, #a855f7, #3b82f6)',
@@ -294,98 +317,10 @@ export default function CodeEditor() {
             fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
             boxShadow: '0 0 14px rgba(168,85,247,.4)',
             transition: 'all .15s',
-          }}>▶ Simulate</button>
+          }}>🐞 Debug</button>
+
         </div>
       </div>
-
-      {/* ── Template Library Panel ── */}
-      {showTemplates && (
-        <div style={{
-          position: 'absolute', top: 44, left: 0, right: 0, zIndex: 100,
-          background: T.uiSurface, borderBottom: `1px solid ${T.uiBorder}`,
-          boxShadow: '0 20px 60px rgba(0,0,0,.8)', maxHeight: 420, display: 'flex', flexDirection: 'column',
-        }}>
-          {/* Search + header */}
-          <div style={{ padding: '8px 12px', borderBottom: `1px solid ${T.uiBorder}`,
-            display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 800, color: T.uiText }}>
-              📂 C++ Template Library
-            </span>
-            <input
-              placeholder="Search templates..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              style={{
-                flex: 1, background: T.uiSurface, border: `1px solid ${T.uiBorder}`,
-                borderRadius: 6, padding: '4px 10px', color: T.uiText,
-                fontSize: 11, fontFamily: "'JetBrains Mono'", outline: 'none',
-              }}
-            />
-            <button onClick={() => setShowTemplates(false)} style={{
-              background: 'transparent', border: 'none', color: T.uiTextMuted,
-              cursor: 'pointer', fontSize: 16, padding: '0 4px',
-            }}>✕</button>
-          </div>
-
-          <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-            {/* Category sidebar */}
-            <div style={{ width: 130, flexShrink: 0, borderRight: `1px solid ${T.uiBorder}`,
-              overflow: 'auto', padding: '6px 0' }}>
-              {TEMPLATE_CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setActiveCategory(cat)} style={{
-                  width: '100%', padding: '7px 12px', textAlign: 'left',
-                  background: activeCategory === cat ? `${CAT_COLORS[cat] ?? '#3b82f6'}15` : 'transparent',
-                  border: 'none', borderLeft: `3px solid ${activeCategory === cat ? (CAT_COLORS[cat] ?? '#3b82f6') : 'transparent'}`,
-                  color: activeCategory === cat ? (CAT_COLORS[cat] ?? '#3b82f6') : T.uiTextMuted,
-                  cursor: 'pointer', fontSize: 11, fontFamily: "'JetBrains Mono'",
-                  fontWeight: activeCategory === cat ? 800 : 400, transition: 'all .12s',
-                }}>
-                  {cat}
-                  <div style={{ fontSize: 8, opacity: .6 }}>
-                    {TEMPLATES.filter(t => t.category === cat).length} templates
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Template cards */}
-            <div style={{ flex: 1, overflow: 'auto', padding: 10,
-              display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8, alignContent: 'start' }}>
-              {filteredTemplates.map(tpl => (
-                <button key={tpl.id} onClick={() => handleLoadTemplate(tpl)} style={{
-                  padding: '10px 12px', borderRadius: 10, textAlign: 'left',
-                  background: T.editorBg,
-                  border: `1px solid ${tpl.traceKey ? 'rgba(16,185,129,.3)' : T.uiBorder}`,
-                  cursor: 'pointer', transition: 'all .15s', color: T.uiText,
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.border = `1px solid ${CAT_COLORS[tpl.category] ?? '#3b82f6'}`; (e.currentTarget as HTMLElement).style.background = `${CAT_COLORS[tpl.category] ?? '#3b82f6'}0a`; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.border = `1px solid ${tpl.traceKey ? 'rgba(16,185,129,.3)' : T.uiBorder}`; (e.currentTarget as HTMLElement).style.background = T.editorBg; }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
-                    <span style={{ fontSize: 18 }}>{tpl.icon}</span>
-                    <div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: T.uiText }}>{tpl.title}</div>
-                      <div style={{ fontSize: 8, color: VERSION_COLORS[tpl.version],
-                        fontFamily: "'JetBrains Mono'", fontWeight: 800 }}>
-                        {VERSION_LABELS[tpl.version]}
-                        {tpl.traceKey && <span style={{ marginLeft: 4, color: '#10b981' }}>· ✅ traced</span>}
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 9, color: T.uiTextMuted, lineHeight: 1.5 }}>
-                    {tpl.description}
-                  </div>
-                </button>
-              ))}
-              {filteredTemplates.length === 0 && (
-                <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 30,
-                  color: T.uiTextMuted, fontSize: 11, fontFamily: "'JetBrains Mono'" }}>
-                  No templates match "{searchQuery}"
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Monaco Editor ── */}
       <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
@@ -417,21 +352,118 @@ export default function CodeEditor() {
             bracketPairColorization: { enabled: true },
             renderWhitespace: 'selection',
             padding: { top: 10, bottom: 10 },
-            glyphMargin: true,  // for heat decorations
-            // Highlight current active execution line
-            ...(activeLine > 0 ? {} : {}),
+            glyphMargin: true,
           }}
         />
 
-        {/* Active line glow overlay — positioned over editor */}
-        {activeLine > 0 && (
+        {/* ── COMPILE / RUN SCREEN OVERLAYS ── */}
+        {compileState === 'compiling' && (
           <div style={{
-            position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-            pointerEvents: 'none', overflow: 'hidden',
+            position: 'absolute', inset: 0, background: 'rgba(3,3,10,0.85)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            zIndex: 300, backdropFilter: 'blur(4px)'
           }}>
-            {/* We can't easily overlay without Monaco line height — show a status strip instead */}
+            <div className="orb anim-pulse" style={{ background: '#a855f7', width: 40, height: 40, boxShadow: '0 0 20px #a855f7' }} />
+            <div style={{ color: '#fff', fontFamily: "'JetBrains Mono'", fontSize: 13, marginTop: 16, fontWeight: 700 }}>
+              g++ -std=c++23 main.cpp -o main
+            </div>
+            <div style={{ color: '#64748b', fontSize: 10, fontFamily: "'JetBrains Mono'", marginTop: 8 }}>
+              Running compilation phase...
+            </div>
           </div>
         )}
+
+        {compileState === 'success' && (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'rgba(3,3,10,0.85)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            zIndex: 300, backdropFilter: 'blur(4px)'
+          }}>
+            <div style={{ color: '#10b981', fontSize: 40 }}>✓</div>
+            <div style={{ color: '#fff', fontFamily: "'JetBrains Mono'", fontSize: 13, marginTop: 12, fontWeight: 700 }}>
+              Build Succeeded
+            </div>
+            <div style={{ color: '#10b981', fontSize: 10, fontFamily: "'JetBrains Mono'", marginTop: 6 }}>
+              0 errors, 0 warnings. Output binary generated.
+            </div>
+          </div>
+        )}
+
+        {compileState === 'running' && (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'rgba(3,3,10,0.85)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            zIndex: 300, backdropFilter: 'blur(4px)'
+          }}>
+            <div className="orb anim-pulse" style={{ background: '#10b981', width: 40, height: 40, boxShadow: '0 0 20px #10b981' }} />
+            <div style={{ color: '#fff', fontFamily: "'JetBrains Mono'", fontSize: 13, marginTop: 16, fontWeight: 700 }}>
+              Executing output main.exe...
+            </div>
+          </div>
+        )}
+
+        {/* ── SHARE MODAL OVERLAY ── */}
+        {showShareModal && (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'rgba(3,3,10,0.88)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 400, backdropFilter: 'blur(6px)'
+          }}>
+            <div style={{
+              width: '90%', maxWidth: 440, background: T.uiSurface,
+              border: `1px solid ${T.uiBorder}`, borderRadius: 16,
+              padding: 24, boxShadow: '0 30px 90px rgba(0,0,0,0.8)',
+              display: 'flex', flexDirection: 'column', gap: 16
+            }}>
+              <div>
+                <h3 style={{ fontSize: 15, color: T.uiText, fontWeight: 800, letterSpacing: '-0.3px' }}>
+                  🔗 Share Execium Code
+                </h3>
+                <p style={{ fontSize: 11, color: T.uiTextMuted, marginTop: 4 }}>
+                  Copy this link. Anyone opening it will load your exact workspace snapshot.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input 
+                  type="text" 
+                  value={shareUrl} 
+                  readOnly 
+                  style={{
+                    flex: 1, background: T.editorBg, border: `1px solid ${T.uiBorder}`,
+                    borderRadius: 8, padding: '8px 12px', fontSize: 11,
+                    color: T.uiTextMuted, outline: 'none', fontFamily: "'JetBrains Mono'"
+                  }}
+                />
+                <button 
+                  onClick={handleCopyShare}
+                  style={{
+                    padding: '8px 16px', borderRadius: 8, border: 'none',
+                    background: copiedShare ? '#10b981' : 'linear-gradient(135deg, #a855f7, #3b82f6)',
+                    color: '#fff', fontSize: 11, fontWeight: 800, cursor: 'pointer',
+                    transition: 'all 0.15s'
+                  }}
+                >
+                  {copiedShare ? "✓ Copied!" : "Copy Link"}
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 10 }}>
+                <button 
+                  onClick={() => setShowShareModal(false)}
+                  style={{
+                    padding: '7px 18px', borderRadius: 8, border: `1px solid ${T.uiBorder}`,
+                    background: 'none', color: T.uiTextMuted, cursor: 'pointer',
+                    fontSize: 11, fontFamily: "'JetBrains Mono'"
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* ── Status bar ── */}
@@ -455,7 +487,7 @@ export default function CodeEditor() {
             </span>
           </>
         )}
-        {/* Heat summary */}
+        
         {Object.keys(lineVisits).length > 0 && (
           <>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>

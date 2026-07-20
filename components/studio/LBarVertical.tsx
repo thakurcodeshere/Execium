@@ -5,7 +5,7 @@ import { useStore } from "@/lib/store";
 import { getProgramList, PROGRAMS } from "@/lib/engine";
 import { 
   Plus, FolderGit2, History, User, Settings, LogOut, Sun, Moon,
-  ChevronLeft, ChevronRight, LayoutTemplate, Clock
+  ChevronLeft, ChevronRight, LayoutTemplate, BookOpen, HelpCircle
 } from "lucide-react";
 
 interface NavUser { name: string; avatar: string; provider: string; }
@@ -25,6 +25,8 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   const [showProgs, setShowProgs] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showLearn, setShowLearn] = useState(false);
+  const [showQuestions, setShowQuestions] = useState(false);
 
   const [history, setHistory] = useState<HistoryItem[]>([]);
 
@@ -32,7 +34,6 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   const programs = getProgramList();
   const T = theme;
 
-  // Load user and history from localStorage
   useEffect(() => {
     try {
       const u = localStorage.getItem("execium_user");
@@ -43,7 +44,6 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
     } catch {}
   }, []);
 
-  // Update history when code is changed or loaded
   const saveToHistory = (customCode: string) => {
     try {
       const newItem: HistoryItem = {
@@ -52,7 +52,7 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
         code: customCode,
         timestamp: new Date().toLocaleString()
       };
-      const updated = [newItem, ...history.slice(0, 19)]; // Limit to 20 items
+      const updated = [newItem, ...history.slice(0, 19)];
       setHistory(updated);
       localStorage.setItem("execium_history", JSON.stringify(updated));
     } catch {}
@@ -69,13 +69,57 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
     setCode(defaultCode);
     restart();
     saveToHistory(defaultCode);
-    alert("New project created in editor!");
   };
 
   const handleLoadHistory = (itemCode: string) => {
     setCode(itemCode);
     restart();
     setShowHistory(false);
+  };
+
+  const learnModules = [
+    { id: "raii", title: "Smart Pointers & RAII", desc: "Understand ownership transfer and smart deallocation.", trace: "smart_ptr" },
+    { id: "lists", title: "Memory and Linked Lists", desc: "Explore pointer chains and heap nodes in memory.", trace: "linked_list" },
+    { id: "recursion", title: "Recursion Dimension", desc: "Track recursion stack frames visually step-by-step.", trace: "factorial" },
+    { id: "sorting", title: "STL & Bubble Sort", desc: "Analyze sorting passes and array comparisons.", trace: "bubble_sort" },
+    { id: "searching", title: "Binary Search Theory", desc: "Divide and conquer algorithm in logarithmic time.", trace: "binary_search" },
+  ];
+
+  const codingQuestions = [
+    {
+      title: "1. Two Sum Challenge",
+      desc: "Find indices of elements adding up to a target sum.",
+      code: `// Question: Two Sum\n// Find indices of two elements in nums that sum to target.\n#include <iostream>\n#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nvector<int> twoSum(vector<int>& nums, int target) {\n    unordered_map<int, int> m;\n    for (int i = 0; i < nums.size(); i++) {\n        int diff = target - nums[i];\n        if (m.count(diff)) return {m[diff], i};\n        m[nums[i]] = i;\n    }\n    return {};\n}\n\nint main() {\n    vector<int> nums = {2, 7, 11, 15};\n    int target = 9;\n    vector<int> res = twoSum(nums, target);\n    cout << "Indices: " << res[0] << ", " << res[1] << endl;\n    return 0;\n}`
+    },
+    {
+      title: "2. Reverse Linked List",
+      desc: "Reverse a singly linked list in-place.",
+      code: `// Question: Reverse Linked List\n// Reverse a singly-linked list in-place and return the new head.\n#include <iostream>\nusing namespace std;\n\nstruct Node {\n    int val;\n    Node* next;\n    Node(int x) : val(x), next(nullptr) {}\n};\n\nNode* reverseList(Node* head) {\n    Node* prev = nullptr;\n    Node* curr = head;\n    while (curr) {\n        Node* nextTemp = curr->next;\n        curr->next = prev;\n        prev = curr;\n        curr = nextTemp;\n    }\n    return prev;\n}\n\nint main() {\n    Node* head = new Node(1);\n    head->next = new Node(2);\n    head->next->next = new Node(3);\n    Node* rev = reverseList(head);\n    while (rev) {\n        cout << rev->val << " -> ";\n        rev = rev->next;\n    }\n    cout << "null" << endl;\n    return 0;\n}`
+    },
+    {
+      title: "3. Compute N-th Fibonacci",
+      desc: "Implement dynamic Fibonacci recursion.",
+      code: `// Question: Fibonacci Recursion\n// Compute the n-th Fibonacci number recursively.\n#include <iostream>\nusing namespace std;\n\nint fib(int n) {\n    if (n <= 1) return n;\n    return fib(n-1) + fib(n-2);\n}\n\nint main() {\n    int result = fib(5);\n    cout << "fib(5) = " << result << endl;\n    return 0;\n}`
+    },
+    {
+      title: "4. Target Binary Search",
+      desc: "Find search index in a sorted array.",
+      code: `// Question: Binary Search\n// Implement O(log N) binary search on sorted vector.\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint binarySearch(const vector<int>& arr, int target) {\n    int lo = 0, hi = arr.size() - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}\n\nint main() {\n    vector<int> arr = {2, 5, 9, 13, 21, 37, 45};\n    int idx = binarySearch(arr, 21);\n    cout << "Found at index: " << idx << endl;\n    return 0;\n}`
+    }
+  ];
+
+  const handleSelectQuestion = (qCode: string) => {
+    setCode(qCode);
+    restart();
+    saveToHistory(qCode);
+    setShowQuestions(false);
+  };
+
+  const handleSelectLearn = (traceKey: string) => {
+    loadProgram(traceKey);
+    const prog = PROGRAMS[traceKey];
+    if (prog) saveToHistory(prog.code);
+    setShowLearn(false);
   };
 
   const CAT_COLORS: Record<string, string> = {
@@ -110,17 +154,16 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
       gap: 16, zIndex: 110, position: "relative", flexShrink: 0,
       transition: "width 0.1s"
     }}>
-      {/* ── DRAG HANDLE FOR RESIZING ── */}
+      {/* ── DRAG HANDLE ── */}
       <div 
         onMouseDown={onStartResize}
         style={{
           position: "absolute", top: 0, right: -4, bottom: 0, width: 8,
           cursor: "col-resize", zIndex: 120
         }}
-        title="Drag to resize sidebar"
       />
 
-      {/* ── TOP SECTION: LOGO & COLLAPSE TOGLE ── */}
+      {/* ── LOGO & COLLAPSE ── */}
       <div style={{
         display: "flex", alignItems: "center", 
         justifyContent: isExpanded ? "space-between" : "center",
@@ -143,41 +186,29 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
         </Link>
         
         {isExpanded && (
-          <button 
-            onClick={() => setWidth(64)}
-            style={{
-              background: "none", border: "none", color: T.uiTextMuted,
-              cursor: "pointer", display: "flex", alignItems: "center"
-            }}
-          >
+          <button onClick={() => setWidth(64)} style={{ background: "none", border: "none", color: T.uiTextMuted, cursor: "pointer", display: "flex" }}>
             <ChevronLeft size={16} />
           </button>
         )}
       </div>
 
-      <div style={{ padding: "0 12px" }}>
-        <div style={{ height: 1, background: T.uiBorder }} />
-      </div>
+      <div style={{ padding: "0 12px" }}><div style={{ height: 1, background: T.uiBorder }} /></div>
 
-      {/* ── INTERACTION BUTTONS ── */}
+      {/* ── VERTICAL NAVIGATION ITEMS ── */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 10px", alignItems: "center" }}>
         
         {/* ADD NEW PROJECT */}
-        <button 
-          onClick={handleNewProject} 
-          style={btnStyle(false)}
-          title="Create New Project"
-        >
+        <button onClick={handleNewProject} style={btnStyle(false)} title="Create New Project">
           <Plus size={18} />
           {isExpanded && <span>New Project</span>}
         </button>
 
-        {/* TEMPLATES OPTION */}
+        {/* TEMPLATES */}
         <div style={{ width: "100%", position: "relative", display: "flex", justifyContent: "center" }}>
           <button 
-            onClick={() => { setShowProgs(p => !p); setShowHistory(false); setShowProfile(false); }} 
+            onClick={() => { setShowProgs(p => !p); setShowHistory(false); setShowProfile(false); setShowLearn(false); setShowQuestions(false); }} 
             style={btnStyle(showProgs)}
-            title="Browse Templates"
+            title="Templates library"
           >
             <LayoutTemplate size={18} />
             {isExpanded && <span>Templates</span>}
@@ -220,10 +251,96 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
           )}
         </div>
 
+        {/* LEARN PROGRAMMING */}
+        <div style={{ width: "100%", position: "relative", display: "flex", justifyContent: "center" }}>
+          <button 
+            onClick={() => { setShowLearn(l => !l); setShowProgs(false); setShowHistory(false); setShowProfile(false); setShowQuestions(false); }} 
+            style={btnStyle(showLearn)}
+            title="Learn C++ Programming"
+          >
+            <BookOpen size={18} />
+            {isExpanded && <span>Learn C++</span>}
+          </button>
+
+          {showLearn && (
+            <div style={{
+              position: "absolute", top: 0, left: width - 8, width: 280,
+              background: T.uiSurface, border: `1px solid ${T.uiBorder}`,
+              borderRadius: 12, overflow: "hidden", zIndex: 220,
+              boxShadow: "10px 10px 40px rgba(0,0,0,.6)"
+            }}>
+              <div style={{ padding: "10px 14px", borderBottom: `1px solid ${T.uiBorder}`, background: T.uiPanelHd }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: T.uiText, fontFamily: "'JetBrains Mono'" }}>📚 LEARN PROGRAMMING</span>
+              </div>
+              <div style={{ maxHeight: 320, overflowY: "auto" }}>
+                {learnModules.map(m => (
+                  <button
+                    key={m.id}
+                    onClick={() => handleSelectLearn(m.trace)}
+                    style={{
+                      width: "100%", padding: "12px 14px", display: "flex", flexDirection: "column",
+                      background: "transparent", border: "none", cursor: "pointer",
+                      textAlign: "left", borderBottom: `1px solid ${T.uiBorder}`
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = `${T.uiAccent}0e`}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                  >
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.uiText }}>{m.title}</div>
+                    <div style={{ fontSize: 9, color: T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>{m.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* PROGRAMMING QUESTIONS */}
+        <div style={{ width: "100%", position: "relative", display: "flex", justifyContent: "center" }}>
+          <button 
+            onClick={() => { setShowQuestions(q => !q); setShowLearn(false); setShowProgs(false); setShowHistory(false); setShowProfile(false); }} 
+            style={btnStyle(showQuestions)}
+            title="Practice Coding Challenges"
+          >
+            <HelpCircle size={18} />
+            {isExpanded && <span>Challenges</span>}
+          </button>
+
+          {showQuestions && (
+            <div style={{
+              position: "absolute", top: 0, left: width - 8, width: 280,
+              background: T.uiSurface, border: `1px solid ${T.uiBorder}`,
+              borderRadius: 12, overflow: "hidden", zIndex: 220,
+              boxShadow: "10px 10px 40px rgba(0,0,0,.6)"
+            }}>
+              <div style={{ padding: "10px 14px", borderBottom: `1px solid ${T.uiBorder}`, background: T.uiPanelHd }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: T.uiText, fontFamily: "'JetBrains Mono'" }}>✍️ CODING CHALLENGES</span>
+              </div>
+              <div style={{ maxHeight: 320, overflowY: "auto" }}>
+                {codingQuestions.map((q, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSelectQuestion(q.code)}
+                    style={{
+                      width: "100%", padding: "12px 14px", display: "flex", flexDirection: "column",
+                      background: "transparent", border: "none", cursor: "pointer",
+                      textAlign: "left", borderBottom: `1px solid ${T.uiBorder}`
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = `${T.uiAccent}0e`}
+                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                  >
+                    <div style={{ fontSize: 12, fontWeight: 700, color: T.uiText }}>{q.title}</div>
+                    <div style={{ fontSize: 9, color: T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>{q.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* PROJECT HISTORY */}
         <div style={{ width: "100%", position: "relative", display: "flex", justifyContent: "center" }}>
           <button 
-            onClick={() => { setShowHistory(h => !h); setShowProgs(false); setShowProfile(false); }} 
+            onClick={() => { setShowHistory(h => !h); setShowProgs(false); setShowProfile(false); setShowLearn(false); setShowQuestions(false); }} 
             style={btnStyle(showHistory)}
             title="Project History"
           >
@@ -273,26 +390,18 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
 
       <div style={{ flex: 1 }} />
 
-      {/* ── BOTTOM SECTION: THEME, PROFILE & SETTINGS (LEFT BOTTOM) ── */}
+      {/* ── BOTTOM PROFILE & SETTINGS ── */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 10px", alignItems: "center" }}>
         
-        {/* THEME TOGGLE */}
-        <button
-          onClick={() => setTheme(theme.id === "dark-plus" ? "github-light" : "dark-plus")}
-          style={btnStyle(false)}
-          title="Toggle Light/Dark Theme"
-        >
+        {/* THEME */}
+        <button onClick={() => setTheme(theme.id === "dark-plus" ? "github-light" : "dark-plus")} style={btnStyle(false)} title="Toggle Light/Dark Theme">
           {theme.id.includes("light") ? <Moon size={18} /> : <Sun size={18} />}
           {isExpanded && <span>Switch Theme</span>}
         </button>
 
         {/* PROFILE */}
         <div style={{ width: "100%", position: "relative", display: "flex", justifyContent: "center" }}>
-          <button 
-            onClick={() => { setShowProfile(p => !p); setShowProgs(false); setShowHistory(false); }} 
-            style={btnStyle(showProfile)}
-            title="User Profile"
-          >
+          <button onClick={() => { setShowProfile(p => !p); setShowProgs(false); setShowHistory(false); setShowLearn(false); setShowQuestions(false); }} style={btnStyle(showProfile)} title="User Profile">
             {user ? (
               <div style={{
                 width: 22, height: 22, borderRadius: "50%",
@@ -319,14 +428,7 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                     <div style={{ fontSize: 13, fontWeight: 700, color: T.uiText }}>{user.name}</div>
                     <div style={{ fontSize: 10, color: T.uiTextMuted, marginTop: 2 }}>via {user.provider}</div>
                   </div>
-                  <button
-                    onClick={logout}
-                    style={{
-                      width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8,
-                      background: "none", border: "none", color: "#ef4444", cursor: "pointer",
-                      fontSize: 12, fontFamily: "'JetBrains Mono'", textAlign: "left"
-                    }}
-                  >
+                  <button onClick={logout} style={{ width: "100%", padding: "10px 14px", display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 12, fontFamily: "'JetBrains Mono'", textAlign: "left" }}>
                     <LogOut size={13} />
                     <span>Sign Out</span>
                   </button>
@@ -355,16 +457,9 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
           </button>
         </Link>
 
-        {/* EXPAND BUTTON (when collapsed) */}
+        {/* COLLAPSE/EXPAND TOGLE BUTTON */}
         {!isExpanded && (
-          <button 
-            onClick={() => setWidth(200)}
-            style={{
-              background: "none", border: "none", color: T.uiTextMuted,
-              cursor: "pointer", display: "flex", alignItems: "center", marginTop: 8
-            }}
-            title="Expand Sidebar"
-          >
+          <button onClick={() => setWidth(200)} style={{ background: "none", border: "none", color: T.uiTextMuted, cursor: "pointer", display: "flex", marginTop: 8 }} title="Expand Sidebar">
             <ChevronRight size={16} />
           </button>
         )}
