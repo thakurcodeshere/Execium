@@ -365,21 +365,111 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{position:"relative",zIndex:2,borderTop:"1px solid #181a1f",padding:"20px 48px",display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:10,color:"#5c6370",fontSize:11,fontFamily:"'JetBrains Mono'"}}>
-        <span>Execium Ω∞ — Computational Reality OS</span>
-        <div style={{display:"flex",gap:18,flexWrap:"wrap"}}>
-          <button onClick={() => setActiveModal("about")} style={{background:"none",border:"none",color:"#5c6370",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>About</button>
-          <button onClick={() => setActiveModal("faq")} style={{background:"none",border:"none",color:"#5c6370",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>FAQ</button>
-          <button onClick={() => setActiveModal("blog")} style={{background:"none",border:"none",color:"#5c6370",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>Blog</button>
-          <button onClick={() => setActiveModal("contact")} style={{background:"none",border:"none",color:"#5c6370",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>Contact Us</button>
-          <button onClick={() => setActiveModal("terms")} style={{background:"none",border:"none",color:"#5c6370",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>Terms</button>
-          <button onClick={() => setActiveModal("privacy")} style={{background:"none",border:"none",color:"#5c6370",cursor:"pointer",fontSize:11,fontFamily:"'JetBrains Mono'"}}>Privacy</button>
+      {/* ── FOOTER (Detailed Multi-Column Grid matching user mockup) ── */}
+      <footer style={{
+        position: "relative", zIndex: 2, borderTop: "1px solid #181a1f",
+        background: "#21252b", padding: "60px 48px 30px", color: "#abb2bf"
+      }}>
+        <div style={{
+          maxWidth: 1200, margin: "0 auto", display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 40
+        }}>
+          {/* Logo Column (Takes double space on large displays) */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, gridColumn: "span 2" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 8,
+                background: "linear-gradient(135deg, #a855f7, #3b82f6)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 14, fontWeight: 900, color: "#fff",
+                boxShadow: "0 0 14px rgba(168,85,247,.4)",
+              }}>Ω</div>
+              <span style={{ fontSize: 16, fontWeight: 800, color: "#fff", fontFamily: "'JetBrains Mono'" }}>Execium</span>
+            </div>
+            <p style={{ fontSize: 12, color: "#5c6370", lineHeight: 1.6, maxWidth: 320 }}>
+              Interactive courses, animations, and AI-powered practice to help you master C++ and software engineering interviews.
+            </p>
+            {/* Social Icons matching design */}
+            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+              {/* Discord */}
+              <a href="https://discord.gg" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>💬</a>
+              {/* LinkedIn */}
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>in</a>
+              {/* YouTube */}
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>▶</a>
+              {/* Instagram */}
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>📸</a>
+              {/* X / Twitter */}
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>𝕏</a>
+              {/* GitHub */}
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>🐙</a>
+            </div>
+          </div>
+
+          {/* Learn Column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", fontFamily: "'JetBrains Mono'", letterSpacing: 0.5 }}>LEARN</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 11 }}>
+              <Link href="/studio?code=DSA_PATTERNS" style={{ color: "#5c6370", textDecoration: "none" }}>DSA Patterns</Link>
+              <Link href="/guidelines" style={{ color: "#5c6370", textDecoration: "none" }}>System Design</Link>
+              <Link href="/guidelines" style={{ color: "#5c6370", textDecoration: "none" }}>System Design Interviews</Link>
+              <Link href="/studio?code=SMART_PTR" style={{ color: "#5c6370", textDecoration: "none" }}>Low-Level Design</Link>
+              <Link href="/studio" style={{ color: "#5c6370", textDecoration: "none" }}>Behavioral Interviews</Link>
+              <a href="#topics" style={{ color: "#5c6370", textDecoration: "none" }}>All Courses</a>
+            </div>
+          </div>
+
+          {/* Practice Column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", fontFamily: "'JetBrains Mono'", letterSpacing: 0.5 }}>PRACTICE</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 11 }}>
+              <Link href="/studio" style={{ color: "#5c6370", textDecoration: "none" }}>DSA Problems</Link>
+              <Link href="/guidelines" style={{ color: "#5c6370", textDecoration: "none" }}>System Design</Link>
+              <Link href="/studio" style={{ color: "#5c6370", textDecoration: "none" }}>Low-Level Design</Link>
+              <Link href="/studio" style={{ color: "#5c6370", textDecoration: "none" }}>Coding Interviews</Link>
+              <Link href="/studio" style={{ color: "#5c6370", textDecoration: "none" }}>Company Questions</Link>
+            </div>
+          </div>
+
+          {/* Tools Column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", fontFamily: "'JetBrains Mono'", letterSpacing: 0.5 }}>TOOLS</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 11 }}>
+              <Link href="/studio?code=bubble_sort" style={{ color: "#5c6370", textDecoration: "none" }}>Algorithm Animations</Link>
+              <Link href="/guidelines" style={{ color: "#5c6370", textDecoration: "none" }}>Roadmaps</Link>
+              <Link href="/settings" style={{ color: "#5c6370", textDecoration: "none" }}>Resume Builder</Link>
+              <Link href="/studio" style={{ color: "#5c6370", textDecoration: "none" }}>Leaderboard</Link>
+            </div>
+          </div>
+
+          {/* Company Column */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: "#fff", fontFamily: "'JetBrains Mono'", letterSpacing: 0.5 }}>COMPANY</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, fontSize: 11 }}>
+              <Link href="/login" style={{ color: "#5c6370", textDecoration: "none" }}>Premium</Link>
+              <Link href="/settings" style={{ color: "#5c6370", textDecoration: "none" }}>Newsletter</Link>
+              <button onClick={() => setActiveModal("faq")} style={{ background: "none", border: "none", color: "#5c6370", cursor: "pointer", fontSize: 11, fontFamily: "'JetBrains Mono'", padding: 0, textAlign: "left", outline: "none" }}>FAQs</button>
+              <button onClick={() => setActiveModal("contact")} style={{ background: "none", border: "none", color: "#5c6370", cursor: "pointer", fontSize: 11, fontFamily: "'JetBrains Mono'", padding: 0, textAlign: "left", outline: "none" }}>Contact</button>
+            </div>
+          </div>
         </div>
-        <span>v∞.0 · Truth becomes visual</span>
+
+        {/* Bottom copyright row */}
+        <div style={{
+          maxWidth: 1200, margin: "40px auto 0", paddingTop: 20, borderTop: "1px solid #181a1f",
+          display: "flex", justifyContent: "space-between", flexWrap: "wrap",
+          gap: 12, color: "#5c6370", fontSize: 11, fontFamily: "'JetBrains Mono'"
+        }}>
+          <span>© {new Date().getFullYear()} Execium Ω∞. All rights reserved.</span>
+          <div style={{ display: "flex", gap: 16 }}>
+            <button onClick={() => setActiveModal("about")} style={{ background: "none", border: "none", color: "#5c6370", cursor: "pointer", fontSize: 11, fontFamily: "'JetBrains Mono'", outline: "none" }}>About Us</button>
+            <button onClick={() => setActiveModal("terms")} style={{ background: "none", border: "none", color: "#5c6370", cursor: "pointer", fontSize: 11, fontFamily: "'JetBrains Mono'", outline: "none" }}>Terms</button>
+            <button onClick={() => setActiveModal("privacy")} style={{ background: "none", border: "none", color: "#5c6370", cursor: "pointer", fontSize: 11, fontFamily: "'JetBrains Mono'", outline: "none" }}>Privacy</button>
+          </div>
+        </div>
       </footer>
 
-      {/* ── MODALS OVERLAYS ── */}
+      {/* ── STUNNING GLASSMORPHIC MODALS OVERLAYS ── */}
       {activeModal && (
         <div style={{
           position:"fixed",inset:0,background:"rgba(30,34,43,0.85)",backdropFilter:"blur(8px)",
