@@ -407,20 +407,50 @@ export default function HomePage() {
             <p style={{ fontSize: 12, color: "#5c6370", lineHeight: 1.6, maxWidth: 320 }}>
               Interactive courses, animations, and AI-powered practice to help you master C++ and software engineering interviews.
             </p>
-            {/* Social Icons matching design */}
-            <div style={{ display: "flex", gap: 12, marginTop: 8 }}>
+            {/* Social Icons — real brand SVGs */}
+            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
               {/* Discord */}
-              <a href="https://discord.gg" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>💬</a>
+              <a href="https://discord.gg" target="_blank" rel="noopener noreferrer" title="Discord" style={{ display: "flex", width: 34, height: 34, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", transition: "all .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#5865F2"; e.currentTarget.style.background = "rgba(88,101,242,.12)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#181a1f"; e.currentTarget.style.background = "#282c34"; }}
+              >
+                <svg width="16" height="12" viewBox="0 0 71 55" fill="#5865F2"><path d="M60.1 4.9A58.5 58.5 0 0045.4.2a.2.2 0 00-.2.1 40.8 40.8 0 00-1.8 3.7 54 54 0 00-16.2 0A37.4 37.4 0 0025.4.3a.2.2 0 00-.2-.1A58.4 58.4 0 0010.5 4.9a.2.2 0 00-.1.1C1.5 18.7-.9 32.2.3 45.5v.1a58.7 58.7 0 0017.7 9a.2.2 0 00.3-.1 42 42 0 003.6-5.9.2.2 0 00-.1-.3 38.7 38.7 0 01-5.5-2.6.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 41.9 41.9 0 0035.6 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.3 47.2 47.2 0 003.6 5.9.2.2 0 00.3.1A58.5 58.5 0 0070.4 45.6v-.1c1.4-15-2.3-28.1-9.8-39.7a.2.2 0 00-.1 0zM23.7 37.3c-3.4 0-6.3-3.2-6.3-7s2.8-7 6.3-7 6.4 3.2 6.3 7-2.8 7-6.3 7zm23.3 0c-3.5 0-6.3-3.2-6.3-7s2.8-7 6.3-7 6.4 3.2 6.3 7-2.8 7-6.3 7z"/></svg>
+              </a>
               {/* LinkedIn */}
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>in</a>
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" title="LinkedIn" style={{ display: "flex", width: 34, height: 34, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", transition: "all .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#0A66C2"; e.currentTarget.style.background = "rgba(10,102,194,.12)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#181a1f"; e.currentTarget.style.background = "#282c34"; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              </a>
               {/* YouTube */}
-              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>▶</a>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" title="YouTube" style={{ display: "flex", width: 34, height: 34, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", transition: "all .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#FF0000"; e.currentTarget.style.background = "rgba(255,0,0,.1)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#181a1f"; e.currentTarget.style.background = "#282c34"; }}
+              >
+                <svg width="16" height="12" viewBox="0 0 24 17" fill="#FF0000"><path d="M23.498 2.186A3.016 3.016 0 0021.382.073C19.505-.39 12-.39 12-.39S4.495-.39 2.618.073A3.016 3.016 0 00.502 2.186C.11 4.064.11 8.01.11 8.01s0 3.946.392 5.825a3.016 3.016 0 002.116 2.112C4.495 16.39 12 16.39 12 16.39s7.505 0 9.382-.443a3.016 3.016 0 002.116-2.112c.392-1.879.392-5.825.392-5.825s0-3.946-.392-5.825z"/><path d="M9.545 11.568V4.452l6.284 3.558-6.284 3.558z" fill="#fff"/></svg>
+              </a>
               {/* Instagram */}
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>📸</a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram" style={{ display: "flex", width: 34, height: 34, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", transition: "all .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#E4405F"; e.currentTarget.style.background = "rgba(228,64,95,.1)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#181a1f"; e.currentTarget.style.background = "#282c34"; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="#E4405F"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+              </a>
               {/* X / Twitter */}
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>𝕏</a>
+              <a href="https://x.com" target="_blank" rel="noopener noreferrer" title="X (Twitter)" style={{ display: "flex", width: 34, height: 34, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", transition: "all .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#abb2bf"; e.currentTarget.style.background = "rgba(171,178,191,.1)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#181a1f"; e.currentTarget.style.background = "#282c34"; }}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="#abb2bf"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
               {/* GitHub */}
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer" style={{ display: "flex", width: 32, height: 32, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", color: "#5c6370" }}>🐙</a>
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" title="GitHub" style={{ display: "flex", width: 34, height: 34, borderRadius: 8, background: "#282c34", border: "1px solid #181a1f", alignItems: "center", justifyContent: "center", textDecoration: "none", transition: "all .15s" }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#abb2bf"; e.currentTarget.style.background = "rgba(171,178,191,.1)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#181a1f"; e.currentTarget.style.background = "#282c34"; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="#abb2bf"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+              </a>
             </div>
           </div>
 
