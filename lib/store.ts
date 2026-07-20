@@ -20,6 +20,7 @@ interface Store {
   theme: VSTheme;
 
   loadProgram(id:string):void;
+  setCode(code:string):void;
   play():void;
   pause():void;
   fwd():void;
@@ -47,6 +48,10 @@ export const useStore = create<Store>((set,get)=>({
     const p=PROGRAMS[id];
     if(!p)return;
     set({pid:id,code:p.code,steps:p.steps,cur:0,playback:'idle',_timer:null});
+  },
+
+  setCode(code){
+    set({code});
   },
 
   play(){
