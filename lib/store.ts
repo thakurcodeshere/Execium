@@ -39,7 +39,7 @@ export const useStore = create<Store>((set,get)=>({
   code: PROGRAMS.for_loop.code,
   steps: PROGRAMS.for_loop.steps,
   cur:0, playback:'idle', speed:1400,
-  aiMode:'beginner', showAI:true, activePanel:'memory', _timer:null,
+  aiMode:'beginner', showAI:false, activePanel:'memory', _timer:null,
   theme: THEMES[DEFAULT_THEME_ID],
 
   loadProgram(id){

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useStore } from "@/lib/store";
 import ExecutionFlow from "./ExecutionFlow";
 import VariablesPanel from "./VariablesPanel";
@@ -7,7 +7,7 @@ import ConsoleOutput from "./ConsoleOutput";
 import MemoryUniverse from "./MemoryUniverse";
 import RecursionDim from "./RecursionDimension";
 import ExecutionWaterfall from "./ExecutionWaterfall";
-import { Play, Pause, SkipForward, SkipBack, RotateCcw } from "lucide-react";
+import { Play, Pause, SkipForward, SkipBack, RotateCcw, Sparkles } from "lucide-react";
 
 type VisualizerTab = 'flow' | 'waterfall' | 'memory' | 'recursion' | 'vars' | 'console';
 
@@ -16,17 +16,12 @@ const HL: Record<string, string> = {
   orange: '#f97316', red: '#ef4444', cyan: '#06b6d4', pink: '#ec4899',
 };
 
-const ICONS: Record<string, string> = {
-  declaration: '📦', assignment: '✏️', compare: '⚖️', call: '📞',
-  return: '↩', loop: '🔄', recursion: '🌀', output: '📤', alloc: '🟠', dealloc: '💥',
-};
-
 const SPEEDS = [{ l: '0.5×', ms: 2800 }, { l: '1×', ms: 1400 }, { l: '2×', ms: 700 }, { l: '4×', ms: 350 }];
 
 export default function LBarHorizontal() {
   const {
     steps, cur, playback, speed, play,
-    pause, fwd, bwd, restart, setSpeed, jump, theme
+    pause, fwd, bwd, restart, setSpeed, jump, theme, showAI, toggleAI
   } = useStore();
 
   const [activeTab, setActiveTab] = useState<VisualizerTab>('flow');
@@ -220,12 +215,34 @@ export default function LBarHorizontal() {
           </span>
         </div>
 
-        {/* Stats */}
-        {step && (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
-            <span>OPS: <strong style={{ color: T.uiText }}>{step.ops}</strong></span>
-          </div>
-        )}
+        {/* Stats & AI Toggle button */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          {step && (
+            <div style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
+              OPS: <strong style={{ color: T.uiText }}>{step.ops}</strong>
+            </div>
+          )}
+
+          <div style={{ width: 1, height: 16, background: T.uiBorder }} />
+
+          {/* Toggle AI Agent button */}
+          <button
+            onClick={toggleAI}
+            title={showAI ? "Close AI Copilot" : "Open AI Copilot"}
+            style={{
+              display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", borderRadius: 8,
+              border: `1px solid ${showAI ? "#06b6d4" : T.uiBorder}`,
+              background: showAI ? "rgba(6,182,212,.12)" : T.uiSurface,
+              color: showAI ? "#06b6d4" : T.uiTextMuted, cursor: "pointer",
+              fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+              boxShadow: showAI ? "0 0 12px rgba(6,182,212,.25)" : "none",
+              transition: "all 0.15s"
+            }}
+          >
+            <Sparkles size={12} />
+            <span>AI AGENT</span>
+          </button>
+        </div>
       </div>
     </div>
   );
