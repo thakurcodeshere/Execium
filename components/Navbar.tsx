@@ -25,15 +25,15 @@ export default function Navbar() {
 
   const navLinks = [
     { href: "/", label: "Home" },
-    { href: "/guidelines", label: "Guidelines" },
-    { href: "/studio", label: "Studio ⚡" },
     { href: "/#topics", label: "Learn" },
     { href: "/#articles", label: "Practice" },
     { href: "/#guidelines", label: "Tools" },
+    { href: "/guidelines", label: "Guidelines" },
+    { href: "/studio", label: "Studio ⚡" },
   ];
 
   const isActive = (href: string) => {
-    if (href.startsWith("/#")) return path === "/";
+    if (href.startsWith("/#")) return false;
     return href === "/" ? path === "/" : path.startsWith(href);
   };
 
