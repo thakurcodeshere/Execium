@@ -266,18 +266,6 @@ export default function CodeEditor() {
             fontSize: 10, fontFamily: "'JetBrains Mono'"
           }}>✕ Clear</button>
 
-          {/* Godbolt */}
-          <a
-            href={`https://godbolt.org/#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1iN`}
-            target="_blank" rel="noopener noreferrer"
-            title="Open in Compiler Explorer"
-            style={{
-              padding: '3px 9px', borderRadius: 6, border: '1px solid rgba(245,158,11,.3)',
-              background: 'rgba(245,158,11,.08)', color: '#f59e0b', cursor: 'pointer',
-              fontSize: 10, fontFamily: "'JetBrains Mono'", textDecoration: 'none',
-              display: 'flex', alignItems: 'center', gap: 4,
-            }}>🔗 Godbolt</a>
-
           <div style={{ width: 1, height: 16, background: T.uiBorder }} />
 
           {/* SHARE OPTION */}
