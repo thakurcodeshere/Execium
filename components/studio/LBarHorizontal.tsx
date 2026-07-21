@@ -2,14 +2,11 @@
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import ExecutionFlow from "./ExecutionFlow";
-import VariablesPanel from "./VariablesPanel";
 import ConsoleOutput from "./ConsoleOutput";
-import MemoryUniverse from "./MemoryUniverse";
-import RecursionDim from "./RecursionDimension";
 import ExecutionWaterfall from "./ExecutionWaterfall";
 import { Play, Pause, SkipForward, SkipBack, RotateCcw, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 
-type VisualizerTab = 'flow' | 'waterfall' | 'memory' | 'recursion' | 'vars' | 'console';
+type VisualizerTab = 'console' | 'flow' | 'waterfall';
 
 const HL: Record<string, string> = {
   blue: '#3b82f6', green: '#10b981', yellow: '#f59e0b', purple: '#a855f7',
@@ -25,7 +22,7 @@ export default function LBarHorizontal() {
     isCollapsed, setCollapsed, toggleCollapsed
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<VisualizerTab>('flow');
+  const [activeTab, setActiveTab] = useState<VisualizerTab>('console');
 
   const step = steps[cur];
   const playing = playback === 'playing';
@@ -35,12 +32,9 @@ export default function LBarHorizontal() {
   const T = theme;
 
   const tabs: Array<{ id: VisualizerTab; label: string; icon: string; col: string }> = [
+    { id: 'console', label: 'Console Output', icon: '📤', col: '#ef4444' },
     { id: 'flow', label: 'Flow', icon: '📋', col: '#06b6d4' },
     { id: 'waterfall', label: 'Waterfall', icon: '🌊', col: '#a855f7' },
-    { id: 'memory', label: 'Memory Universe', icon: '📦', col: '#f97316' },
-    { id: 'recursion', label: 'Stack Frame', icon: '🌀', col: '#ec4899' },
-    { id: 'vars', label: 'Variables', icon: '✏️', col: '#10b981' },
-    { id: 'console', label: 'Console Output', icon: '📤', col: '#ef4444' },
   ];
 
   return (
@@ -113,16 +107,13 @@ export default function LBarHorizontal() {
       {/* ── Visualizer Panels Content (Scrollable) ── */}
       {!isCollapsed && (
         <div style={{ flex: 1, overflowY: "auto", minHeight: 0, background: T.uiBg }}>
-          {activeTab === 'flow' && <ExecutionFlow />}
-          {activeTab === 'waterfall' && <ExecutionWaterfall />}
-          {activeTab === 'memory' && <MemoryUniverse />}
-          {activeTab === 'recursion' && <RecursionDim />}
-          {activeTab === 'vars' && <VariablesPanel />}
           {activeTab === 'console' && (
             <div style={{ height: "100%", padding: 12, background: T.editorBg }}>
               <ConsoleOutput />
             </div>
           )}
+          {activeTab === 'flow' && <ExecutionFlow />}
+          {activeTab === 'waterfall' && <ExecutionWaterfall />}
         </div>
       )}
 
