@@ -67,15 +67,28 @@ export default function Navbar() {
 
       {/* Nav links */}
       <div style={{ display: "flex", gap: 2, marginLeft: 24 }}>
-        {navLinks.map(l => (
-          <Link key={l.href} href={l.href} style={{
+        {navLinks.map(l => {
+          const isHash = l.href.includes("#");
+          const style = {
             padding: "6px 14px", borderRadius: 8, textDecoration: "none", fontSize: 13,
             fontWeight: isActive(l.href) ? 700 : 500,
             color: isActive(l.href) ? "#a855f7" : "#64748b",
             background: isActive(l.href) ? "rgba(168,85,247,.1)" : "transparent",
             transition: "all .15s",
-          }}>{l.label}</Link>
-        ))}
+          };
+          if (isHash) {
+            return (
+              <a key={l.href} href={l.href} style={style}>
+                {l.label}
+              </a>
+            );
+          }
+          return (
+            <Link key={l.href} href={l.href} style={style}>
+              {l.label}
+            </Link>
+          );
+        })}
       </div>
 
       <div style={{ flex: 1 }} />

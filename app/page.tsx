@@ -10,7 +10,12 @@ function ParticleField() {
     const c = ref.current; if (!c) return;
     const ctx = c.getContext("2d")!;
     let W = c.width = window.innerWidth, H = c.height = window.innerHeight;
-    window.addEventListener("resize", () => { W = c.width = window.innerWidth; H = c.height = window.innerHeight; });
+    const handleResize = () => {
+      if (!c) return;
+      W = c.width = window.innerWidth;
+      H = c.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
     const cols = ["#3b82f6","#a855f7","#06b6d4","#10b981","#f97316"];
     const pts = Array.from({length:100},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35,r:Math.random()*2+.5,c:cols[Math.floor(Math.random()*5)],l:Math.random()*200,ml:150+Math.random()*150}));
     let raf: number;
@@ -26,7 +31,10 @@ function ParticleField() {
       raf = requestAnimationFrame(draw);
     };
     draw();
-    return () => cancelAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", handleResize);
+    };
   },[]);
   return <canvas ref={ref} style={{position:"fixed",inset:0,zIndex:0,pointerEvents:"none"}}/>;
 }
