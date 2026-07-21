@@ -19,6 +19,8 @@ interface Store {
   _timer: ReturnType<typeof setInterval>|null;
   theme: VSTheme;
   isCollapsed: boolean;
+  projectName: string;
+  projectId: string | null;
 
   loadProgram(id:string):void;
   setCode(code:string):void;
@@ -35,6 +37,8 @@ interface Store {
   setTheme(id:string):void;
   setCollapsed(collapsed:boolean):void;
   toggleCollapsed():void;
+  setProjectName(name:string):void;
+  setProjectId(id:string|null):void;
 }
 
 export const useStore = create<Store>((set,get)=>({
@@ -45,6 +49,8 @@ export const useStore = create<Store>((set,get)=>({
   aiMode:'beginner', showAI:false, activePanel:'memory', _timer:null,
   theme: THEMES[DEFAULT_THEME_ID],
   isCollapsed: true,
+  projectName: 'Untitled Project',
+  projectId: null,
 
   loadProgram(id){
     const {_timer}=get();
@@ -114,4 +120,6 @@ export const useStore = create<Store>((set,get)=>({
   setTheme(id:string){set({theme:THEMES[id]??THEMES[DEFAULT_THEME_ID]})},
   setCollapsed(collapsed){set({isCollapsed:collapsed})},
   toggleCollapsed(){set(s=>({isCollapsed:!s.isCollapsed}))},
+  setProjectName(name){set({projectName:name})},
+  setProjectId(id){set({projectId:id})},
 }));

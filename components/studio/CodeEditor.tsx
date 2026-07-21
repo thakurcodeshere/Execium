@@ -20,7 +20,10 @@ const VERSION_COLORS: Record<CppVersion, string> = {
 };
 
 export default function CodeEditor() {
-  const { code, steps, cur, theme, loadProgram, setCode, jump, restart } = useStore();
+  const { 
+    code, steps, cur, theme, loadProgram, setCode, jump, restart,
+    projectName, projectId, setProjectName, setProjectId
+  } = useStore();
   const [cppVersion, setCppVersion] = useState<CppVersion>('cpp11');
   const [traceHint, setTraceHint] = useState<string | null>(null);
   const editorRef = useRef<any>(null);
@@ -30,6 +33,7 @@ export default function CodeEditor() {
   const [shareUrl, setShareUrl] = useState("");
   const [copiedShare, setCopiedShare] = useState(false);
   const [compileState, setCompileState] = useState<'idle' | 'compiling' | 'success' | 'running'>('idle');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const step = steps[cur];
   const monacoTheme = MONACO_THEMES[theme.id] ?? 'vs-dark';
@@ -144,6 +148,52 @@ export default function CodeEditor() {
     }, 1200);
   };
 
+  const handleSaveProject = () => {
+    setSaveStatus('saving');
+    
+    const currentCode = editorRef.current?.getValue() ?? code;
+    let activeId = projectId;
+    let activeName = projectName;
+
+    if (!activeId) {
+      const name = prompt("Name your project before saving:", "My Saved Project");
+      if (!name || !name.trim()) {
+        setSaveStatus('idle');
+        return;
+      }
+      activeName = name.trim();
+      activeId = Date.now().toString();
+      
+      setProjectName(activeName);
+      setProjectId(activeId);
+    }
+
+    try {
+      const projs = JSON.parse(localStorage.getItem("execium_projects") ?? "[]");
+      const existingIdx = projs.findIndex((p: any) => p.id === activeId);
+
+      const updatedProj = {
+        id: activeId,
+        name: activeName,
+        code: currentCode,
+        timestamp: new Date().toLocaleString()
+      };
+
+      if (existingIdx >= 0) {
+        projs[existingIdx] = updatedProj;
+      } else {
+        projs.unshift(updatedProj);
+      }
+
+      localStorage.setItem("execium_projects", JSON.stringify(projs));
+    } catch {}
+
+    setTimeout(() => {
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 1500);
+    }, 600);
+  };
+
   const handleDebug = (val?: string) => {
     const currentCode = val ?? editorRef.current?.getValue() ?? code;
     const key = detectTrace(currentCode);
@@ -197,6 +247,37 @@ export default function CodeEditor() {
             <option key={k} value={k} style={{ background: '#0f172a', color: '#e2e8f0' }}>{v}</option>
           ))}
         </select>
+
+        <div style={{ width: 1, height: 18, background: T.uiBorder }} />
+
+        {/* Project Name & Rename Trigger */}
+        <div 
+          title="Double click to rename project"
+          onDoubleClick={() => {
+            const newName = prompt("Rename Project:", projectName);
+            if (newName && newName.trim()) {
+              setProjectName(newName.trim());
+              if (projectId) {
+                try {
+                  const projs = JSON.parse(localStorage.getItem("execium_projects") ?? "[]");
+                  const updated = projs.map((p: any) => p.id === projectId ? { ...p, name: newName.trim() } : p);
+                  localStorage.setItem("execium_projects", JSON.stringify(updated));
+                } catch {}
+              }
+            }
+          }}
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: 6, color: T.uiText, fontSize: 10, 
+            fontFamily: "'JetBrains Mono'", padding: '3px 8px', borderRadius: 6, 
+            background: 'rgba(255,255,255,.03)', border: `1px solid ${T.uiBorder}`, 
+            cursor: 'pointer', transition: 'all 0.15s', userSelect: 'none'
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(168,85,247,.4)'; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = T.uiBorder; }}
+        >
+          <span style={{ fontSize: 11 }}>📁</span>
+          <span style={{ fontWeight: 800 }}>{projectName}</span>
+        </div>
 
         <div style={{ width: 1, height: 18, background: T.uiBorder }} />
 
@@ -267,6 +348,19 @@ export default function CodeEditor() {
           }}>✕ Clear</button>
 
           <div style={{ width: 1, height: 16, background: T.uiBorder }} />
+
+          {/* SAVE OPTION */}
+          <button onClick={handleSaveProject} style={{
+            padding: '4px 10px', borderRadius: 6, 
+            border: `1px solid ${saveStatus === 'saved' ? '#10b981' : T.uiBorder}`,
+            background: saveStatus === 'saved' ? 'rgba(16,185,129,.12)' : T.uiSurface, 
+            color: saveStatus === 'saved' ? '#10b981' : T.uiText, cursor: 'pointer',
+            fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 700,
+            transition: 'all .15s', display: 'flex', alignItems: 'center', gap: 4
+          }}>
+            <span>{saveStatus === 'saved' ? '✓' : '💾'}</span>
+            {saveStatus === 'saved' ? 'Saved' : saveStatus === 'saving' ? 'Saving...' : 'Save'}
+          </button>
 
           {/* SHARE OPTION */}
           <button onClick={handleShare} style={{
