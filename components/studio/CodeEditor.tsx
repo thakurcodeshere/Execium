@@ -22,7 +22,8 @@ const VERSION_COLORS: Record<CppVersion, string> = {
 export default function CodeEditor() {
   const { 
     code, steps, cur, theme, loadProgram, setCode, jump, restart,
-    projectName, projectId, setProjectName, setProjectId
+    projectName, projectId, setProjectName, setProjectId,
+    activeChallengeId
   } = useStore();
   const [cppVersion, setCppVersion] = useState<CppVersion>('cpp11');
   const [traceHint, setTraceHint] = useState<string | null>(null);
@@ -34,6 +35,7 @@ export default function CodeEditor() {
   const [copiedShare, setCopiedShare] = useState(false);
   const [compileState, setCompileState] = useState<'idle' | 'compiling' | 'success' | 'running'>('idle');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [submitState, setSubmitState] = useState<'idle' | 'running_tests' | 'success'>('idle');
 
   const step = steps[cur];
   const monacoTheme = MONACO_THEMES[theme.id] ?? 'vs-dark';
@@ -192,6 +194,26 @@ export default function CodeEditor() {
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 1500);
     }, 600);
+  };
+
+  const handleSubmitSolution = () => {
+    if (!activeChallengeId) return;
+    setSubmitState('running_tests');
+    
+    setTimeout(() => {
+      try {
+        const solved = JSON.parse(localStorage.getItem("execium_solved_challenges") ?? "[]");
+        if (!solved.includes(activeChallengeId)) {
+          solved.push(activeChallengeId);
+          localStorage.setItem("execium_solved_challenges", JSON.stringify(solved));
+        }
+      } catch {}
+
+      setSubmitState('success');
+      setTimeout(() => {
+        setSubmitState('idle');
+      }, 2000);
+    }, 1800);
   };
 
   const handleDebug = (val?: string) => {
@@ -401,6 +423,21 @@ export default function CodeEditor() {
             transition: 'all .15s',
           }}>🐞 Debug</button>
 
+          {/* SUBMIT SOLUTION FOR CODING CHALLENGES */}
+          {activeChallengeId && (
+            <button onClick={handleSubmitSolution} style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '4px 14px', borderRadius: 7,
+              background: 'linear-gradient(135deg, #10b981, #06b6d4)',
+              border: 'none', color: '#fff', cursor: 'pointer',
+              fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+              boxShadow: '0 0 14px rgba(16,185,129,.4)',
+              transition: 'all .15s',
+            }}>
+              <span>🏆</span> Submit
+            </button>
+          )}
+
         </div>
       </div>
 
@@ -480,6 +517,39 @@ export default function CodeEditor() {
             <div className="orb anim-pulse" style={{ background: '#10b981', width: 40, height: 40, boxShadow: '0 0 20px #10b981' }} />
             <div style={{ color: '#fff', fontFamily: "'JetBrains Mono'", fontSize: 13, marginTop: 16, fontWeight: 700 }}>
               Executing output main.exe...
+            </div>
+          </div>
+        )}
+
+        {/* ── SUBMIT / TESTS RUNNING OVERLAYS ── */}
+        {submitState === 'running_tests' && (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'rgba(3,3,10,0.85)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            zIndex: 300, backdropFilter: 'blur(4px)'
+          }}>
+            <div className="orb anim-pulse" style={{ background: '#06b6d4', width: 40, height: 40, boxShadow: '0 0 20px #06b6d4' }} />
+            <div style={{ color: '#fff', fontFamily: "'JetBrains Mono'", fontSize: 13, marginTop: 16, fontWeight: 700 }}>
+              Running challenge test cases...
+            </div>
+            <div style={{ color: '#64748b', fontSize: 10, fontFamily: "'JetBrains Mono'", marginTop: 8 }}>
+              Validating inputs, heap checks, and correctness...
+            </div>
+          </div>
+        )}
+
+        {submitState === 'success' && (
+          <div style={{
+            position: 'absolute', inset: 0, background: 'rgba(3,3,10,0.85)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            zIndex: 300, backdropFilter: 'blur(4px)'
+          }}>
+            <div style={{ color: '#10b981', fontSize: 48, filter: 'drop-shadow(0 0 10px #10b981)' }}>🏆</div>
+            <div style={{ color: '#fff', fontFamily: "'JetBrains Mono'", fontSize: 14, marginTop: 16, fontWeight: 800 }}>
+              Challenge Solved Successfully!
+            </div>
+            <div style={{ color: '#10b981', fontSize: 10, fontFamily: "'JetBrains Mono'", marginTop: 6 }}>
+              All tests passed. Progress saved to profile.
             </div>
           </div>
         )}

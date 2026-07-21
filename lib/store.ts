@@ -21,6 +21,7 @@ interface Store {
   isCollapsed: boolean;
   projectName: string;
   projectId: string | null;
+  activeChallengeId: string | null;
 
   loadProgram(id:string):void;
   setCode(code:string):void;
@@ -39,6 +40,7 @@ interface Store {
   toggleCollapsed():void;
   setProjectName(name:string):void;
   setProjectId(id:string|null):void;
+  setChallengeId(id:string|null):void;
 }
 
 export const useStore = create<Store>((set,get)=>({
@@ -51,6 +53,7 @@ export const useStore = create<Store>((set,get)=>({
   isCollapsed: true,
   projectName: 'Untitled Project',
   projectId: null,
+  activeChallengeId: null,
 
   loadProgram(id){
     const {_timer}=get();
@@ -122,4 +125,5 @@ export const useStore = create<Store>((set,get)=>({
   toggleCollapsed(){set(s=>({isCollapsed:!s.isCollapsed}))},
   setProjectName(name){set({projectName:name})},
   setProjectId(id){set({projectId:id})},
+  setChallengeId(id){set({activeChallengeId:id})},
 }));
