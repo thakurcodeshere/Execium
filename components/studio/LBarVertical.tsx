@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { getProgramList, PROGRAMS } from "@/lib/engine";
 import { CODING_CHALLENGES, CodingChallenge, getDailyChallenge } from "@/lib/challenges";
+import { LEARN_MODULES } from "@/lib/learn";
 import { 
   Plus, FolderGit2, History, User, Settings, LogOut, Sun, Moon,
   ChevronLeft, ChevronRight, LayoutTemplate, BookOpen, HelpCircle, Flame
@@ -23,7 +24,7 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   const { 
     pid, code, setCode, loadProgram, restart, theme, setTheme,
     projectName, projectId, setProjectName, setProjectId,
-    activeChallengeId, setChallengeId
+    activeChallengeId, setChallengeId, setLearnModuleId
   } = useStore();
   const [user, setUser] = useState<NavUser | null>(null);
   
@@ -231,14 +232,6 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
     setShowHistory(false);
   };
 
-  const learnModules = [
-    { id: "raii", title: "Smart Pointers & RAII", desc: "Understand ownership transfer and smart deallocation.", trace: "smart_ptr" },
-    { id: "lists", title: "Memory and Linked Lists", desc: "Explore pointer chains and heap nodes in memory.", trace: "linked_list" },
-    { id: "recursion", title: "Recursion Dimension", desc: "Track recursion stack frames visually step-by-step.", trace: "factorial" },
-    { id: "sorting", title: "STL & Bubble Sort", desc: "Analyze sorting passes and array comparisons.", trace: "bubble_sort" },
-    { id: "searching", title: "Binary Search Theory", desc: "Divide and conquer algorithm in logarithmic time.", trace: "binary_search" },
-  ];
-
   const handleSelectQuestion = (q: CodingChallenge) => {
     setCode(q.code);
     setProjectName(q.title);
@@ -249,11 +242,8 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
     setShowQuestions(false);
   };
 
-  const handleSelectLearn = (traceKey: string) => {
-    loadProgram(traceKey);
-    setChallengeId(null);
-    const prog = PROGRAMS[traceKey];
-    if (prog) saveToHistory(prog.code);
+  const handleSelectLearn = (modId: string) => {
+    setLearnModuleId(modId);
     setShowLearn(false);
   };
 
@@ -408,10 +398,10 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                 <span style={{ fontSize: 11, fontWeight: 800, color: T.uiText, fontFamily: "'JetBrains Mono'" }}>📚 LEARN PROGRAMMING</span>
               </div>
               <div style={{ maxHeight: 320, overflowY: "auto" }}>
-                {learnModules.map(m => (
+                {LEARN_MODULES.map(m => (
                   <button
                     key={m.id}
-                    onClick={() => handleSelectLearn(m.trace)}
+                    onClick={() => handleSelectLearn(m.id)}
                     style={{
                       width: "100%", padding: "12px 14px", display: "flex", flexDirection: "column",
                       background: "transparent", border: "none", cursor: "pointer",
@@ -421,7 +411,7 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                     onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                   >
                     <div style={{ fontSize: 12, fontWeight: 700, color: T.uiText }}>{m.title}</div>
-                    <div style={{ fontSize: 9, color: T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>{m.desc}</div>
+                    <div style={{ fontSize: 9, color: T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>{m.shortDesc}</div>
                   </button>
                 ))}
               </div>

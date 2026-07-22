@@ -6,11 +6,12 @@ import LBarVertical from "@/components/studio/LBarVertical";
 import LBarHorizontal from "@/components/studio/LBarHorizontal";
 import AIAgentPanel from "@/components/studio/AIAgentPanel";
 import ChallengePanel from "@/components/studio/ChallengePanel";
+import LearnPanel from "@/components/studio/LearnPanel";
 
 const CodeEditor = dynamic(() => import("@/components/studio/CodeEditor"), { ssr: false });
 
 export default function StudioPage() {
-  const { theme, showAI, isCollapsed, activeChallengeId } = useStore();
+  const { theme, showAI, isCollapsed, activeChallengeId, activeLearnModuleId } = useStore();
   const T = theme;
 
   // Sidebar drag-to-resize states
@@ -51,6 +52,8 @@ export default function StudioPage() {
     };
   }, [isResizing, resize, stopResizing]);
 
+  const isSplit = Boolean(activeChallengeId || activeLearnModuleId);
+
   return (
     <div style={{
       height: "100vh", display: "flex", background: T.uiBg,
@@ -69,14 +72,14 @@ export default function StudioPage() {
         height: "100%", overflow: "hidden", minWidth: 0
       }}>
         
-        {/* ── Main Area: Code Editor (Left) & Problem Statement Frame (Right) ── */}
+        {/* ── Main Area: Code Editor (Left) & Problem / Learn Frame (Right) ── */}
         <div style={{
           flex: 1, minHeight: 0, position: "relative",
           background: T.editorBg, display: "flex"
         }}>
           {/* Left Frame: Monaco Code Editor */}
           <div style={{
-            flex: activeChallengeId ? "1 1 55%" : "1 1 100%",
+            flex: isSplit ? "1 1 55%" : "1 1 100%",
             height: "100%", position: "relative", minWidth: 0
           }}>
             <CodeEditor />
@@ -89,6 +92,16 @@ export default function StudioPage() {
               height: "100%", flexShrink: 0
             }}>
               <ChallengePanel />
+            </div>
+          )}
+
+          {/* Right Frame: Pedagogical Learn Programming Framework */}
+          {activeLearnModuleId && (
+            <div style={{
+              width: "45%", minWidth: 340, maxWidth: 640,
+              height: "100%", flexShrink: 0
+            }}>
+              <LearnPanel />
             </div>
           )}
         </div>

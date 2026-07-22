@@ -22,6 +22,7 @@ interface Store {
   projectName: string;
   projectId: string | null;
   activeChallengeId: string | null;
+  activeLearnModuleId: string | null;
   attemptedChallenges: string[];
 
   loadProgram(id:string):void;
@@ -42,6 +43,7 @@ interface Store {
   setProjectName(name:string):void;
   setProjectId(id:string|null):void;
   setChallengeId(id:string|null):void;
+  setLearnModuleId(id:string|null):void;
   recordAttempt(id:string):void;
 }
 
@@ -56,6 +58,7 @@ export const useStore = create<Store>((set,get)=>({
   projectName: 'Untitled Project',
   projectId: null,
   activeChallengeId: null,
+  activeLearnModuleId: null,
   attemptedChallenges: [],
 
   loadProgram(id){
@@ -128,7 +131,8 @@ export const useStore = create<Store>((set,get)=>({
   toggleCollapsed(){set(s=>({isCollapsed:!s.isCollapsed}))},
   setProjectName(name){set({projectName:name})},
   setProjectId(id){set({projectId:id})},
-  setChallengeId(id){set({activeChallengeId:id})},
+  setChallengeId(id){set({activeChallengeId:id, activeLearnModuleId: id ? null : get().activeLearnModuleId})},
+  setLearnModuleId(id){set({activeLearnModuleId:id, activeChallengeId: id ? null : get().activeChallengeId})},
   recordAttempt(id){
     if (!id) return;
     const { attemptedChallenges } = get();
