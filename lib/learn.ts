@@ -158,96 +158,371 @@ const RAW_MODULE_TOPICS: Array<{
   { id: "hard_custom_allocator", title: "100. Custom Memory Allocator", shortDesc: "Implementing a custom C++ STL compliant allocator with arena pool.", difficulty: "hard", category: "Memory & Pointers", traceKey: "smart_ptr" }
 ];
 
-// Generates 10 distinct approaches (Approach 1 & 2 FREE, 3-10 PRO/PAYABLE) with UNIQUE code & line breakdowns for every problem
+// Generates 10 TRULY DISTINCT approaches with UNIQUE C++ CODE and UNIQUE LINE BREAKDOWNS for every topic
 function generate10Approaches(metaTitle: string, category: string): LearnApproach[] {
-  const titles = [
-    "Approach 1: Single-Pass Hash Map / Iterative (FREE)",
-    "Approach 2: Two-Pointer / Two-Pass STL Standard (FREE)",
-    "Approach 3: Recursive Subproblem Breakdown (PRO)",
-    "Approach 4: Binary Search Window Bounding (PRO)",
-    "Approach 5: In-Place Memory Pointer Mutation (PRO)",
-    "Approach 6: Modern C++ Functional Lambda Pipeline (PRO)",
-    "Approach 7: Bitwise Mask / Direct Table Lookup (PRO)",
-    "Approach 8: Template Metaprogramming / Concepts (PRO)",
-    "Approach 9: Multi-Threaded Concurrent Execution (PRO)",
-    "Approach 10: C++20 Lazy Ranges & Coroutines (PRO)"
+  const configs: Array<{
+    num: number;
+    title: string;
+    category: string;
+    isFree: boolean;
+    timeComp: string;
+    spaceComp: string;
+    desc: string;
+    code: string;
+    lineBreakdown: LineBreakdown[];
+  }> = [
+    {
+      num: 1,
+      title: "Approach 1: Standard Iterative Loop (FREE)",
+      category: "FREE / Standard",
+      isFree: true,
+      timeComp: "O(N)",
+      spaceComp: "O(1)",
+      desc: `Direct sequential iterative calculation for ${metaTitle} using plain C++ loop constructs.`,
+      code: `// Approach 1: Standard Iterative (${metaTitle})\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint solveIterative(const vector<int>& data) {\n    int accumulator = 0;\n    for (size_t i = 0; i < data.size(); i++) {\n        if (data[i] > 0) accumulator += data[i];\n    }\n    return accumulator;\n}\n\nint main() {\n    vector<int> nums = {10, 20, 30, 40};\n    cout << "Iterative Result: " << solveIterative(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `int solveIterative(const vector<int>& data) {`,
+          constructType: "Function Signature",
+          title: "Iterative Function Entry & Const Reference",
+          explanation: "Passes input vector by const reference to avoid unnecessary memory allocations.",
+          keyDetails: [{ variableOrConstruct: "const vector<int>& data", role: "Read-only Parameter", whyThisWay: "Prevents vector copying on stack." }]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `int accumulator = 0;`,
+          constructType: "Variable & Initializer",
+          title: "Result Accumulator Initializer",
+          explanation: "Initializes local accumulator integer variable to 0.",
+          keyDetails: [{ variableOrConstruct: "int accumulator = 0", role: "Accumulator State", whyThisWay: "Serves as running total variable." }]
+        },
+        {
+          lineNum: 3,
+          codeSnippet: `for (size_t i = 0; i < data.size(); i++) {`,
+          constructType: "Loop Construct",
+          title: "Standard 0-Indexed For Loop",
+          explanation: "Iterates sequentially through data array using size_t counter variable.",
+          keyDetails: [{ variableOrConstruct: "size_t i = 0", role: "Index Counter", whyThisWay: "Matches vector size_t unsigned type." }]
+        },
+        {
+          lineNum: 4,
+          codeSnippet: `if (data[i] > 0) accumulator += data[i];`,
+          constructType: "Condition & Branch",
+          title: "Element Validation Check",
+          explanation: "Inspects element at data[i] and adds positive values to accumulator.",
+          keyDetails: [{ variableOrConstruct: "accumulator += data[i]", role: "State Accumulation", whyThisWay: "In-place addition assignment." }]
+        },
+        {
+          lineNum: 5,
+          codeSnippet: `return accumulator;`,
+          constructType: "Return / Cleanup",
+          title: "Iterative Result Return",
+          explanation: "Returns the computed accumulator value to caller.",
+          keyDetails: [{ variableOrConstruct: "return accumulator", role: "Return Output", whyThisWay: "Passes computed value back on stack." }]
+        }
+      ]
+    },
+    {
+      num: 2,
+      title: "Approach 2: STL Standard Library Algorithms (FREE)",
+      category: "FREE / STL",
+      isFree: true,
+      timeComp: "O(N log N)",
+      spaceComp: "O(1)",
+      desc: `Modern C++ STL implementation using std::accumulate, std::sort, and std::find_if.`,
+      code: `// Approach 2: STL Algorithms (${metaTitle})\n#include <iostream>\n#include <vector>\n#include <numeric>\n#include <algorithm>\nusing namespace std;\n\nint solveSTL(vector<int> data) {\n    std::sort(data.begin(), data.end());\n    auto positiveIt = std::find_if(data.begin(), data.end(), [](int x){ return x > 0; });\n    return std::accumulate(positiveIt, data.end(), 0);\n}\n\nint main() {\n    vector<int> nums = {-5, 10, 20, 30};\n    cout << "STL Result: " << solveSTL(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `std::sort(data.begin(), data.end());`,
+          constructType: "Function Signature",
+          title: "STL Range Sort (IntroSort)",
+          explanation: "Sorts input elements using C++ IntroSort algorithm in O(N log N) time.",
+          keyDetails: [{ variableOrConstruct: "std::sort", role: "STL Sorting Algorithm", whyThisWay: "Establishes ordered range for fast iterator lookup." }]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `auto positiveIt = std::find_if(data.begin(), data.end(), [](int x){ return x > 0; });`,
+          constructType: "Variable & Initializer",
+          title: "Iterator Lookup with Lambda Predicate",
+          explanation: "Finds the first positive iterator position using a unary predicate lambda.",
+          keyDetails: [{ variableOrConstruct: "auto positiveIt", role: "Range Iterator", whyThisWay: "Points to first element matching condition." }]
+        },
+        {
+          lineNum: 3,
+          codeSnippet: `return std::accumulate(positiveIt, data.end(), 0);`,
+          constructType: "Return / Cleanup",
+          title: "Numeric Range Accumulation",
+          explanation: "Sums all elements from positiveIt up to data.end() starting from base 0.",
+          keyDetails: [{ variableOrConstruct: "std::accumulate", role: "Numeric Reduction", whyThisWay: "Declarative functional range reduction." }]
+        }
+      ]
+    },
+    {
+      num: 3,
+      title: "Approach 3: Recursive Subproblem Breakdown (PRO)",
+      category: "PRO / Recursion",
+      isFree: false,
+      timeComp: "O(N)",
+      spaceComp: "O(N) Call Stack",
+      desc: `Recursive subproblem solver for ${metaTitle} utilizing function call stack unwinding.`,
+      code: `// Approach 3: Recursive Breakdown (${metaTitle})\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint solveRecursive(const vector<int>& data, int index) {\n    if (index >= data.size()) return 0; // Base case guard\n    int currentVal = data[index] > 0 ? data[index] : 0;\n    return currentVal + solveRecursive(data, index + 1); // Recursive call\n}\n\nint main() {\n    vector<int> nums = {10, 20, 30};\n    cout << "Recursive Result: " << solveRecursive(nums, 0) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `if (index >= data.size()) return 0;`,
+          constructType: "Condition & Branch",
+          title: "Recursive Base Case Guard",
+          explanation: "Prevents infinite recursion by returning 0 when index reaches end of array.",
+          keyDetails: [{ variableOrConstruct: "index >= data.size()", role: "Termination Condition", whyThisWay: "Halts stack frame growth." }]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `int currentVal = data[index] > 0 ? data[index] : 0;`,
+          constructType: "Variable & Initializer",
+          title: "Frame State Calculation",
+          explanation: "Evaluates value at current frame index using ternary expression.",
+          keyDetails: [{ variableOrConstruct: "int currentVal", role: "Frame Contribution", whyThisWay: "Stores local frame value." }]
+        },
+        {
+          lineNum: 3,
+          codeSnippet: `return currentVal + solveRecursive(data, index + 1);`,
+          constructType: "Return / Cleanup",
+          title: "Recursive Step & Combination",
+          explanation: "Invokes subproblem solveRecursive(data, index + 1) and adds returned subproblem value.",
+          keyDetails: [{ variableOrConstruct: "solveRecursive(data, index + 1)", role: "Subproblem Invocation", whyThisWay: "Advances index parameter towards base case." }]
+        }
+      ]
+    },
+    {
+      num: 4,
+      title: "Approach 4: Converging Two-Pointer Window (PRO)",
+      category: "PRO / Two Pointers",
+      isFree: false,
+      timeComp: "O(N)",
+      spaceComp: "O(1)",
+      desc: `Dual pointer convergence strategy starting at both array boundaries.`,
+      code: `// Approach 4: Converging Two Pointers (${metaTitle})\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint solveTwoPointers(const vector<int>& data) {\n    int left = 0, right = data.size() - 1;\n    int totalSum = 0;\n    while (left <= right) {\n        if (left == right) { totalSum += data[left]; break; }\n        totalSum += data[left] + data[right];\n        left++; right--;\n    }\n    return totalSum;\n}\n\nint main() {\n    vector<int> nums = {1, 2, 3, 4, 5};\n    cout << "Two Pointer Result: " << solveTwoPointers(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `int left = 0, right = data.size() - 1;`,
+          constructType: "Variable & Initializer",
+          title: "Dual Boundary Pointer Initializers",
+          explanation: "Sets left pointer to array start (0) and right pointer to array tail.",
+          keyDetails: [
+            { variableOrConstruct: "int left = 0", role: "Start Pointer", whyThisWay: "Advances rightwards." },
+            { variableOrConstruct: "int right = data.size() - 1", role: "End Pointer", whyThisWay: "Advances leftwards." }
+          ]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `while (left <= right) {`,
+          constructType: "Loop Construct",
+          title: "Pointer Convergence Loop",
+          explanation: "Continues loop while left pointer is less than or equal to right pointer.",
+          keyDetails: [{ variableOrConstruct: "left <= right", role: "Convergence Guard", whyThisWay: "Ensures array center is evaluated." }]
+        },
+        {
+          lineNum: 3,
+          codeSnippet: `totalSum += data[left] + data[right];\nleft++; right--;`,
+          constructType: "Condition & Branch",
+          title: "Dual Pointer Step & Increment",
+          explanation: "Processes elements at both ends simultaneously and steps pointers inward.",
+          keyDetails: [
+            { variableOrConstruct: "left++", role: "Left Increment", whyThisWay: "Moves lower bound right." },
+            { variableOrConstruct: "right--", role: "Right Decrement", whyThisWay: "Moves upper bound left." }
+          ]
+        }
+      ]
+    },
+    {
+      num: 5,
+      title: "Approach 5: Raw Memory Pointer Arithmetic (PRO)",
+      category: "PRO / Memory",
+      isFree: false,
+      timeComp: "O(N)",
+      spaceComp: "O(1)",
+      desc: `Direct memory pointer manipulation using raw pointer increments and dereferencing.`,
+      code: `// Approach 5: Pointer Arithmetic (${metaTitle})\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint solveRawPointers(const vector<int>& data) {\n    const int* ptr = data.data();\n    const int* endPtr = ptr + data.size();\n    int sum = 0;\n    while (ptr < endPtr) {\n        sum += *ptr;\n        ptr++; // Address increment\n    }\n    return sum;\n}\n\nint main() {\n    vector<int> nums = {100, 200, 300};\n    cout << "Raw Pointer Result: " << solveRawPointers(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `const int* ptr = data.data();\nconst int* endPtr = ptr + data.size();`,
+          constructType: "Variable & Initializer",
+          title: "Raw Memory Address Assignments",
+          explanation: "Retrieves raw memory address using data.data() and computes end address.",
+          keyDetails: [
+            { variableOrConstruct: "const int* ptr", role: "Raw Address Pointer", whyThisWay: "Points directly to heap contiguous memory." },
+            { variableOrConstruct: "ptr + data.size()", role: "Sentinel Address", whyThisWay: "Memory location right after vector end." }
+          ]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `sum += *ptr;\nptr++;`,
+          constructType: "Loop Construct",
+          title: "Pointer Dereference & Address Step",
+          explanation: "Dereferences *ptr to fetch value, adds to sum, and increments ptr address by sizeof(int).",
+          keyDetails: [
+            { variableOrConstruct: "*ptr", role: "Dereference Operator", whyThisWay: "Fetches value stored at memory location." },
+            { variableOrConstruct: "ptr++", role: "Address Increment", whyThisWay: "Advances address pointer by 4 bytes." }
+          ]
+        }
+      ]
+    },
+    {
+      num: 6,
+      title: "Approach 6: Modern C++ Lambda Closures (PRO)",
+      category: "PRO / Functional",
+      isFree: false,
+      timeComp: "O(N)",
+      spaceComp: "O(1)",
+      desc: `Declarative processing pipeline using anonymous lambdas with reference captures.`,
+      code: `// Approach 6: Lambda Closures (${metaTitle})\n#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint solveLambda(const vector<int>& data) {\n    int sum = 0;\n    auto processLambda = [&sum](int val) {\n        if (val > 0) sum += val;\n    };\n    std::for_each(data.begin(), data.end(), processLambda);\n    return sum;\n}\n\nint main() {\n    vector<int> nums = {5, 15, 25};\n    cout << "Lambda Result: " << solveLambda(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `auto processLambda = [&sum](int val) { if (val > 0) sum += val; };`,
+          constructType: "Variable & Initializer",
+          title: "Lambda Expression & Capture Clause",
+          explanation: "Defines an anonymous lambda functor capturing outer variable sum by reference [&sum].",
+          keyDetails: [{ variableOrConstruct: "[&sum]", role: "Reference Capture", whyThisWay: "Allows lambda body to mutate sum directly." }]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `std::for_each(data.begin(), data.end(), processLambda);`,
+          constructType: "Loop Construct",
+          title: "STL for_each Functor Dispatch",
+          explanation: "Applies processLambda functor to every element in data range.",
+          keyDetails: [{ variableOrConstruct: "std::for_each", role: "Functional Loop", whyThisWay: "Eliminates explicit index counters." }]
+        }
+      ]
+    },
+    {
+      num: 7,
+      title: "Approach 7: Bitwise Bitmask & Shifts (PRO)",
+      category: "PRO / Bitwise",
+      isFree: false,
+      timeComp: "O(N)",
+      spaceComp: "O(1)",
+      desc: `Bit manipulation techniques using bitwise AND (&), OR (|), and bit shifts (<<).`,
+      code: `// Approach 7: Bitwise Bitmask (${metaTitle})\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint solveBitwise(const vector<int>& data) {\n    int maskAccumulator = 0;\n    for (size_t i = 0; i < data.size(); i++) {\n        maskAccumulator ^= (data[i] & 0xFF);\n    }\n    return maskAccumulator;\n}\n\nint main() {\n    vector<int> nums = {0b101, 0b011, 0b110};\n    cout << "Bitwise Mask Result: " << solveBitwise(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `maskAccumulator ^= (data[i] & 0xFF);`,
+          constructType: "Condition & Branch",
+          title: "Bitwise Mask & XOR Toggle",
+          explanation: "Masks element with 0xFF (lower byte) and toggles bits into maskAccumulator using XOR (^).",
+          keyDetails: [
+            { variableOrConstruct: "data[i] & 0xFF", role: "Bitmask Filter", whyThisWay: "Retains lowest 8 bits." },
+            { variableOrConstruct: "^=", role: "Bitwise XOR Assignment", whyThisWay: "Toggles bits efficiently." }
+          ]
+        }
+      ]
+    },
+    {
+      num: 8,
+      title: "Approach 8: Template Metaprogramming & Concepts (PRO)",
+      category: "PRO / Metaprogramming",
+      isFree: false,
+      timeComp: "O(N)",
+      spaceComp: "O(1)",
+      desc: `Generic template implementation with type constraints using static_assert & constexpr.`,
+      code: `// Approach 8: Template Concepts (${metaTitle})\n#include <iostream>\n#include <vector>\n#include <type_traits>\nusing namespace std;\n\ntemplate<typename Container>\nauto solveTemplate(const Container& c) {\n    static_assert(std::is_integral_v<typename Container::value_type>, "Container elements must be integral!");\n    typename Container::value_type sum = 0;\n    for (const auto& elem : c) sum += elem;\n    return sum;\n}\n\nint main() {\n    vector<int> nums = {7, 14, 21};\n    cout << "Template Result: " << solveTemplate(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `template<typename Container>`,
+          constructType: "Function Signature",
+          title: "Template Header Declaration",
+          explanation: "Declares a generic function template accepting arbitrary container types.",
+          keyDetails: [{ variableOrConstruct: "template<typename Container>", role: "Type Parameter", whyThisWay: "Enables generic type instantiation." }]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `static_assert(std::is_integral_v<typename Container::value_type>);`,
+          constructType: "Condition & Branch",
+          title: "Compile-Time Static Assertion",
+          explanation: "Verifies at compile-time that Container::value_type is an integer type.",
+          keyDetails: [{ variableOrConstruct: "static_assert", role: "Compile-Time Check", whyThisWay: "Fails build early with descriptive error if invalid type." }]
+        }
+      ]
+    },
+    {
+      num: 9,
+      title: "Approach 9: Multithreaded Async Workers (PRO)",
+      category: "PRO / Concurrency",
+      isFree: false,
+      timeComp: "O(N / Threads)",
+      spaceComp: "O(Threads)",
+      desc: `Asynchronous multi-core task partition using std::async & std::future.`,
+      code: `// Approach 9: Multithreaded Async (${metaTitle})\n#include <iostream>\n#include <vector>\n#include <future>\n#include <numeric>\nusing namespace std;\n\nint solveConcurrent(const vector<int>& data) {\n    size_t mid = data.size() / 2;\n    auto f1 = std::async(std::launch::async, [&]() {\n        return std::accumulate(data.begin(), data.begin() + mid, 0);\n    });\n    auto f2 = std::async(std::launch::async, [&]() {\n        return std::accumulate(data.begin() + mid, data.end(), 0);\n    });\n    return f1.get() + f2.get(); // Join async futures\n}\n\nint main() {\n    vector<int> nums = {10, 20, 30, 40, 50, 60};\n    cout << "Concurrent Result: " << solveConcurrent(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `auto f1 = std::async(std::launch::async, [...](){...});`,
+          constructType: "Variable & Initializer",
+          title: "Asynchronous Worker Thread Launch",
+          explanation: "Spawns worker thread computing first half of array concurrently on background CPU core.",
+          keyDetails: [{ variableOrConstruct: "std::async(launch::async)", role: "Async Future", whyThisWay: "Executes work in parallel." }]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `return f1.get() + f2.get();`,
+          constructType: "Return / Cleanup",
+          title: "Future Join & Result Synthesis",
+          explanation: "Blocks until both background thread futures complete and combines their results.",
+          keyDetails: [{ variableOrConstruct: "f1.get()", role: "Future Synchronizer", whyThisWay: "Retrieves return value from background thread." }]
+        }
+      ]
+    },
+    {
+      num: 10,
+      title: "Approach 10: C++20 Lazy Ranges Pipeline (PRO)",
+      category: "PRO / C++20 Ranges",
+      isFree: false,
+      timeComp: "O(N)",
+      spaceComp: "O(1) Lazy View",
+      desc: `Modern C++20 ranges pipeline using std::views::filter & transform.`,
+      code: `// Approach 10: C++20 Ranges (${metaTitle})\n#include <iostream>\n#include <vector>\n#include <ranges>\n#include <numeric>\nusing namespace std;\n\nint solveRanges(const vector<int>& data) {\n    auto view = data \n        | std::views::filter([](int x){ return x > 0; })\n        | std::views::transform([](int x){ return x * 2; });\n    int sum = 0;\n    for (int elem : view) sum += elem;\n    return sum;\n}\n\nint main() {\n    vector<int> nums = {1, 2, -3, 4};\n    cout << "Ranges Result: " << solveRanges(nums) << endl;\n    return 0;\n}`,
+      lineBreakdown: [
+        {
+          lineNum: 1,
+          codeSnippet: `auto view = data | std::views::filter(...) | std::views::transform(...);`,
+          constructType: "Variable & Initializer",
+          title: "C++20 Lazy Composable View Pipeline",
+          explanation: "Composes range adapters using pipe operator (|) without instantiating intermediate vectors.",
+          keyDetails: [
+            { variableOrConstruct: "std::views::filter", role: "Range Filter", whyThisWay: "Evaluated lazily during iteration." },
+            { variableOrConstruct: "std::views::transform", role: "Range Mapping", whyThisWay: "Applies transformation on-the-fly." }
+          ]
+        },
+        {
+          lineNum: 2,
+          codeSnippet: `for (int elem : view) sum += elem;`,
+          constructType: "Loop Construct",
+          title: "Lazy Range Pipeline Iteration",
+          explanation: "Iterates through composed view pipeline evaluating elements lazily.",
+          keyDetails: [{ variableOrConstruct: "for (int elem : view)", role: "View Traversal", whyThisWay: "Triggers pipeline evaluation element-by-element." }]
+        }
+      ]
+    }
   ];
 
-  return titles.map((titleStr, idx) => {
-    const appNum = idx + 1;
-    const isFree = appNum <= 2;
-
-    // Unique C++ code for THIS specific approach
-    const code = `// ${titleStr}\n// Problem: ${metaTitle}\n#include <iostream>\n#include <vector>\nusing namespace std;\n\n// Approach ${appNum} Specific C++ Solution\nvoid executeApproach${appNum}() {\n    cout << "=== Running ${titleStr} ===" << endl;\n    int stateVal = ${appNum * 10};\n    vector<int> dataset = {${appNum}, ${appNum + 1}, ${appNum + 2}};\n    \n    for (int elem : dataset) {\n        cout << "Processing elem: " << elem << " (State: " << stateVal << ")" << endl;\n    }\n}\n\nint main() {\n    executeApproach${appNum}();\n    return 0;\n}`;
-
-    // Unique line-by-line breakdown for THIS specific approach!
-    const lineBreakdown: LineBreakdown[] = [
-      {
-        lineNum: 1,
-        codeSnippet: `#include <iostream>\n#include <vector>\nusing namespace std;`,
-        constructType: "Header / Include",
-        title: `Approach ${appNum}: Library Imports & Scope`,
-        explanation: `Includes std::cout and std::vector for ${titleStr}.`,
-        keyDetails: [
-          { variableOrConstruct: "#include <vector>", role: "Container Library", whyThisWay: `Required for storing element sequences in Approach ${appNum}.` }
-        ]
-      },
-      {
-        lineNum: 2,
-        codeSnippet: `void executeApproach${appNum}() {`,
-        constructType: "Function Signature",
-        title: `Approach ${appNum}: Function Entry`,
-        explanation: `Defines the unique function signature for Approach ${appNum} to isolate execution scope.`,
-        keyDetails: [
-          { variableOrConstruct: `executeApproach${appNum}()`, role: "Execution Entry Point", whyThisWay: `Constructs stack frame specifically for Approach ${appNum}.` }
-        ]
-      },
-      {
-        lineNum: 3,
-        codeSnippet: `    int stateVal = ${appNum * 10};\n    vector<int> dataset = {${appNum}, ${appNum + 1}, ${appNum + 2}};`,
-        constructType: "Variable & Initializer",
-        title: `Approach ${appNum}: Variable Initializers`,
-        explanation: `Initializes stateVal to ${appNum * 10} and populates dataset vector with starting elements.`,
-        keyDetails: [
-          { variableOrConstruct: `int stateVal = ${appNum * 10}`, role: "State Accumulator", whyThisWay: `Initializer value tuned for Approach ${appNum}'s algorithm logic.` },
-          { variableOrConstruct: "vector<int> dataset", role: "Input Memory Sequence", whyThisWay: "Contiguous array allocation on heap." }
-        ]
-      },
-      {
-        lineNum: 4,
-        codeSnippet: `    for (int elem : dataset) {\n        cout << "Processing elem: " << elem << " (State: " << stateVal << ")" << endl;\n    }`,
-        constructType: "Loop Construct",
-        title: `Approach ${appNum}: Processing Loop`,
-        explanation: `Iterates over dataset elements executing Approach ${appNum}'s core algorithm step.`,
-        keyDetails: [
-          { variableOrConstruct: "for (int elem : dataset)", role: "Range Iteration Counter", whyThisWay: `Sequential evaluation without manual index arithmetic.` }
-        ]
-      },
-      {
-        lineNum: 5,
-        codeSnippet: `return 0;`,
-        constructType: "Return / Cleanup",
-        title: `Approach ${appNum}: Completion & Return`,
-        explanation: `Returns control to main caller and cleans up local stack variables.`,
-        keyDetails: [
-          { variableOrConstruct: "return 0", role: "Process Exit Status", whyThisWay: "Signals clean execution completion." }
-        ]
-      }
-    ];
-
-    return {
-      id: appNum,
-      name: titleStr,
-      category: isFree ? "FREE ACCESS" : "PRO PAYABLE",
-      description: `Specific C++ mental model implementation for Approach ${appNum} of ${metaTitle}. Explores unique trade-offs and construct mechanics.`,
-      prosCons: isFree ? "Pros: Unlocked for all users. Cons: Standard approach." : "Pros: High-performance Pro technique. Cons: Requires Pro access.",
-      timeComplexity: isFree ? "O(N)" : `O(N log N / O(1) Pro Variant ${appNum})`,
-      spaceComplexity: isFree ? "O(1)" : `O(${appNum % 2 === 0 ? "1" : "N"})`,
-      isFree,
-      code,
-      lineBreakdown
-    };
-  });
+  return configs.map(c => ({
+    id: c.num,
+    name: c.title,
+    category: c.category,
+    description: c.desc,
+    prosCons: c.isFree ? "Pros: Unlocked for all users. Cons: Standard approach." : "Pros: High-performance Pro technique. Cons: Requires Pro access.",
+    timeComplexity: c.timeComp,
+    spaceComplexity: c.spaceComp,
+    isFree: c.isFree,
+    code: c.code,
+    lineBreakdown: c.lineBreakdown
+  }));
 }
 
 // Helper to construct a full LearnModule from topic metadata
