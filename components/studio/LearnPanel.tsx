@@ -390,78 +390,86 @@ export default function LearnPanel() {
                       </div>
                     )}
 
+                    {/* ── INLINE ACTION BOX (PROMPT IMAGE SPECIFICATION) FOR THIS SELECTED APPROACH ── */}
+                    {isSelected && (
+                      <div style={{
+                        marginTop: 6, paddingTop: 12, borderTop: `1px solid ${T.uiBorder}`,
+                        display: "flex", flexDirection: "column", gap: 8
+                      }}>
+                        <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.4, fontFamily: "'Inter', sans-serif" }}>
+                          Switch to Step 3 below to view the line-by-line C++ code breakdown specific to this mental model approach!
+                        </div>
+
+                        {isAccessible ? (
+                          <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLoadSelectedApproachCode();
+                              }}
+                              style={{
+                                flex: 1, padding: "9px 0", borderRadius: 8, border: `1px solid ${T.uiBorder}`,
+                                background: "#1e293b", color: T.uiText, fontSize: 10,
+                                fontFamily: "'JetBrains Mono'", fontWeight: 700, cursor: "pointer",
+                                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                                transition: "all 0.15s"
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.borderColor = "#38bdf8"}
+                              onMouseLeave={e => e.currentTarget.style.borderColor = T.uiBorder}
+                            >
+                              <Code2 size={13} color="#38bdf8" /> Load Code into Editor
+                            </button>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActiveTab('breakdown');
+                              }}
+                              style={{
+                                flex: 1, padding: "9px 0", borderRadius: 8, border: "none",
+                                background: "linear-gradient(135deg, #f59e0b 0%, #a855f7 100%)",
+                                color: "#fff", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                                boxShadow: "0 4px 16px rgba(245,158,11,0.35)", transition: "transform 0.15s"
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
+                              onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+                            >
+                              Step 3: Line Breakdown <ArrowRight size={13} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{
+                            background: "linear-gradient(135deg, rgba(239,68,68,0.1), rgba(168,85,247,0.1))",
+                            border: "1px dashed rgba(239,68,68,0.4)", borderRadius: 10, padding: 12,
+                            textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 8
+                          }}>
+                            <div style={{ fontSize: 11, fontWeight: 800, color: T.uiText }}>
+                              🔒 Pro Approach Locked
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUnlockPro();
+                              }}
+                              style={{
+                                padding: "7px 16px", borderRadius: 8, border: "none",
+                                background: "linear-gradient(135deg, #ef4444, #a855f7)",
+                                color: "#fff", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                                cursor: "pointer", boxShadow: "0 0 14px rgba(239,68,68,0.3)"
+                              }}
+                            >
+                              🚀 Unlock All 10 Pro Approaches (Demo Pass)
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                   </div>
                 );
               })}
             </div>
-
-            {/* Selected Mental Model Details or Pro Unlock Banner */}
-            {selectedApproach.isFree || isProUnlocked ? (
-              <div style={{
-                background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)",
-                borderRadius: 10, padding: 14, display: "flex", flexDirection: "column", gap: 10
-              }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b", display: "flex", alignItems: "center", gap: 6 }}>
-                  <Zap size={14} /> Selected Mental Model: <span style={{ color: T.uiText }}>{selectedApproach.name}</span>
-                </div>
-                <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.4 }}>
-                  Switch to Step 3 below to view the line-by-line C++ code breakdown specific to this mental model approach!
-                </div>
-
-                <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
-                  <button
-                    onClick={handleLoadSelectedApproachCode}
-                    style={{
-                      flex: 1, padding: "8px 0", borderRadius: 8, border: `1px solid ${T.uiBorder}`,
-                      background: T.uiSurface, color: T.uiText, fontSize: 10,
-                      fontFamily: "'JetBrains Mono'", fontWeight: 700, cursor: "pointer",
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 4
-                    }}
-                  >
-                    <Code2 size={12} color="#38bdf8" /> Load Code into Editor
-                  </button>
-
-                  <button
-                    onClick={() => setActiveTab('breakdown')}
-                    style={{
-                      flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
-                      background: "linear-gradient(135deg, #f59e0b, #a855f7)",
-                      color: "#fff", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
-                      boxShadow: "0 3px 12px rgba(245,158,11,0.25)"
-                    }}
-                  >
-                    Step 3: Line Breakdown <ArrowRight size={12} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* PRO PAYABLE LOCK CARD */
-              <div style={{
-                background: "linear-gradient(135deg, rgba(239,68,68,0.1), rgba(168,85,247,0.1))",
-                border: "1px dashed rgba(239,68,68,0.4)", borderRadius: 12, padding: 16,
-                textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10
-              }}>
-                <Lock size={24} color="#ef4444" />
-                <div style={{ fontSize: 13, fontWeight: 800, color: T.uiText }}>
-                  Pro Mental Model Approach (Approaches 3 - 10)
-                </div>
-                <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.5, maxWidth: 300 }}>
-                  This advanced mental model approach and its custom line-by-line C++ breakdown are locked under Execium Pro. Approaches 1 & 2 are free for all users.
-                </div>
-                <button
-                  onClick={handleUnlockPro}
-                  style={{
-                    padding: "8px 18px", borderRadius: 8, border: "none",
-                    background: "linear-gradient(135deg, #ef4444, #a855f7)",
-                    color: "#fff", fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                    cursor: "pointer", boxShadow: "0 0 16px rgba(239,68,68,0.3)"
-                  }}
-                >
-                  🚀 Unlock All 10 Pro Approaches (Demo Pass)
-                </button>
-              </div>
-            )}
 
           </div>
         )}
