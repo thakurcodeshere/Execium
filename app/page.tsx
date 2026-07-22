@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import FeedbackModal from "@/components/FeedbackModal";
+import { getDailyChallenge, getTimeUntilNextDaily } from "@/lib/challenges";
 
 function ParticleField() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -84,6 +85,14 @@ export default function HomePage() {
   const [contactEmail, setContactEmail] = useState("");
   const [contactMsg, setContactMsg] = useState("");
   const [contactSubmitted, setContactSubmitted] = useState(false);
+
+  // Daily Challenge timer state
+  const [dailyTimer, setDailyTimer] = useState(getTimeUntilNextDaily());
+  useEffect(() => {
+    const interval = setInterval(() => setDailyTimer(getTimeUntilNextDaily()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+  const dailyPick = getDailyChallenge();
 
   const filtered = TOPICS.filter(t =>
     (cat === "All" || t.cat === cat) &&
@@ -215,6 +224,87 @@ export default function HomePage() {
                   <div style={{fontSize:13,fontWeight:700,color:"#abb2bf",marginBottom:6}}>⚡ One-Click Commits</div>
                   <p style={{fontSize:11,color:"#5c6370",lineHeight:1.5}}>Publish code changes to main branches in real time from the Studio.</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── DAILY CODING CHALLENGE SECTION ── */}
+      <section style={{padding:"70px 48px",position:"relative",zIndex:2,background:"linear-gradient(180deg, #181a1f 0%, #21252b 100%)",borderTop:"1px solid #282c34",borderBottom:"1px solid #282c34"}} id="daily-challenge">
+        <div style={{maxWidth:1200,margin:"0 auto"}}>
+          <div style={{
+            background:"linear-gradient(135deg, rgba(249,115,22,0.08) 0%, rgba(168,85,247,0.08) 100%)",
+            border:"1px solid rgba(249,115,22,0.25)", borderRadius:24, padding:"36px 44px",
+            display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:32,
+            boxShadow:"0 20px 60px rgba(0,0,0,0.4)"
+          }}>
+            <div style={{flex:"1 1 500px"}}>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
+                <span style={{
+                  fontSize:11,fontFamily:"'JetBrains Mono'",fontWeight:800,
+                  padding:"4px 12px",borderRadius:20,
+                  background:"rgba(249,115,22,0.18)",color:"#f97316",
+                  border:"1px solid rgba(249,115,22,0.35)",display:"inline-flex",alignItems:"center",gap:6
+                }}>
+                  🔥 DAILY CODING CHALLENGE • NEW EVERY 24 HOURS
+                </span>
+                <span style={{fontSize:11,fontFamily:"'JetBrains Mono'",color:"#858585"}}>
+                  {dailyPick.formattedDate}
+                </span>
+              </div>
+
+              <h2 style={{fontSize:"clamp(26px,3.5vw,40px)",fontWeight:900,color:"#abb2bf",marginBottom:12,letterSpacing:"-1px"}}>
+                Today&apos;s Pick: <span style={{background:"linear-gradient(135deg,#f97316,#a855f7)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{dailyPick.challenge.title}</span>
+              </h2>
+
+              <p style={{fontSize:14,color:"#858585",lineHeight:1.7,marginBottom:24,maxWidth:560}}>
+                {dailyPick.challenge.desc} Test your problem solving skills daily in Execium&apos;s interactive C++ memory sandbox.
+              </p>
+
+              <div style={{display:"flex",gap:16,alignItems:"center",flexWrap:"wrap"}}>
+                <Link href="/studio" style={{textDecoration:"none"}}>
+                  <button style={{
+                    padding:"12px 28px",borderRadius:12,border:"none",
+                    background:"linear-gradient(135deg, #f97316, #a855f7)",
+                    color:"#fff",fontSize:13,fontFamily:"'JetBrains Mono'",fontWeight:800,
+                    cursor:"pointer",boxShadow:"0 0 25px rgba(249,115,22,0.4)",
+                    transition:"all 0.2s"
+                  }}>
+                    ⚡ Solve Today&apos;s Challenge in Studio →
+                  </button>
+                </Link>
+                <span style={{
+                  fontSize:11,fontFamily:"'JetBrains Mono'",fontWeight:800,padding:"4px 10px",borderRadius:6,
+                  background: dailyPick.challenge.difficulty === 'easy' ? "rgba(16,185,129,0.15)" : dailyPick.challenge.difficulty === 'medium' ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)",
+                  color: dailyPick.challenge.difficulty === 'easy' ? "#10b981" : dailyPick.challenge.difficulty === 'medium' ? "#f59e0b" : "#ef4444",
+                  border: `1px solid ${dailyPick.challenge.difficulty === 'easy' ? "rgba(16,185,129,0.3)" : dailyPick.challenge.difficulty === 'medium' ? "rgba(245,158,11,0.3)" : "rgba(239,68,68,0.3)"}`
+                }}>
+                  DIFFICULTY: {dailyPick.challenge.difficulty.toUpperCase()}
+                </span>
+              </div>
+            </div>
+
+            {/* Countdown Timer Block */}
+            <div style={{
+              background:"#21252b",border:"1px solid #282c34",borderRadius:18,padding:"24px 32px",
+              textAlign:"center",minWidth:240,boxShadow:"0 10px 30px rgba(0,0,0,0.3)"
+            }}>
+              <div style={{fontSize:10,fontFamily:"'JetBrains Mono'",color:"#5c6370",textTransform:"uppercase",letterSpacing:1.5,marginBottom:10}}>
+                NEXT DAILY REFRESH IN
+              </div>
+              <div style={{
+                fontSize:26,fontWeight:900,fontFamily:"'JetBrains Mono'",
+                color:"#abb2bf",letterSpacing:1,display:"flex",justifyContent:"center",gap:6
+              }}>
+                <span>{String(dailyTimer.hours).padStart(2, '0')}h</span>
+                <span style={{color:"#f97316"}}>:</span>
+                <span>{String(dailyTimer.mins).padStart(2, '0')}m</span>
+                <span style={{color:"#f97316"}}>:</span>
+                <span style={{color:"#f97316"}}>{String(dailyTimer.secs).padStart(2, '0')}s</span>
+              </div>
+              <div style={{fontSize:10,color:"#10b981",fontFamily:"'JetBrains Mono'",marginTop:10}}>
+                ✓ Fresh Challenge Every Midnight
               </div>
             </div>
           </div>
