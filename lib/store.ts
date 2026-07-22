@@ -22,6 +22,7 @@ interface Store {
   projectName: string;
   projectId: string | null;
   activeChallengeId: string | null;
+  attemptedChallenges: string[];
 
   loadProgram(id:string):void;
   setCode(code:string):void;
@@ -41,6 +42,7 @@ interface Store {
   setProjectName(name:string):void;
   setProjectId(id:string|null):void;
   setChallengeId(id:string|null):void;
+  recordAttempt(id:string):void;
 }
 
 export const useStore = create<Store>((set,get)=>({
@@ -54,6 +56,7 @@ export const useStore = create<Store>((set,get)=>({
   projectName: 'Untitled Project',
   projectId: null,
   activeChallengeId: null,
+  attemptedChallenges: [],
 
   loadProgram(id){
     const {_timer}=get();
@@ -126,4 +129,15 @@ export const useStore = create<Store>((set,get)=>({
   setProjectName(name){set({projectName:name})},
   setProjectId(id){set({projectId:id})},
   setChallengeId(id){set({activeChallengeId:id})},
+  recordAttempt(id){
+    if (!id) return;
+    const { attemptedChallenges } = get();
+    if (!attemptedChallenges.includes(id)) {
+      const updated = [...attemptedChallenges, id];
+      set({ attemptedChallenges: updated });
+      try {
+        localStorage.setItem("execium_attempted_challenges", JSON.stringify(updated));
+      } catch {}
+    }
+  },
 }));

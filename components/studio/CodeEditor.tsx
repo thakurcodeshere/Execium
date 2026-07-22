@@ -23,7 +23,7 @@ export default function CodeEditor() {
   const { 
     code, steps, cur, theme, loadProgram, setCode, jump, restart,
     projectName, projectId, setProjectName, setProjectId,
-    activeChallengeId
+    activeChallengeId, recordAttempt
   } = useStore();
   const [cppVersion, setCppVersion] = useState<CppVersion>('cpp11');
   const [traceHint, setTraceHint] = useState<string | null>(null);
@@ -135,6 +135,7 @@ export default function CodeEditor() {
 
   // Actions
   const handleCompile = () => {
+    if (activeChallengeId) recordAttempt(activeChallengeId);
     setCompileState('compiling');
     setTimeout(() => {
       setCompileState('success');
@@ -143,6 +144,7 @@ export default function CodeEditor() {
   };
 
   const handleRun = () => {
+    if (activeChallengeId) recordAttempt(activeChallengeId);
     setCompileState('running');
     setTimeout(() => {
       setCompileState('idle');
@@ -198,6 +200,7 @@ export default function CodeEditor() {
 
   const handleSubmitSolution = () => {
     if (!activeChallengeId) return;
+    recordAttempt(activeChallengeId);
     setSubmitState('running_tests');
     
     setTimeout(() => {
@@ -217,6 +220,7 @@ export default function CodeEditor() {
   };
 
   const handleDebug = (val?: string) => {
+    if (activeChallengeId) recordAttempt(activeChallengeId);
     const currentCode = val ?? editorRef.current?.getValue() ?? code;
     const key = detectTrace(currentCode);
     if (key && PROGRAMS[key]) {

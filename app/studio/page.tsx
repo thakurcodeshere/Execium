@@ -5,11 +5,12 @@ import { useStore } from "@/lib/store";
 import LBarVertical from "@/components/studio/LBarVertical";
 import LBarHorizontal from "@/components/studio/LBarHorizontal";
 import AIAgentPanel from "@/components/studio/AIAgentPanel";
+import ChallengePanel from "@/components/studio/ChallengePanel";
 
 const CodeEditor = dynamic(() => import("@/components/studio/CodeEditor"), { ssr: false });
 
 export default function StudioPage() {
-  const { theme, showAI, isCollapsed } = useStore();
+  const { theme, showAI, isCollapsed, activeChallengeId } = useStore();
   const T = theme;
 
   // Sidebar drag-to-resize states
@@ -68,12 +69,28 @@ export default function StudioPage() {
         height: "100%", overflow: "hidden", minWidth: 0
       }}>
         
-        {/* ── Main Area: Code Editor (Full Frame) ── */}
+        {/* ── Main Area: Code Editor (Left) & Problem Statement Frame (Right) ── */}
         <div style={{
           flex: 1, minHeight: 0, position: "relative",
-          background: T.editorBg
+          background: T.editorBg, display: "flex"
         }}>
-          <CodeEditor />
+          {/* Left Frame: Monaco Code Editor */}
+          <div style={{
+            flex: activeChallengeId ? "1 1 55%" : "1 1 100%",
+            height: "100%", position: "relative", minWidth: 0
+          }}>
+            <CodeEditor />
+          </div>
+
+          {/* Right Frame: Problem Statement & Up to 10 Solutions */}
+          {activeChallengeId && (
+            <div style={{
+              width: "45%", minWidth: 340, maxWidth: 640,
+              height: "100%", flexShrink: 0
+            }}>
+              <ChallengePanel />
+            </div>
+          )}
         </div>
 
         {/* ── Bottom Section (Visualizers, Controls, and optional AI Agent) ── */}

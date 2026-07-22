@@ -1,9 +1,27 @@
+export interface SolutionApproach {
+  id: number;
+  title: string;
+  desc: string;
+  timeComplexity: string;
+  spaceComplexity: string;
+  code: string;
+}
+
 export interface CodingChallenge {
   id: string;
   title: string;
   desc: string;
   difficulty: 'easy' | 'medium' | 'hard';
   code: string;
+}
+
+export interface ChallengeDetails extends CodingChallenge {
+  problemStatement: string;
+  inputFormat: string;
+  outputFormat: string;
+  exampleCases: { input: string; output: string; explanation?: string }[];
+  constraints: string[];
+  solutions: SolutionApproach[];
 }
 
 export const CODING_CHALLENGES: CodingChallenge[] = [
@@ -92,6 +110,122 @@ export const CODING_CHALLENGES: CodingChallenge[] = [
     code: `// Hard Challenge: Longest Balanced Parentheses\n#include <iostream>\n#include <string>\n#include <vector>\nusing namespace std;\n\nint longestValid(string s) {\n    int maxLen = 0;\n    vector<int> st = {-1};\n    for (int i = 0; i < s.length(); i++) {\n        if (s[i] == '(') st.push_back(i);\n        else {\n            st.pop_back();\n            if (st.empty()) st.push_back(i);\n            else maxLen = max(maxLen, i - st.back());\n        }\n    }\n    return maxLen;\n}\n\nint main() {\n    cout << ")(()()): " << longestValid(")(()())") << endl;\n    return 0;\n}`
   }
 ];
+
+export function getChallengeDetails(id: string): ChallengeDetails {
+  const base = CODING_CHALLENGES.find(c => c.id === id) || CODING_CHALLENGES[0];
+
+  const problemStatement = `Given an input dataset, solve the "${base.title}" problem by writing an optimal C++ algorithm. Your code will be executed and verified against hidden test cases. Make sure to handle edge cases, empty bounds, and performance constraints.`;
+
+  const inputFormat = `Standard input parameters according to function signature (e.g. vector<int> / string / Node* head).`;
+  const outputFormat = `Return the calculated result or mutate data in-place as specified.`;
+
+  const exampleCases = [
+    { input: "nums = [2, 7, 11, 15], target = 9", output: "[0, 1]", explanation: "nums[0] + nums[1] == 9, so return [0, 1]." },
+    { input: "nums = [3, 2, 4], target = 6", output: "[1, 2]", explanation: "nums[1] + nums[2] == 6, so return [1, 2]." },
+    { input: "nums = [3, 3], target = 6", output: "[0, 1]", explanation: "nums[0] + nums[1] == 6, so return [0, 1]." }
+  ];
+
+  const constraints = [
+    "1 <= N <= 10^5 elements",
+    "-10^9 <= nums[i] <= 10^9",
+    "Time Limit: 1.0s",
+    "Memory Limit: 256MB"
+  ];
+
+  // Up to 10 solutions per challenge
+  const solutions: SolutionApproach[] = [
+    {
+      id: 1,
+      title: "1. Hash Map Single-Pass (Optimal)",
+      desc: "Store numbers in an unordered_map as you iterate. Checks if target - current exists in map in O(1) average time.",
+      timeComplexity: "O(N)",
+      spaceComplexity: "O(N)",
+      code: `// Approach 1: Single-pass Hash Map\n#include <iostream>\n#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nvector<int> solveOptimal(vector<int>& nums, int target) {\n    unordered_map<int, int> seen;\n    for (int i = 0; i < nums.size(); i++) {\n        int complement = target - nums[i];\n        if (seen.find(complement) != seen.end()) {\n            return {seen[complement], i};\n        }\n        seen[nums[i]] = i;\n    }\n    return {};\n}`
+    },
+    {
+      id: 2,
+      title: "2. Two-Pass Hash Table",
+      desc: "First populate the hash map with all elements, then make a second pass to look up target - nums[i].",
+      timeComplexity: "O(N)",
+      spaceComplexity: "O(N)",
+      code: `// Approach 2: Two-pass Hash Table\n#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nvector<int> solveTwoPass(vector<int>& nums, int target) {\n    unordered_map<int, int> map;\n    for (int i = 0; i < nums.size(); i++) map[nums[i]] = i;\n    for (int i = 0; i < nums.size(); i++) {\n        int comp = target - nums[i];\n        if (map.count(comp) && map[comp] != i) return {i, map[comp]};\n    }\n    return {};\n}`
+    },
+    {
+      id: 3,
+      title: "3. Sorting + Two Pointers",
+      desc: "Sort a vector of pairs (value, index). Place pointers at start and end, stepping inward based on sum vs target.",
+      timeComplexity: "O(N log N)",
+      spaceComplexity: "O(N)",
+      code: `// Approach 3: Sorting + Two Pointers\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nvector<int> solveTwoPointers(vector<int>& nums, int target) {\n    vector<pair<int, int>> v;\n    for (int i = 0; i < nums.size(); i++) v.push_back({nums[i], i});\n    sort(v.begin(), v.end());\n    int l = 0, r = v.size() - 1;\n    while (l < r) {\n        int sum = v[l].first + v[r].first;\n        if (sum == target) return {v[l].second, v[r].second};\n        if (sum < target) l++;\n        else r--;\n    }\n    return {};\n}`
+    },
+    {
+      id: 4,
+      title: "4. Binary Search Lookup",
+      desc: "For each element, perform binary search in a sorted array to locate the complement index.",
+      timeComplexity: "O(N log N)",
+      spaceComplexity: "O(N)",
+      code: `// Approach 4: Binary Search Lookup\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nvector<int> solveBinarySearch(vector<int>& nums, int target) {\n    vector<pair<int, int>> vec;\n    for(int i=0; i<nums.size(); i++) vec.push_back({nums[i], i});\n    sort(vec.begin(), vec.end());\n    for(int i=0; i<nums.size(); i++) {\n        int wanted = target - vec[i].first;\n        int lo = i + 1, hi = vec.size() - 1;\n        while(lo <= hi) {\n            int mid = lo + (hi - lo)/2;\n            if(vec[mid].first == wanted) return {vec[i].second, vec[mid].second};\n            if(vec[mid].first < wanted) lo = mid + 1;\n            else hi = mid - 1;\n        }\n    }\n    return {};\n}`
+    },
+    {
+      id: 5,
+      title: "5. Brute Force Double Loop",
+      desc: "Check every possible pair (i, j) with nested loops. Simple but quadratic time complexity.",
+      timeComplexity: "O(N²)",
+      spaceComplexity: "O(1)",
+      code: `// Approach 5: Brute Force\n#include <vector>\nusing namespace std;\n\nvector<int> solveBrute(vector<int>& nums, int target) {\n    for (int i = 0; i < nums.size(); i++) {\n        for (int j = i + 1; j < nums.size(); j++) {\n            if (nums[i] + nums[j] == target) return {i, j};\n        }\n    }\n    return {};\n}`
+    },
+    {
+      id: 6,
+      title: "6. STL std::find_if & std::distance",
+      desc: "Leverages C++ Standard Library algorithms for concise Functional C++ code.",
+      timeComplexity: "O(N²)",
+      spaceComplexity: "O(1)",
+      code: `// Approach 6: STL Algorithms\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nvector<int> solveSTL(vector<int>& nums, int target) {\n    for (auto it = nums.begin(); it != nums.end(); ++it) {\n        int comp = target - *it;\n        auto match = find(it + 1, nums.end(), comp);\n        if (match != nums.end()) {\n            return { (int)distance(nums.begin(), it), (int)distance(nums.begin(), match) };\n        }\n    }\n    return {};\n}`
+    },
+    {
+      id: "7",
+      title: "7. Recursive Subproblem Decomposition",
+      desc: "Recursively check pairs from index k to N, shrinking the array boundaries on each frame.",
+      timeComplexity: "O(N²)",
+      spaceComplexity: "O(N)",
+      code: `// Approach 7: Recursive Subproblem\n#include <vector>\nusing namespace std;\n\nvector<int> solveRec(vector<int>& nums, int target, int i = 0) {\n    if (i >= nums.size()) return {};\n    for (int j = i + 1; j < nums.size(); j++) {\n        if (nums[i] + nums[j] == target) return {i, j};\n    }\n    return solveRec(nums, target, i + 1);\n}`
+    },
+    {
+      id: 8,
+      title: "8. Bucket / Direct Index Table (Small Integer Bounds)",
+      desc: "If values are bounded in a small range, use a direct array mapping for fast indexing.",
+      timeComplexity: "O(N)",
+      spaceComplexity: "O(MaxVal)",
+      code: `// Approach 8: Direct Index Array\n#include <vector>\n#include <cstring>\nusing namespace std;\n\nvector<int> solveBucket(vector<int>& nums, int target) {\n    int bucket[20001];\n    memset(bucket, -1, sizeof(bucket));\n    int offset = 10000;\n    for(int i = 0; i < nums.size(); i++) {\n        int comp = target - nums[i];\n        if (comp >= -10000 && comp <= 10000 && bucket[comp + offset] != -1) {\n            return {bucket[comp + offset], i};\n        }\n        if (nums[i] >= -10000 && nums[i] <= 10000) {\n            bucket[nums[i] + offset] = i;\n        }\n    }\n    return {};\n}`
+    },
+    {
+      id: 9,
+      title: "9. Multimap / Multi-value Handling",
+      desc: "Handles duplicate values easily using std::unordered_multimap.",
+      timeComplexity: "O(N)",
+      spaceComplexity: "O(N)",
+      code: `// Approach 9: Multimap Implementation\n#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nvector<int> solveMultimap(vector<int>& nums, int target) {\n    unordered_multimap<int, int> mm;\n    for(int i = 0; i < nums.size(); i++) mm.insert({nums[i], i});\n    for(int i = 0; i < nums.size(); i++) {\n        int comp = target - nums[i];\n        auto range = mm.equal_range(comp);\n        for(auto it = range.first; it != range.second; ++it) {\n            if(it->second != i) return {i, it->second};\n        }\n    }\n    return {};\n}`
+    },
+    {
+      id: 10,
+      title: "10. Modern C++20 Ranges & Structured Bindings",
+      desc: "Clean modern C++20 syntax using ranges and structured bindings.",
+      timeComplexity: "O(N)",
+      spaceComplexity: "O(N)",
+      code: `// Approach 10: Modern C++20\n#include <vector>\n#include <unordered_map>\nusing namespace std;\n\nauto solveCpp20(const vector<int>& nums, int target) -> vector<int> {\n    unordered_map<int, int> seen;\n    for (int i = 0; const auto& val : nums) {\n        if (auto it = seen.find(target - val); it != seen.end()) {\n            return {it->second, i};\n        }\n        seen[val] = i++;\n    }\n    return {};\n}`
+    }
+  ];
+
+  return {
+    ...base,
+    problemStatement,
+    inputFormat,
+    outputFormat,
+    exampleCases,
+    constraints,
+    solutions
+  };
+}
 
 export function getDailyChallenge(d: Date = new Date()) {
   const oneDay = 1000 * 60 * 60 * 24;
