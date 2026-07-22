@@ -1,10 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
-import { getLearnModuleDetails } from "@/lib/learn";
+import { getLearnModuleDetails, LEARN_MODULES } from "@/lib/learn";
 import { 
   X, BookOpen, Target, Brain, Code2, Play, CheckCircle2, 
-  ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles, Check, Cpu, Zap, Lock, Unlock
+  ChevronLeft, ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles, Check, Cpu, Zap, Lock, Unlock
 } from "lucide-react";
 
 export default function LearnPanel() {
@@ -27,6 +27,7 @@ export default function LearnPanel() {
 
   if (!activeLearnModuleId) return null;
 
+  const currentModuleIdx = LEARN_MODULES.findIndex(m => m.id === activeLearnModuleId);
   const moduleInfo = getLearnModuleDetails(activeLearnModuleId);
   const selectedApproach = moduleInfo.approaches[selectedApproachIdx] || moduleInfo.approaches[0];
   
@@ -88,11 +89,12 @@ export default function LearnPanel() {
         }
       `}</style>
 
-      {/* ── HEADER BAR ── */}
+      {/* ── HEADER BAR WITH PREV / NEXT PROBLEM NAVIGATION ── */}
       <div style={{
         padding: "10px 14px", background: T.uiPanelHd, borderBottom: `1px solid ${T.uiBorder}`,
         display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0
       }}>
+        {/* Left: Module Title & Category Badge */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, overflow: "hidden" }}>
           <BookOpen size={16} color="#3b82f6" />
           <span style={{ fontSize: 13, fontWeight: 800, color: T.uiText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -107,19 +109,67 @@ export default function LearnPanel() {
           </span>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {isProUnlocked && (
-            <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: "rgba(16,185,129,0.2)", color: "#10b981", border: "1px solid rgba(16,185,129,0.4)" }}>
-              PRO UNLOCKED
-            </span>
-          )}
+        {/* Right: Prev / Next Navigation Controls & Exit */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {/* Previous Problem Button */}
+          <button
+            disabled={currentModuleIdx <= 0}
+            onClick={() => {
+              if (currentModuleIdx > 0) {
+                const prevId = LEARN_MODULES[currentModuleIdx - 1].id;
+                setLearnModuleId(prevId);
+                setActiveConstructIdx(0);
+                setSelectedApproachIdx(0);
+              }
+            }}
+            title="Previous Problem"
+            style={{
+              padding: "4px 8px", borderRadius: 6, border: `1px solid ${T.uiBorder}`,
+              background: currentModuleIdx <= 0 ? "transparent" : T.uiSurface,
+              color: currentModuleIdx <= 0 ? T.uiTextMuted : T.uiText,
+              fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 700,
+              cursor: currentModuleIdx <= 0 ? "default" : "pointer",
+              opacity: currentModuleIdx <= 0 ? 0.4 : 1,
+              display: "flex", alignItems: "center", gap: 3, transition: "all 0.15s"
+            }}
+          >
+            <ChevronLeft size={13} /> Prev
+          </button>
+
+          {/* Next Problem Button */}
+          <button
+            disabled={currentModuleIdx >= LEARN_MODULES.length - 1}
+            onClick={() => {
+              if (currentModuleIdx < LEARN_MODULES.length - 1) {
+                const nextId = LEARN_MODULES[currentModuleIdx + 1].id;
+                setLearnModuleId(nextId);
+                setActiveConstructIdx(0);
+                setSelectedApproachIdx(0);
+              }
+            }}
+            title="Next Problem"
+            style={{
+              padding: "4px 8px", borderRadius: 6, border: "none",
+              background: currentModuleIdx >= LEARN_MODULES.length - 1 ? "transparent" : "linear-gradient(135deg, #3b82f6, #a855f7)",
+              color: currentModuleIdx >= LEARN_MODULES.length - 1 ? T.uiTextMuted : "#fff",
+              fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+              cursor: currentModuleIdx >= LEARN_MODULES.length - 1 ? "default" : "pointer",
+              opacity: currentModuleIdx >= LEARN_MODULES.length - 1 ? 0.4 : 1,
+              display: "flex", alignItems: "center", gap: 3, transition: "all 0.15s",
+              boxShadow: currentModuleIdx >= LEARN_MODULES.length - 1 ? "none" : "0 2px 10px rgba(59,130,246,0.3)"
+            }}
+          >
+            Next <ChevronRight size={13} />
+          </button>
+
+          {/* Exit Learn Mode */}
           <button
             onClick={() => setLearnModuleId(null)}
             title="Exit Learn Mode"
             style={{
               background: "transparent", border: "none", color: T.uiTextMuted,
               cursor: "pointer", display: "flex", alignItems: "center", padding: 4,
-              borderRadius: 4, transition: "all 0.15s"
+              borderRadius: 4, transition: "all 0.15s", marginLeft: 4
             }}
             onMouseEnter={e => e.currentTarget.style.color = "#ef4444"}
             onMouseLeave={e => e.currentTarget.style.color = T.uiTextMuted}
