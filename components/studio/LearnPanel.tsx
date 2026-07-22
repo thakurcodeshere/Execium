@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
-import { getLearnModuleDetails, LEARN_MODULES } from "@/lib/learn";
+import { getLearnModuleDetails } from "@/lib/learn";
 import { 
   X, BookOpen, Target, Brain, Code2, Play, CheckCircle2, 
-  ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles, Check, Cpu, Zap
+  ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles, Check, Cpu, Zap, Lock, Unlock
 } from "lucide-react";
 
 export default function LearnPanel() {
@@ -13,14 +13,33 @@ export default function LearnPanel() {
   const [selectedApproachIdx, setSelectedApproachIdx] = useState(0);
   const [activeConstructIdx, setActiveConstructIdx] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [isProUnlocked, setIsProUnlocked] = useState(false);
 
   const T = theme;
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("execium_pro_unlocked") === "true") {
+        setIsProUnlocked(true);
+      }
+    } catch {}
+  }, []);
 
   if (!activeLearnModuleId) return null;
 
   const moduleInfo = getLearnModuleDetails(activeLearnModuleId);
-  const activeConstruct = moduleInfo.lineBreakdown[activeConstructIdx] || moduleInfo.lineBreakdown[0];
   const selectedApproach = moduleInfo.approaches[selectedApproachIdx] || moduleInfo.approaches[0];
+  
+  // Dynamic line breakdown for the currently SELECTED Mental Model Approach!
+  const currentLineBreakdown = selectedApproach.lineBreakdown || moduleInfo.approaches[0].lineBreakdown;
+  const activeConstruct = currentLineBreakdown[activeConstructIdx] || currentLineBreakdown[0];
+
+  const handleUnlockPro = () => {
+    try {
+      localStorage.setItem("execium_pro_unlocked", "true");
+    } catch {}
+    setIsProUnlocked(true);
+  };
 
   const handleCopyCode = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -28,8 +47,8 @@ export default function LearnPanel() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleLoadCode = () => {
-    setCode(moduleInfo.fullCode);
+  const handleLoadSelectedApproachCode = () => {
+    setCode(selectedApproach.code);
     restart();
     if (moduleInfo.traceKey) {
       loadProgram(moduleInfo.traceKey);
@@ -37,7 +56,7 @@ export default function LearnPanel() {
   };
 
   const handleSimulate = () => {
-    handleLoadCode();
+    handleLoadSelectedApproachCode();
     setTimeout(() => {
       play();
     }, 400);
@@ -60,10 +79,6 @@ export default function LearnPanel() {
           0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
           70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
           100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
-        }
-        @keyframes barExpand {
-          from { width: 0%; }
-          to { width: 100%; }
         }
         .anim-fade {
           animation: fadeInSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -92,19 +107,26 @@ export default function LearnPanel() {
           </span>
         </div>
 
-        <button
-          onClick={() => setLearnModuleId(null)}
-          title="Exit Learn Mode"
-          style={{
-            background: "transparent", border: "none", color: T.uiTextMuted,
-            cursor: "pointer", display: "flex", alignItems: "center", padding: 4,
-            borderRadius: 4, transition: "all 0.15s"
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = "#ef4444"}
-          onMouseLeave={e => e.currentTarget.style.color = T.uiTextMuted}
-        >
-          <X size={16} />
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {isProUnlocked && (
+            <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: "rgba(16,185,129,0.2)", color: "#10b981", border: "1px solid rgba(16,185,129,0.4)" }}>
+              PRO UNLOCKED
+            </span>
+          )}
+          <button
+            onClick={() => setLearnModuleId(null)}
+            title="Exit Learn Mode"
+            style={{
+              background: "transparent", border: "none", color: T.uiTextMuted,
+              cursor: "pointer", display: "flex", alignItems: "center", padding: 4,
+              borderRadius: 4, transition: "all 0.15s"
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = "#ef4444"}
+            onMouseLeave={e => e.currentTarget.style.color = T.uiTextMuted}
+          >
+            <X size={16} />
+          </button>
+        </div>
       </div>
 
       {/* ── STEP TABS (Problem -> Approaches -> Line Breakdown) ── */}
@@ -139,7 +161,7 @@ export default function LearnPanel() {
             transition: "all 0.2s ease"
           }}
         >
-          <Brain size={13} /> 2. Mental Model
+          <Brain size={13} /> 2. Mental Models (10)
         </button>
 
         <button
@@ -223,22 +245,22 @@ export default function LearnPanel() {
               onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
               onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
             >
-              Step 2: Choose Mental Model & Strategy <ArrowRight size={14} />
+              Step 2: Choose Mental Model (10 Approaches) <ArrowRight size={14} />
             </button>
 
           </div>
         )}
 
-        {/* ── TAB 2: INTERACTIVE MENTAL MODEL SELECTOR WITH ANIMATION (USER REQUEST) ── */}
+        {/* ── TAB 2: INTERACTIVE MENTAL MODEL SELECTOR (10 APPROACHES: 2 FREE, 8 PRO) ── */}
         {activeTab === 'approaches' && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1 }}>
-                // CHOOSE MENTAL MODEL STRATEGY
+                // CHOOSE MENTAL MODEL (UP TO 10)
               </div>
               <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: "#f59e0b", fontWeight: 800 }}>
-                {moduleInfo.approaches.length} Models Available
+                2 Free | 8 Pro Payable
               </span>
             </div>
 
@@ -246,34 +268,40 @@ export default function LearnPanel() {
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {moduleInfo.approaches.map((app, idx) => {
                 const isSelected = selectedApproachIdx === idx;
+                const isAccessible = app.isFree || isProUnlocked;
+
                 return (
                   <div
                     key={idx}
-                    onClick={() => setSelectedApproachIdx(idx)}
+                    onClick={() => {
+                      setSelectedApproachIdx(idx);
+                      setActiveConstructIdx(0); // Reset line stepper for new mental model
+                    }}
                     className={isSelected ? "anim-pulse" : ""}
                     style={{
-                      background: isSelected ? "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(168,85,247,0.08))" : "rgba(0,0,0,0.18)",
-                      border: `1.5px solid ${isSelected ? "#f59e0b" : T.uiBorder}`,
+                      background: isSelected 
+                        ? "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(168,85,247,0.08))" 
+                        : isAccessible ? "rgba(0,0,0,0.18)" : "rgba(0,0,0,0.3)",
+                      border: `1.5px solid ${isSelected ? "#f59e0b" : isAccessible ? T.uiBorder : "rgba(239,68,68,0.3)"}`,
                       borderRadius: 12, padding: 14, cursor: "pointer",
                       display: "flex", flexDirection: "column", gap: 10,
                       transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
                       transform: isSelected ? "scale(1.01)" : "scale(1)",
-                      boxShadow: isSelected ? "0 8px 24px rgba(245,158,11,0.2)" : "none"
+                      opacity: isAccessible ? 1 : 0.85
                     }}
                   >
-                    {/* Top Row: Title & Radio Selection Indicator */}
+                    {/* Top Row: Title & Free vs Pro Indicator */}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <div style={{
                           width: 20, height: 20, borderRadius: 10,
                           background: isSelected ? "#f59e0b" : "transparent",
                           border: `2px solid ${isSelected ? "#f59e0b" : T.uiTextMuted}`,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          transition: "all 0.2s ease"
+                          display: "flex", alignItems: "center", justifyContent: "center"
                         }}>
                           {isSelected && <Check size={12} color="#000" strokeWidth={3} />}
                         </div>
-                        <span style={{ fontSize: 13, fontWeight: 800, color: isSelected ? "#f59e0b" : T.uiText }}>
+                        <span style={{ fontSize: 12, fontWeight: 800, color: isSelected ? "#f59e0b" : T.uiText }}>
                           {app.name}
                         </span>
                       </div>
@@ -281,110 +309,134 @@ export default function LearnPanel() {
                       <span style={{
                         fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
                         padding: "2px 7px", borderRadius: 4,
-                        background: isSelected ? "rgba(245,158,11,0.25)" : "rgba(255,255,255,0.05)",
-                        color: isSelected ? "#f59e0b" : T.uiTextMuted,
-                        border: `1px solid ${isSelected ? "rgba(245,158,11,0.4)" : "transparent"}`
+                        background: app.isFree ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)",
+                        color: app.isFree ? "#10b981" : "#ef4444",
+                        border: `1px solid ${app.isFree ? "rgba(16,185,129,0.4)" : "rgba(239,68,68,0.4)"}`,
+                        display: "flex", alignItems: "center", gap: 4
                       }}>
-                        {isSelected ? "ACTIVE MODEL" : app.category.toUpperCase()}
+                        {app.isFree ? <Unlock size={10} /> : <Lock size={10} />}
+                        {app.isFree ? "FREE" : "PRO PAYABLE"}
                       </span>
                     </div>
 
-                    {/* Mental Model Strategy Description */}
+                    {/* Mental Model Description */}
                     <div style={{ fontSize: 11, color: T.uiTextMuted, lineHeight: 1.5, paddingLeft: 28 }}>
                       {app.description}
                     </div>
 
-                    {/* Trade-offs & Pros/Cons */}
-                    <div style={{
-                      fontSize: 10, color: T.uiText, fontStyle: "italic",
-                      background: "rgba(0,0,0,0.15)", padding: "6px 10px", borderRadius: 6,
-                      border: `1px solid ${T.uiBorder}`, marginLeft: 28
-                    }}>
-                      ⚡ {app.prosCons}
-                    </div>
-
-                    {/* Animated Complexity Meters */}
-                    <div style={{ display: "flex", gap: 12, marginLeft: 28, marginTop: 2, alignItems: "center" }}>
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "'JetBrains Mono'" }}>
-                          <span style={{ color: "#3b82f6", fontWeight: 700 }}>⏱ TIME COMPLEXITY</span>
-                          <span style={{ color: "#3b82f6", fontWeight: 800 }}>{app.timeComplexity}</span>
-                        </div>
-                        <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
-                          <div style={{
-                            height: "100%", background: "linear-gradient(90deg, #3b82f6, #60a5fa)",
-                            width: isSelected ? "100%" : "60%", transition: "width 0.4s ease"
-                          }} />
-                        </div>
+                    {/* Complexity & Pros/Cons */}
+                    {isAccessible ? (
+                      <div style={{ display: "flex", gap: 8, marginLeft: 28, alignItems: "center" }}>
+                        <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>
+                          Time: {app.timeComplexity}
+                        </span>
+                        <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: "rgba(168,85,247,0.15)", color: "#a855f7" }}>
+                          Space: {app.spaceComplexity}
+                        </span>
                       </div>
-
-                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "'JetBrains Mono'" }}>
-                          <span style={{ color: "#a855f7", fontWeight: 700 }}>💾 SPACE COMPLEXITY</span>
-                          <span style={{ color: "#a855f7", fontWeight: 800 }}>{app.spaceComplexity}</span>
-                        </div>
-                        <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
-                          <div style={{
-                            height: "100%", background: "linear-gradient(90deg, #a855f7, #c084fc)",
-                            width: isSelected ? "100%" : "40%", transition: "width 0.4s ease"
-                          }} />
-                        </div>
+                    ) : (
+                      <div style={{ fontSize: 10, color: "#ef4444", marginLeft: 28, fontFamily: "'JetBrains Mono'", fontWeight: 700 }}>
+                        🔒 Locked: Pro Subscription Required to view code & line breakdown.
                       </div>
-                    </div>
+                    )}
 
                   </div>
                 );
               })}
             </div>
 
-            {/* Interactive Action Bar for Selected Mental Model */}
-            <div style={{
-              background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)",
-              borderRadius: 10, padding: 14, display: "flex", flexDirection: "column", gap: 10,
-              marginTop: 4
-            }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b", display: "flex", alignItems: "center", gap: 6 }}>
-                <Zap size={14} /> Mental Model Selected: <span style={{ color: T.uiText }}>{selectedApproach.name}</span>
-              </div>
-              <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.4 }}>
-                Ready to inspect the code construction for this strategy? Proceed to line-by-line mechanics or load directly into the editor.
-              </div>
+            {/* Selected Mental Model Details or Pro Unlock Banner */}
+            {selectedApproach.isFree || isProUnlocked ? (
+              <div style={{
+                background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)",
+                borderRadius: 10, padding: 14, display: "flex", flexDirection: "column", gap: 10
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b", display: "flex", alignItems: "center", gap: 6 }}>
+                  <Zap size={14} /> Selected Mental Model: <span style={{ color: T.uiText }}>{selectedApproach.name}</span>
+                </div>
+                <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.4 }}>
+                  Switch to Step 3 below to view the line-by-line C++ code breakdown specific to this mental model approach!
+                </div>
 
-              <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                  <button
+                    onClick={handleLoadSelectedApproachCode}
+                    style={{
+                      flex: 1, padding: "8px 0", borderRadius: 8, border: `1px solid ${T.uiBorder}`,
+                      background: T.uiSurface, color: T.uiText, fontSize: 10,
+                      fontFamily: "'JetBrains Mono'", fontWeight: 700, cursor: "pointer",
+                      display: "flex", alignItems: "center", justifyContent: "center", gap: 4
+                    }}
+                  >
+                    <Code2 size={12} color="#38bdf8" /> Load Code into Editor
+                  </button>
+
+                  <button
+                    onClick={() => setActiveTab('breakdown')}
+                    style={{
+                      flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
+                      background: "linear-gradient(135deg, #f59e0b, #a855f7)",
+                      color: "#fff", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                      cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+                      boxShadow: "0 3px 12px rgba(245,158,11,0.25)"
+                    }}
+                  >
+                    Step 3: Line Breakdown <ArrowRight size={12} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* PRO PAYABLE LOCK CARD */
+              <div style={{
+                background: "linear-gradient(135deg, rgba(239,68,68,0.1), rgba(168,85,247,0.1))",
+                border: "1px dashed rgba(239,68,68,0.4)", borderRadius: 12, padding: 16,
+                textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10
+              }}>
+                <Lock size={24} color="#ef4444" />
+                <div style={{ fontSize: 13, fontWeight: 800, color: T.uiText }}>
+                  Pro Mental Model Approach (Approaches 3 - 10)
+                </div>
+                <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.5, maxWidth: 300 }}>
+                  This advanced mental model approach and its custom line-by-line C++ breakdown are locked under Execium Pro. Approaches 1 & 2 are free for all users.
+                </div>
                 <button
-                  onClick={() => setActiveTab('breakdown')}
+                  onClick={handleUnlockPro}
                   style={{
-                    flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
-                    background: "linear-gradient(135deg, #f59e0b, #a855f7)",
-                    color: "#fff", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                    boxShadow: "0 3px 12px rgba(245,158,11,0.25)"
+                    padding: "8px 18px", borderRadius: 8, border: "none",
+                    background: "linear-gradient(135deg, #ef4444, #a855f7)",
+                    color: "#fff", fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                    cursor: "pointer", boxShadow: "0 0 16px rgba(239,68,68,0.3)"
                   }}
                 >
-                  Step 3: Line-by-Line Breakdown <ArrowRight size={13} />
+                  🚀 Unlock All 10 Pro Approaches (Demo Pass)
                 </button>
               </div>
-            </div>
+            )}
 
           </div>
         )}
 
-        {/* ── TAB 3: LINE-BY-LINE CONSTRUCT BREAKDOWN ── */}
+        {/* ── TAB 3: DYNAMIC LINE-BY-LINE BREAKDOWN FOR SELECTED MENTAL MODEL ── */}
         {activeTab === 'breakdown' && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1 }}>
-                // LINE & CONSTRUCT MECHANICS
+            {/* Header info showing which Mental Model this breakdown belongs to */}
+            <div style={{
+              padding: "8px 12px", background: "rgba(168,85,247,0.1)",
+              border: "1px solid rgba(168,85,247,0.3)", borderRadius: 8,
+              display: "flex", alignItems: "center", justifyContent: "space-between"
+            }}>
+              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#a855f7" }}>
+                🧠 MODEL BREAKDOWN: {selectedApproach.name}
               </div>
-              <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: "#a855f7", fontWeight: 800 }}>
-                Step {activeConstructIdx + 1} of {moduleInfo.lineBreakdown.length}
+              <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
+                Line {activeConstructIdx + 1} of {currentLineBreakdown.length}
               </span>
             </div>
 
             {/* Construct Stepper Button List */}
             <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
-              {moduleInfo.lineBreakdown.map((item, idx) => {
+              {currentLineBreakdown.map((item, idx) => {
                 const isSelected = activeConstructIdx === idx;
                 return (
                   <button
@@ -405,7 +457,7 @@ export default function LearnPanel() {
               })}
             </div>
 
-            {/* Active Line & Construct Card */}
+            {/* Active Line & Construct Card for THIS Mental Model */}
             <div style={{
               background: "rgba(0,0,0,0.25)", border: `1px solid ${T.uiBorder}`,
               borderRadius: 12, padding: 16, display: "flex", flexDirection: "column", gap: 14
@@ -424,7 +476,7 @@ export default function LearnPanel() {
                 </span>
               </div>
 
-              {/* Code Snippet Box */}
+              {/* Code Snippet Box for THIS specific approach */}
               <div style={{
                 fontFamily: "'JetBrains Mono', monospace", fontSize: 11, lineHeight: 1.6,
                 background: "#0f172a", border: `1px solid ${T.uiBorder}`, borderRadius: 8,
@@ -433,7 +485,7 @@ export default function LearnPanel() {
                 <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{activeConstruct.codeSnippet}</pre>
               </div>
 
-              {/* Explanation of Why written this way */}
+              {/* Explanation of Why written this way for THIS specific approach */}
               <div>
                 <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
                   // WHY WRITTEN THIS WAY
@@ -443,7 +495,7 @@ export default function LearnPanel() {
                 </div>
               </div>
 
-              {/* Key Construct Details Table */}
+              {/* Key Construct Details Table for THIS approach */}
               <div>
                 <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
                   // VARIABLE & CONSTRUCT ROLES
@@ -486,14 +538,14 @@ export default function LearnPanel() {
                 </button>
 
                 <button
-                  disabled={activeConstructIdx === moduleInfo.lineBreakdown.length - 1}
-                  onClick={() => setActiveConstructIdx(idx => Math.min(moduleInfo.lineBreakdown.length - 1, idx + 1))}
+                  disabled={activeConstructIdx === currentLineBreakdown.length - 1}
+                  onClick={() => setActiveConstructIdx(idx => Math.min(currentLineBreakdown.length - 1, idx + 1))}
                   style={{
                     padding: "5px 12px", borderRadius: 6, border: "none",
                     background: "linear-gradient(135deg, #a855f7, #3b82f6)",
                     color: "#fff", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                    cursor: activeConstructIdx === moduleInfo.lineBreakdown.length - 1 ? "default" : "pointer",
-                    opacity: activeConstructIdx === moduleInfo.lineBreakdown.length - 1 ? 0.5 : 1
+                    cursor: activeConstructIdx === currentLineBreakdown.length - 1 ? "default" : "pointer",
+                    opacity: activeConstructIdx === currentLineBreakdown.length - 1 ? 0.5 : 1
                   }}
                 >
                   Next Line →
@@ -513,7 +565,7 @@ export default function LearnPanel() {
         display: "flex", gap: 10, flexShrink: 0
       }}>
         <button
-          onClick={handleLoadCode}
+          onClick={handleLoadSelectedApproachCode}
           style={{
             flex: 1, padding: "8px 0", borderRadius: 8, border: `1px solid ${T.uiBorder}`,
             background: T.uiSurface, color: T.uiText, fontSize: 10,
