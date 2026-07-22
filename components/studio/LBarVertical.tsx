@@ -35,6 +35,9 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   const [showLearn, setShowLearn] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
 
+  const [learnDiffTab, setLearnDiffTab] = useState<'all' | 'easy' | 'medium' | 'hard'>('all');
+  const [learnSearchQuery, setLearnSearchQuery] = useState("");
+
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [projects, setProjects] = useState<CustomProject[]>([]);
   const [historyTab, setHistoryTab] = useState<'projects' | 'history'>('projects');
@@ -389,31 +392,107 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
 
           {showLearn && (
             <div style={{
-              position: "absolute", top: 0, left: width - 8, width: 280,
+              position: "absolute", top: 0, left: width - 8, width: 320,
               background: T.uiSurface, border: `1px solid ${T.uiBorder}`,
               borderRadius: 12, overflow: "hidden", zIndex: 220,
-              boxShadow: "10px 10px 40px rgba(0,0,0,.6)"
+              boxShadow: "10px 10px 40px rgba(0,0,0,.6)", display: "flex", flexDirection: "column"
             }}>
-              <div style={{ padding: "10px 14px", borderBottom: `1px solid ${T.uiBorder}`, background: T.uiPanelHd }}>
-                <span style={{ fontSize: 11, fontWeight: 800, color: T.uiText, fontFamily: "'JetBrains Mono'" }}>📚 LEARN PROGRAMMING</span>
+              {/* Header Title */}
+              <div style={{ padding: "10px 14px", borderBottom: `1px solid ${T.uiBorder}`, background: T.uiPanelHd, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 11, fontWeight: 800, color: T.uiText, fontFamily: "'JetBrains Mono'" }}>📚 LEARN PROGRAMMING (100)</span>
+                <span style={{ fontSize: 9, color: T.uiTextMuted, fontFamily: "'JetBrains Mono'" }}>100 C++ TYPES</span>
               </div>
-              <div style={{ maxHeight: 320, overflowY: "auto" }}>
-                {LEARN_MODULES.map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => handleSelectLearn(m.id)}
-                    style={{
-                      width: "100%", padding: "12px 14px", display: "flex", flexDirection: "column",
-                      background: "transparent", border: "none", cursor: "pointer",
-                      textAlign: "left", borderBottom: `1px solid ${T.uiBorder}`
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = `${T.uiAccent}0e`}
-                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                  >
-                    <div style={{ fontSize: 12, fontWeight: 700, color: T.uiText }}>{m.title}</div>
-                    <div style={{ fontSize: 9, color: T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>{m.shortDesc}</div>
-                  </button>
-                ))}
+
+              {/* Search Filter Box */}
+              <div style={{ padding: "8px 10px", borderBottom: `1px solid ${T.uiBorder}`, background: "rgba(0,0,0,0.15)" }}>
+                <input
+                  type="text"
+                  placeholder="🔍 Search 100 C++ modules..."
+                  value={learnSearchQuery}
+                  onChange={e => setLearnSearchQuery(e.target.value)}
+                  style={{
+                    width: "100%", padding: "5px 10px", borderRadius: 6,
+                    border: `1px solid ${T.uiBorder}`, background: T.uiSurface,
+                    color: T.uiText, fontSize: 11, fontFamily: "'JetBrains Mono'", outline: "none"
+                  }}
+                />
+              </div>
+
+              {/* Difficulty Tabs */}
+              <div style={{ padding: "6px 8px", borderBottom: `1px solid ${T.uiBorder}`, background: T.uiPanelHd, display: "flex", gap: 4 }}>
+                {(['all', 'easy', 'medium', 'hard'] as const).map(tab => {
+                  const isAct = learnDiffTab === tab;
+                  const count = tab === 'all' ? 100 : tab === 'easy' ? 35 : tab === 'medium' ? 40 : 25;
+                  const color = tab === 'easy' ? '#10b981' : tab === 'medium' ? '#f59e0b' : tab === 'hard' ? '#ef4444' : T.uiAccent;
+                  return (
+                    <button
+                      key={tab}
+                      onClick={() => setLearnDiffTab(tab)}
+                      style={{
+                        flex: 1, padding: "4px 0", borderRadius: 5, border: `1px solid ${isAct ? color : "transparent"}`,
+                        background: isAct ? `${color}20` : "transparent",
+                        color: isAct ? color : T.uiTextMuted,
+                        fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                        cursor: "pointer", textTransform: "uppercase"
+                      }}
+                    >
+                      {tab} ({count})
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Filtered Modules List */}
+              <div style={{ maxHeight: 340, overflowY: "auto" }}>
+                {(() => {
+                  const filtered = LEARN_MODULES.filter(m => {
+                    const matchTab = learnDiffTab === 'all' || m.difficulty === learnDiffTab;
+                    const q = learnSearchQuery.toLowerCase().trim();
+                    const matchQuery = !q || m.title.toLowerCase().includes(q) || m.shortDesc.toLowerCase().includes(q) || m.category.toLowerCase().includes(q);
+                    return matchTab && matchQuery;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div style={{ padding: 20, textAlign: "center", fontSize: 11, color: T.uiTextMuted, fontFamily: "'JetBrains Mono'" }}>
+                        No modules match "{learnSearchQuery}"
+                      </div>
+                    );
+                  }
+
+                  return filtered.map(m => {
+                    const diffColor = m.difficulty === 'easy' ? '#10b981' : m.difficulty === 'medium' ? '#f59e0b' : '#ef4444';
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => handleSelectLearn(m.id)}
+                        style={{
+                          width: "100%", padding: "10px 12px", display: "flex", flexDirection: "column",
+                          background: "transparent", border: "none", cursor: "pointer",
+                          textAlign: "left", borderBottom: `1px solid ${T.uiBorder}`, transition: "background 0.15s"
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = `${T.uiAccent}0e`}
+                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: T.uiText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {m.title}
+                          </span>
+                          <span style={{
+                            fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                            padding: "1px 5px", borderRadius: 3, background: `${diffColor}20`,
+                            color: diffColor, border: `1px solid ${diffColor}40`, textTransform: "uppercase"
+                          }}>
+                            {m.difficulty}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 9, color: T.uiTextMuted, lineHeight: 1.3 }}>
+                          {m.shortDesc}
+                        </div>
+                      </button>
+                    );
+                  });
+                })()}
               </div>
             </div>
           )}

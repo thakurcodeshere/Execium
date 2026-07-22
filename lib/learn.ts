@@ -26,6 +26,7 @@ export interface LearnModule {
   title: string;
   shortDesc: string;
   traceKey: string;
+  difficulty: 'easy' | 'medium' | 'hard';
   category: string;
   problemStatement: {
     title: string;
@@ -39,426 +40,222 @@ export interface LearnModule {
   fullCode: string;
 }
 
-export const LEARN_MODULES: LearnModule[] = [
-  {
-    id: "searching",
-    title: "Binary Search & Divide & Conquer",
-    shortDesc: "Master logarithmic searching, pointers, loop conditions, and overflow-safe mid calculation.",
-    traceKey: "binary_search",
-    category: "Algorithms",
-    problemStatement: {
-      title: "Target Value Search in a Sorted Array",
-      objective: "Given a sorted vector of integers `arr` and a target value `target`, find the 0-based index of `target` in logarithmic time O(log N). If the target does not exist, return -1.",
-      inputDesc: "Sorted vector `arr` = [1, 3, 5, 7, 9, 11, 15], `target` = 7",
-      outputDesc: "Index `3` (since arr[3] == 7)",
-      takeaways: [
-        "Divide and conquer search space halving",
-        "Overflow-safe midpoint formula calculation",
-        "Loop boundary condition termination (`lo <= hi`)",
-        "Boundary adjustment (`lo = mid + 1` vs `hi = mid - 1`)"
-      ]
-    },
-    approaches: [
-      {
-        id: "binary_search",
-        name: "Approach 1: Divide and Conquer (Binary Search)",
-        category: "Optimal",
-        description: "Divide the sorted array into two halves at each step. By comparing target with mid element, eliminate half of the search space every iteration.",
-        prosCons: "Pros: Extremely fast logarithmic O(log N) time. Cons: Array MUST be sorted beforehand.",
-        timeComplexity: "O(log N)",
-        spaceComplexity: "O(1)"
-      },
-      {
-        id: "linear_search",
-        name: "Approach 2: Linear Scan (Naive Sequential Search)",
-        category: "Alternative",
-        description: "Iterate through every single index from 0 to N-1 and compare elements sequentially until target is found.",
-        prosCons: "Pros: Works on unsorted arrays. Cons: Slow linear O(N) time for large datasets.",
-        timeComplexity: "O(N)",
-        spaceComplexity: "O(1)"
-      }
-    ],
-    lineBreakdown: [
-      {
-        lineNum: 1,
-        codeSnippet: "#include <iostream>\n#include <vector>",
-        constructType: "Header / Include",
-        title: "Standard Library Headers",
-        explanation: "Include `<iostream>` for output printing (`std::cout`) and `<vector>` for dynamic sequence containers (`std::vector`).",
-        keyDetails: [
-          { variableOrConstruct: "#include <vector>", role: "Library import", whyThisWay: "Enables `std::vector` contiguous memory array structure." }
-        ]
-      },
-      {
-        lineNum: 2,
-        codeSnippet: "int binarySearch(const vector<int>& arr, int target)",
-        constructType: "Function Signature",
-        title: "Function Signature & Parameters",
-        explanation: "Pass `arr` by `const vector<int>&` (constant reference) to prevent costly copying of elements while guaranteeing read-only access.",
-        keyDetails: [
-          { variableOrConstruct: "const vector<int>& arr", role: "Input Parameter", whyThisWay: "Avoids memory duplication (O(1) parameter passing) and protects input array from mutation." },
-          { variableOrConstruct: "int target", role: "Value Parameter", whyThisWay: "Primitive int passed by value efficiently in a CPU register." }
-        ]
-      },
-      {
-        lineNum: 3,
-        codeSnippet: "int lo = 0;\nint hi = arr.size() - 1;",
-        constructType: "Variable & Initializer",
-        title: "Range Pointer Initializers",
-        explanation: "Initialize `lo` to 0 (start index) and `hi` to `arr.size() - 1` (last index). These two integer variables define our active search window boundaries.",
-        keyDetails: [
-          { variableOrConstruct: "int lo = 0", role: "Lower Bound Pointer", whyThisWay: "Starts at the first valid array index." },
-          { variableOrConstruct: "int hi = arr.size() - 1", role: "Upper Bound Pointer", whyThisWay: "Points to the last element. Using size() - 1 prevents out-of-bounds indexing." }
-        ]
-      },
-      {
-        lineNum: 4,
-        codeSnippet: "while (lo <= hi)",
-        constructType: "Loop Construct",
-        title: "Loop Condition Check",
-        explanation: "The while loop continues as long as `lo <= hi`. When `lo > hi`, the search window has collapsed to zero size, meaning target is absent.",
-        keyDetails: [
-          { variableOrConstruct: "lo <= hi", role: "Loop Termination Condition", whyThisWay: "Ensures single-element search windows (`lo == hi`) are evaluated before terminating." }
-        ]
-      },
-      {
-        lineNum: 5,
-        codeSnippet: "int mid = lo + (hi - lo) / 2;",
-        constructType: "Variable & Initializer",
-        title: "Overflow-Safe Midpoint Calculation",
-        explanation: "Compute `mid` using `lo + (hi - lo) / 2` instead of `(lo + hi) / 2` to prevent potential 32-bit signed integer overflow when `lo + hi` exceeds `2,147,483,647`.",
-        keyDetails: [
-          { variableOrConstruct: "int mid", role: "Sub-array Index Counter", whyThisWay: "Serves as the pivot index to inspect the middle element in each step." },
-          { variableOrConstruct: "lo + (hi - lo) / 2", role: "Math Formula", whyThisWay: "Mathematically equivalent to `(lo+hi)/2` but safe against integer overflow." }
-        ]
-      },
-      {
-        lineNum: 6,
-        codeSnippet: "if (arr[mid] == target) return mid;",
-        constructType: "Condition & Branch",
-        title: "Target Element Check",
-        explanation: "Inspect element at `arr[mid]`. If it matches `target`, we immediately return `mid` as the solution index.",
-        keyDetails: [
-          { variableOrConstruct: "arr[mid] == target", role: "Match Condition", whyThisWay: "Direct O(1) element lookup check." }
-        ]
-      },
-      {
-        lineNum: 7,
-        codeSnippet: "if (arr[mid] < target) lo = mid + 1;\nelse hi = mid - 1;",
-        constructType: "Condition & Branch",
-        title: "Search Window Halving Adjustments",
-        explanation: "If `arr[mid] < target`, target must lie in the right half, so advance `lo = mid + 1`. Otherwise, target lies in the left half, so shrink `hi = mid - 1`.",
-        keyDetails: [
-          { variableOrConstruct: "lo = mid + 1", role: "Lower Bound Shift", whyThisWay: "Excludes `mid` and all elements to its left." },
-          { variableOrConstruct: "hi = mid - 1", role: "Upper Bound Shift", whyThisWay: "Excludes `mid` and all elements to its right." }
-        ]
-      },
-      {
-        lineNum: 8,
-        codeSnippet: "return -1;",
-        constructType: "Return / Cleanup",
-        title: "Fallback Return Value",
-        explanation: "If the loop terminates without finding target, return `-1` to signal to caller that target is not present in the vector.",
-        keyDetails: [
-          { variableOrConstruct: "return -1", role: "Sentinel Return", whyThisWay: "Standard C++ convention for invalid/not-found index." }
-        ]
-      }
-    ],
-    fullCode: `// Learn: Binary Search Algorithm\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint binarySearch(const vector<int>& arr, int target) {\n    int lo = 0;\n    int hi = arr.size() - 1;\n    while (lo <= hi) {\n        int mid = lo + (hi - lo) / 2;\n        if (arr[mid] == target) return mid;\n        if (arr[mid] < target) lo = mid + 1;\n        else hi = mid - 1;\n    }\n    return -1;\n}\n\nint main() {\n    vector<int> arr = {1, 3, 5, 7, 9, 11, 15};\n    int target = 7;\n    int idx = binarySearch(arr, target);\n    cout << "Target " << target << " found at index: " << idx << endl;\n    return 0;\n}`
-  },
-  {
-    id: "raii",
-    title: "Smart Pointers & RAII Memory Model",
-    shortDesc: "Understand automatic heap deallocation, ownership transfer, unique_ptr vs shared_ptr.",
-    traceKey: "smart_ptr",
-    category: "Memory Management",
-    problemStatement: {
-      title: "Resource Acquisition Is Initialization (RAII)",
-      objective: "Manage dynamically allocated heap objects safely without manual `delete` calls, eliminating memory leaks, dangling pointers, and double-free crashes.",
-      inputDesc: "Creating a heap object `Entity` and wrapping it in `std::unique_ptr<Entity>`",
-      outputDesc: "Automatic destructor invocation upon scope exit",
-      takeaways: [
-        "Scope-bound dynamic lifetime management",
-        "Exclusive ownership semantics with `std::unique_ptr`",
-        "Move semantics (`std::move`) for ownership transfer",
-        "Zero-overhead abstraction compared to raw pointers"
-      ]
-    },
-    approaches: [
-      {
-        id: "unique_ptr",
-        name: "Approach 1: Exclusive Ownership (std::unique_ptr)",
-        category: "Optimal",
-        description: "Enforces strict single ownership. When unique_ptr leaves scope, destructor is called automatically.",
-        prosCons: "Pros: Zero runtime overhead, impossible to leak. Cons: Cannot be copied (only moved).",
-        timeComplexity: "O(1)",
-        spaceComplexity: "O(1)"
-      },
-      {
-        id: "shared_ptr",
-        name: "Approach 2: Reference Counted (std::shared_ptr)",
-        category: "Alternative",
-        description: "Shares ownership among multiple pointers using internal control block ref-counts.",
-        prosCons: "Pros: Multi-owner sharing. Cons: Slight atomic ref-count overhead.",
-        timeComplexity: "O(1)",
-        spaceComplexity: "O(1) extra control block"
-      }
-    ],
-    lineBreakdown: [
-      {
-        lineNum: 1,
-        codeSnippet: "#include <iostream>\n#include <memory>",
-        constructType: "Header / Include",
-        title: "Memory Library Import",
-        explanation: "Include `<memory>` header to access `std::unique_ptr`, `std::make_unique`, and `std::shared_ptr`.",
-        keyDetails: [
-          { variableOrConstruct: "#include <memory>", role: "STL Memory Header", whyThisWay: "Required for all C++ smart pointer types." }
-        ]
-      },
-      {
-        lineNum: 2,
-        codeSnippet: "auto ptr = make_unique<int>(42);",
-        constructType: "Variable & Initializer",
-        title: "Heap Allocation & RAII Initialization",
-        explanation: "Allocates integer `42` on the heap and binds ownership to `ptr`. `make_unique` provides exception-safe allocation.",
-        keyDetails: [
-          { variableOrConstruct: "make_unique<int>(42)", role: "Heap Allocation Factory", whyThisWay: "Prevents memory leaks during complex expression evaluation." },
-          { variableOrConstruct: "auto ptr", role: "Smart Pointer Owner", whyThisWay: "Auto deduces `std::unique_ptr<int>` type." }
-        ]
-      },
-      {
-        lineNum: 3,
-        codeSnippet: "*ptr = 100;",
-        constructType: "Condition & Branch",
-        title: "Dereference & Value Mutation",
-        explanation: "Use `*` operator to access and mutate the underlying heap integer value directly.",
-        keyDetails: [
-          { variableOrConstruct: "*ptr", role: "Dereference Operator", whyThisWay: "Behaves like a raw pointer while retaining RAII ownership." }
-        ]
-      },
-      {
-        lineNum: 4,
-        codeSnippet: "auto ptr2 = std::move(ptr);",
-        constructType: "Variable & Initializer",
-        title: "Ownership Transfer via Move Semantics",
-        explanation: "Transfers heap ownership from `ptr` to `ptr2`. `ptr` becomes `nullptr`, while `ptr2` becomes sole owner.",
-        keyDetails: [
-          { variableOrConstruct: "std::move(ptr)", role: "Ownership Transfer", whyThisWay: "unique_ptr copy constructor is deleted; move transfer required." }
-        ]
-      }
-    ],
-    fullCode: `// Learn: Smart Pointers & RAII\n#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main() {\n    // Allocate heap integer with RAII management\n    auto ptr = make_unique<int>(42);\n    cout << "Original Value: " << *ptr << endl;\n    \n    *ptr = 100;\n    cout << "Mutated Value: " << *ptr << endl;\n    \n    // Move ownership to ptr2\n    auto ptr2 = move(ptr);\n    if (!ptr) cout << "ptr is now null (ownership moved)" << endl;\n    cout << "ptr2 value: " << *ptr2 << endl;\n    \n    return 0;\n    // Automatic deallocation occurs here on scope exit\n}`
-  },
-  {
-    id: "recursion",
-    title: "Recursion & Stack Frame Dimension",
-    shortDesc: "Understand function call stacks, base cases, unwind phases, and stack overflow limits.",
-    traceKey: "factorial",
-    category: "Recursion",
-    problemStatement: {
-      title: "Factorial & Recursion Stack Tracing",
-      objective: "Compute factorial `N!` recursively while observing stack frames pushed on call and popped on return unwind.",
-      inputDesc: "Integer `N = 4`",
-      outputDesc: "Factorial result `24`",
-      takeaways: [
-        "Call stack frame allocation per recursive invocation",
-        "Base case guard condition (`n <= 1`)",
-        "Subproblem reduction step (`n * fact(n-1)`)",
-        "Stack frame unwind & return value bubble up"
-      ]
-    },
-    approaches: [
-      {
-        id: "recursion_head",
-        name: "Approach 1: Recursive Breakdown",
-        category: "Optimal",
-        description: "Breaks problem N into smaller subproblem N-1 until base case is reached.",
-        prosCons: "Pros: Elegant mathematical representation. Cons: Consumes O(N) stack frame memory.",
-        timeComplexity: "O(N)",
-        spaceComplexity: "O(N) stack frames"
-      },
-      {
-        id: "iterative_loop",
-        name: "Approach 2: Iterative Loop Accumulator",
-        category: "Alternative",
-        description: "Uses a for loop counter from 1 to N to multiply result sequentially.",
-        prosCons: "Pros: O(1) space, no stack overflow risk. Cons: Less expressive for recursive tree structures.",
-        timeComplexity: "O(N)",
-        spaceComplexity: "O(1)"
-      }
-    ],
-    lineBreakdown: [
-      {
-        lineNum: 1,
-        codeSnippet: "int fact(int n)",
-        constructType: "Function Signature",
-        title: "Recursive Function Declaration",
-        explanation: "Takes integer `n` as parameter and returns computed factorial result.",
-        keyDetails: [
-          { variableOrConstruct: "int n", role: "Stack Frame Input State", whyThisWay: "Unique copy stored in each call stack frame." }
-        ]
-      },
-      {
-        lineNum: 2,
-        codeSnippet: "if (n <= 1) return 1;",
-        constructType: "Condition & Branch",
-        title: "Base Case Guard",
-        explanation: "CRITICAL: Base case prevents infinite recursion. Returns 1 when `n <= 1` to halt call stack expansion.",
-        keyDetails: [
-          { variableOrConstruct: "n <= 1", role: "Termination Guard", whyThisWay: "Without base case, function triggers infinite stack frames and SegFault." }
-        ]
-      },
-      {
-        lineNum: 3,
-        codeSnippet: "return n * fact(n - 1);",
-        constructType: "Return / Cleanup",
-        title: "Recursive Call & Combination Step",
-        explanation: "Pushes a new call frame `fact(n-1)` onto the stack. After return, multiplies `n` with returned result.",
-        keyDetails: [
-          { variableOrConstruct: "fact(n - 1)", role: "Subproblem Invocation", whyThisWay: "Reduces problem size towards base case." }
-        ]
-      }
-    ],
-    fullCode: `// Learn: Recursive Call Stack Mechanics\n#include <iostream>\nusing namespace std;\n\nint fact(int n) {\n    if (n <= 1) return 1; // Base case guard\n    return n * fact(n - 1); // Recursive reduction\n}\n\nint main() {\n    int n = 4;\n    cout << "fact(" << n << ") = " << fact(n) << endl;\n    return 0;\n}`
-  },
-  {
-    id: "sorting",
-    title: "Bubble Sort & Array Swapping Mechanics",
-    shortDesc: "Understand nested loops, adjacent element comparison, swap passes, and array mutation.",
-    traceKey: "bubble_sort",
-    category: "Algorithms",
-    problemStatement: {
-      title: "Array Sorting via Adjacent Swaps",
-      objective: "Sort an unsorted integer array in non-decreasing order by repeatedly swapping adjacent elements that are out of order.",
-      inputDesc: "Unsorted vector `arr` = [5, 2, 8, 1, 9]",
-      outputDesc: "Sorted vector `arr` = [1, 2, 5, 8, 9]",
-      takeaways: [
-        "Outer pass loop counter (`i`)",
-        "Inner comparison loop boundary (`j < n - i - 1`)",
-        "In-place swap mechanics (`std::swap`)",
-        "Bubble-up maximum element behavior per pass"
-      ]
-    },
-    approaches: [
-      {
-        id: "bubble_sort",
-        name: "Approach 1: Bubble Sort Passes",
-        category: "Educational",
-        description: "Compares adjacent items and bubbles largest element to the end in each pass.",
-        prosCons: "Pros: In-place O(1) space. Cons: Quadratic O(N²) time complexity.",
-        timeComplexity: "O(N²)",
-        spaceComplexity: "O(1)"
-      },
-      {
-        id: "std_sort",
-        name: "Approach 2: STL std::sort (IntroSort)",
-        category: "Optimal",
-        description: "Hybrid of QuickSort, HeapSort, and InsertionSort used in C++ standard library.",
-        prosCons: "Pros: Highly optimized O(N log N). Cons: Hides underlying comparison steps.",
-        timeComplexity: "O(N log N)",
-        spaceComplexity: "O(log N)"
-      }
-    ],
-    lineBreakdown: [
-      {
-        lineNum: 1,
-        codeSnippet: "for (int i = 0; i < n - 1; i++)",
-        constructType: "Loop Construct",
-        title: "Outer Pass Loop",
-        explanation: "Runs `n - 1` passes. After pass `i`, the largest `i` elements are sorted at the end.",
-        keyDetails: [
-          { variableOrConstruct: "int i = 0", role: "Pass Counter", whyThisWay: "Tracks number of completed sorting passes." }
-        ]
-      },
-      {
-        lineNum: 2,
-        codeSnippet: "for (int j = 0; j < n - i - 1; j++)",
-        constructType: "Loop Construct",
-        title: "Inner Adjacent Comparison Loop",
-        explanation: "Iterates through unsorted elements. `n - i - 1` skips elements already bubbled to the end.",
-        keyDetails: [
-          { variableOrConstruct: "j < n - i - 1", role: "Optimized Loop Bound", whyThisWay: "Avoids re-checking already sorted tail elements." }
-        ]
-      },
-      {
-        lineNum: 3,
-        codeSnippet: "if (arr[j] > arr[j + 1]) swap(arr[j], arr[j + 1]);",
-        constructType: "Condition & Branch",
-        title: "Adjacent Comparison & In-Place Swap",
-        explanation: "Compares left and right adjacent elements. If left > right, swaps values in memory.",
-        keyDetails: [
-          { variableOrConstruct: "swap(arr[j], arr[j+1])", role: "In-Place Swap", whyThisWay: "Swaps values using temp variable or std::swap." }
-        ]
-      }
-    ],
-    fullCode: `// Learn: Bubble Sort Pass Mechanics\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid bubbleSort(vector<int>& arr) {\n    int n = arr.size();\n    for (int i = 0; i < n - 1; i++) {\n        for (int j = 0; j < n - i - 1; j++) {\n            if (arr[j] > arr[j + 1]) {\n                swap(arr[j], arr[j + 1]);\n            }\n        }\n    }\n}\n\nint main() {\n    vector<int> arr = {5, 2, 8, 1, 9};\n    bubbleSort(arr);\n    for (int val : arr) cout << val << " ";\n    cout << endl;\n    return 0;\n}`
-  },
-  {
-    id: "lists",
-    title: "Pointer Chains & Linked List Nodes",
-    shortDesc: "Understand dynamic heap node allocation, next pointers, traversing, and in-place reversal.",
-    traceKey: "linked_list",
-    category: "Data Structures",
-    problemStatement: {
-      title: "Dynamic Node Linkage & Traversal",
-      objective: "Build a singly linked list with node pointers (`Node* next`) and traverse the chain step-by-step.",
-      inputDesc: "Nodes [1] -> [2] -> [3] -> nullptr",
-      outputDesc: "Sequential print: 1 -> 2 -> 3 -> nullptr",
-      takeaways: [
-        "Struct definition with value and pointer fields",
-        "Heap allocation using `new Node(val)`",
-        "Pointer reassignment (`curr = curr->next`)",
-        "Null pointer sentinel check (`curr != nullptr`)"
-      ]
-    },
-    approaches: [
-      {
-        id: "pointer_traversal",
-        name: "Approach 1: Pointer Iteration",
-        category: "Optimal",
-        description: "Uses a current pointer `curr` initialized to head, stepping to `curr->next` until null.",
-        prosCons: "Pros: Simple O(N) traversal. Cons: Non-contiguous memory (cache misses).",
-        timeComplexity: "O(N)",
-        spaceComplexity: "O(1)"
-      }
-    ],
-    lineBreakdown: [
-      {
-        lineNum: 1,
-        codeSnippet: "struct Node {\n    int val;\n    Node* next;\n    Node(int x) : val(x), next(nullptr) {}\n};",
-        constructType: "Variable & Initializer",
-        title: "Node Struct Definition",
-        explanation: "Defines a self-referential Node struct holding data `val` and pointer `next` to another Node.",
-        keyDetails: [
-          { variableOrConstruct: "Node* next", role: "Linkage Pointer", whyThisWay: "Points to next memory location on heap." },
-          { variableOrConstruct: "Node(int x) : val(x), next(nullptr)", role: "Constructor", whyThisWay: "Initializes node data and sets next to nullptr safely." }
-        ]
-      },
-      {
-        lineNum: 2,
-        codeSnippet: "Node* head = new Node(1);\nhead->next = new Node(2);",
-        constructType: "Variable & Initializer",
-        title: "Heap Node Chain Allocation",
-        explanation: "Allocates nodes on heap with `new` and connects `head->next` to second node.",
-        keyDetails: [
-          { variableOrConstruct: "new Node(1)", role: "Heap Allocation", whyThisWay: "Dynamically creates node persisting beyond local scope." }
-        ]
-      },
-      {
-        lineNum: 3,
-        codeSnippet: "while (curr != nullptr) {\n    cout << curr->val << \" \";\n    curr = curr->next;\n}",
-        constructType: "Loop Construct",
-        title: "Pointer Step Traversal Loop",
-        explanation: "Advances `curr` pointer through node chain until reaching `nullptr`.",
-        keyDetails: [
-          { variableOrConstruct: "curr = curr->next", role: "Pointer Step", whyThisWay: "Moves pointer to next memory address in linked chain." }
-        ]
-      }
-    ],
-    fullCode: `// Learn: Pointer Chains & Linked List Nodes\n#include <iostream>\nusing namespace std;\n\nstruct Node {\n    int val;\n    Node* next;\n    Node(int x) : val(x), next(nullptr) {}\n};\n\nint main() {\n    Node* head = new Node(1);\n    head->next = new Node(2);\n    head->next->next = new Node(3);\n    \n    Node* curr = head;\n    while (curr != nullptr) {\n        cout << curr->val << " -> ";\n        curr = curr->next;\n    }\n    cout << "nullptr" << endl;\n    return 0;\n}`
-  }
+// ── RAW DATA SEED FOR ALL 100 C++ MODULES ──
+const RAW_MODULE_TOPICS: Array<{
+  id: string;
+  title: string;
+  shortDesc: string;
+  difficulty: 'easy' | 'medium' | 'hard';
+  category: string;
+  traceKey: string;
+}> = [
+  // ── EASY MODE (1 - 35) ──
+  { id: "easy_hello", title: "1. Hello World & I/O Streams", shortDesc: "Input/output streams using std::cout, std::cin, and std::endl.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_vars", title: "2. Primitive Types & Integer Bounds", shortDesc: "Primitive types (int, double, char, bool) and overflow behavior.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_conditionals", title: "3. If-Else & Ternary Operator", shortDesc: "Conditional branching and ternary selector expressions.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_loops", title: "4. For, While, & Do-While Loops", shortDesc: "Iterative loop counters, exit conditions, and incrementors.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_functions", title: "5. Function Signatures & Parameters", shortDesc: "Pass-by-value vs pass-by-reference parameter passing.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_arrays", title: "6. Fixed-Size Contiguous Arrays", shortDesc: "Fixed-length stack arrays and 0-based index lookup.", difficulty: "easy", category: "Fundamentals", traceKey: "bubble_sort" },
+  { id: "easy_strings", title: "7. String Operations (std::string)", shortDesc: "String concatenation, substr, find, and length checks.", difficulty: "easy", category: "STL Containers", traceKey: "for_loop" },
+  { id: "easy_vector", title: "8. Dynamic Vectors (std::vector)", shortDesc: "Dynamic resizing arrays, push_back, size, and capacity.", difficulty: "easy", category: "STL Containers", traceKey: "bubble_sort" },
+  { id: "easy_pointers", title: "9. Raw Pointers & Address-of (&)", shortDesc: "Pointer declarations, memory addresses, and dereferencing (*).", difficulty: "easy", category: "Memory & Pointers", traceKey: "linked_list" },
+  { id: "easy_structs", title: "10. Structs & Member Access", shortDesc: "Grouping data members with struct and access operators (. and ->).", difficulty: "easy", category: "OOP Basics", traceKey: "linked_list" },
+  { id: "easy_enums", title: "11. Scoped Enums (enum class)", shortDesc: "Strongly typed scoped enums for type-safe state machines.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_math", title: "12. CMath Library Operations", shortDesc: "Mathematical functions: sqrt, pow, abs, ceil, and floor.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_switch", title: "13. Switch Case Statements", shortDesc: "Multi-branch switch execution and break statements.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_const", title: "14. Const Correctness & Read-Only", shortDesc: "Immutability with const variables, references, and pointers.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_auto", title: "15. Auto Type Deduction (C++11)", shortDesc: "Compiler automatic type inference with auto keyword.", difficulty: "easy", category: "Modern C++", traceKey: "for_loop" },
+  { id: "easy_range_for", title: "16. Range-Based For Loops", shortDesc: "Clean container iteration syntax: for (const auto& elem : vec).", difficulty: "easy", category: "Modern C++", traceKey: "bubble_sort" },
+  { id: "easy_pass_ref", title: "17. Const Reference Passing", shortDesc: "Efficient parameter passing (const T&) avoiding copies.", difficulty: "easy", category: "Fundamentals", traceKey: "binary_search" },
+  { id: "easy_default_args", title: "18. Default Parameter Values", shortDesc: "Optional function parameters with default fallback values.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_overloading", title: "19. Function Overloading", shortDesc: "Same function name with different parameter signatures.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_namespaces", title: "20. Namespaces & Scope Resolution", shortDesc: "Preventing naming collisions using namespace and :: operator.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_static_var", title: "21. Static Local Variables", shortDesc: "State persistence across function calls using static local vars.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_typedef", title: "22. Type Aliases (using vs typedef)", shortDesc: "Creating modern type aliases using the using keyword.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_cstring", title: "23. C-Style Null-Terminated Strings", shortDesc: "Working with char arrays, strlen, and null terminator '\\0'.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_pair", title: "24. Pair Container (std::pair)", shortDesc: "Storing two heterogeneous objects together with std::pair.", difficulty: "easy", category: "STL Containers", traceKey: "for_loop" },
+  { id: "easy_tuple_basic", title: "25. Tuples (std::tuple & std::get)", shortDesc: "Fixed-size collection of heterogeneous values with std::tuple.", difficulty: "easy", category: "STL Containers", traceKey: "for_loop" },
+  { id: "easy_stack_std", title: "26. Standard Stack (std::stack)", shortDesc: "LIFO (Last In First Out) container adapter: push, pop, top.", difficulty: "easy", category: "Data Structures", traceKey: "factorial" },
+  { id: "easy_queue_std", title: "27. Standard Queue (std::queue)", shortDesc: "FIFO (First In First Out) container adapter: push, pop, front.", difficulty: "easy", category: "Data Structures", traceKey: "for_loop" },
+  { id: "easy_set_std", title: "28. Ordered Set (std::set)", shortDesc: "Self-balancing BST storing unique sorted elements.", difficulty: "easy", category: "Data Structures", traceKey: "binary_search" },
+  { id: "easy_map_std", title: "29. Ordered Map (std::map)", shortDesc: "Key-value associative container sorted by keys.", difficulty: "easy", category: "Data Structures", traceKey: "binary_search" },
+  { id: "easy_unordered_map", title: "30. Hash Map (std::unordered_map)", shortDesc: "O(1) average lookup key-value store using hashing.", difficulty: "easy", category: "Data Structures", traceKey: "for_loop" },
+  { id: "easy_algorithms_basic", title: "31. Basic STL Algorithms", shortDesc: "std::sort, std::reverse, std::min, std::max, and std::count.", difficulty: "easy", category: "STL Algorithms", traceKey: "bubble_sort" },
+  { id: "easy_recursion_basic", title: "32. Introduction to Recursion", shortDesc: "Recursive base cases and self-referencing function calls.", difficulty: "easy", category: "Recursion", traceKey: "factorial" },
+  { id: "easy_bit_basic", title: "33. Bitwise Operators (&, |, ^, ~)", shortDesc: "Bit manipulation, bit shifts (<<, >>), and mask evaluations.", difficulty: "easy", category: "Bit Manipulation", traceKey: "for_loop" },
+  { id: "easy_exception_basic", title: "34. Exception Handling (try/catch)", shortDesc: "Handling runtime errors with try, catch, and throw.", difficulty: "easy", category: "Fundamentals", traceKey: "for_loop" },
+  { id: "easy_class_basic", title: "35. Classes & Access Modifiers", shortDesc: "Object-oriented encapsulation with public and private members.", difficulty: "easy", category: "OOP Basics", traceKey: "linked_list" },
+
+  // ── MEDIUM MODE (36 - 75) ──
+  { id: "med_raii", title: "36. Unique Pointers (std::unique_ptr)", shortDesc: "Exclusive RAII ownership and automatic heap memory release.", difficulty: "medium", category: "Memory & Pointers", traceKey: "smart_ptr" },
+  { id: "med_shared_ptr", title: "37. Shared & Weak Pointers", shortDesc: "Reference counted ownership with std::shared_ptr & std::weak_ptr.", difficulty: "medium", category: "Memory & Pointers", traceKey: "smart_ptr" },
+  { id: "med_move_semantics", title: "38. Move Semantics & Rvalue References", shortDesc: "Zero-copy resource transfers using std::move and T&&.", difficulty: "medium", category: "Modern C++", traceKey: "smart_ptr" },
+  { id: "med_lambdas", title: "39. Lambda Closures & Captures", shortDesc: "Anonymous functions with capture clauses ([=], [&]) and mutable.", difficulty: "medium", category: "Modern C++", traceKey: "bubble_sort" },
+  { id: "med_templates_func", title: "40. Function Templates", shortDesc: "Generic programming using template<typename T> for functions.", difficulty: "medium", category: "Templates", traceKey: "binary_search" },
+  { id: "med_templates_class", title: "41. Class Templates", shortDesc: "Generic data structures using template<class T> classes.", difficulty: "medium", category: "Templates", traceKey: "linked_list" },
+  { id: "med_constructors", title: "42. Special Member Functions", shortDesc: "Constructors, copy constructors, move constructors, & Rule of 5.", difficulty: "medium", category: "OOP Basics", traceKey: "linked_list" },
+  { id: "med_destructors", title: "43. Virtual Destructors & Cleanup", shortDesc: "Preventing memory leaks during polymorphic class deletion.", difficulty: "medium", category: "OOP Basics", traceKey: "linked_list" },
+  { id: "med_op_overload", title: "44. Operator Overloading", shortDesc: "Overloading +, ==, <<, and [] operators for custom objects.", difficulty: "medium", category: "OOP Basics", traceKey: "for_loop" },
+  { id: "med_inheritance", title: "45. Inheritance & Protected Members", shortDesc: "Base and derived classes, access levels, and base initialization.", difficulty: "medium", category: "OOP Basics", traceKey: "linked_list" },
+  { id: "med_virtual_func", title: "46. Polymorphism & Virtual Functions", shortDesc: "Dynamic dispatch using virtual functions, override, and VTables.", difficulty: "medium", category: "OOP Basics", traceKey: "linked_list" },
+  { id: "med_abstract_class", title: "47. Pure Virtual & Abstract Interfaces", shortDesc: "Creating abstract base interfaces using pure virtual functions (= 0).", difficulty: "medium", category: "OOP Basics", traceKey: "linked_list" },
+  { id: "med_linked_list", title: "48. Singly Linked List In-Place", shortDesc: "Manual node pointer linkage, insertion, deletion, and reversal.", difficulty: "medium", category: "Data Structures", traceKey: "linked_list" },
+  { id: "med_doubly_linked", title: "49. Doubly Linked List Operations", shortDesc: "Bi-directional node traversal using prev and next pointers.", difficulty: "medium", category: "Data Structures", traceKey: "linked_list" },
+  { id: "med_binary_tree", title: "50. Binary Tree Traversals", shortDesc: "Inorder, Preorder, Postorder, and Level-Order traversals.", difficulty: "medium", category: "Data Structures", traceKey: "factorial" },
+  { id: "med_bst", title: "51. Binary Search Tree (BST)", shortDesc: "Insert, search, and delete nodes maintaining BST property.", difficulty: "medium", category: "Data Structures", traceKey: "binary_search" },
+  { id: "med_heap", title: "52. Min-Heap & Max-Heap Arrays", shortDesc: "Binary heap implementation with sift-up and sift-down operations.", difficulty: "medium", category: "Data Structures", traceKey: "bubble_sort" },
+  { id: "med_priority_queue", title: "53. Priority Queue Comparators", shortDesc: "std::priority_queue with custom struct comparators.", difficulty: "medium", category: "Data Structures", traceKey: "bubble_sort" },
+  { id: "med_graph_bfs", title: "54. Graph BFS (Breadth-First)", shortDesc: "Level-by-level queue traversal for shortest unweighted paths.", difficulty: "medium", category: "Graph Algorithms", traceKey: "for_loop" },
+  { id: "med_graph_dfs", title: "55. Graph DFS (Depth-First)", shortDesc: "Recursive depth-first graph traversal and component counting.", difficulty: "medium", category: "Graph Algorithms", traceKey: "factorial" },
+  { id: "med_two_pointers", title: "56. Two-Pointer Technique", shortDesc: "Optimizing array search windows with converging pointers.", difficulty: "medium", category: "Algorithms", traceKey: "binary_search" },
+  { id: "med_sliding_window", title: "57. Sliding Window Technique", shortDesc: "Fixed and variable length window optimization over arrays.", difficulty: "medium", category: "Algorithms", traceKey: "bubble_sort" },
+  { id: "med_binary_search", title: "58. Binary Search Deep Dive", shortDesc: "Overflow-safe midpoint formula and boundary condition rules.", difficulty: "medium", category: "Algorithms", traceKey: "binary_search" },
+  { id: "med_quick_sort", title: "59. QuickSort Partitioning", shortDesc: "Hoare & Lomuto partition schemes for divide-and-conquer sort.", difficulty: "medium", category: "Algorithms", traceKey: "bubble_sort" },
+  { id: "med_merge_sort", title: "60. MergeSort Recursive Divide", shortDesc: "Stable O(N log N) recursive sorting with array merging.", difficulty: "medium", category: "Algorithms", traceKey: "factorial" },
+  { id: "med_dp_1d", title: "61. 1D Dynamic Programming", shortDesc: "Tabulation and memoization for subproblem optimization.", difficulty: "medium", category: "Dynamic Programming", traceKey: "factorial" },
+  { id: "med_dp_knapsack", title: "62. 0/1 Knapsack DP Problem", shortDesc: "Optimal subset selection under weight capacity bounds.", difficulty: "medium", category: "Dynamic Programming", traceKey: "factorial" },
+  { id: "med_backtracking", title: "63. Backtracking Subsets Generator", shortDesc: "State space tree search with recursive choice and undo step.", difficulty: "medium", category: "Backtracking", traceKey: "factorial" },
+  { id: "med_bit_manipulation", title: "64. Bitwise Tricks & Bitmasks", shortDesc: "Brian Kernighan's bit count, XOR single number, and bitmasks.", difficulty: "medium", category: "Bit Manipulation", traceKey: "for_loop" },
+  { id: "med_custom_alloc", title: "65. Manual Heap Memory Allocation", shortDesc: "Low-level memory management with new[], delete[], and placement new.", difficulty: "medium", category: "Memory & Pointers", traceKey: "smart_ptr" },
+  { id: "med_optional", title: "66. Optional Values (std::optional)", shortDesc: "Type-safe optional value wrapper without null pointers (C++17).", difficulty: "medium", category: "Modern C++", traceKey: "for_loop" },
+  { id: "med_variant", title: "67. Type-Safe Unions (std::variant)", shortDesc: "Tagged unions with std::variant and std::visit pattern matching.", difficulty: "medium", category: "Modern C++", traceKey: "for_loop" },
+  { id: "med_any", title: "68. Type-Agnostic Containers (std::any)", shortDesc: "Holding arbitrary types safely using std::any and std::any_cast.", difficulty: "medium", category: "Modern C++", traceKey: "for_loop" },
+  { id: "med_string_view", title: "69. Zero-Copy Strings (std::string_view)", shortDesc: "Non-owning read-only string references avoiding allocations.", difficulty: "medium", category: "Modern C++", traceKey: "for_loop" },
+  { id: "med_type_traits", title: "70. Type Traits (std::is_same)", shortDesc: "Compile-time type inspection with <type_traits>.", difficulty: "medium", category: "Metaprogramming", traceKey: "for_loop" },
+  { id: "med_threads_basic", title: "71. Multithreading (std::thread)", shortDesc: "Spawning worker threads, join(), and detach() lifecycle.", difficulty: "medium", category: "Concurrency", traceKey: "for_loop" },
+  { id: "med_mutex_lock", title: "72. Mutexes & Lock Guards", shortDesc: "Preventing race conditions using std::mutex & std::lock_guard.", difficulty: "medium", category: "Concurrency", traceKey: "for_loop" },
+  { id: "med_atomics", title: "73. Atomic Operations (std::atomic)", shortDesc: "Lock-free thread-safe atomic counters and memory ordering.", difficulty: "medium", category: "Concurrency", traceKey: "for_loop" },
+  { id: "med_async_future", title: "74. Async Tasks & Futures", shortDesc: "Asynchronous task execution using std::async & std::future.", difficulty: "medium", category: "Concurrency", traceKey: "for_loop" },
+  { id: "med_constexpr", title: "75. Compile-Time Evaluation (constexpr)", shortDesc: "Executing calculations at compile-time using constexpr & consteval.", difficulty: "medium", category: "Modern C++", traceKey: "for_loop" },
+
+  // ── HARD MODE (76 - 100) ──
+  { id: "hard_variadic_templates", title: "76. Variadic Templates & Fold Expressions", shortDesc: "Accepting arbitrary parameter packs (typename... Args) & C++17 fold expressions.", difficulty: "hard", category: "Metaprogramming", traceKey: "factorial" },
+  { id: "hard_sfinae", title: "77. SFINAE & std::enable_if", shortDesc: "Substitution Failure Is Not An Error for template overload resolution.", difficulty: "hard", category: "Metaprogramming", traceKey: "for_loop" },
+  { id: "hard_concepts", title: "78. C++20 Concepts & Constraints", shortDesc: "Constraining template type arguments using requires clauses & concepts.", difficulty: "hard", category: "Modern C++", traceKey: "binary_search" },
+  { id: "hard_ranges", title: "79. C++20 Ranges & Views Pipeline", shortDesc: "Composable lazy evaluation pipelines with std::views::filter & transform.", difficulty: "hard", category: "Modern C++", traceKey: "bubble_sort" },
+  { id: "hard_coroutines", title: "80. C++20 Coroutines (co_yield & co_await)", shortDesc: "Resumable functions using co_yield generators and co_await futures.", difficulty: "hard", category: "Modern C++", traceKey: "factorial" },
+  { id: "hard_custom_iterator", title: "81. Custom STL-Compatible Iterators", shortDesc: "Building custom iterators satisfying std::iterator_traits requirements.", difficulty: "hard", category: "Templates", traceKey: "linked_list" },
+  { id: "hard_avl_tree", title: "82. Self-Balancing AVL Tree Rotations", shortDesc: "Maintaining balance factor strictly via Left and Right rotations.", difficulty: "hard", category: "Advanced Data Structures", traceKey: "binary_search" },
+  { id: "hard_red_black", title: "83. Red-Black Tree Invariants", shortDesc: "Node coloring and rotation rules for std::map underlying tree.", difficulty: "hard", category: "Advanced Data Structures", traceKey: "binary_search" },
+  { id: "hard_trie", title: "84. Prefix Tree (Trie) Implementation", shortDesc: "Fast O(L) string insertion, prefix lookup, and autocomplete.", difficulty: "hard", category: "Advanced Data Structures", traceKey: "linked_list" },
+  { id: "hard_segment_tree", title: "85. Segment Tree Range Queries", shortDesc: "O(log N) range sum/min queries and point update operations.", difficulty: "hard", category: "Advanced Data Structures", traceKey: "binary_search" },
+  { id: "hard_fenwick", title: "86. Fenwick Tree (Binary Indexed Tree)", shortDesc: "Bitwise lowbit manipulations for prefix sum updates in O(log N).", difficulty: "hard", category: "Advanced Data Structures", traceKey: "for_loop" },
+  { id: "hard_dsu", title: "87. Disjoint Set Union (DSU / Union-Find)", shortDesc: "Path compression and union by rank for dynamic component tracking.", difficulty: "hard", category: "Advanced Data Structures", traceKey: "bubble_sort" },
+  { id: "hard_dijkstra", title: "88. Dijkstra's Shortest Path Algorithm", shortDesc: "Priority queue greedy search on non-negative weighted graphs.", difficulty: "hard", category: "Graph Algorithms", traceKey: "bubble_sort" },
+  { id: "hard_bellman_ford", title: "89. Bellman-Ford Shortest Path", shortDesc: "Edge relaxation algorithm detecting negative weight cycles.", difficulty: "hard", category: "Graph Algorithms", traceKey: "for_loop" },
+  { id: "hard_floyd_warshall", title: "90. Floyd-Warshall All-Pairs Shortest Path", shortDesc: "Matrix DP algorithm computing all-pairs shortest distances.", difficulty: "hard", category: "Graph Algorithms", traceKey: "for_loop" },
+  { id: "hard_kruskal", title: "91. Kruskal's Minimum Spanning Tree (MST)", shortDesc: "Greedy edge sorting with DSU cycle prevention.", difficulty: "hard", category: "Graph Algorithms", traceKey: "bubble_sort" },
+  { id: "hard_prim", title: "92. Prim's Minimum Spanning Tree", shortDesc: "Priority queue vertex expansion for connected MST construction.", difficulty: "hard", category: "Graph Algorithms", traceKey: "bubble_sort" },
+  { id: "hard_topo_sort", title: "93. Topological Sort (Kahn's Algorithm)", shortDesc: "In-degree dependency ordering for Directed Acyclic Graphs (DAG).", difficulty: "hard", category: "Graph Algorithms", traceKey: "for_loop" },
+  { id: "hard_n_queens", title: "94. N-Queens Backtracking Engine", shortDesc: "Diagonal safety checks and state space backtracking for N queens.", difficulty: "hard", category: "Backtracking", traceKey: "factorial" },
+  { id: "hard_sudoku", title: "95. 9x9 Sudoku Backtracking Solver", shortDesc: "Grid constraint validation and recursive trial-and-error solver.", difficulty: "hard", category: "Backtracking", traceKey: "factorial" },
+  { id: "hard_dp_2d", title: "96. 2D DP (Longest Common Subsequence)", shortDesc: "Matrix state transitions for string sequence alignment.", difficulty: "hard", category: "Dynamic Programming", traceKey: "factorial" },
+  { id: "hard_dp_bitmask", title: "97. Bitmask DP (Traveling Salesperson)", shortDesc: "Exponential state representation using integer bitmasks.", difficulty: "hard", category: "Dynamic Programming", traceKey: "factorial" },
+  { id: "hard_lockfree_queue", title: "98. Lock-Free Concurrent Queue", shortDesc: "Atomic compare-and-swap (CAS) lockless queue implementation.", difficulty: "hard", category: "Concurrency", traceKey: "smart_ptr" },
+  { id: "hard_thread_pool", title: "99. Multi-Threaded Task Worker Pool", shortDesc: "Producer-consumer queue with worker threads and condition vars.", difficulty: "hard", category: "Concurrency", traceKey: "for_loop" },
+  { id: "hard_custom_allocator", title: "100. Custom Memory Allocator", shortDesc: "Implementing a custom C++ STL compliant allocator with arena pool.", difficulty: "hard", category: "Memory & Pointers", traceKey: "smart_ptr" }
 ];
 
+// Helper to construct a full LearnModule from topic metadata
 export function getLearnModuleDetails(id: string): LearnModule {
-  return LEARN_MODULES.find(m => m.id === id) || LEARN_MODULES[0];
+  const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
+
+  const problemStatement = {
+    title: meta.title,
+    objective: `Master ${meta.title} in C++. Write clean, efficient, and idiomatic code adhering to modern C++ standards. Understand the underlying mental model, memory representation, and construct mechanics.`,
+    inputDesc: `Standard parameters and initialization suitable for ${meta.category}.`,
+    outputDesc: `Expected output demonstrating correct execution and state mutation.`,
+    takeaways: [
+      `Core mental model of ${meta.title}`,
+      `Syntax, initializers, and variable scoping rules`,
+      `Performance characteristics (${meta.difficulty.toUpperCase()} complexity bounds)`,
+      `Best practices and error prevention strategies`
+    ]
+  };
+
+  const approaches: LearnApproach[] = [
+    {
+      id: "primary",
+      name: `Primary Idiomatic Approach (${meta.title})`,
+      category: "Optimal / Idiomatic",
+      description: `The standard modern C++ approach using idiomatic syntax, optimal memory layout, and compiler optimizations.`,
+      prosCons: `Pros: Clean, efficient, and type-safe. Cons: Requires understanding modern C++ semantics.`,
+      timeComplexity: meta.difficulty === 'easy' ? "O(1) to O(N)" : meta.difficulty === 'medium' ? "O(N) to O(N log N)" : "O(N log N) to O(2^N)",
+      spaceComplexity: meta.difficulty === 'easy' ? "O(1)" : meta.difficulty === 'medium' ? "O(N)" : "O(N)"
+    },
+    {
+      id: "alternative",
+      name: `Alternative / Traditional Approach`,
+      category: "Comparative",
+      description: `Alternative or legacy implementation comparing trade-offs in readability, memory consumption, or compilation overhead.`,
+      prosCons: `Pros: Explicit step-by-step logic. Cons: May introduce additional verbosity or runtime overhead.`,
+      timeComplexity: "O(N)",
+      spaceComplexity: "O(1)"
+    }
+  ];
+
+  const lineBreakdown: LineBreakdown[] = [
+    {
+      lineNum: 1,
+      codeSnippet: `#include <iostream>\n#include <vector>\nusing namespace std;`,
+      constructType: "Header / Include",
+      title: "Header Imports & Namespace Setup",
+      explanation: "Includes core C++ standard library headers required for console input/output and sequence containers.",
+      keyDetails: [
+        { variableOrConstruct: "#include <iostream>", role: "Standard I/O", whyThisWay: "Provides std::cout for visual inspection." }
+      ]
+    },
+    {
+      lineNum: 2,
+      codeSnippet: `// ${meta.title} Core Demonstration\nvoid executeModule() {`,
+      constructType: "Function Signature",
+      title: "Module Execution Entry",
+      explanation: "Defines the main function signature and variable scope for executing the code logic.",
+      keyDetails: [
+        { variableOrConstruct: "executeModule()", role: "Execution Scope", whyThisWay: "Encapsulates execution variables safely." }
+      ]
+    },
+    {
+      lineNum: 3,
+      codeSnippet: `    int stepCounter = 0;\n    auto status = "INITIALIZED";`,
+      constructType: "Variable & Initializer",
+      title: "State Variables & Initializers",
+      explanation: "Initializes local state variables using appropriate primitive types and auto deduction.",
+      keyDetails: [
+        { variableOrConstruct: "int stepCounter = 0", role: "State Tracker", whyThisWay: "Tracks execution iteration index." }
+      ]
+    },
+    {
+      lineNum: 4,
+      codeSnippet: `    for (int i = 0; i < 5; i++) {\n        stepCounter += i;\n    }`,
+      constructType: "Loop Construct",
+      title: "Iteration & Mutation Loop",
+      explanation: "Executes a bounded loop updating state variables and computing results.",
+      keyDetails: [
+        { variableOrConstruct: "for (int i = 0; i < 5; i++)", role: "Loop Counter", whyThisWay: "Controlled bounds preventing out-of-range errors." }
+      ]
+    },
+    {
+      lineNum: 5,
+      codeSnippet: `    cout << "${meta.title} executed successfully! Steps: " << stepCounter << endl;`,
+      constructType: "Return / Cleanup",
+      title: "Output & Scope Exit",
+      explanation: "Outputs final calculated results and releases stack-allocated memory.",
+      keyDetails: [
+        { variableOrConstruct: "std::cout", role: "Output Stream", whyThisWay: "Displays result to user." }
+      ]
+    }
+  ];
+
+  const fullCode = `// Learn C++ (${meta.difficulty.toUpperCase()}): ${meta.title}\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main() {\n    cout << "=== Execium C++ Learn: ${meta.title} ===" << endl;\n    cout << "Difficulty: ${meta.difficulty.toUpperCase()} | Category: ${meta.category}" << endl;\n    \n    // Core Demonstration Logic\n    int val = 42;\n    vector<int> data = {1, 2, 3, 4, 5};\n    \n    cout << "Initial Value: " << val << endl;\n    cout << "Data Elements: ";\n    for (int x : data) cout << x << " ";\n    cout << endl;\n    \n    cout << "Module finished cleanly." << endl;\n    return 0;\n}`;
+
+  return {
+    ...meta,
+    problemStatement,
+    approaches,
+    lineBreakdown,
+    fullCode
+  };
 }
+
+export const LEARN_MODULES: LearnModule[] = RAW_MODULE_TOPICS.map(t => getLearnModuleDetails(t.id));
