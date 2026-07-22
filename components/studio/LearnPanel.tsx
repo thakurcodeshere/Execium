@@ -4,12 +4,13 @@ import { useStore } from "@/lib/store";
 import { getLearnModuleDetails, LEARN_MODULES } from "@/lib/learn";
 import { 
   X, BookOpen, Target, Brain, Code2, Play, CheckCircle2, 
-  ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles
+  ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles, Check, Cpu, Zap
 } from "lucide-react";
 
 export default function LearnPanel() {
   const { activeLearnModuleId, setLearnModuleId, theme, setCode, loadProgram, restart, play } = useStore();
   const [activeTab, setActiveTab] = useState<'problem' | 'approaches' | 'breakdown'>('problem');
+  const [selectedApproachIdx, setSelectedApproachIdx] = useState(0);
   const [activeConstructIdx, setActiveConstructIdx] = useState(0);
   const [copied, setCopied] = useState(false);
 
@@ -19,6 +20,7 @@ export default function LearnPanel() {
 
   const moduleInfo = getLearnModuleDetails(activeLearnModuleId);
   const activeConstruct = moduleInfo.lineBreakdown[activeConstructIdx] || moduleInfo.lineBreakdown[0];
+  const selectedApproach = moduleInfo.approaches[selectedApproachIdx] || moduleInfo.approaches[0];
 
   const handleCopyCode = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -45,8 +47,32 @@ export default function LearnPanel() {
     <div style={{
       height: "100%", display: "flex", flexDirection: "column",
       background: T.uiSurface, borderLeft: `1px solid ${T.uiBorder}`,
-      color: T.uiText, fontFamily: "'Inter', sans-serif", position: "relative"
+      color: T.uiText, fontFamily: "'Inter', sans-serif", position: "relative",
+      overflow: "hidden"
     }}>
+      {/* ── CSS KEYFRAME ANIMATIONS ── */}
+      <style jsx global>{`
+        @keyframes fadeInSlide {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulseBorder {
+          0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+          70% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        @keyframes barExpand {
+          from { width: 0%; }
+          to { width: 100%; }
+        }
+        .anim-fade {
+          animation: fadeInSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .anim-pulse {
+          animation: pulseBorder 2s infinite;
+        }
+      `}</style>
+
       {/* ── HEADER BAR ── */}
       <div style={{
         padding: "10px 14px", background: T.uiPanelHd, borderBottom: `1px solid ${T.uiBorder}`,
@@ -89,26 +115,28 @@ export default function LearnPanel() {
         <button
           onClick={() => setActiveTab('problem')}
           style={{
-            flex: 1, padding: "9px 0", border: "none", cursor: "pointer",
+            flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
             fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
             background: activeTab === 'problem' ? T.uiSurface : "transparent",
             color: activeTab === 'problem' ? "#10b981" : T.uiTextMuted,
             borderBottom: activeTab === 'problem' ? "2px solid #10b981" : "2px solid transparent",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            transition: "all 0.2s ease"
           }}
         >
-          <Target size={13} /> 1. Problem Statement
+          <Target size={13} /> 1. Problem
         </button>
 
         <button
           onClick={() => setActiveTab('approaches')}
           style={{
-            flex: 1, padding: "9px 0", border: "none", cursor: "pointer",
+            flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
             fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
             background: activeTab === 'approaches' ? T.uiSurface : "transparent",
             color: activeTab === 'approaches' ? "#f59e0b" : T.uiTextMuted,
             borderBottom: activeTab === 'approaches' ? "2px solid #f59e0b" : "2px solid transparent",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            transition: "all 0.2s ease"
           }}
         >
           <Brain size={13} /> 2. Mental Model
@@ -117,20 +145,21 @@ export default function LearnPanel() {
         <button
           onClick={() => setActiveTab('breakdown')}
           style={{
-            flex: 1, padding: "9px 0", border: "none", cursor: "pointer",
+            flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
             fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
             background: activeTab === 'breakdown' ? T.uiSurface : "transparent",
             color: activeTab === 'breakdown' ? "#a855f7" : T.uiTextMuted,
             borderBottom: activeTab === 'breakdown' ? "2px solid #a855f7" : "2px solid transparent",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            transition: "all 0.2s ease"
           }}
         >
           <Code2 size={13} /> 3. Line Breakdown
         </button>
       </div>
 
-      {/* ── MAIN CONTENT BODY ── */}
-      <div style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* ── MAIN CONTENT BODY WITH MOTION FADE ── */}
+      <div key={activeTab} className="anim-fade" style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
 
         {/* ── TAB 1: PROBLEM & OBJECTIVE ── */}
         {activeTab === 'problem' && (
@@ -189,84 +218,158 @@ export default function LearnPanel() {
                 background: "linear-gradient(135deg, #10b981, #3b82f6)",
                 color: "#fff", fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                marginTop: 8
+                marginTop: 8, transition: "transform 0.15s ease", boxShadow: "0 4px 15px rgba(16,185,129,0.3)"
               }}
+              onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
+              onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
             >
-              Step 2: Explore Mental Model & Approaches <ArrowRight size={14} />
+              Step 2: Choose Mental Model & Strategy <ArrowRight size={14} />
             </button>
 
           </div>
         )}
 
-        {/* ── TAB 2: MENTAL MODEL & APPROACHES ── */}
+        {/* ── TAB 2: INTERACTIVE MENTAL MODEL SELECTOR WITH ANIMATION (USER REQUEST) ── */}
         {activeTab === 'approaches' && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             
-            <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1 }}>
-              // STRATEGY & MENTAL MODEL
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1 }}>
+                // CHOOSE MENTAL MODEL STRATEGY
+              </div>
+              <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: "#f59e0b", fontWeight: 800 }}>
+                {moduleInfo.approaches.length} Models Available
+              </span>
             </div>
 
-            {/* Approaches List */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              {moduleInfo.approaches.map((app, idx) => (
-                <div key={idx} style={{
-                  background: idx === 0 ? "rgba(245,158,11,0.08)" : "rgba(0,0,0,0.15)",
-                  border: `1px solid ${idx === 0 ? "rgba(245,158,11,0.3)" : T.uiBorder}`,
-                  borderRadius: 10, padding: 14, display: "flex", flexDirection: "column", gap: 8
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 12, fontWeight: 800, color: idx === 0 ? "#f59e0b" : T.uiText }}>
-                      {app.name}
-                    </span>
-                    <span style={{
-                      fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                      padding: "2px 6px", borderRadius: 4,
-                      background: idx === 0 ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.05)",
-                      color: idx === 0 ? "#f59e0b" : T.uiTextMuted
+            {/* Interactive Selectable Mental Model Cards */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {moduleInfo.approaches.map((app, idx) => {
+                const isSelected = selectedApproachIdx === idx;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedApproachIdx(idx)}
+                    className={isSelected ? "anim-pulse" : ""}
+                    style={{
+                      background: isSelected ? "linear-gradient(135deg, rgba(245,158,11,0.12), rgba(168,85,247,0.08))" : "rgba(0,0,0,0.18)",
+                      border: `1.5px solid ${isSelected ? "#f59e0b" : T.uiBorder}`,
+                      borderRadius: 12, padding: 14, cursor: "pointer",
+                      display: "flex", flexDirection: "column", gap: 10,
+                      transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                      transform: isSelected ? "scale(1.01)" : "scale(1)",
+                      boxShadow: isSelected ? "0 8px 24px rgba(245,158,11,0.2)" : "none"
+                    }}
+                  >
+                    {/* Top Row: Title & Radio Selection Indicator */}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <div style={{
+                          width: 20, height: 20, borderRadius: 10,
+                          background: isSelected ? "#f59e0b" : "transparent",
+                          border: `2px solid ${isSelected ? "#f59e0b" : T.uiTextMuted}`,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          transition: "all 0.2s ease"
+                        }}>
+                          {isSelected && <Check size={12} color="#000" strokeWidth={3} />}
+                        </div>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: isSelected ? "#f59e0b" : T.uiText }}>
+                          {app.name}
+                        </span>
+                      </div>
+
+                      <span style={{
+                        fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                        padding: "2px 7px", borderRadius: 4,
+                        background: isSelected ? "rgba(245,158,11,0.25)" : "rgba(255,255,255,0.05)",
+                        color: isSelected ? "#f59e0b" : T.uiTextMuted,
+                        border: `1px solid ${isSelected ? "rgba(245,158,11,0.4)" : "transparent"}`
+                      }}>
+                        {isSelected ? "ACTIVE MODEL" : app.category.toUpperCase()}
+                      </span>
+                    </div>
+
+                    {/* Mental Model Strategy Description */}
+                    <div style={{ fontSize: 11, color: T.uiTextMuted, lineHeight: 1.5, paddingLeft: 28 }}>
+                      {app.description}
+                    </div>
+
+                    {/* Trade-offs & Pros/Cons */}
+                    <div style={{
+                      fontSize: 10, color: T.uiText, fontStyle: "italic",
+                      background: "rgba(0,0,0,0.15)", padding: "6px 10px", borderRadius: 6,
+                      border: `1px solid ${T.uiBorder}`, marginLeft: 28
                     }}>
-                      {app.category.toUpperCase()}
-                    </span>
-                  </div>
+                      ⚡ {app.prosCons}
+                    </div>
 
-                  <div style={{ fontSize: 11, color: T.uiTextMuted, lineHeight: 1.5 }}>
-                    {app.description}
-                  </div>
+                    {/* Animated Complexity Meters */}
+                    <div style={{ display: "flex", gap: 12, marginLeft: 28, marginTop: 2, alignItems: "center" }}>
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "'JetBrains Mono'" }}>
+                          <span style={{ color: "#3b82f6", fontWeight: 700 }}>⏱ TIME COMPLEXITY</span>
+                          <span style={{ color: "#3b82f6", fontWeight: 800 }}>{app.timeComplexity}</span>
+                        </div>
+                        <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
+                          <div style={{
+                            height: "100%", background: "linear-gradient(90deg, #3b82f6, #60a5fa)",
+                            width: isSelected ? "100%" : "60%", transition: "width 0.4s ease"
+                          }} />
+                        </div>
+                      </div>
 
-                  <div style={{ fontSize: 10, color: T.uiText, fontStyle: "italic" }}>
-                    {app.prosCons}
-                  </div>
+                      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 3 }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "'JetBrains Mono'" }}>
+                          <span style={{ color: "#a855f7", fontWeight: 700 }}>💾 SPACE COMPLEXITY</span>
+                          <span style={{ color: "#a855f7", fontWeight: 800 }}>{app.spaceComplexity}</span>
+                        </div>
+                        <div style={{ height: 4, background: "rgba(255,255,255,0.08)", borderRadius: 2, overflow: "hidden" }}>
+                          <div style={{
+                            height: "100%", background: "linear-gradient(90deg, #a855f7, #c084fc)",
+                            width: isSelected ? "100%" : "40%", transition: "width 0.4s ease"
+                          }} />
+                        </div>
+                      </div>
+                    </div>
 
-                  {/* Complexity Pills */}
-                  <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
-                    <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>
-                      Time: {app.timeComplexity}
-                    </span>
-                    <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: "rgba(168,85,247,0.15)", color: "#a855f7" }}>
-                      Space: {app.spaceComplexity}
-                    </span>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            {/* CTA Button */}
-            <button
-              onClick={() => setActiveTab('breakdown')}
-              style={{
-                padding: "10px 0", borderRadius: 8, border: "none",
-                background: "linear-gradient(135deg, #f59e0b, #a855f7)",
-                color: "#fff", fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                marginTop: 8
-              }}
-            >
-              Step 3: Line-by-Line Code Breakdown <ArrowRight size={14} />
-            </button>
+            {/* Interactive Action Bar for Selected Mental Model */}
+            <div style={{
+              background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)",
+              borderRadius: 10, padding: 14, display: "flex", flexDirection: "column", gap: 10,
+              marginTop: 4
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#f59e0b", display: "flex", alignItems: "center", gap: 6 }}>
+                <Zap size={14} /> Mental Model Selected: <span style={{ color: T.uiText }}>{selectedApproach.name}</span>
+              </div>
+              <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.4 }}>
+                Ready to inspect the code construction for this strategy? Proceed to line-by-line mechanics or load directly into the editor.
+              </div>
+
+              <div style={{ display: "flex", gap: 8, marginTop: 2 }}>
+                <button
+                  onClick={() => setActiveTab('breakdown')}
+                  style={{
+                    flex: 1, padding: "8px 0", borderRadius: 8, border: "none",
+                    background: "linear-gradient(135deg, #f59e0b, #a855f7)",
+                    color: "#fff", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    boxShadow: "0 3px 12px rgba(245,158,11,0.25)"
+                  }}
+                >
+                  Step 3: Line-by-Line Breakdown <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
 
           </div>
         )}
 
-        {/* ── TAB 3: LINE-BY-LINE CONSTRUCT BREAKDOWN (CORE USER REQUEST) ── */}
+        {/* ── TAB 3: LINE-BY-LINE CONSTRUCT BREAKDOWN ── */}
         {activeTab === 'breakdown' && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             
