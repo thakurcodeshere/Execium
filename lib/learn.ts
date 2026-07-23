@@ -7685,6 +7685,1690 @@ int main() {
 }
 
 
+
+export function getProblem36Details(): LearnModule {
+  return {
+    id: "med_raii",
+    title: "36. Unique Pointers (std::unique_ptr)",
+    category: "Memory & Pointers",
+    difficulty: "medium",
+    shortDesc: "Exclusive RAII ownership and automatic heap memory release.",
+    fullCode: `// 36. Unique Pointers - Approach 1: Exclusive Ownership & make_unique
+#include <iostream>
+#include <memory>
+#include <string>
+using namespace std;
+
+struct Device {
+    string name;
+    Device(string n) : name(n) { cout << "Device " << name << " initialized." << endl; }
+    ~Device() { cout << "Device " << name << " destroyed." << endl; }
+};
+
+int main() {
+    auto ptr = make_unique<Device>("Sensor");
+    cout << "Accessing: " << ptr->name << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "36. Unique Pointers (std::unique_ptr)",
+      objective: "Master explicit single-owner dynamic memory management using std::unique_ptr, std::make_unique, move semantics, custom deleters, and polymorphic memory cleanup.",
+      description: "Implement **Unique Pointers (std::unique_ptr)** (Memory & Pointers). Exclusive RAII ownership and automatic heap memory release. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Dynamic heap memory allocations and ownership transfer operations.",
+      outputDesc: "Automatic memory deallocations, move notifications, and custom deleter executions.",
+      takeaways: [
+        "std::unique_ptr guarantees single, non-shared ownership of a dynamic heap resource",
+        "Unique pointers cannot be copied; they can only be transferred using std::move()",
+        "std::make_unique<T>() (C++14) avoids raw new expressions and provides exception safety",
+        "When a unique_ptr goes out of scope, its destructor automatically frees the heap memory"
+      ],
+      examples: [
+        { id: 1, input: "make_unique<Device>('Sensor')", output: "Device Sensor initialized -> Device Sensor destroyed", explanation: "Heap resource automatically freed when unique_ptr leaves scope." },
+        { id: 2, input: "auto ptr2 = std::move(ptr1)", output: "ptr1 is nullptr, ptr2 owns resource", explanation: "Ownership transferred exclusively from ptr1 to ptr2 via std::move." },
+        { id: 3, input: "make_unique<int[]>(5)", output: "Dynamic Heap Array Allocation", explanation: "Allocates contiguous heap array managed by std::unique_ptr<int[]>." }
+      ],
+      constraints: ["std::unique_ptr cannot be copy-constructed or copy-assigned.", "Do not create multiple unique_ptr instances from the same raw pointer."],
+      companies: ["Google", "Meta", "Microsoft", "Apple", "Amazon"],
+      acceptanceRate: "89.4%",
+      totalAccepted: "1,980,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Exclusive Ownership & std::make_unique (FREE)", category: "FREE / Make Unique",
+        description: "Creates exclusive ownership smart pointer using std::make_unique<T>() with automatic scope destruction.",
+        prosCons: "Pros: Exception safe, no raw new required, zero memory overhead. Cons: Exclusive ownership only.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 36. Unique Pointers - Approach 1: Exclusive Ownership
+#include <iostream>
+#include <memory>
+#include <string>
+using namespace std;
+
+struct Widget {
+    string model;
+    Widget(string m) : model(m) { cout << "Widget " << model << " created." << endl; }
+    ~Widget() { cout << "Widget " << model << " destroyed." << endl; }
+};
+
+int main() {
+    auto wPtr = make_unique<Widget>("Alpha");
+    cout << "Widget Model: " << wPtr->model << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto wPtr = make_unique<Widget>('Alpha');", constructType: "Variable & Initializer", title: "Make Unique Instantiation", explanation: "Allocates Widget on heap returning std::unique_ptr<Widget> owning instance.", keyDetails: [{ variableOrConstruct: "make_unique<Widget>", role: "Heap Allocation", whyThisWay: "Exception-safe dynamic allocation." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Widget Model: ' << wPtr->model;", constructType: "Condition & Branch", title: "Arrow Operator Dereference", explanation: "Accesses member variable via arrow operator dereferencing smart pointer.", keyDetails: [{ variableOrConstruct: "wPtr->model", role: "Smart Pointer Access", whyThisWay: "Dereferences internal raw pointer." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Scope Exit Auto Deallocation", explanation: "Scope exit automatically invokes Widget destructor releasing heap memory.", keyDetails: [{ variableOrConstruct: "Scope Exit", role: "RAII Destruction", whyThisWay: "Frees heap memory automatically." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Ownership Transfer via std::move (FREE)", category: "FREE / Move Ownership",
+        description: "Transfers exclusive ownership from one unique_ptr to another using std::move.",
+        prosCons: "Pros: Zero-copy transfer of heavy heap resources. Cons: Source pointer becomes nullptr.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 36. Unique Pointers - Approach 2: Move Ownership
+#include <iostream>
+#include <memory>
+using namespace std;
+
+int main() {
+    auto ptr1 = make_unique<int>(100);
+    auto ptr2 = move(ptr1);
+    if (!ptr1) cout << "ptr1 is null." << endl;
+    if (ptr2) cout << "ptr2 value: " << *ptr2 << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto ptr2 = move(ptr1);", constructType: "Variable & Initializer", title: "Transfer Ownership with std::move", explanation: "Transfers raw heap pointer from ptr1 to ptr2 and resets ptr1 to nullptr.", keyDetails: [{ variableOrConstruct: "std::move(ptr1)", role: "Move Transfer", whyThisWay: "Uniquely transfers ownership." }] },
+          { lineNum: 2, codeSnippet: "if (!ptr1) cout << 'ptr1 is null.';", constructType: "Condition & Branch", title: "Nullptr Guard Check", explanation: "Checks if source pointer was cleared to nullptr after move.", keyDetails: [{ variableOrConstruct: "!ptr1", role: "Null Check", whyThisWay: "Verifies source is null." }] },
+          { lineNum: 3, codeSnippet: "cout << 'ptr2 value: ' << *ptr2;", constructType: "Return / Cleanup", title: "Dereference Moved Pointer", explanation: "Dereferences moved pointer to retrieve heap value 100.", keyDetails: [{ variableOrConstruct: "*ptr2", role: "Pointer Dereference", whyThisWay: "Reads value from target owner." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Heap Array Allocation with std::unique_ptr<T[]> (PRO)", category: "PRO / Unique Array",
+        description: "Manages dynamic heap array using specialized std::unique_ptr<T[]> specialization.",
+        prosCons: "Pros: Automatic delete[] invocation on destruction. Cons: No bounds checking like std::vector.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 36. Unique Pointers - Approach 3: Dynamic Heap Array
+#include <iostream>
+#include <memory>
+using namespace std;
+
+int main() {
+    auto arr = make_unique<int[]>(5);
+    for (int i = 0; i < 5; i++) arr[i] = (i + 1) * 10;
+    for (int i = 0; i < 5; i++) cout << arr[i] << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto arr = make_unique<int[]>(5);", constructType: "Variable & Initializer", title: "Allocate Heap Array", explanation: "Allocates dynamic heap array of 5 integers managed by unique_ptr array specialization.", keyDetails: [{ variableOrConstruct: "make_unique<int[]>(5)", role: "Heap Array Allocation", whyThisWay: "Allocates array with auto delete[]." }] },
+          { lineNum: 2, codeSnippet: "arr[i] = (i + 1) * 10;", constructType: "Loop Construct", title: "Subscript Operator Array Access", explanation: "Uses operator[] to mutate heap array element.", keyDetails: [{ variableOrConstruct: "arr[i]", role: "Array Access", whyThisWay: "Subscript access on unique_ptr array." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Array Deallocation Cleanup", explanation: "Destructor automatically calls delete[] on array allocation.", keyDetails: [{ variableOrConstruct: "delete[]", role: "Array Destructor", whyThisWay: "Frees total array heap block." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Custom Deleter Functions & Lambdas (PRO)", category: "PRO / Custom Deleter",
+        description: "Passes custom deleter lambda to unique_ptr for C file handle or resource release.",
+        prosCons: "Pros: Extends RAII to non-memory system resources (files, sockets). Cons: Alters unique_ptr type signature.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 36. Unique Pointers - Approach 4: Custom Deleter
+#include <iostream>
+#include <memory>
+#include <cstdio>
+using namespace std;
+
+int main() {
+    auto fileDeleter = [](FILE* f) {
+        if (f) {
+            cout << "Closing file handle..." << endl;
+            fclose(f);
+        }
+    };
+    unique_ptr<FILE, decltype(fileDeleter)> file(fopen("test.txt", "w"), fileDeleter);
+    if (file) cout << "File opened successfully." << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto fileDeleter = [](FILE* f) { ... };", constructType: "Function Signature", title: "Define Custom Deleter Lambda", explanation: "Defines lambda callable that executes fclose() on C file handle.", keyDetails: [{ variableOrConstruct: "fileDeleter", role: "Custom Deleter Callable", whyThisWay: "Custom cleanup function." }] },
+          { lineNum: 2, codeSnippet: "unique_ptr<FILE, decltype(fileDeleter)> file(fopen('test.txt', 'w'), fileDeleter);", constructType: "Variable & Initializer", title: "Construct Pointer with Custom Deleter", explanation: "Constructs unique_ptr holding FILE handle and custom deleter type signature.", keyDetails: [{ variableOrConstruct: "decltype(fileDeleter)", role: "Deleter Type Signature", whyThisWay: "Binds custom deleter type." }] },
+          { lineNum: 3, codeSnippet: "if (file) cout << 'File opened successfully.';", constructType: "Return / Cleanup", title: "Execute Custom Deleter on Scope Exit", explanation: "Scope exit automatically triggers fileDeleter closing file.", keyDetails: [{ variableOrConstruct: "fclose", role: "Deleter Execution", whyThisWay: "Executes custom cleanup." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Passing Unique Pointers by Const Reference (PRO)", category: "PRO / Pass by Ref",
+        description: "Passes const unique_ptr<T>& to functions to inspect object without transferring ownership.",
+        prosCons: "Pros: Non-owning inspection without pointer copy or ownership move. Cons: Reference coupling.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 36. Unique Pointers - Approach 5: Pass by Const Reference
+#include <iostream>
+#include <memory>
+#include <string>
+using namespace std;
+
+struct Log {
+    string msg;
+    Log(string m) : msg(m) {}
+};
+
+void inspectLog(const unique_ptr<Log>& lPtr) {
+    if (lPtr) cout << "Log Entry: " << lPtr->msg << endl;
+}
+
+int main() {
+    auto log = make_unique<Log>("System initialized");
+    inspectLog(log);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "void inspectLog(const unique_ptr<Log>& lPtr)", constructType: "Function Signature", title: "Const Ref Parameter Signature", explanation: "Receives const reference to unique_ptr without altering ownership.", keyDetails: [{ variableOrConstruct: "const unique_ptr<Log>&", role: "Non-Owning Reference", whyThisWay: "Inspects pointer without move." }] },
+          { lineNum: 2, codeSnippet: "if (lPtr) cout << 'Log Entry: ' << lPtr->msg;", constructType: "Condition & Branch", title: "Read Object via Reference", explanation: "Accesses underlying object through reference parameter.", keyDetails: [{ variableOrConstruct: "lPtr->msg", role: "Member Access", whyThisWay: "Reads owned object value." }] },
+          { lineNum: 3, codeSnippet: "inspectLog(log);", constructType: "Return / Cleanup", title: "Pass Pointer by Reference", explanation: "Passes lvalue log pointer by reference.", keyDetails: [{ variableOrConstruct: "inspectLog(log)", role: "Function Call", whyThisWay: "Maintains ownership in caller." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Returning Unique Pointers from Factory Functions (PRO)", category: "PRO / Factory Return",
+        description: "Returns unique_ptr from factory function taking advantage of Return Value Optimization (RVO).",
+        prosCons: "Pros: Elegant design pattern for dynamic object creation. Cons: Moves ownership to caller.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 36. Unique Pointers - Approach 6: Factory Function
+#include <iostream>
+#include <memory>
+#include <string>
+using namespace std;
+
+struct Product {
+    string title;
+    Product(string t) : title(t) {}
+};
+
+unique_ptr<Product> createProduct(string title) {
+    return make_unique<Product>(title);
+}
+
+int main() {
+    auto p = createProduct("Laptop");
+    cout << "Created: " << p->title << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "unique_ptr<Product> createProduct(string title)", constructType: "Function Signature", title: "Factory Return Signature", explanation: "Returns owned unique_ptr<Product> object.", keyDetails: [{ variableOrConstruct: "unique_ptr<Product>", role: "Factory Return Type", whyThisWay: "Yields exclusive ownership to caller." }] },
+          { lineNum: 2, codeSnippet: "return make_unique<Product>(title);", constructType: "Return / Cleanup", title: "RVO Return Instantiation", explanation: "Instantiates and returns unique_ptr directly via RVO.", keyDetails: [{ variableOrConstruct: "make_unique<Product>", role: "Factory Instantiation", whyThisWay: "Efficient factory return." }] },
+          { lineNum: 3, codeSnippet: "auto p = createProduct('Laptop');", constructType: "Variable & Initializer", title: "Receive Factory Ownership", explanation: "Receives factory pointer into local variable p.", keyDetails: [{ variableOrConstruct: "p", role: "New Owner", whyThisWay: "Takes ownership from factory." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Release & Reset Heap Operations (PRO)", category: "PRO / Release & Reset",
+        description: "Compares reset() (destroys managed object) vs release() (yields raw pointer without destroying).",
+        prosCons: "Pros: Fine-grained control over raw pointer lifetime. Cons: Must manually delete raw pointer after release().",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 36. Unique Pointers - Approach 7: Release & Reset
+#include <iostream>
+#include <memory>
+using namespace std;
+
+int main() {
+    auto ptr = make_unique<int>(42);
+    int* raw = ptr.release();
+    cout << "Raw value after release: " << *raw << endl;
+    delete raw;
+    
+    auto ptr2 = make_unique<int>(100);
+    ptr2.reset(new int(200));
+    cout << "Reset value: " << *ptr2 << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int* raw = ptr.release();", constructType: "Variable & Initializer", title: "Yield Ownership via release()", explanation: "Yields raw pointer without calling destructor and sets ptr to nullptr.", keyDetails: [{ variableOrConstruct: "ptr.release()", role: "Ownership Yielder", whyThisWay: "Releases raw pointer manual control." }] },
+          { lineNum: 2, codeSnippet: "delete raw;", constructType: "Condition & Branch", title: "Manual Cleanup of Released Pointer", explanation: "Must manually delete raw pointer because smart pointer released ownership.", keyDetails: [{ variableOrConstruct: "delete raw", role: "Manual Delete", whyThisWay: "Prevents memory leak after release." }] },
+          { lineNum: 3, codeSnippet: "ptr2.reset(new int(200));", constructType: "Return / Cleanup", title: "Replace Resource via reset()", explanation: "Destroys old object owned by ptr2 and replaces with new dynamic allocation.", keyDetails: [{ variableOrConstruct: "ptr2.reset()", role: "Resource Replacer", whyThisWay: "Destroys old and sets new." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: RAII Class Member Composition (Rule of 0) (PRO)", category: "PRO / RAII Composition",
+        description: "Encapsulates dynamic heap members inside class using unique_ptr, enforcing Rule of 0.",
+        prosCons: "Pros: Automatic destructor generation for enclosing class. Cons: Makes class non-copyable by default.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 36. Unique Pointers - Approach 8: Rule of Zero
+#include <iostream>
+#include <memory>
+#include <string>
+using namespace std;
+
+class DatabaseConnection {
+private:
+    struct Impl {
+        string connStr;
+        Impl(string s) : connStr(s) {}
+    };
+    unique_ptr<Impl> pimpl;
+public:
+    DatabaseConnection(string s) : pimpl(make_unique<Impl>(s)) {}
+    void connect() { cout << "Connecting: " << pimpl->connStr << endl; }
+};
+
+int main() {
+    DatabaseConnection db("db.server.internal:5432");
+    db.connect();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "unique_ptr<Impl> pimpl;", constructType: "Variable & Initializer", title: "Pimpl Pointer Member", explanation: "Declares unique_ptr member implementing Pointer-to-Implementation (Pimpl) idiom.", keyDetails: [{ variableOrConstruct: "unique_ptr<Impl>", role: "Pimpl Member", whyThisWay: "Encapsulates implementation detail." }] },
+          { lineNum: 2, codeSnippet: "DatabaseConnection(string s) : pimpl(make_unique<Impl>(s)) {}", constructType: "Function Signature", title: "Construct Pimpl Member", explanation: "Initializes pimpl member directly in member initializer list.", keyDetails: [{ variableOrConstruct: "make_unique<Impl>", role: "Member Initialization", whyThisWay: "Constructs Pimpl instance." }] },
+          { lineNum: 3, codeSnippet: "db.connect();", constructType: "Return / Cleanup", title: "Rule of Zero Class Destruction", explanation: "Compiler automatically generates destructor that cleans up pimpl member.", keyDetails: [{ variableOrConstruct: "Rule of 0", role: "Auto Destruction", whyThisWay: "No manual destructor needed." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Polymorphic Base Class Management (PRO)", category: "PRO / Polymorphic Unique",
+        description: "Stores derived class objects inside std::unique_ptr<Base> with virtual destructor.",
+        prosCons: "Pros: Dynamic dispatch with guaranteed polymorphic heap memory cleanup. Cons: Base destructor MUST be virtual.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 36. Unique Pointers - Approach 9: Polymorphism
+#include <iostream>
+#include <memory>
+using namespace std;
+
+class Shape {
+public:
+    virtual void draw() const = 0;
+    virtual ~Shape() { cout << "Shape Base Destroyed." << endl; }
+};
+
+class Circle : public Shape {
+public:
+    void draw() const override { cout << "Drawing Circle." << endl; }
+    ~Circle() override { cout << "Circle Derived Destroyed." << endl; }
+};
+
+int main() {
+    unique_ptr<Shape> shape = make_unique<Circle>();
+    shape->draw();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "virtual ~Shape() { cout << 'Shape Base Destroyed.'; }", constructType: "Function Signature", title: "Virtual Base Destructor", explanation: "Declares virtual destructor ensuring proper derived class destruction.", keyDetails: [{ variableOrConstruct: "virtual ~Shape()", role: "Virtual Destructor", whyThisWay: "Required for polymorphic cleanup." }] },
+          { lineNum: 2, codeSnippet: "unique_ptr<Shape> shape = make_unique<Circle>();", constructType: "Variable & Initializer", title: "Polymorphic Unique Pointer Instantiation", explanation: "Assigns derived Circle pointer to base Shape unique_ptr.", keyDetails: [{ variableOrConstruct: "unique_ptr<Shape>", role: "Base Smart Pointer", whyThisWay: "Holds polymorphic derived instance." }] },
+          { lineNum: 3, codeSnippet: "shape->draw();", constructType: "Return / Cleanup", title: "Dynamic Virtual Method Dispatch", explanation: "Invokes Circle::draw() via virtual table dispatch.", keyDetails: [{ variableOrConstruct: "shape->draw()", role: "Virtual Method Call", whyThisWay: "Dispatches derived method." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Vector of Unique Pointers (std::vector<unique_ptr<T>>) (PRO)", category: "PRO / Unique Vector",
+        description: "Stores collection of move-only unique_ptr objects inside std::vector using emplace_back.",
+        prosCons: "Pros: Dynamic container of heterogeneous polymorphic objects. Cons: Requires std::move during vector ops.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 36. Unique Pointers - Approach 10: Vector of Unique Pointers
+#include <iostream>
+#include <memory>
+#include <vector>
+#include <string>
+using namespace std;
+
+struct Task {
+    string name;
+    Task(string n) : name(n) {}
+};
+
+int main() {
+    vector<unique_ptr<Task>> tasks;
+    tasks.push_back(make_unique<Task>("Job A"));
+    tasks.emplace_back(make_unique<Task>("Job B"));
+    
+    for (const auto& t : tasks) {
+        cout << "Task: " << t->name << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "vector<unique_ptr<Task>> tasks;", constructType: "Variable & Initializer", title: "Vector Container of Unique Pointers", explanation: "Declares vector container storing move-only unique_ptr elements.", keyDetails: [{ variableOrConstruct: "vector<unique_ptr<Task>>", role: "Smart Pointer Vector", whyThisWay: "Stores dynamic move-only elements." }] },
+          { lineNum: 2, codeSnippet: "tasks.emplace_back(make_unique<Task>('Job B'));", constructType: "Condition & Branch", title: "Emplace Unique Pointer into Vector", explanation: "Constructs unique_ptr directly inside vector capacity without temporary copies.", keyDetails: [{ variableOrConstruct: "emplace_back", role: "Direct Construction", whyThisWay: "Constructs move-only element in-place." }] },
+          { lineNum: 3, codeSnippet: "for (const auto& t : tasks)", constructType: "Loop Construct", title: "Iterate Vector by Const Reference", explanation: "Iterates vector elements by const reference to avoid forbidden copy attempts.", keyDetails: [{ variableOrConstruct: "const auto& t", role: "Const Ref Iteration", whyThisWay: "Prevents copy compilation error." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem37Details(): LearnModule {
+  return {
+    id: "med_shared_ptr",
+    title: "37. Shared & Weak Pointers",
+    category: "Memory & Pointers",
+    difficulty: "medium",
+    shortDesc: "Reference counted ownership with std::shared_ptr & std::weak_ptr.",
+    fullCode: `// 37. Shared & Weak Pointers - Approach 1: Reference Counting
+#include <iostream>
+#include <memory>
+using namespace std;
+
+struct Resource {
+    Resource() { cout << "Resource acquired." << endl; }
+    ~Resource() { cout << "Resource destroyed." << endl; }
+};
+
+int main() {
+    shared_ptr<Resource> s1 = make_shared<Resource>();
+    cout << "Ref count: " << s1.use_count() << endl;
+    {
+        shared_ptr<Resource> s2 = s1;
+        cout << "Ref count in scope: " << s1.use_count() << endl;
+    }
+    cout << "Ref count after scope: " << s1.use_count() << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "37. Shared & Weak Pointers",
+      objective: "Master shared reference-counted memory management using std::shared_ptr, std::weak_ptr, control blocks, cyclic dependency resolution, and std::enable_shared_from_this.",
+      description: "Implement **Shared & Weak Pointers** (Memory & Pointers). Reference counted ownership with std::shared_ptr & std::weak_ptr. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Shared memory pointers created across multiple scope boundaries.",
+      outputDesc: "Reference counter increments/decrements, lock promotions, and cycle resolution logs.",
+      takeaways: [
+        "std::shared_ptr maintains a reference-counted control block to track active owners",
+        "Heap memory is freed only when the internal use_count() drops to 0",
+        "std::weak_ptr holds a non-owning weak reference to break circular dependencies",
+        "Use wp.lock() to safely promote a weak_ptr to a shared_ptr before accessing"
+      ],
+      examples: [
+        { id: 1, input: "shared_ptr<Resource> s2 = s1", output: "Ref count: 2", explanation: "Copying shared_ptr increments atomic reference counter." },
+        { id: 2, input: "Cyclic Node A <-> Node B with shared_ptr", output: "Memory Leak (Destructors never invoked)", explanation: "Circular shared_ptr references keep use_count at 1 indefinitely." },
+        { id: 3, input: "weak_ptr.lock() when object alive", output: "Valid shared_ptr returned", explanation: "Promotes weak reference to shared_ptr if target object still exists." }
+      ],
+      constraints: ["Circular shared_ptr references MUST be broken using std::weak_ptr.", "Prefer std::make_shared to allocate control block and object in a single heap chunk."],
+      companies: ["Google", "Microsoft", "Meta", "Amazon", "Apple"],
+      acceptanceRate: "87.1%",
+      totalAccepted: "1,850,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Shared Ownership & Reference Counting (std::make_shared) (FREE)", category: "FREE / Reference Counting",
+        description: "Creates shared ownership pointers with std::make_shared and tracks atomic reference count.",
+        prosCons: "Pros: Single heap allocation for control block and object. Cons: Higher memory footprint than unique_ptr.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 37. Shared Pointers - Approach 1: Reference Counting
+#include <iostream>
+#include <memory>
+using namespace std;
+
+struct Node {
+    int id;
+    Node(int i) : id(i) {}
+};
+
+int main() {
+    auto p1 = make_shared<Node>(42);
+    cout << "Initial count: " << p1.use_count() << endl;
+    auto p2 = p1;
+    cout << "Shared count: " << p1.use_count() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto p1 = make_shared<Node>(42);", constructType: "Variable & Initializer", title: "Make Shared Instantiation", explanation: "Allocates Node and control block in single heap chunk returning shared_ptr.", keyDetails: [{ variableOrConstruct: "make_shared<Node>", role: "Single Heap Allocation", whyThisWay: "Allocates object and control block together." }] },
+          { lineNum: 2, codeSnippet: "auto p2 = p1;", constructType: "Variable & Initializer", title: "Copy Shared Pointer", explanation: "Copies shared_ptr, incrementing atomic reference counter to 2.", keyDetails: [{ variableOrConstruct: "p2 = p1", role: "Ref Counter Increment", whyThisWay: "Shares ownership." }] },
+          { lineNum: 3, codeSnippet: "p1.use_count()", constructType: "Return / Cleanup", title: "Inspect Use Count", explanation: "Returns active reference count 2.", keyDetails: [{ variableOrConstruct: "use_count()", role: "Count Reader", whyThisWay: "Queries active owners count." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Breaking Circular Reference Cycles with std::weak_ptr (FREE)", category: "FREE / Weak Pointer Cycle",
+        description: "Resolves memory leaks caused by circular shared_ptr references using std::weak_ptr.",
+        prosCons: "Pros: Prevents silent cyclic memory leaks. Cons: Cannot dereference weak_ptr directly.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 37. Shared & Weak Pointers - Approach 2: Circular Dependency
+#include <iostream>
+#include <memory>
+using namespace std;
+
+struct Person {
+    string name;
+    shared_ptr<Person> partner;
+    weak_ptr<Person> friendWeak; // Breaks cyclic loop!
+    Person(string n) : name(n) {}
+    ~Person() { cout << name << " destroyed." << endl; }
+};
+
+int main() {
+    auto alice = make_shared<Person>("Alice");
+    auto bob = make_shared<Person>("Bob");
+    alice->friendWeak = bob;
+    bob->friendWeak = alice;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "weak_ptr<Person> friendWeak;", constructType: "Variable & Initializer", title: "Declare Weak Pointer Member", explanation: "Declares non-owning weak pointer to break cyclic dependency chain.", keyDetails: [{ variableOrConstruct: "weak_ptr<Person>", role: "Weak Reference Member", whyThisWay: "Does not increment strong reference counter." }] },
+          { lineNum: 2, codeSnippet: "alice->friendWeak = bob;", constructType: "Condition & Branch", title: "Assign Weak Pointer", explanation: "Assigns shared_ptr to weak_ptr without increasing strong reference count.", keyDetails: [{ variableOrConstruct: "alice->friendWeak = bob", role: "Weak Assignment", whyThisWay: "Establishes non-owning link." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Clean Destruction on Scope Exit", explanation: "Scope exit reduces strong ref count to 0, successfully calling destructors for both Alice and Bob.", keyDetails: [{ variableOrConstruct: "~Person()", role: "Successful Destructor", whyThisWay: "Cleanly frees memory." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Promoting Weak Pointers via lock() (PRO)", category: "PRO / Lock Promotion",
+        description: "Promotes weak_ptr to shared_ptr using lock() and checks expired() status.",
+        prosCons: "Pros: Safe access to weak references. Cons: Lock returns null shared_ptr if target destroyed.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 37. Shared & Weak Pointers - Approach 3: Lock Promotion
+#include <iostream>
+#include <memory>
+using namespace std;
+
+int main() {
+    weak_ptr<int> wPtr;
+    {
+        auto sPtr = make_shared<int>(99);
+        wPtr = sPtr;
+        if (auto locked = wPtr.lock()) {
+            cout << "Locked value inside scope: " << *locked << endl;
+        }
+    }
+    if (wPtr.expired()) {
+        cout << "Weak pointer has expired." << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "wPtr = sPtr;", constructType: "Variable & Initializer", title: "Assign Shared to Weak Pointer", explanation: "Points weak_ptr to shared_ptr instance.", keyDetails: [{ variableOrConstruct: "wPtr = sPtr", role: "Weak Assignment", whyThisWay: "Observes shared resource." }] },
+          { lineNum: 2, codeSnippet: "if (auto locked = wPtr.lock()) { ... }", constructType: "Condition & Branch", title: "Promote Weak to Shared via lock()", explanation: "Promotes weak_ptr to temporary shared_ptr if target resource is alive.", keyDetails: [{ variableOrConstruct: "wPtr.lock()", role: "Lock Promotion", whyThisWay: "Safely converts weak to shared pointer." }] },
+          { lineNum: 3, codeSnippet: "if (wPtr.expired()) cout << 'Weak pointer has expired.';", constructType: "Return / Cleanup", title: "Check Expired Status", explanation: "Checks if target resource was destroyed after inner scope exit.", keyDetails: [{ variableOrConstruct: "wPtr.expired()", role: "Expiration Check", whyThisWay: "Verifies resource lifespan." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Custom Deleters with std::shared_ptr (PRO)", category: "PRO / Custom Deleter",
+        description: "Passes custom deleter to shared_ptr without modifying pointer type signature.",
+        prosCons: "Pros: Deleter type is erased inside control block (no template type clutter). Cons: Slightly larger control block.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 37. Shared Pointers - Approach 4: Custom Deleter
+#include <iostream>
+#include <memory>
+using namespace std;
+
+struct Socket {
+    int handle;
+    Socket(int h) : handle(h) {}
+};
+
+void closeSocket(Socket* s) {
+    if (s) {
+        cout << "Closing socket handle: " << s->handle << endl;
+        delete s;
+    }
+}
+
+int main() {
+    shared_ptr<Socket> sock(new Socket(8080), closeSocket);
+    cout << "Socket active on port: " << sock->handle << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "shared_ptr<Socket> sock(new Socket(8080), closeSocket);", constructType: "Variable & Initializer", title: "Construct Shared Pointer with Deleter", explanation: "Stores raw socket pointer and custom closeSocket function inside control block.", keyDetails: [{ variableOrConstruct: "closeSocket", role: "Custom Deleter Function", whyThisWay: "Erased deleter function stored in control block." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Socket active on port: ' << sock->handle;", constructType: "Condition & Branch", title: "Access Shared Resource", explanation: "Reads handle through shared_ptr arrow operator.", keyDetails: [{ variableOrConstruct: "sock->handle", role: "Resource Access", whyThisWay: "Dereferences smart pointer." }] },
+          { lineNum: 3, codeSnippet: "closeSocket", constructType: "Return / Cleanup", title: "Auto Deallocation via Custom Deleter", explanation: "Scope exit triggers closeSocket function automatically.", keyDetails: [{ variableOrConstruct: "closeSocket", role: "Deleter Execution", whyThisWay: "Cleans up socket handle." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Shared Pointers in Polymorphic Heterogeneous Collections (PRO)", category: "PRO / Polymorphic Collection",
+        description: "Stores shared_ptr<Base> elements in vector and shares individual objects across components.",
+        prosCons: "Pros: Shared dynamic dispatch across multiple system owners. Cons: Dynamic memory overhead.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 37. Shared Pointers - Approach 5: Polymorphic Containers
+#include <iostream>
+#include <memory>
+#include <vector>
+using namespace std;
+
+class Animal {
+public:
+    virtual void speak() const = 0;
+    virtual ~Animal() {}
+};
+
+class Dog : public Animal {
+public:
+    void speak() const override { cout << "Woof!" << endl; }
+};
+
+int main() {
+    vector<shared_ptr<Animal>> zoo;
+    auto dog = make_shared<Dog>();
+    zoo.push_back(dog);
+    dog->speak();
+    cout << "Dog ref count: " << dog.use_count() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "vector<shared_ptr<Animal>> zoo;", constructType: "Variable & Initializer", title: "Declare Polymorphic Shared Vector", explanation: "Declares vector storing shared pointers to Animal base class.", keyDetails: [{ variableOrConstruct: "vector<shared_ptr<Animal>>", role: "Polymorphic Vector", whyThisWay: "Stores shared polymorphic pointers." }] },
+          { lineNum: 2, codeSnippet: "zoo.push_back(dog);", constructType: "Condition & Branch", title: "Share Dog Pointer into Vector", explanation: "Pushes dog pointer into vector, incrementing ref count to 2.", keyDetails: [{ variableOrConstruct: "zoo.push_back(dog)", role: "Container Insertion", whyThisWay: "Shares ownership with vector." }] },
+          { lineNum: 3, codeSnippet: "dog.use_count()", constructType: "Return / Cleanup", title: "Inspect Ref Count", explanation: "Returns ref count 2 (dog local var + vector element).", keyDetails: [{ variableOrConstruct: "dog.use_count()", role: "Count Reader", whyThisWay: "Displays shared count." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Safe Self-Reference with std::enable_shared_from_this (PRO)", category: "PRO / enable_shared_from_this",
+        description: "Derives class from enable_shared_from_this<T> to safely obtain shared_ptr from this pointer.",
+        prosCons: "Pros: Prevents duplicate control block creation from raw this pointer. Cons: Object MUST be managed by shared_ptr.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 37. Shared Pointers - Approach 6: enable_shared_from_this
+#include <iostream>
+#include <memory>
+using namespace std;
+
+class Worker : public enable_shared_from_this<Worker> {
+public:
+    shared_ptr<Worker> getShared() {
+        return shared_from_this();
+    }
+};
+
+int main() {
+    auto w1 = make_shared<Worker>();
+    auto w2 = w1->getShared();
+    cout << "Worker ref count: " << w1.use_count() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "class Worker : public enable_shared_from_this<Worker> { ... };", constructType: "Header / Include", title: "Inherit enable_shared_from_this", explanation: "Derives Worker from enable_shared_from_this to allow safe shared_ptr generation.", keyDetails: [{ variableOrConstruct: "enable_shared_from_this<Worker>", role: "CRTP Base Class", whyThisWay: "Enables shared_from_this() method." }] },
+          { lineNum: 2, codeSnippet: "return shared_from_this();", constructType: "Return / Cleanup", title: "Return Shared Pointer from this", explanation: "Generates new shared_ptr pointing to existing control block from internal weak reference.", keyDetails: [{ variableOrConstruct: "shared_from_this()", role: "Self Shared Generator", whyThisWay: "Reuses existing control block safely." }] },
+          { lineNum: 3, codeSnippet: "auto w2 = w1->getShared();", constructType: "Variable & Initializer", title: "Invoke getShared()", explanation: "Increments ref count to 2 without creating duplicate control block.", keyDetails: [{ variableOrConstruct: "w1->getShared()", role: "Method Call", whyThisWay: "Obtains shared ownership." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Dynamic Pointer Casting (std::dynamic_pointer_cast) (PRO)", category: "PRO / Dynamic Pointer Cast",
+        description: "Casts std::shared_ptr<Base> to std::shared_ptr<Derived> using dynamic_pointer_cast.",
+        prosCons: "Pros: Safe RTTI dynamic downcasting for shared pointers. Cons: Requires virtual table RTTI metadata.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 37. Shared Pointers - Approach 7: Dynamic Pointer Cast
+#include <iostream>
+#include <memory>
+using namespace std;
+
+struct Vehicle { virtual ~Vehicle() {} };
+struct Car : public Vehicle {
+    void drive() { cout << "Driving car!" << endl; }
+};
+
+int main() {
+    shared_ptr<Vehicle> v = make_shared<Car>();
+    if (auto c = dynamic_pointer_cast<Car>(v)) {
+        c->drive();
+        cout << "Ref count after cast: " << v.use_count() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "shared_ptr<Vehicle> v = make_shared<Car>();", constructType: "Variable & Initializer", title: "Instantiate Base Shared Pointer", explanation: "Instantiates Car object assigned to Vehicle base shared_ptr.", keyDetails: [{ variableOrConstruct: "shared_ptr<Vehicle>", role: "Base Shared Pointer", whyThisWay: "Holds polymorphic object." }] },
+          { lineNum: 2, codeSnippet: "if (auto c = dynamic_pointer_cast<Car>(v))", constructType: "Condition & Branch", title: "Dynamic Pointer Downcast", explanation: "Safely downcasts Vehicle shared_ptr to Car shared_ptr using RTTI.", keyDetails: [{ variableOrConstruct: "dynamic_pointer_cast<Car>", role: "Shared Pointer Cast", whyThisWay: "Shares control block during RTTI cast." }] },
+          { lineNum: 3, codeSnippet: "c->drive();", constructType: "Return / Cleanup", title: "Invoke Derived Method", explanation: "Invokes Car::drive() method after successful downcast.", keyDetails: [{ variableOrConstruct: "c->drive()", role: "Derived Method Call", whyThisWay: "Executes derived behavior." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Aliasing Constructor for Member Pointer Sharing (PRO)", category: "PRO / Aliasing Constructor",
+        description: "Shares ownership of parent object while pointing to inner member variable.",
+        prosCons: "Pros: Keeps parent object alive while exposing internal sub-object pointer. Cons: Complex syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 37. Shared Pointers - Approach 8: Aliasing Constructor
+#include <iostream>
+#include <memory>
+#include <string>
+using namespace std;
+
+struct PersonData {
+    string name;
+    int age;
+    PersonData(string n, int a) : name(n), age(a) {}
+};
+
+int main() {
+    auto person = make_shared<PersonData>("Charlie", 30);
+    shared_ptr<int> agePtr(person, &person->age);
+    cout << "Age via aliased ptr: " << *agePtr << endl;
+    cout << "Ref count: " << agePtr.use_count() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "shared_ptr<int> agePtr(person, &person->age);", constructType: "Variable & Initializer", title: "Construct Aliased Shared Pointer", explanation: "Shares control block of person object while storing address of age member.", keyDetails: [{ variableOrConstruct: "agePtr(person, &person->age)", role: "Aliasing Constructor", whyThisWay: "Points to member while sharing parent ref count." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Age via aliased ptr: ' << *agePtr;", constructType: "Condition & Branch", title: "Dereference Aliased Pointer", explanation: "Dereferences agePtr to yield integer 30.", keyDetails: [{ variableOrConstruct: "*agePtr", role: "Member Dereference", whyThisWay: "Reads member value directly." }] },
+          { lineNum: 3, codeSnippet: "agePtr.use_count()", constructType: "Return / Cleanup", title: "Inspect Ref Count", explanation: "Returns 2 because agePtr shares control block of person.", keyDetails: [{ variableOrConstruct: "use_count()", role: "Shared Count", whyThisWay: "Reflects parent ownership count." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Atomic Shared Pointer Operations (PRO)", category: "PRO / Atomic Shared Pointer",
+        description: "Performs thread-safe atomic pointer swaps using std::atomic<shared_ptr<T>> (C++20).",
+        prosCons: "Pros: Thread-safe pointer replacement without external mutex locks. Cons: Requires modern compiler support.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 37. Shared Pointers - Approach 9: Atomic Shared Pointer
+#include <iostream>
+#include <memory>
+using namespace std;
+
+struct Config {
+    int timeout;
+    Config(int t) : timeout(t) {}
+};
+
+int main() {
+    shared_ptr<Config> globalCfg = make_shared<Config>(30);
+    auto newCfg = make_shared<Config>(60);
+    atomic_store(&globalCfg, newCfg);
+    auto current = atomic_load(&globalCfg);
+    cout << "Atomic Timeout: " << current->timeout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "atomic_store(&globalCfg, newCfg);", constructType: "Condition & Branch", title: "Atomic Store Pointer", explanation: "Atomically replaces globalCfg pointer with newCfg in thread-safe manner.", keyDetails: [{ variableOrConstruct: "atomic_store", role: "Atomic Write", whyThisWay: "Thread-safe pointer update." }] },
+          { lineNum: 2, codeSnippet: "auto current = atomic_load(&globalCfg);", constructType: "Variable & Initializer", title: "Atomic Load Pointer", explanation: "Atomically loads active shared_ptr, incrementing ref count safely.", keyDetails: [{ variableOrConstruct: "atomic_load", role: "Atomic Read", whyThisWay: "Thread-safe pointer load." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Atomic Timeout: ' << current->timeout;", constructType: "Return / Cleanup", title: "Access Atomic Config", explanation: "Reads updated timeout value 60.", keyDetails: [{ variableOrConstruct: "current->timeout", role: "Value Access", whyThisWay: "Reads atomic config." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Shared Pointer Overhead Analysis & Benchmarking (PRO)", category: "PRO / Performance Overhead",
+        description: "Compares memory footprint and performance characteristics of raw pointer vs unique_ptr vs shared_ptr.",
+        prosCons: "Pros: Understands exact atomic ref-count cost. Cons: Diagnostic analysis demonstration.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 37. Shared Pointers - Approach 10: Overhead Analysis
+#include <iostream>
+#include <memory>
+using namespace std;
+
+int main() {
+    cout << "Size of Raw Pointer:    " << sizeof(int*) << " bytes" << endl;
+    cout << "Size of unique_ptr:     " << sizeof(unique_ptr<int>) << " bytes" << endl;
+    cout << "Size of shared_ptr:     " << sizeof(shared_ptr<int>) << " bytes" << endl;
+    cout << "Size of weak_ptr:       " << sizeof(weak_ptr<int>) << " bytes" << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "sizeof(unique_ptr<int>)", constructType: "Condition & Branch", title: "Inspect Unique Pointer Size", explanation: "Measures 8 bytes (same size as raw pointer).", keyDetails: [{ variableOrConstruct: "sizeof(unique_ptr)", role: "Size Query", whyThisWay: "Demonstrates zero overhead." }] },
+          { lineNum: 2, codeSnippet: "sizeof(shared_ptr<int>)", constructType: "Condition & Branch", title: "Inspect Shared Pointer Size", explanation: "Measures 16 bytes (raw object pointer + control block pointer).", keyDetails: [{ variableOrConstruct: "sizeof(shared_ptr)", role: "Size Query", whyThisWay: "Demonstrates dual pointer size." }] },
+          { lineNum: 3, codeSnippet: "sizeof(weak_ptr<int>)", constructType: "Return / Cleanup", title: "Inspect Weak Pointer Size", explanation: "Measures 16 bytes (raw object pointer + control block pointer).", keyDetails: [{ variableOrConstruct: "sizeof(weak_ptr)", role: "Size Query", whyThisWay: "Demonstrates weak pointer size." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem38Details(): LearnModule {
+  return {
+    id: "med_move_semantics",
+    title: "38. Move Semantics & Rvalue References",
+    category: "Modern C++",
+    difficulty: "medium",
+    shortDesc: "Zero-copy resource transfers using std::move and T&&.",
+    fullCode: `// 38. Move Semantics - Approach 1: Move Constructor
+#include <iostream>
+#include <utility>
+using namespace std;
+
+class Buffer {
+public:
+    int* data;
+    size_t size;
+    Buffer(size_t s) : size(s), data(new int[s]) { cout << "Allocated." << endl; }
+    ~Buffer() { delete[] data; cout << "Deallocated." << endl; }
+    // Move Constructor
+    Buffer(Buffer&& other) noexcept : data(other.data), size(other.size) {
+        other.data = nullptr;
+        other.size = 0;
+        cout << "Moved!" << endl;
+    }
+};
+
+int main() {
+    Buffer b1(1000);
+    Buffer b2 = move(b1);
+    return 0;
+}`,
+    problemStatement: {
+      title: "38. Move Semantics & Rvalue References",
+      objective: "Master move semantics (C++11), rvalue references (T&&), std::move, Rule of 5, perfect forwarding (std::forward), and zero-copy performance optimizations.",
+      description: "Implement **Move Semantics & Rvalue References** (Modern C++). Zero-copy resource transfers using std::move and T&&. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Heavy resource buffers, dynamic arrays, and temporary rvalue objects.",
+      outputDesc: "Zero-copy pointer transfers, move notifications, and optimized execution profiles.",
+      takeaways: [
+        "Lvalue references (T&) bind to named variables; Rvalue references (T&&) bind to temporary objects",
+        "Move constructors transfer raw pointers from source to target without allocating new heap memory",
+        "std::move(x) performs an unconditional static_cast to an rvalue reference (T&&)",
+        "Always mark move constructors and move assignment operators as noexcept for STL container compatibility"
+      ],
+      examples: [
+        { id: 1, input: "Buffer b2 = std::move(b1)", output: "Moved! (b1.data becomes nullptr)", explanation: "Transfers dynamic heap array pointer from b1 to b2 in O(1) time." },
+        { id: 2, input: "forward<T>(arg) in template", output: "Perfect Forwarding preserved", explanation: "Preserves exact lvalue/rvalue category when passing arguments." },
+        { id: 3, input: "vector.push_back(move(obj))", output: "Move constructed into vector", explanation: "Avoids deep heap copy when inserting element into container." }
+      ],
+      constraints: ["Move constructors MUST reset source pointer to nullptr to prevent double-free.", "Move operations MUST be decorated with noexcept."],
+      companies: ["Google", "Meta", "Apple", "Microsoft", "Amazon"],
+      acceptanceRate: "85.2%",
+      totalAccepted: "1,720,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Lvalue vs Rvalue References (T& vs T&&) (FREE)", category: "FREE / Rvalue References",
+        description: "Binds named variables to lvalue references T& and temporary literals to rvalue references T&&.",
+        prosCons: "Pros: Distinguishes permanent memory locations from transient temporaries. Cons: Syntax syntax distinction.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 38. Move Semantics - Approach 1: Lvalue vs Rvalue
+#include <iostream>
+using namespace std;
+
+void inspect(int& x) { cout << "Lvalue reference: " << x << endl; }
+void inspect(int&& x) { cout << "Rvalue reference: " << x << endl; }
+
+int main() {
+    int a = 10;
+    inspect(a);
+    inspect(20);
+    inspect(a + 5);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "void inspect(int& x) { cout << 'Lvalue reference: ' << x; }", constructType: "Function Signature", title: "Lvalue Reference Overload", explanation: "Binds to named persistent lvalue variable a.", keyDetails: [{ variableOrConstruct: "int& x", role: "Lvalue Ref Overload", whyThisWay: "Binds to named lvalues." }] },
+          { lineNum: 2, codeSnippet: "void inspect(int&& x) { cout << 'Rvalue reference: ' << x; }", constructType: "Function Signature", title: "Rvalue Reference Overload", explanation: "Binds to temporary rvalue expressions like literal 20 or (a + 5).", keyDetails: [{ variableOrConstruct: "int&& x", role: "Rvalue Ref Overload", whyThisWay: "Binds to temporary rvalues." }] },
+          { lineNum: 3, codeSnippet: "inspect(a + 5);", constructType: "Return / Cleanup", title: "Invoke Rvalue Overload", explanation: "Evaluates temporary expression (a + 5) and dispatches to rvalue reference overload.", keyDetails: [{ variableOrConstruct: "inspect(a + 5)", role: "Function Call", whyThisWay: "Passes temporary rvalue." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Writing a Move Constructor (Buffer(Buffer&&)) (FREE)", category: "FREE / Move Constructor",
+        description: "Steals dynamic pointer resources in move constructor and zeroes out source object.",
+        prosCons: "Pros: O(1) instantaneous resource transfer regardless of buffer size. Cons: Source object enters moved-from state.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 38. Move Semantics - Approach 2: Move Constructor
+#include <iostream>
+#include <utility>
+using namespace std;
+
+class MemoryBlock {
+public:
+    int* ptr;
+    size_t length;
+    MemoryBlock(size_t len) : length(len), ptr(new int[len]) {}
+    ~MemoryBlock() { delete[] ptr; }
+    
+    // Move Constructor
+    MemoryBlock(MemoryBlock&& other) noexcept : ptr(other.ptr), length(other.length) {
+        other.ptr = nullptr;
+        other.length = 0;
+    }
+};
+
+int main() {
+    MemoryBlock m1(1000000);
+    MemoryBlock m2(move(m1));
+    cout << "m2 length: " << m2.length << " | m1 ptr null: " << (m1.ptr == nullptr ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "MemoryBlock(MemoryBlock&& other) noexcept : ptr(other.ptr), length(other.length)", constructType: "Function Signature", title: "Move Constructor Header", explanation: "Steals raw pointer other.ptr directly in member initializer list.", keyDetails: [{ variableOrConstruct: "MemoryBlock&& other", role: "Rvalue Ref Parameter", whyThisWay: "Accepts temporary or moved instance." }] },
+          { lineNum: 2, codeSnippet: "other.ptr = nullptr; other.length = 0;", constructType: "Variable & Initializer", title: "Nullify Source Object Pointer", explanation: "Sets source pointer to nullptr so its destructor will not free stolen heap memory.", keyDetails: [{ variableOrConstruct: "other.ptr = nullptr", role: "Nullifier", whyThisWay: "Prevents double free bug." }] },
+          { lineNum: 3, codeSnippet: "MemoryBlock m2(move(m1));", constructType: "Return / Cleanup", title: "Invoke Move Constructor", explanation: "Casts m1 to rvalue reference triggering move constructor.", keyDetails: [{ variableOrConstruct: "move(m1)", role: "Move Cast", whyThisWay: "Triggers move constructor." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Move Assignment Operator (operator=(T&&)) (PRO)", category: "PRO / Move Assignment",
+        description: "Implements move assignment operator with self-assignment guard and resource cleanup.",
+        prosCons: "Pros: Reuses existing object memory without leak. Cons: Must release existing held resource.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 38. Move Semantics - Approach 3: Move Assignment
+#include <iostream>
+#include <utility>
+using namespace std;
+
+class DynamicArray {
+public:
+    int* arr;
+    size_t size;
+    DynamicArray(size_t s) : size(s), arr(new int[s]) {}
+    ~DynamicArray() { delete[] arr; }
+    
+    DynamicArray& operator=(DynamicArray&& other) noexcept {
+        if (this != &other) {
+            delete[] arr; // Clean existing
+            arr = other.arr;
+            size = other.size;
+            other.arr = nullptr;
+            other.size = 0;
+        }
+        return *this;
+    }
+};
+
+int main() {
+    DynamicArray a1(10), a2(20);
+    a2 = move(a1);
+    cout << "a2 size: " << a2.size << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (this != &other) { delete[] arr; ... }", constructType: "Condition & Branch", title: "Self-Assignment Guard & Existing Cleanup", explanation: "Guards against self assignment (a = move(a)) and frees existing held heap array.", keyDetails: [{ variableOrConstruct: "this != &other", role: "Self Guard", whyThisWay: "Prevents self destruction." }] },
+          { lineNum: 2, codeSnippet: "arr = other.arr; other.arr = nullptr;", constructType: "Variable & Initializer", title: "Steal Pointer & Reset Source", explanation: "Transfers pointer ownership and resets source to nullptr.", keyDetails: [{ variableOrConstruct: "other.arr = nullptr", role: "Pointer Transfer", whyThisWay: "Transfers ownership." }] },
+          { lineNum: 3, codeSnippet: "return *this;", constructType: "Return / Cleanup", title: "Return Reference to Self", explanation: "Returns reference *this to enable chained assignment.", keyDetails: [{ variableOrConstruct: "return *this", role: "Chain Return", whyThisWay: "Enables chained operator calls." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Forced Ownership Transfer with std::move (PRO)", category: "PRO / std::move",
+        description: "Uses std::move() to convert lvalue to rvalue reference, triggering move operations.",
+        prosCons: "Pros: Enables explicit ownership transfer. Cons: Moved-from object state must not be dereferenced.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 38. Move Semantics - Approach 4: std::move
+#include <iostream>
+#include <string>
+#include <utility>
+using namespace std;
+
+int main() {
+    string str1 = "Heavy String Resource";
+    string str2 = move(str1);
+    cout << "str2: " << str2 << endl;
+    cout << "str1 size after move: " << str1.size() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "string str2 = move(str1);", constructType: "Variable & Initializer", title: "Move Construct String", explanation: "Converts str1 to rvalue reference, invoking std::string move constructor to steal string buffer.", keyDetails: [{ variableOrConstruct: "move(str1)", role: "Move Cast", whyThisWay: "Steals string buffer without copy." }] },
+          { lineNum: 2, codeSnippet: "cout << 'str2: ' << str2;", constructType: "Condition & Branch", title: "Access Destination String", explanation: "Reads stolen string buffer contents from str2.", keyDetails: [{ variableOrConstruct: "str2", role: "Target Owner", whyThisWay: "Holds stolen string." }] },
+          { lineNum: 3, codeSnippet: "cout << 'str1 size after move: ' << str1.size();", constructType: "Return / Cleanup", title: "Inspect Moved-From State", explanation: "Reads moved-from string size (0).", keyDetails: [{ variableOrConstruct: "str1.size()", role: "Moved-From State", whyThisWay: "Shows empty moved-from state." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Complete Implementation of Rule of 5 (PRO)", category: "PRO / Rule of 5",
+        description: "Implements Destructor, Copy Constructor, Copy Assignment, Move Constructor, and Move Assignment.",
+        prosCons: "Pros: Complete resource management class compliance. Cons: Verbose code requirement.",
+        timeComplexity: "O(N) copy, O(1) move", spaceComplexity: "O(N) copy, O(1) move", isFree: false,
+        code: `// 38. Move Semantics - Approach 5: Rule of 5
+#include <iostream>
+#include <utility>
+using namespace std;
+
+class Resource {
+public:
+    int* ptr;
+    Resource(int val) : ptr(new int(val)) {}
+    ~Resource() { delete ptr; }
+    Resource(const Resource& o) : ptr(new int(*o.ptr)) {}
+    Resource& operator=(const Resource& o) {
+        if (this != &o) { delete ptr; ptr = new int(*o.ptr); }
+        return *this;
+    }
+    Resource(Resource&& o) noexcept : ptr(o.ptr) { o.ptr = nullptr; }
+    Resource& operator=(Resource&& o) noexcept {
+        if (this != &o) { delete ptr; ptr = o.ptr; o.ptr = nullptr; }
+        return *this;
+    }
+};
+
+int main() {
+    Resource r1(10);
+    Resource r2 = move(r1);
+    cout << "r2 val: " << *r2.ptr << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Resource(const Resource& o) : ptr(new int(*o.ptr)) {}", constructType: "Function Signature", title: "Deep Copy Constructor", explanation: "Allocates new memory block and performs deep copy.", keyDetails: [{ variableOrConstruct: "Copy Constructor", role: "Deep Copy", whyThisWay: "Duplicates heap resource." }] },
+          { lineNum: 2, codeSnippet: "Resource(Resource&& o) noexcept : ptr(o.ptr) { o.ptr = nullptr; }", constructType: "Function Signature", title: "Move Constructor", explanation: "Steals raw pointer and resets source pointer to nullptr.", keyDetails: [{ variableOrConstruct: "Move Constructor", role: "Pointer Steal", whyThisWay: "Transfers pointer without copy." }] },
+          { lineNum: 3, codeSnippet: "Resource r2 = move(r1);", constructType: "Return / Cleanup", title: "Invoke Rule of 5 Move", explanation: "Dispatches to move constructor.", keyDetails: [{ variableOrConstruct: "r2 = move(r1)", role: "Move Invocation", whyThisWay: "Executes move constructor." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Perfect Forwarding with std::forward & Universal References (PRO)", category: "PRO / Perfect Forwarding",
+        description: "Preserves value category (lvalue vs rvalue) when forwarding arguments using std::forward<T>(arg).",
+        prosCons: "Pros: Eliminates redundant temporary copies in template wrappers. Cons: Complex universal reference rules.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 38. Move Semantics - Approach 6: Perfect Forwarding
+#include <iostream>
+#include <utility>
+using namespace std;
+
+void process(int& x) { cout << "Lvalue processed." << endl; }
+void process(int&& x) { cout << "Rvalue processed." << endl; }
+
+template <typename T>
+void wrapper(T&& arg) {
+    process(forward<T>(arg));
+}
+
+int main() {
+    int val = 50;
+    wrapper(val);
+    wrapper(100);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T> void wrapper(T&& arg)", constructType: "Function Signature", title: "Universal Reference Template Signature", explanation: "T&& in template parameter deduction context acts as universal reference binding to both lvalues and rvalues.", keyDetails: [{ variableOrConstruct: "T&& arg", role: "Universal Reference", whyThisWay: "Deduces lvalue ref or rvalue ref." }] },
+          { lineNum: 2, codeSnippet: "process(forward<T>(arg));", constructType: "Condition & Branch", title: "Perfect Forwarding via std::forward", explanation: "Forwards arg preserving exact original value category (lvalue ref or rvalue ref).", keyDetails: [{ variableOrConstruct: "forward<T>(arg)", role: "Perfect Forwarder", whyThisWay: "Preserves value category." }] },
+          { lineNum: 3, codeSnippet: "wrapper(100);", constructType: "Return / Cleanup", title: "Forward Rvalue Temporary", explanation: "Passes temporary rvalue 100 which forwards cleanly to rvalue process overload.", keyDetails: [{ variableOrConstruct: "wrapper(100)", role: "Test Call", whyThisWay: "Tests rvalue forwarding." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: RVO vs std::move Return Optimization (PRO)", category: "PRO / RVO Analysis",
+        description: "Demonstrates how returning local object by value triggers Named RVO (NRVO) and why return std::move(x) breaks it.",
+        prosCons: "Pros: Understands compiler copy elision. Cons: Prevents bad habit of returning move(local).",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 38. Move Semantics - Approach 7: NRVO Analysis
+#include <iostream>
+#include <string>
+#include <utility>
+using namespace std;
+
+string createStringNRVO() {
+    string s = "Constructed in-place via NRVO";
+    return s; // NRVO elides move/copy entirely!
+}
+
+int main() {
+    string res = createStringNRVO();
+    cout << res << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "return s;", constructType: "Return / Cleanup", title: "Clean Return Triggers NRVO", explanation: "Returning local named object s by value allows compiler to construct result directly in caller memory space.", keyDetails: [{ variableOrConstruct: "return s", role: "NRVO Return", whyThisWay: "Triggers zero-copy NRVO copy elision." }] },
+          { lineNum: 2, codeSnippet: "string res = createStringNRVO();", constructType: "Variable & Initializer", title: "Receive NRVO Return Value", explanation: "Receives string created directly in caller stack frame without copy or move.", keyDetails: [{ variableOrConstruct: "createStringNRVO()", role: "NRVO Receiver", whyThisWay: "Constructs in-place." }] },
+          { lineNum: 3, codeSnippet: "cout << res;", constructType: "Condition & Branch", title: "Print Returned String", explanation: "Prints NRVO constructed string.", keyDetails: [{ variableOrConstruct: "res", role: "Output", whyThisWay: "Displays result." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Move-Only Types in Containers (PRO)", category: "PRO / Move-Only Container",
+        description: "Manages move-only objects like unique_ptr inside std::vector using emplace_back and std::move.",
+        prosCons: "Pros: Enforces exclusive ownership inside dynamic collections. Cons: Cannot use copy algorithm calls.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 38. Move Semantics - Approach 8: Move-Only Vector
+#include <iostream>
+#include <vector>
+#include <memory>
+using namespace std;
+
+int main() {
+    vector<unique_ptr<int>> vec;
+    auto p = make_unique<int>(777);
+    vec.push_back(move(p));
+    cout << "Vector element: " << *vec[0] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "vector<unique_ptr<int>> vec;", constructType: "Variable & Initializer", title: "Move-Only Vector Declaration", explanation: "Declares vector container holding move-only unique_ptr elements.", keyDetails: [{ variableOrConstruct: "vector<unique_ptr<int>>", role: "Move Only Container", whyThisWay: "Holds non-copyable elements." }] },
+          { lineNum: 2, codeSnippet: "vec.push_back(move(p));", constructType: "Condition & Branch", title: "Move Pointer into Vector", explanation: "Uses std::move to transfer unique_ptr into vector.", keyDetails: [{ variableOrConstruct: "move(p)", role: "Move Transfer", whyThisWay: "Transfers ownership to vector." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Vector element: ' << *vec[0];", constructType: "Return / Cleanup", title: "Access Moved Element", explanation: "Dereferences unique_ptr stored inside vector.", keyDetails: [{ variableOrConstruct: "*vec[0]", role: "Element Dereference", whyThisWay: "Reads stored value." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: String Concatenation Efficiency with Move Semantics (PRO)", category: "PRO / String Move",
+        description: "Compares expensive string copy concatenations vs move semantics buffer re-use.",
+        prosCons: "Pros: Dramatically speeds up string assembly loops. Cons: Requires explicit rvalue conversions.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 38. Move Semantics - Approach 9: String Concatenation
+#include <iostream>
+#include <string>
+#include <utility>
+using namespace std;
+
+int main() {
+    string a = "Hello ";
+    string b = "World!";
+    string c = move(a) + b;
+    cout << "Concatenated: " << c << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "string c = move(a) + b;", constructType: "Variable & Initializer", title: "Move String Buffer in Operator+", explanation: "Casts string a to rvalue, allowing operator+ to append b directly into a's buffer without new heap allocation.", keyDetails: [{ variableOrConstruct: "move(a) + b", role: "Buffer Reuse Addition", whyThisWay: "Reuses a buffer for concatenation." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Concatenated: ' << c;", constructType: "Condition & Branch", title: "Print Result String", explanation: "Prints 'Hello World!'.", keyDetails: [{ variableOrConstruct: "c", role: "Output", whyThisWay: "Displays concatenated result." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Ref-Qualified Member Functions (& vs &&) (PRO)", category: "PRO / Ref-Qualified Members",
+        description: "Overloads member functions based on whether implicit *this instance is an lvalue (&) or rvalue (&&).",
+        prosCons: "Pros: Enables zero-copy extraction from temporary objects. Cons: Advanced C++ syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 38. Move Semantics - Approach 10: Ref Qualifiers
+#include <iostream>
+#include <vector>
+#include <utility>
+using namespace std;
+
+class Container {
+private:
+    vector<int> data;
+public:
+    Container() : data({1, 2, 3, 4, 5}) {}
+    // Lvalue ref qualifier: Return const ref
+    const vector<int>& getData() const & {
+        cout << "Lvalue getData() called (copy)." << endl;
+        return data;
+    }
+    // Rvalue ref qualifier: Return moved vector
+    vector<int> getData() && {
+        cout << "Rvalue getData() called (move)." << endl;
+        return move(data);
+    }
+};
+
+int main() {
+    Container c;
+    auto v1 = c.getData();
+    auto v2 = Container().getData();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "const vector<int>& getData() const &", constructType: "Function Signature", title: "Lvalue Ref-Qualified Method", explanation: "Invoked when calling getData() on persistent lvalue container instance c.", keyDetails: [{ variableOrConstruct: "const &", role: "Lvalue Ref Qualifier", whyThisWay: "Returns const reference without move." }] },
+          { lineNum: 2, codeSnippet: "vector<int> getData() &&", constructType: "Function Signature", title: "Rvalue Ref-Qualified Method", explanation: "Invoked when calling getData() on temporary rvalue container instance Container().", keyDetails: [{ variableOrConstruct: "&&", role: "Rvalue Ref Qualifier", whyThisWay: "Moves internal vector out of temporary object." }] },
+          { lineNum: 3, codeSnippet: "auto v2 = Container().getData();", constructType: "Return / Cleanup", title: "Invoke Rvalue Method", explanation: "Dispatches to rvalue ref-qualified overload moving data buffer directly.", keyDetails: [{ variableOrConstruct: "Container().getData()", role: "Rvalue Method Call", whyThisWay: "Steals data from temporary." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem39Details(): LearnModule {
+  return {
+    id: "med_lambdas",
+    title: "39. Lambda Closures & Captures",
+    category: "Modern C++",
+    difficulty: "medium",
+    shortDesc: "Anonymous functions with capture clauses ([=], [&]) and mutable.",
+    fullCode: `// 39. Lambda Closures - Approach 1: Value Captures
+#include <iostream>
+using namespace std;
+
+int main() {
+    int factor = 3;
+    auto multiply = [factor](int x) { return x * factor; };
+    cout << "5 * 3 = " << multiply(5) << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "39. Lambda Closures & Captures",
+      objective: "Master C++ anonymous functions, capture clauses ([=], [&], [this], init captures), mutable lambdas, generic lambdas, std::function wrappers, and stateless lambda function-pointer decay.",
+      description: "Implement **Lambda Closures & Captures** (Modern C++). Anonymous functions with capture clauses ([=], [&]) and mutable. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Inline lambda expressions, captured environment variables, and argument parameters.",
+      outputDesc: "Computed functional outputs, captured state mutations, and callback execution flows.",
+      takeaways: [
+        "Capture clauses determine how outer local variables are accessed: [=] by value, [&] by reference",
+        "By default, value-captured variables are const inside the lambda body; use mutable to modify copies",
+        "C++14 generalized init captures [x = std::move(p)] allow moving objects into closures",
+        "Stateless lambdas without captures implicitly decay to standard C-style function pointers"
+      ],
+      examples: [
+        { id: 1, input: "auto add = [](int a, int b) { return a + b; }", output: "add(3, 4) -> 7", explanation: "Basic stateless lambda computing sum of two parameters." },
+        { id: 2, input: "[&count]() { count++; }", output: "Outer count variable incremented", explanation: "Reference capture mutates outer local variable directly." },
+        { id: 3, input: "std::function<int(int)> fn = lambda", output: "Type-erased callable wrapper", explanation: "Wraps closure in std::function for callback storage." }
+      ],
+      constraints: ["Be cautious with reference captures [&] in asynchronous or out-of-scope lambdas to avoid dangling references."],
+      companies: ["Google", "Meta", "Microsoft", "Apple", "Amazon"],
+      acceptanceRate: "91.0%",
+      totalAccepted: "2,050,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Lambda Syntax & Value Captures ([=]) (FREE)", category: "FREE / Value Captures",
+        description: "Captures local variables by value into closure [val] for read-only functional processing.",
+        prosCons: "Pros: Safe copy capture immune to outer variable lifetime changes. Cons: Copies captured variable.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 39. Lambda Closures - Approach 1: Value Capture
+#include <iostream>
+using namespace std;
+
+int main() {
+    int multiplier = 10;
+    auto scale = [multiplier](int val) { return val * multiplier; };
+    cout << "Scaled 4: " << scale(4) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto scale = [multiplier](int val) { return val * multiplier; };", constructType: "Function Signature", title: "Lambda Declaration with Value Capture", explanation: "Captures multiplier by value inside closure object.", keyDetails: [{ variableOrConstruct: "[multiplier]", role: "Value Capture Clause", whyThisWay: "Captures copy of multiplier." }] },
+          { lineNum: 2, codeSnippet: "scale(4)", constructType: "Condition & Branch", title: "Invoke Lambda Closure", explanation: "Invokes closure passing parameter 4, producing 40.", keyDetails: [{ variableOrConstruct: "scale(4)", role: "Closure Invocation", whyThisWay: "Executes lambda function body." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Scaled 4: ' << scale(4);", constructType: "Return / Cleanup", title: "Print Lambda Result", explanation: "Prints computed result 40.", keyDetails: [{ variableOrConstruct: "scale(4)", role: "Output", whyThisWay: "Displays result." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Reference Captures ([&]) & State Mutation (FREE)", category: "FREE / Reference Captures",
+        description: "Captures local variables by reference [&var] allowing direct state mutation.",
+        prosCons: "Pros: Zero copy overhead, allows mutating outer local variables. Cons: Risk of dangling reference.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 39. Lambda Closures - Approach 2: Reference Capture
+#include <iostream>
+using namespace std;
+
+int main() {
+    int sum = 0;
+    auto add = [&sum](int val) { sum += val; };
+    add(10);
+    add(20);
+    cout << "Total Sum: " << sum << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto add = [&sum](int val) { sum += val; };", constructType: "Function Signature", title: "Reference Capture Lambda", explanation: "Captures variable sum by reference using [&sum].", keyDetails: [{ variableOrConstruct: "[&sum]", role: "Ref Capture Clause", whyThisWay: "Captures sum variable reference." }] },
+          { lineNum: 2, codeSnippet: "add(10); add(20);", constructType: "Condition & Branch", title: "Mutate Captured State", explanation: "Invokes lambda twice mutating outer sum variable directly.", keyDetails: [{ variableOrConstruct: "sum += val", role: "State Mutation", whyThisWay: "Mutates outer local state." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Total Sum: ' << sum;", constructType: "Return / Cleanup", title: "Output Mutated State", explanation: "Prints updated sum value 30.", keyDetails: [{ variableOrConstruct: "sum", role: "Output State", whyThisWay: "Displays updated state." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Mutable Lambdas for Internal Capture Copies (PRO)", category: "PRO / Mutable Lambda",
+        description: "Uses mutable keyword to allow modification of value-captured variables across calls.",
+        prosCons: "Pros: Maintains internal closure state independent of outer variable. Cons: Does not mutate outer variable.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 39. Lambda Closures - Approach 3: Mutable Lambda
+#include <iostream>
+using namespace std;
+
+int main() {
+    int counter = 0;
+    auto step = [counter]() mutable {
+        return ++counter;
+    };
+    cout << "Call 1: " << step() << endl;
+    cout << "Call 2: " << step() << endl;
+    cout << "Outer counter: " << counter << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto step = [counter]() mutable { return ++counter; };", constructType: "Function Signature", title: "Mutable Lambda Header", explanation: "Removes const qualifier from operator() method of closure, allowing internal counter copy mutation.", keyDetails: [{ variableOrConstruct: "mutable", role: "Mutable Specifier", whyThisWay: "Allows mutating internal capture copy." }] },
+          { lineNum: 2, codeSnippet: "step()", constructType: "Condition & Branch", title: "Invoke Mutable State", explanation: "Increments internal closure counter state (1, 2).", keyDetails: [{ variableOrConstruct: "step()", role: "Stateful Call", whyThisWay: "Increments closure internal copy." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Outer counter: ' << counter;", constructType: "Return / Cleanup", title: "Inspect Outer Variable Unchanged", explanation: "Prints outer counter (still 0 because capture was by value).", keyDetails: [{ variableOrConstruct: "counter", role: "Outer Unchanged State", whyThisWay: "Shows outer variable preserved." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Generalized Init Captures / Move Captures (C++14) (PRO)", category: "PRO / Init Capture",
+        description: "Captures move-only objects into closure using init capture syntax [ptr = std::move(p)].",
+        prosCons: "Pros: Enables move-only types (unique_ptr) inside lambdas. Cons: C++14 or higher required.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 39. Lambda Closures - Approach 4: Init Capture
+#include <iostream>
+#include <memory>
+#include <utility>
+using namespace std;
+
+int main() {
+    auto ptr = make_unique<int>(500);
+    auto lambda = [p = move(ptr)]() {
+        cout << "Captured move-only ptr value: " << *p << endl;
+    };
+    lambda();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto lambda = [p = move(ptr)]() { ... };", constructType: "Function Signature", title: "Init Capture with std::move", explanation: "Moves ptr directly into closure member p.", keyDetails: [{ variableOrConstruct: "[p = move(ptr)]", role: "Init Capture", whyThisWay: "Moves ownership into closure member." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Captured move-only ptr value: ' << *p;", constructType: "Condition & Branch", title: "Access Moved Member inside Lambda", explanation: "Dereferences moved pointer p inside lambda body.", keyDetails: [{ variableOrConstruct: "*p", role: "Member Dereference", whyThisWay: "Reads value from closure member." }] },
+          { lineNum: 3, codeSnippet: "lambda();", constructType: "Return / Cleanup", title: "Invoke Lambda", explanation: "Executes lambda printing 500.", keyDetails: [{ variableOrConstruct: "lambda()", role: "Invocation", whyThisWay: "Executes closure." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Generic Lambdas with auto Parameters (C++14/C++20) (PRO)", category: "PRO / Generic Lambda",
+        description: "Uses auto parameters to create generic polymorphic lambda functions.",
+        prosCons: "Pros: Works with any operand types supporting operation. Cons: Instantiates template operator() method per type.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 39. Lambda Closures - Approach 5: Generic Lambda
+#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    auto print = [](auto x, auto y) {
+        cout << "Val1: " << x << " | Val2: " << y << endl;
+    };
+    print(10, 20.5);
+    print("Hello", "World");
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto print = [](auto x, auto y) { ... };", constructType: "Function Signature", title: "Generic Lambda Declaration", explanation: "Uses auto parameters creating template operator() inside closure class.", keyDetails: [{ variableOrConstruct: "auto x, auto y", role: "Generic Template Parameters", whyThisWay: "Accepts any printable types." }] },
+          { lineNum: 2, codeSnippet: "print(10, 20.5);", constructType: "Condition & Branch", title: "Invoke with Mixed Primitives", explanation: "Instantiates operator()<int, double>.", keyDetails: [{ variableOrConstruct: "print(10, 20.5)", role: "Int Double Call", whyThisWay: "Dispatches int and double." }] },
+          { lineNum: 3, codeSnippet: "print('Hello', 'World');", constructType: "Return / Cleanup", title: "Invoke with String Literals", explanation: "Instantiates operator()<const char*, const char*>.", keyDetails: [{ variableOrConstruct: "print(string)", role: "String Call", whyThisWay: "Dispatches string literals." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Storing Lambdas in std::function Wrappers (PRO)", category: "PRO / std::function Wrapper",
+        description: "Wraps lambda closure inside polymorphic type-erased std::function<R(Args...)> wrapper.",
+        prosCons: "Pros: Allows storing heterogeneous callables in callbacks and event tables. Cons: Small heap allocation/indirection cost.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 39. Lambda Closures - Approach 6: std::function
+#include <iostream>
+#include <functional>
+using namespace std;
+
+void executeCallback(const function<void(int)>& cb, int val) {
+    cb(val);
+}
+
+int main() {
+    function<void(int)> handler = [](int score) {
+        cout << "Score processed: " << score << endl;
+    };
+    executeCallback(handler, 100);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "function<void(int)> handler = [](int score) { ... };", constructType: "Variable & Initializer", title: "Wrap Lambda in std::function", explanation: "Wraps lambda closure inside type-erased std::function<void(int)> container.", keyDetails: [{ variableOrConstruct: "std::function<void(int)>", role: "Type Erased Wrapper", whyThisWay: "Stores callable closure." }] },
+          { lineNum: 2, codeSnippet: "void executeCallback(const function<void(int)>& cb, int val)", constructType: "Function Signature", title: "Callback Function Parameter", explanation: "Receives const std::function reference callback parameter.", keyDetails: [{ variableOrConstruct: "const function&", role: "Callback Parameter", whyThisWay: "Passes callable callback." }] },
+          { lineNum: 3, codeSnippet: "executeCallback(handler, 100);", constructType: "Return / Cleanup", title: "Execute Callback", explanation: "Invokes callback passing value 100.", keyDetails: [{ variableOrConstruct: "executeCallback", role: "Callback Exec", whyThisWay: "Executes wrapped handler." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Capturing Class Member State ([this] vs [*this]) (PRO)", category: "PRO / Member Captures",
+        description: "Captures class instance by reference [this] or by value copy [*this] (C++17).",
+        prosCons: "Pros: Direct access to private class member methods inside lambda. Cons: Lifespan coupling.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 39. Lambda Closures - Approach 7: Capturing *this
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Account {
+private:
+    string name;
+public:
+    Account(string n) : name(n) {}
+    void printAsync() const {
+        auto fn = [this]() { cout << "Account Name: " << name << endl; };
+        fn();
+    }
+};
+
+int main() {
+    Account acc("Vault-01");
+    acc.printAsync();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto fn = [this]() { cout << 'Account Name: ' << name; };", constructType: "Function Signature", title: "Capture Class this Pointer", explanation: "Captures this pointer by reference allowing direct access to member variable name.", keyDetails: [{ variableOrConstruct: "[this]", role: "Class Pointer Capture", whyThisWay: "Captures pointer to outer class object." }] },
+          { lineNum: 2, codeSnippet: "acc.printAsync();", constructType: "Condition & Branch", title: "Invoke Method Containing Lambda", explanation: "Calls printAsync() method.", keyDetails: [{ variableOrConstruct: "printAsync()", role: "Method Call", whyThisWay: "Invokes method containing lambda." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Recursive Lambdas with std::function & Self-Capture (PRO)", category: "PRO / Recursive Lambda",
+        description: "Implements recursive lambda algorithms using std::function self-reference capture.",
+        prosCons: "Pros: Enables self-contained recursive local closure functions. Cons: Requires std::function syntax.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N) Stack", isFree: false,
+        code: `// 39. Lambda Closures - Approach 8: Recursive Lambda
+#include <iostream>
+#include <functional>
+using namespace std;
+
+int main() {
+    function<int(int)> fib = [&](int n) -> int {
+        if (n <= 0) return 0;
+        if (n == 1) return 1;
+        return fib(n - 1) + fib(n - 2);
+    };
+    cout << "fib(7) = " << fib(7) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "function<int(int)> fib = [&](int n) -> int { ... };", constructType: "Function Signature", title: "Declare Recursive Lambda with std::function", explanation: "Declares std::function variable fib capturing itself by reference [&].", keyDetails: [{ variableOrConstruct: "[&]", role: "Self Capture Clause", whyThisWay: "Captures fib variable for self-recursion." }] },
+          { lineNum: 2, codeSnippet: "return fib(n - 1) + fib(n - 2);", constructType: "Return / Cleanup", title: "Self Recursive Call", explanation: "Recursively invokes fib function reference inside closure body.", keyDetails: [{ variableOrConstruct: "fib(n - 1)", role: "Recursive Self Call", whyThisWay: "Evaluates recursive terms." }] },
+          { lineNum: 3, codeSnippet: "fib(7)", constructType: "Condition & Branch", title: "Invoke Recursive Lambda", explanation: "Computes Fibonacci term 13.", keyDetails: [{ variableOrConstruct: "fib(7)", role: "Test Call", whyThisWay: "Tests fibonacci lambda." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: STL Algorithm Integration with Lambda Predicates (PRO)", category: "PRO / STL Predicates",
+        description: "Passes inline lambda predicates to std::sort, std::find_if, and std::count_if.",
+        prosCons: "Pros: Concise inline predicate logic. Cons: Compiler expands unique closure type per call.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 39. Lambda Closures - Approach 9: STL Integration
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> nums = {5, 2, 8, 1, 9, 4};
+    int threshold = 5;
+    int countHigh = count_if(nums.begin(), nums.end(), [threshold](int x) {
+        return x > threshold;
+    });
+    cout << "Count above 5: " << countHigh << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "count_if(nums.begin(), nums.end(), [threshold](int x) { return x > threshold; });", constructType: "Condition & Branch", title: "Pass Lambda to count_if", explanation: "Passes unary predicate lambda capturing threshold to count matching elements.", keyDetails: [{ variableOrConstruct: "count_if", role: "STL Algorithm", whyThisWay: "Filters range elements with lambda predicate." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Count above 5: ' << countHigh;", constructType: "Return / Cleanup", title: "Output Match Count", explanation: "Prints total elements above threshold (2).", keyDetails: [{ variableOrConstruct: "countHigh", role: "Output", whyThisWay: "Displays filtered count." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Stateless Lambda Decay to Function Pointer (PRO)", category: "PRO / Function Pointer Decay",
+        description: "Demonstrates that stateless capture-less [] lambdas implicitly decay to C-style function pointers.",
+        prosCons: "Pros: Interoperates seamlessly with legacy C API function pointer callbacks. Cons: Only works for capture-less [] lambdas.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 39. Lambda Closures - Approach 10: Function Pointer Decay
+#include <iostream>
+using namespace std;
+
+typedef void(*CFunctionPtr)(int);
+
+void callCAPI(CFunctionPtr fn, int val) {
+    fn(val);
+}
+
+int main() {
+    // Stateless lambda implicitly converts to raw function pointer!
+    CFunctionPtr ptr = [](int x) {
+        cout << "Stateless lambda decay executed with: " << x << endl;
+    };
+    callCAPI(ptr, 42);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "typedef void(*CFunctionPtr)(int);", constructType: "Header / Include", title: "Declare C Function Pointer Alias", explanation: "Defines raw C-style function pointer signature.", keyDetails: [{ variableOrConstruct: "CFunctionPtr", role: "Raw Function Pointer Alias", whyThisWay: "C-compatible function pointer type." }] },
+          { lineNum: 2, codeSnippet: "CFunctionPtr ptr = [](int x) { ... };", constructType: "Variable & Initializer", title: "Implicit Stateless Lambda Decay", explanation: "Implicitly converts stateless capture-less lambda [] to raw C function pointer.", keyDetails: [{ variableOrConstruct: "[](int x)", role: "Stateless Lambda", whyThisWay: "Decays to raw function pointer." }] },
+          { lineNum: 3, codeSnippet: "callCAPI(ptr, 42);", constructType: "Return / Cleanup", title: "Pass Decayed Pointer to C API", explanation: "Passes decayed function pointer into C API callback.", keyDetails: [{ variableOrConstruct: "callCAPI(ptr, 42)", role: "C API Call", whyThisWay: "Executes raw function pointer callback." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem40Details(): LearnModule {
+  return {
+    id: "med_templates_func",
+    title: "40. Function Templates",
+    category: "Templates",
+    difficulty: "medium",
+    shortDesc: "Generic programming using template<typename T> for functions.",
+    fullCode: `// 40. Function Templates - Approach 1: Generic Functions
+#include <iostream>
+#include <string>
+using namespace std;
+
+template <typename T>
+T myMax(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+int main() {
+    cout << "Max Int: " << myMax(10, 20) << endl;
+    cout << "Max Double: " << myMax(3.14, 2.71) << endl;
+    cout << "Max String: " << myMax(string("apple"), string("banana")) << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "40. Function Templates",
+      objective: "Master generic function metaprogramming using template<typename T>, multi-type deduction, explicit template instantiation, template specialization, variadic fold expressions, and SFINAE / C++20 Concepts.",
+      description: "Implement **Function Templates** (Templates). Generic programming using template<typename T> for functions. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Generic typed parameters passed to template function definitions.",
+      outputDesc: "Compile-time generated type specialization functions and execution outputs.",
+      takeaways: [
+        "Function templates enable type-independent generic algorithms resolved at compile time",
+        "The compiler automatically deduces template type arguments from function call arguments",
+        "Template specialization allows custom implementations for specific type overrides",
+        "C++20 Concepts (requires clause) constrain template arguments with clean compile-time errors"
+      ],
+      examples: [
+        { id: 1, input: "myMax(10, 20) / myMax(3.14, 2.71)", output: "20 / 3.14", explanation: "Compiler generates myMax<int> and myMax<double> at build time." },
+        { id: 2, input: "sum(1, 2, 3, 4, 5)", output: "15", explanation: "C++17 variadic fold expression (... + args) sums all parameter pack arguments." },
+        { id: 3, input: "myMax<double>(10, 5.5)", output: "10.0", explanation: "Explicit template argument overrides implicit parameter type deduction." }
+      ],
+      constraints: ["Template code must be available in header files to allow compile-time instantiation.", "Mismatched parameter types require explicit template type arguments."],
+      companies: ["Google", "Microsoft", "Meta", "Amazon", "Apple"],
+      acceptanceRate: "88.6%",
+      totalAccepted: "1,920,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Function Template (template<typename T>) (FREE)", category: "FREE / Generic Functions",
+        description: "Defines generic myMax<T> algorithm operating on int, double, and string types.",
+        prosCons: "Pros: Zero runtime overhead, compile-time type safety. Cons: Code bloat from template instantiation.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 40. Function Templates - Approach 1: Basic Template
+#include <iostream>
+#include <string>
+using namespace std;
+
+template <typename T>
+T myMax(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+int main() {
+    cout << "Max int: " << myMax(15, 25) << endl;
+    cout << "Max double: " << myMax(8.4, 3.2) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T> T myMax(T a, T b)", constructType: "Function Signature", title: "Template Function Header", explanation: "Declares template parameter T representing generic parameter type.", keyDetails: [{ variableOrConstruct: "template <typename T>", role: "Template Declaration", whyThisWay: "Defines generic type parameter T." }] },
+          { lineNum: 2, codeSnippet: "return (a > b) ? a : b;", constructType: "Return / Cleanup", title: "Generic Comparison Return", explanation: "Evaluates ternary operator > on generic type T operands.", keyDetails: [{ variableOrConstruct: "a > b", role: "Generic Comparison", whyThisWay: "Uses operator> defined on T." }] },
+          { lineNum: 3, codeSnippet: "myMax(15, 25)", constructType: "Condition & Branch", title: "Implicit Type Deduction", explanation: "Deduces T=int automatically and generates myMax<int> code at compile time.", keyDetails: [{ variableOrConstruct: "myMax(15, 25)", role: "Implicit Instantiation", whyThisWay: "Compiler deduces T=int." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Multiple Template Parameters (template<typename T, typename U>) (FREE)", category: "FREE / Multi Type Template",
+        description: "Handles two distinct generic parameter types T and U with auto return type deduction.",
+        prosCons: "Pros: Flexible mixed-type operand support. Cons: Complex return type deduction.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 40. Function Templates - Approach 2: Multiple Types
+#include <iostream>
+using namespace std;
+
+template <typename T, typename U>
+auto add(T a, U b) -> decltype(a + b) {
+    return a + b;
+}
+
+int main() {
+    auto res = add(5, 3.14);
+    cout << "Mixed Sum: " << res << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T, typename U> auto add(T a, U b)", constructType: "Function Signature", title: "Dual Type Template Signature", explanation: "Declares multi-type template parameters T and U.", keyDetails: [{ variableOrConstruct: "typename T, typename U", role: "Dual Type Parameters", whyThisWay: "Accepts heterogeneous input types." }] },
+          { lineNum: 2, codeSnippet: "-> decltype(a + b)", constructType: "Function Signature", title: "Trailing Return Type Deduction", explanation: "Deduces return type based on expression (a + b) (double for int + double).", keyDetails: [{ variableOrConstruct: "decltype(a + b)", role: "Trailing Return Type", whyThisWay: "Deduces output type." }] },
+          { lineNum: 3, codeSnippet: "add(5, 3.14)", constructType: "Return / Cleanup", title: "Invoke Heterogeneous Function", explanation: "Computes 5 + 3.14 = 8.14.", keyDetails: [{ variableOrConstruct: "add(5, 3.14)", role: "Test Call", whyThisWay: "Tests int + double addition." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Explicit Template Type Specification (PRO)", category: "PRO / Explicit Instantiation",
+        description: "Overrides implicit parameter type deduction by specifying explicit template type arguments.",
+        prosCons: "Pros: Resolves ambiguous mixed-type parameters. Cons: Requires explicit type qualification syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 40. Function Templates - Approach 3: Explicit Instantiation
+#include <iostream>
+using namespace std;
+
+template <typename T>
+T divide(T a, T b) {
+    return a / b;
+}
+
+int main() {
+    auto res = divide<double>(10, 4);
+    cout << "Explicit double division: " << res << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T> T divide(T a, T b)", constructType: "Function Signature", title: "Generic Division Template", explanation: "Declares generic division function.", keyDetails: [{ variableOrConstruct: "T divide(T, T)", role: "Division Template", whyThisWay: "Generic division definition." }] },
+          { lineNum: 2, codeSnippet: "auto res = divide<double>(10, 4);", constructType: "Variable & Initializer", title: "Explicit Template Type Argument", explanation: "Explicitly specifies T=double, forcing integer 10 and 4 arguments to convert to double before division.", keyDetails: [{ variableOrConstruct: "divide<double>", role: "Explicit Type Qualification", whyThisWay: "Forces T to double type." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Explicit double division: ' << res;", constructType: "Return / Cleanup", title: "Output Floating Division Result", explanation: "Prints 2.5 instead of truncated integer 2.", keyDetails: [{ variableOrConstruct: "res", role: "Output Result", whyThisWay: "Displays 2.5." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Function Template Specialization (PRO)", category: "PRO / Specialization",
+        description: "Provides specialized implementation of template for specific types like const char*.",
+        prosCons: "Pros: Customized behavior for specific non-standard types. Cons: Specialization rules complexity.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 40. Function Templates - Approach 4: Template Specialization
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+template <typename T>
+bool isEqual(T a, T b) {
+    return a == b;
+}
+
+template <>
+bool isEqual<const char*>(const char* a, const char* b) {
+    return strcmp(a, b) == 0;
+}
+
+int main() {
+    cout << "Int equal: " << (isEqual(10, 10) ? "Yes" : "No") << endl;
+    cout << "Str equal: " << (isEqual("abc", "abc") ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <> bool isEqual<const char*>(const char* a, const char* b)", constructType: "Function Signature", title: "Full Template Specialization Header", explanation: "Specializes isEqual template specifically for C-style string pointers const char*.", keyDetails: [{ variableOrConstruct: "template <>", role: "Full Specialization", whyThisWay: "Overrides primary template for const char*." }] },
+          { lineNum: 2, codeSnippet: "return strcmp(a, b) == 0;", constructType: "Return / Cleanup", title: "C-String strcmp Evaluation", explanation: "Uses C-library strcmp function instead of shallow pointer comparison (a == b).", keyDetails: [{ variableOrConstruct: "strcmp(a, b)", role: "String Equality Check", whyThisWay: "Compares string contents instead of pointer addresses." }] },
+          { lineNum: 3, codeSnippet: "isEqual('abc', 'abc')", constructType: "Condition & Branch", title: "Invoke Specialization", explanation: "Dispatches to const char* specialized template implementation.", keyDetails: [{ variableOrConstruct: "isEqual(const char*)", role: "Specialization Call", whyThisWay: "Executes specialized strcmp logic." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Non-Type Template Parameters (template<typename T, int N>) (PRO)", category: "PRO / Non-Type Parameter",
+        description: "Passes compile-time constant integer N as non-type template parameter.",
+        prosCons: "Pros: Enables fixed compile-time array bound optimization. Cons: Parameter value must be compile-time constant.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 40. Function Templates - Approach 5: Non-Type Parameter
+#include <iostream>
+using namespace std;
+
+template <typename T, int N>
+void printArray(const T (&arr)[N]) {
+    for (int i = 0; i < N; i++) cout << arr[i] << " ";
+    cout << endl;
+}
+
+int main() {
+    int nums[4] = {10, 20, 30, 40};
+    printArray(nums);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T, int N> void printArray(const T (&arr)[N])", constructType: "Function Signature", title: "Non-Type Parameter Template Header", explanation: "Passes array size N as non-type compile-time template parameter.", keyDetails: [{ variableOrConstruct: "int N", role: "Non-Type Template Parameter", whyThisWay: "Captures array bounds at compile time." }] },
+          { lineNum: 2, codeSnippet: "for (int i = 0; i < N; i++) cout << arr[i] << ' ';", constructType: "Loop Construct", title: "Iterate Compile-Time Size N", explanation: "Iterates array using compile-time bound N.", keyDetails: [{ variableOrConstruct: "i < N", role: "Compile Time Bound Loop", whyThisWay: "Uses deducted array length N." }] },
+          { lineNum: 3, codeSnippet: "printArray(nums);", constructType: "Return / Cleanup", title: "Deduce Non-Type Parameter N=4", explanation: "Compiler deduces T=int and N=4 from array declaration.", keyDetails: [{ variableOrConstruct: "printArray(nums)", role: "Array Deduce Call", whyThisWay: "Deduces array type and bound." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Overloading Function Templates with Regular Functions (PRO)", category: "PRO / Template Overloading",
+        description: "Combines non-template regular functions with function templates.",
+        prosCons: "Pros: Non-template exact match takes precedence over generic templates. Cons: Complex overload resolution rules.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 40. Function Templates - Approach 6: Overloading
+#include <iostream>
+using namespace std;
+
+template <typename T>
+void display(T val) {
+    cout << "Template display: " << val << endl;
+}
+
+void display(int val) {
+    cout << "Non-template int display: " << val << endl;
+}
+
+int main() {
+    display(42);
+    display(3.14);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "void display(int val) { cout << 'Non-template int display: ' << val; }", constructType: "Function Signature", title: "Non-Template Exact Match Overload", explanation: "Defines regular non-template function taking int parameter.", keyDetails: [{ variableOrConstruct: "display(int)", role: "Regular Function Overload", whyThisWay: "Exact match takes priority over template." }] },
+          { lineNum: 2, codeSnippet: "display(42);", constructType: "Condition & Branch", title: "Dispatches to Regular Function", explanation: "Calls regular display(int) because exact non-template match is preferred.", keyDetails: [{ variableOrConstruct: "display(42)", role: "Exact Match Invocation", whyThisWay: "Prefers non-template function." }] },
+          { lineNum: 3, codeSnippet: "display(3.14);", constructType: "Return / Cleanup", title: "Dispatches to Template Function", explanation: "Calls generic display<double> template because no non-template double overload exists.", keyDetails: [{ variableOrConstruct: "display(3.14)", role: "Template Fallback Invocation", whyThisWay: "Instantiates template fallback." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Variadic Templates & C++17 Fold Expressions (PRO)", category: "PRO / Variadic Fold",
+        description: "Accepts arbitrary number of parameters using parameter pack typename... Args and fold expression (... + args).",
+        prosCons: "Pros: Concise compile-time variadic parameter processing. Cons: Requires C++17.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 40. Function Templates - Approach 7: Variadic Fold
+#include <iostream>
+using namespace std;
+
+template <typename... Args>
+auto sumAll(Args... args) {
+    return (... + args);
+}
+
+int main() {
+    cout << "Sum 4 terms: " << sumAll(10, 20, 30, 40) << endl;
+    cout << "Sum mixed: " << sumAll(1.5, 2.5, 3.0) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename... Args> auto sumAll(Args... args)", constructType: "Function Signature", title: "Variadic Parameter Pack Header", explanation: "Declares variadic template parameter pack Args...", keyDetails: [{ variableOrConstruct: "typename... Args", role: "Variadic Parameter Pack", whyThisWay: "Accepts arbitrary number of arguments." }] },
+          { lineNum: 2, codeSnippet: "return (... + args);", constructType: "Return / Cleanup", title: "C++17 Binary Right Fold Expression", explanation: "Expands parameter pack into right fold expression (arg1 + (arg2 + (arg3 + arg4))).", keyDetails: [{ variableOrConstruct: "(... + args)", role: "Fold Expression", whyThisWay: "Folds parameter pack with + operator." }] },
+          { lineNum: 3, codeSnippet: "sumAll(10, 20, 30, 40)", constructType: "Condition & Branch", title: "Invoke Variadic Sum", explanation: "Computes total sum 100.", keyDetails: [{ variableOrConstruct: "sumAll(10, 20, 30, 40)", role: "Variadic Invocation", whyThisWay: "Passes 4 integer arguments." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: SFINAE & std::enable_if Type Constraints (PRO)", category: "PRO / SFINAE",
+        description: "Uses SFINAE (Substitution Failure Is Not An Error) with std::enable_if to constrain template type candidates.",
+        prosCons: "Pros: Type-safe template filtering in pre-C++20 standards. Cons: Extremely verbose syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 40. Function Templates - Approach 8: SFINAE
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template <typename T>
+typename enable_if<is_integral<T>::value, bool>::type
+isEven(T val) {
+    return val % 2 == 0;
+}
+
+int main() {
+    cout << "Is 42 even? " << (isEven(42) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "typename enable_if<is_integral<T>::value, bool>::type", constructType: "Header / Include", title: "SFINAE enable_if Guard", explanation: "Enables template instantiation ONLY if T is an integral type (int, long, char), returning bool.", keyDetails: [{ variableOrConstruct: "enable_if<is_integral<T>::value>", role: "SFINAE Type Guard", whyThisWay: "Restricts template to integral types." }] },
+          { lineNum: 2, codeSnippet: "return val % 2 == 0;", constructType: "Return / Cleanup", title: "Integral Modulo Check", explanation: "Evaluates modulo % 2 (valid only on integral types).", keyDetails: [{ variableOrConstruct: "val % 2 == 0", role: "Even Check", whyThisWay: "Checks if value is even." }] },
+          { lineNum: 3, codeSnippet: "isEven(42)", constructType: "Condition & Branch", title: "Invoke Integral SFINAE Template", explanation: "Invokes SFINAE template with integral value 42.", keyDetails: [{ variableOrConstruct: "isEven(42)", role: "Valid SFINAE Invocation", whyThisWay: "Passes integral type test." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: C++20 Concepts & Requires Clauses (PRO)", category: "PRO / C++20 Concepts",
+        description: "Constrains template functions cleanly using modern C++20 concepts like std::integral.",
+        prosCons: "Pros: Clear, human-readable compiler error messages compared to SFINAE. Cons: Requires C++20 standard.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 40. Function Templates - Approach 9: C++20 Concepts
+#include <iostream>
+#include <concepts>
+using namespace std;
+
+template <typename T>
+requires std::integral<T>
+T addIntegers(T a, T b) {
+    return a + b;
+}
+
+int main() {
+    cout << "Concept sum: " << addIntegers(10, 20) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "requires std::integral<T>", constructType: "Function Signature", title: "C++20 Concept Requires Clause", explanation: "Constrains template parameter T to satisfy std::integral concept.", keyDetails: [{ variableOrConstruct: "requires std::integral<T>", role: "C++20 Concept Constraint", whyThisWay: "Clean compile-time concept constraint." }] },
+          { lineNum: 2, codeSnippet: "return a + b;", constructType: "Return / Cleanup", title: "Integral Addition", explanation: "Performs addition on constrained integral types.", keyDetails: [{ variableOrConstruct: "a + b", role: "Addition", whyThisWay: "Sums integral operands." }] },
+          { lineNum: 3, codeSnippet: "addIntegers(10, 20)", constructType: "Condition & Branch", title: "Invoke Concept Constrained Function", explanation: "Passes 10 and 20 satisfying std::integral concept.", keyDetails: [{ variableOrConstruct: "addIntegers(10, 20)", role: "Concept Call", whyThisWay: "Executes concept constrained method." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Default Template Arguments in Functions (PRO)", category: "PRO / Default Template Argument",
+        description: "Provides default type for template parameter (template<typename T = int>).",
+        prosCons: "Pros: Allows calling function without explicit template type when parameters are omitted. Cons: Less common than default function arguments.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 40. Function Templates - Approach 10: Default Template Argument
+#include <iostream>
+using namespace std;
+
+template <typename T = int>
+T defaultValue() {
+    return T();
+}
+
+int main() {
+    auto defaultInt = defaultValue();
+    auto defaultDouble = defaultValue<double>();
+    cout << "Default Int: " << defaultInt << " | Default Double: " << defaultDouble << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T = int> T defaultValue()", constructType: "Function Signature", title: "Default Template Parameter Header", explanation: "Specifies int as default type for generic parameter T if unspecified.", keyDetails: [{ variableOrConstruct: "typename T = int", role: "Default Template Type", whyThisWay: "Sets default type parameter to int." }] },
+          { lineNum: 2, codeSnippet: "auto defaultInt = defaultValue();", constructType: "Variable & Initializer", title: "Invoke with Default Type int", explanation: "Calls defaultValue() using default template type T=int, returning 0.", keyDetails: [{ variableOrConstruct: "defaultValue()", role: "Default Call", whyThisWay: "Uses default T=int type." }] },
+          { lineNum: 3, codeSnippet: "auto defaultDouble = defaultValue<double>();", constructType: "Return / Cleanup", title: "Invoke with Explicit Override double", explanation: "Overrides default type parameter with explicit T=double, returning 0.0.", keyDetails: [{ variableOrConstruct: "defaultValue<double>()", role: "Override Call", whyThisWay: "Overrides default type with double." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -7721,6 +9405,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_bit_basic") return getProblem33Details();
   if (id === "easy_exception_basic") return getProblem34Details();
   if (id === "easy_class_basic") return getProblem35Details();
+  if (id === "med_raii") return getProblem36Details();
+  if (id === "med_shared_ptr") return getProblem37Details();
+  if (id === "med_move_semantics") return getProblem38Details();
+  if (id === "med_lambdas") return getProblem39Details();
+  if (id === "med_templates_func") return getProblem40Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
