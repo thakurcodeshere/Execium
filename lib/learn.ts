@@ -3551,6 +3551,777 @@ function getProblem20Details(): LearnModule {
   };
 }
 
+
+export function getProblem21Details(): LearnModule {
+  return {
+    id: "easy_static_var",
+    title: "21. Static Local Variables",
+    category: "Fundamentals",
+    difficulty: "easy",
+    shortDesc: "State persistence across function calls using static local vars.",
+    fullCode: "// 21. Static Local Variables - Approach 1: Basic Static Local Counter\n#include <iostream>\nusing namespace std;\n\nvoid countCalls() {\n    static int callCount = 0; // Initialized once\n    callCount++;\n    cout << \"Call count: \" << callCount << endl;\n}\n\nint main() {\n    countCalls();\n    countCalls();\n    countCalls();\n    return 0;\n}",
+    problemStatement: {
+      title: "21. Static Local Variables",
+      objective: "Master static local variable persistence, thread-safe initialization (Meyers Singleton), and memory lifecycle in C++.",
+      description: "Implement **Static Local Variables** (Fundamentals). State persistence across function calls using static local vars. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Function invocations demonstrating persistent local state.",
+      outputDesc: "Console output displaying preserved values across function calls.",
+      takeaways: [
+        "Static local variables are initialized exactly once when control passes through declaration",
+        "Static locals reside in data segment (.data/.bss), not stack frame",
+        "C++11 guarantees thread-safe initialization of static local variables (Meyers Singleton)",
+        "Lifetime extends to program termination while scope remains local to function"
+      ],
+      examples: [
+        { id: 1, input: "countCalls() called 3 times", output: "Call count: 1\nCall count: 2\nCall count: 3", explanation: "Static variable retains value across calls." },
+        { id: 2, input: "accumulateSum(10), accumulateSum(20)", output: "Running Total: 10\nRunning Total: 30", explanation: "Static accumulator adds values incrementally." }
+      ],
+      constraints: ["Static variables exist for the entire duration of the program.", "Scope is restricted to declaring function."],
+      companies: ["Google", "Microsoft", "Meta", "Apple"],
+      acceptanceRate: "91.5%",
+      totalAccepted: "2,140,500"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Static Local Counter (FREE)", category: "FREE / Static Local",
+        description: "Increments static local variable callCount across function calls without global variables.",
+        prosCons: "Pros: Retains state without polluting global namespace. Cons: State is shared across all callers.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 21. Static Local Variables - Approach 1: Basic Counter\n#include <iostream>\nusing namespace std;\n\nvoid counter() {\n    static int count = 0;\n    count++;\n    cout << \"Counter: \" << count << endl;\n}\n\nint main() {\n    counter(); counter(); counter();\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static int count = 0;", constructType: "Variable & Initializer", title: "Static Variable Declaration", explanation: "Allocates count in data segment and initializes to 0 on first execution.", keyDetails: [{ variableOrConstruct: "static int count", role: "Persistent State", whyThisWay: "Ensures single initialization." }] },
+          { lineNum: 2, codeSnippet: "count++;", constructType: "Condition & Branch", title: "State Mutation", explanation: "Increments static count value.", keyDetails: [{ variableOrConstruct: "count++", role: "State Increment", whyThisWay: "Persists value for next invocation." }] },
+          { lineNum: 3, codeSnippet: "cout << \"Counter: \" << count << endl;", constructType: "Return / Cleanup", title: "Output State", explanation: "Prints updated count.", keyDetails: [{ variableOrConstruct: "cout", role: "Output", whyThisWay: "Displays state." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Static Local Accumulator (FREE)", category: "FREE / Accumulator",
+        description: "Accumulates running total across separate function calls.",
+        prosCons: "Pros: Easy running sum calculation. Cons: Requires explicit reset method if reset needed.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 21. Static Local Variables - Approach 2: Accumulator\n#include <iostream>\nusing namespace std;\n\nint addTotal(int val) {\n    static int total = 0;\n    total += val;\n    return total;\n}\n\nint main() {\n    cout << addTotal(10) << endl;\n    cout << addTotal(25) << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static int total = 0;", constructType: "Variable & Initializer", title: "Static Accumulator", explanation: "Holds running total across all calls.", keyDetails: [{ variableOrConstruct: "static int total", role: "Accumulator", whyThisWay: "Retains running sum." }] },
+          { lineNum: 2, codeSnippet: "total += val;", constructType: "Condition & Branch", title: "Add Value", explanation: "Adds current argument to persistent total.", keyDetails: [{ variableOrConstruct: "total += val", role: "Addition", whyThisWay: "Mutates state." }] },
+          { lineNum: 3, codeSnippet: "return total;", constructType: "Return / Cleanup", title: "Return Total", explanation: "Returns accumulated sum.", keyDetails: [{ variableOrConstruct: "total", role: "Return Value", whyThisWay: "Returns accumulated state." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Meyers Singleton Pattern (C++11 Thread-Safe Static Init) (PRO)", category: "PRO / Meyers Singleton",
+        description: "Uses C++11 static local variable initialization magic to create thread-safe lazy Singleton.",
+        prosCons: "Pros: Thread-safe lazy initialization guaranteed by C++11 standard. Cons: Non-destructible before main ends.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 21. Static Local Variables - Approach 3: Meyers Singleton\n#include <iostream>\nusing namespace std;\n\nclass Database {\nprivate:\n    Database() { cout << \"DB Initialized!\" << endl; }\npublic:\n    static Database& getInstance() {\n        static Database instance; // Thread-safe in C++11+\n        return instance;\n    }\n    void query() { cout << \"Executing Query...\" << endl; }\n};\n\nint main() {\n    Database::getInstance().query();\n    Database::getInstance().query();\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static Database instance;", constructType: "Variable & Initializer", title: "Thread-Safe Lazy Initialization", explanation: "Compiler wraps this in thread-safe guard structure; initializes on first call.", keyDetails: [{ variableOrConstruct: "static Database instance", role: "Meyers Singleton", whyThisWay: "Guarantees single thread-safe instance." }] },
+          { lineNum: 2, codeSnippet: "return instance;", constructType: "Return / Cleanup", title: "Return Reference", explanation: "Returns reference to single persistent instance.", keyDetails: [{ variableOrConstruct: "instance", role: "Singleton Ref", whyThisWay: "Avoids copying." }] },
+          { lineNum: 3, codeSnippet: "Database::getInstance().query();", constructType: "Condition & Branch", title: "Invoke Singleton Method", explanation: "Calls query() on singleton instance.", keyDetails: [{ variableOrConstruct: "query()", role: "Method Call", whyThisWay: "Uses singleton instance." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Static Local Memoization Cache (PRO)", category: "PRO / Memoization",
+        description: "Uses static local std::unordered_map to cache expensive function computation results.",
+        prosCons: "Pros: Drastically reduces redundant calculations. Cons: Cache grows unbounded unless cleared.",
+        timeComplexity: "O(1) amortized", spaceComplexity: "O(N)", isFree: false,
+        code: "// 21. Static Local Variables - Approach 4: Memoization Cache\n#include <iostream>\n#include <unordered_map>\nusing namespace std;\n\nlong long fib(int n) {\n    static unordered_map<int, long long> cache;\n    if (n <= 1) return n;\n    if (cache.count(n)) return cache[n];\n    return cache[n] = fib(n - 1) + fib(n - 2);\n}\n\nint main() {\n    cout << \"fib(50): \" << fib(50) << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static unordered_map<int, long long> cache;", constructType: "Variable & Initializer", title: "Static Cache Map", explanation: "Map stays alive across recursive calls to store computed Fibonacci numbers.", keyDetails: [{ variableOrConstruct: "static unordered_map", role: "Memo Cache", whyThisWay: "Persists cache across recursive frames." }] },
+          { lineNum: 2, codeSnippet: "if (cache.count(n)) return cache[n];", constructType: "Condition & Branch", title: "Cache Lookup", explanation: "Returns pre-computed result in O(1) time.", keyDetails: [{ variableOrConstruct: "cache[n]", role: "Hit Return", whyThisWay: "Short-circuits recursion." }] },
+          { lineNum: 3, codeSnippet: "return cache[n] = fib(n - 1) + fib(n - 2);", constructType: "Return / Cleanup", title: "Cache & Return", explanation: "Stores computed result into cache map before returning.", keyDetails: [{ variableOrConstruct: "cache[n] =", role: "Store", whyThisWay: "Populates cache." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Static Local One-Time Initialization Flag (PRO)", category: "PRO / One-Time Flag",
+        description: "Uses static bool flag to perform initialization logic exactly once.",
+        prosCons: "Pros: Avoids repeated setup logic. Cons: Manual flag checking.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 21. Static Local Variables - Approach 5: One-Time Flag\n#include <iostream>\nusing namespace std;\n\nvoid process() {\n    static bool init = false;\n    if (!init) {\n        cout << \"[INIT] System Setup Done!\" << endl;\n        init = true;\n    }\n    cout << \"[WORK] Processing Task...\" << endl;\n}\n\nint main() {\n    process(); process();\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static bool init = false;", constructType: "Variable & Initializer", title: "One-Time Guard Flag", explanation: "Initialized to false once at program start.", keyDetails: [{ variableOrConstruct: "static bool init", role: "Guard Flag", whyThisWay: "Tracks execution state." }] },
+          { lineNum: 2, codeSnippet: "if (!init) { init = true; ... }", constructType: "Condition & Branch", title: "One-Time Execution", explanation: "Executes block on first call only and sets flag to true.", keyDetails: [{ variableOrConstruct: "if (!init)", role: "One-Time Branch", whyThisWay: "Guards expensive setup." }] },
+          { lineNum: 3, codeSnippet: "cout << \"[WORK] Processing Task...\" << endl;", constructType: "Return / Cleanup", title: "Regular Task Execution", explanation: "Executes normal function body on every call.", keyDetails: [{ variableOrConstruct: "process()", role: "Normal Task", whyThisWay: "Performs task." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Static Local Sequential ID Allocator (PRO)", category: "PRO / ID Allocator",
+        description: "Generates auto-incrementing unique IDs for newly instantiated objects.",
+        prosCons: "Pros: Guarantees unique IDs without external ID generator class. Cons: ID sequence resets only on process restart.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 21. Static Local Variables - Approach 6: ID Allocator\n#include <iostream>\nusing namespace std;\n\nint generateNextId() {\n    static int currentId = 1000;\n    return currentId++;\n}\n\nint main() {\n    cout << \"ID 1: \" << generateNextId() << endl;\n    cout << \"ID 2: \" << generateNextId() << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static int currentId = 1000;", constructType: "Variable & Initializer", title: "Static Base ID Counter", explanation: "Starts sequence at 1000.", keyDetails: [{ variableOrConstruct: "currentId = 1000", role: "Base Counter", whyThisWay: "Sets sequence start." }] },
+          { lineNum: 2, codeSnippet: "return currentId++;", constructType: "Return / Cleanup", title: "Post-Increment Return", explanation: "Returns current ID then increments for next caller.", keyDetails: [{ variableOrConstruct: "currentId++", role: "Post Increment", whyThisWay: "Provides unique ID." }] },
+          { lineNum: 3, codeSnippet: "generateNextId()", constructType: "Condition & Branch", title: "Invoke Allocator", explanation: "Retrieves consecutive unique IDs.", keyDetails: [{ variableOrConstruct: "generateNextId()", role: "ID Gen", whyThisWay: "Gets next unique ID." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Constexpr Static Local Lookup Table (PRO)", category: "PRO / Constexpr Table",
+        description: "Creates compile-time static constexpr lookup table inside function.",
+        prosCons: "Pros: Zero runtime initialization overhead. Cons: Must be computable at compile time.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 21. Static Local Variables - Approach 7: Constexpr Table\n#include <iostream>\nusing namespace std;\n\nint getSquare(int idx) {\n    static constexpr int squares[] = {0, 1, 4, 9, 16, 25, 36, 49, 64, 81};\n    return squares[idx];\n}\n\nint main() {\n    cout << \"Square of 7: \" << getSquare(7) << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static constexpr int squares[] = {0, 1, 4, 9, 16...};", constructType: "Variable & Initializer", title: "Constexpr Static Array", explanation: "Evaluated at compile time and embedded in read-only data segment.", keyDetails: [{ variableOrConstruct: "static constexpr", role: "Lookup Table", whyThisWay: "Zero runtime cost." }] },
+          { lineNum: 2, codeSnippet: "return squares[idx];", constructType: "Return / Cleanup", title: "O(1) Array Indexing", explanation: "Fetches precomputed square instantly.", keyDetails: [{ variableOrConstruct: "squares[idx]", role: "O(1) Return", whyThisWay: "Fast direct indexing." }] },
+          { lineNum: 3, codeSnippet: "getSquare(7)", constructType: "Condition & Branch", title: "Lookup Execution", explanation: "Returns 49.", keyDetails: [{ variableOrConstruct: "getSquare(7)", role: "Lookup Call", whyThisWay: "Fetches value." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Static Local Variable inside Lambda Closure (PRO)", category: "PRO / Lambda Static Local",
+        description: "Uses static local variable inside lambda body for stateful lambda without capture state.",
+        prosCons: "Pros: Stateless lambda interface with internal persistent state. Cons: Shared across lambda copies.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 21. Static Local Variables - Approach 8: Lambda Static Local\n#include <iostream>\nusing namespace std;\n\nint main() {\n    auto counterLambda = []() {\n        static int count = 0;\n        return ++count;\n    };\n    cout << counterLambda() << endl;\n    cout << counterLambda() << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static int count = 0;", constructType: "Variable & Initializer", title: "Lambda Body Static State", explanation: "Declared inside lambda body, persisting across calls.", keyDetails: [{ variableOrConstruct: "static int count", role: "Lambda State", whyThisWay: "Persists state inside lambda." }] },
+          { lineNum: 2, codeSnippet: "return ++count;", constructType: "Return / Cleanup", title: "Pre-Increment Return", explanation: "Increments count and returns new value.", keyDetails: [{ variableOrConstruct: "++count", role: "Increment", whyThisWay: "Returns updated state." }] },
+          { lineNum: 3, codeSnippet: "counterLambda()", constructType: "Condition & Branch", title: "Invoke Lambda", explanation: "Invokes stateful lambda.", keyDetails: [{ variableOrConstruct: "counterLambda()", role: "Invocation", whyThisWay: "Calls lambda." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Static Class Method Local Variable (PRO)", category: "PRO / Static Method Local",
+        description: "Encapsulates static local variable inside static class method.",
+        prosCons: "Pros: Clean OOP namespace scoping. Cons: Shared across all class instances.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 21. Static Local Variables - Approach 9: Static Method Local\n#include <iostream>\nusing namespace std;\n\nclass Logger {\npublic:\n    static void log(const string& msg) {\n        static int logNum = 1;\n        cout << \"[\" << logNum++ << \"] \" << msg << endl;\n    }\n};\n\nint main() {\n    Logger::log(\"Booting system...\");\n    Logger::log(\"System Ready.\");\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static int logNum = 1;", constructType: "Variable & Initializer", title: "Static Local Log Sequence", explanation: "Maintains log sequence number inside static log method.", keyDetails: [{ variableOrConstruct: "static int logNum", role: "Sequence Counter", whyThisWay: "Sequences log entries." }] },
+          { lineNum: 2, codeSnippet: "cout << \"[\" << logNum++ << \"] \" << msg;", constructType: "Condition & Branch", title: "Format & Increment Log", explanation: "Prints log message with current sequence number.", keyDetails: [{ variableOrConstruct: "logNum++", role: "Format Output", whyThisWay: "Increments sequence." }] },
+          { lineNum: 3, codeSnippet: "Logger::log(\"...\")", constructType: "Return / Cleanup", title: "Invoke Static Method", explanation: "Logs messages.", keyDetails: [{ variableOrConstruct: "Logger::log", role: "Static Call", whyThisWay: "Static method invocation." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Performance Benchmark: Static Local vs Parameter Passing (PRO)", category: "PRO / Benchmark",
+        description: "Compares execution timing of static local vs passing state by reference.",
+        prosCons: "Pros: Reveals cache and memory access characteristics. Cons: Microbenchmark environment dependent.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 21. Static Local Variables - Approach 10: Benchmark\n#include <iostream>\n#include <chrono>\nusing namespace std;\n\nvoid staticInc() {\n    static int s = 0;\n    s++;\n}\n\nvoid refInc(int& r) {\n    r++;\n}\n\nint main() {\n    auto start = chrono::high_resolution_clock::now();\n    for(int i=0; i<10000000; i++) staticInc();\n    auto mid = chrono::high_resolution_clock::now();\n    int val = 0;\n    for(int i=0; i<10000000; i++) refInc(val);\n    auto end = chrono::high_resolution_clock::now();\n    cout << \"Static time: \" << chrono::duration_cast<chrono::milliseconds>(mid-start).count() << \" ms\" << endl;\n    cout << \"Ref time: \" << chrono::duration_cast<chrono::milliseconds>(end-mid).count() << \" ms\" << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "for(int i=0; i<10000000; i++) staticInc();", constructType: "Condition & Branch", title: "Static Increment Loop", explanation: "Executes 10 million static local increments.", keyDetails: [{ variableOrConstruct: "staticInc()", role: "Static Loop", whyThisWay: "Tests static local performance." }] },
+          { lineNum: 2, codeSnippet: "for(int i=0; i<10000000; i++) refInc(val);", constructType: "Condition & Branch", title: "Reference Increment Loop", explanation: "Executes 10 million reference increments.", keyDetails: [{ variableOrConstruct: "refInc(val)", role: "Ref Loop", whyThisWay: "Tests parameter passing performance." }] },
+          { lineNum: 3, codeSnippet: "chrono::duration_cast<chrono::milliseconds>", constructType: "Return / Cleanup", title: "Report Benchmark Timing", explanation: "Displays execution time comparison.", keyDetails: [{ variableOrConstruct: "chrono::duration_cast", role: "Benchmark Result", whyThisWay: "Prints timing difference." }] }
+        ]
+      }
+    ]
+  };
+}
+
+export function getProblem22Details(): LearnModule {
+  return {
+    id: "easy_typedef",
+    title: "22. Type Aliases (using vs typedef)",
+    category: "Fundamentals",
+    difficulty: "easy",
+    shortDesc: "Creating modern type aliases using the using keyword.",
+    fullCode: "// 22. Type Aliases - Approach 1: Modern using Alias\n#include <iostream>\n#include <map>\n#include <string>\nusing namespace std;\n\nusing ScoreMap = map<string, int>;\n\nint main() {\n    ScoreMap scores;\n    scores[\"Alice\"] = 95;\n    cout << \"Alice Score: \" << scores[\"Alice\"] << endl;\n    return 0;\n}",
+    problemStatement: {
+      title: "22. Type Aliases (using vs typedef)",
+      objective: "Master modern C++11 using type aliases vs legacy C typedef syntax for containers, templates, and function pointers.",
+      description: "Implement **Type Aliases** (Fundamentals). Creating modern type aliases using the using keyword. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Type alias declarations and usage across container, function pointer, and template types.",
+      outputDesc: "Executed program output verifying identical type compatibility.",
+      takeaways: [
+        "C++11 'using Alias = Target' syntax is cleaner and left-to-right readable compared to typedef",
+        "Template aliases (template<typename T> using) are ONLY possible with using syntax",
+        "Type aliases create exact type synonyms without runtime overhead",
+        "Function pointer aliases with 'using' are far easier to read and maintain"
+      ],
+      examples: [
+        { id: 1, input: "using StringList = vector<string>; StringList names = {'Alice', 'Bob'};", output: "List Size: 2", explanation: "using Alias simplifies complex template type signatures." },
+        { id: 2, input: "typedef unsigned long ulong; ulong bytes = 1048576;", output: "Bytes: 1048576", explanation: "Legacy typedef syntax creates alias for primitive types." }
+      ],
+      constraints: ["Type aliases create compile-time synonyms with zero runtime performance cost."],
+      companies: ["Google", "Meta", "Amazon", "Apple"],
+      acceptanceRate: "93.2%",
+      totalAccepted: "1,850,200"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Modern Container Type Alias (using Alias = Target) (FREE)", category: "FREE / Modern Alias",
+        description: "Creates clean alias using using ScoreMap = std::map<std::string, int>.",
+        prosCons: "Pros: Left-to-right readable syntax. Cons: Requires C++11.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 22. Type Aliases - Approach 1: Modern Container Alias\n#include <iostream>\n#include <map>\n#include <string>\nusing namespace std;\n\nusing ScoreMap = map<string, int>;\n\nint main() {\n    ScoreMap scores;\n    scores[\"Alice\"] = 100;\n    cout << \"Score: \" << scores[\"Alice\"] << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "using ScoreMap = map<string, int>;", constructType: "Header / Include", title: "Modern Type Alias Declaration", explanation: "Defines ScoreMap as an exact synonym for map<string, int>.", keyDetails: [{ variableOrConstruct: "using ScoreMap =", role: "Type Alias", whyThisWay: "Clean left-to-right alias syntax." }] },
+          { lineNum: 2, codeSnippet: "ScoreMap scores;", constructType: "Variable & Initializer", title: "Instantiate Container via Alias", explanation: "Instantiates map object using alias name.", keyDetails: [{ variableOrConstruct: "ScoreMap scores", role: "Container Var", whyThisWay: "Uses alias as type." }] },
+          { lineNum: 3, codeSnippet: "scores[\"Alice\"] = 100;", constructType: "Condition & Branch", title: "Container Operations", explanation: "Operates on map via alias variable.", keyDetails: [{ variableOrConstruct: "scores[Alice]", role: "Map Insert", whyThisWay: "Normal container usage." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Legacy C typedef Syntax (typedef Target Alias) (FREE)", category: "FREE / Legacy typedef",
+        description: "Creates alias using classic C typedef syntax for primitive types.",
+        prosCons: "Pros: Backward compatible with C and old C++ compilers. Cons: Right-to-left syntax can be confusing.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 22. Type Aliases - Approach 2: Legacy typedef\n#include <iostream>\nusing namespace std;\n\ntypedef unsigned long long u64;\n\nint main() {\n    u64 bigNum = 18446744073709551615ULL;\n    cout << \"Max u64: \" << bigNum << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "typedef unsigned long long u64;", constructType: "Header / Include", title: "Legacy Typedef Declaration", explanation: "Maps u64 to unsigned long long using C typedef syntax.", keyDetails: [{ variableOrConstruct: "typedef ... u64", role: "C Alias", whyThisWay: "C-compatible alias." }] },
+          { lineNum: 2, codeSnippet: "u64 bigNum = 18446744073709551615ULL;", constructType: "Variable & Initializer", title: "64-bit Integer Allocation", explanation: "Allocates 64-bit unsigned int.", keyDetails: [{ variableOrConstruct: "u64 bigNum", role: "Variable", whyThisWay: "Uses typedef alias." }] },
+          { lineNum: 3, codeSnippet: "cout << \"Max u64: \" << bigNum << endl;", constructType: "Return / Cleanup", title: "Output 64-bit Int", explanation: "Prints 64-bit integer.", keyDetails: [{ variableOrConstruct: "bigNum", role: "Output", whyThisWay: "Prints value." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Template Type Alias (template<typename T> using) (PRO)", category: "PRO / Template Alias",
+        description: "Creates generic template alias template<typename T> using StringMap = map<string, T>.",
+        prosCons: "Pros: Extremely powerful template abstraction impossible with typedef alone. Cons: Requires C++11.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 22. Type Aliases - Approach 3: Template Alias\n#include <iostream>\n#include <map>\n#include <string>\nusing namespace std;\n\ntemplate<typename V>\nusing StringMap = map<string, V>;\n\nint main() {\n    StringMap<double> prices;\n    prices[\"Apple\"] = 1.99;\n    cout << \"Price: $\" << prices[\"Apple\"] << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template<typename V> using StringMap = map<string, V>;", constructType: "Header / Include", title: "Template Type Alias", explanation: "Binds first template argument of map to string while leaving second argument free.", keyDetails: [{ variableOrConstruct: "using StringMap =", role: "Template Alias", whyThisWay: "Partial template specialization for aliases." }] },
+          { lineNum: 2, codeSnippet: "StringMap<double> prices;", constructType: "Variable & Initializer", title: "Instantiate Template Alias", explanation: "Instantiates map<string, double> via template alias.", keyDetails: [{ variableOrConstruct: "StringMap<double>", role: "Instantiated Type", whyThisWay: "Clean template instantiation." }] },
+          { lineNum: 3, codeSnippet: "cout << \"Price: $\" << prices[\"Apple\"] << endl;", constructType: "Return / Cleanup", title: "Use Map", explanation: "Outputs price value.", keyDetails: [{ variableOrConstruct: "prices[Apple]", role: "Output", whyThisWay: "Prints value." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Function Pointer Type Alias (using FuncPtr) (PRO)", category: "PRO / Function Pointer Alias",
+        description: "Creates readable function pointer type alias using using MathFunc = double(*)(double).",
+        prosCons: "Pros: Much clearer syntax than typedef function pointers. Cons: Requires understanding function pointers.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 22. Type Aliases - Approach 4: Function Pointer Alias\n#include <iostream>\n#include <cmath>\nusing namespace std;\n\nusing MathOp = double(*)(double);\n\nvoid applyOp(MathOp op, double val) {\n    cout << \"Result: \" << op(val) << endl;\n}\n\nint main() {\n    MathOp f = sqrt;\n    applyOp(f, 16.0);\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "using MathOp = double(*)(double);", constructType: "Header / Include", title: "Function Pointer Alias", explanation: "Aliasing function pointer accepting double and returning double.", keyDetails: [{ variableOrConstruct: "using MathOp = ...", role: "Func Pointer Alias", whyThisWay: "Readable function pointer syntax." }] },
+          { lineNum: 2, codeSnippet: "MathOp f = sqrt;", constructType: "Variable & Initializer", title: "Assign Function Address", explanation: "Assigns address of std::sqrt function to MathOp pointer.", keyDetails: [{ variableOrConstruct: "MathOp f = sqrt", role: "Function Pointer", whyThisWay: "Assigns function pointer." }] },
+          { lineNum: 3, codeSnippet: "applyOp(f, 16.0);", constructType: "Condition & Branch", title: "Pass Function Pointer", explanation: "Executes applyOp passing sqrt pointer.", keyDetails: [{ variableOrConstruct: "applyOp(f, 16.0)", role: "Function Pass", whyThisWay: "Invokes callback." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Legacy Typedef Function Pointer (PRO)", category: "PRO / Typedef Func Pointer",
+        description: "Demonstrates classic typedef void (*Handler)(int) syntax for contrast.",
+        prosCons: "Pros: C compatible. Cons: Complex syntax with alias name buried in middle.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 22. Type Aliases - Approach 5: Legacy Typedef Func Pointer\n#include <iostream>\nusing namespace std;\n\ntypedef void (*Callback)(int);\n\nvoid printNum(int n) { cout << \"Num: \" << n << endl; }\n\nint main() {\n    Callback cb = printNum;\n    cb(42);\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "typedef void (*Callback)(int);", constructType: "Header / Include", title: "Legacy Typedef Func Pointer", explanation: "Defines Callback alias with name buried in middle of signature.", keyDetails: [{ variableOrConstruct: "typedef ... Callback", role: "Legacy Alias", whyThisWay: "Classic C function pointer syntax." }] },
+          { lineNum: 2, codeSnippet: "Callback cb = printNum;", constructType: "Variable & Initializer", title: "Initialize Callback", explanation: "Stores printNum address in callback variable.", keyDetails: [{ variableOrConstruct: "Callback cb", role: "Callback Pointer", whyThisWay: "Holds function address." }] },
+          { lineNum: 3, codeSnippet: "cb(42);", constructType: "Condition & Branch", title: "Invoke Callback", explanation: "Executes callback with argument 42.", keyDetails: [{ variableOrConstruct: "cb(42)", role: "Invocation", whyThisWay: "Calls function via pointer." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Nested Type Alias in Class Interface (PRO)", category: "PRO / Class Interface Alias",
+        description: "Defines using value_type = T inside class interface for STL container compliance.",
+        prosCons: "Pros: Enables STL iterator and trait compatibility. Cons: Exposes type in public interface.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 22. Type Aliases - Approach 6: Class Interface Alias\n#include <iostream>\nusing namespace std;\n\ntemplate<typename T>\nclass CustomContainer {\npublic:\n    using value_type = T;\n    using reference = T&;\n    value_type data;\n    CustomContainer(T v) : data(v) {}\n};\n\nint main() {\n    CustomContainer<int>::value_type val = 50;\n    cout << \"Type Alias Val: \" << val << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "using value_type = T;", constructType: "Header / Include", title: "Nested Member Alias", explanation: "Defines value_type in public interface of class template.", keyDetails: [{ variableOrConstruct: "using value_type", role: "Member Alias", whyThisWay: "Standard STL container type trait interface." }] },
+          { lineNum: 2, codeSnippet: "CustomContainer<int>::value_type val = 50;", constructType: "Variable & Initializer", title: "External Type Access", explanation: "Accesses value_type via scope resolution operator.", keyDetails: [{ variableOrConstruct: "value_type val", role: "Scoped Access", whyThisWay: "Accesses nested type alias." }] },
+          { lineNum: 3, codeSnippet: "cout << \"Type Alias Val: \" << val << endl;", constructType: "Return / Cleanup", title: "Output Value", explanation: "Prints 50.", keyDetails: [{ variableOrConstruct: "val", role: "Output", whyThisWay: "Prints value." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Type Alias for Complex Tuples & Pairs (PRO)", category: "PRO / Complex Tuple Alias",
+        description: "Simplifies deeply nested data types like vector<pair<string, vector<int>>>.",
+        prosCons: "Pros: Drastically improves code readability. Cons: Hides underlying structure if overused.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 22. Type Aliases - Approach 7: Complex Type Alias\n#include <iostream>\n#include <vector>\n#include <string>\n#include <utility>\nusing namespace std;\n\nusing StudentRecord = pair<string, vector<int>>;\nusing ClassRoster = vector<StudentRecord>;\n\nint main() {\n    ClassRoster roster = { {\"Alice\", {90, 85, 92}}, {\"Bob\", {78, 88, 95}} };\n    cout << roster[0].first << \" Grades Count: \" << roster[0].second.size() << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "using StudentRecord = pair<string, vector<int>>;", constructType: "Header / Include", title: "Nested Pair Alias", explanation: "Names complex pair type StudentRecord.", keyDetails: [{ variableOrConstruct: "StudentRecord", role: "Pair Alias", whyThisWay: "Cleans up nested type." }] },
+          { lineNum: 2, codeSnippet: "using ClassRoster = vector<StudentRecord>;", constructType: "Header / Include", title: "Nested Vector Alias", explanation: "Names vector of StudentRecord ClassRoster.", keyDetails: [{ variableOrConstruct: "ClassRoster", role: "Vector Alias", whyThisWay: "Provides domain-specific type name." }] },
+          { lineNum: 3, codeSnippet: "ClassRoster roster = { ... };", constructType: "Variable & Initializer", title: "Clean Instantiation", explanation: "Instantiates roster using clean type alias.", keyDetails: [{ variableOrConstruct: "ClassRoster roster", role: "Roster Var", whyThisWay: "Constructs object cleanly." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Meta-Programming Conditional Type Alias (PRO)", category: "PRO / Meta Alias",
+        description: "Uses std::conditional_t type alias for compile-time conditional type selection.",
+        prosCons: "Pros: Powerful meta-programming type branch. Cons: Requires type traits header.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 22. Type Aliases - Approach 8: Meta-Programming Alias\n#include <iostream>\n#include <type_traits>\nusing namespace std;\n\ntemplate<bool IsFloat>\nusing NumberType = conditional_t<IsFloat, double, int>;\n\nint main() {\n    NumberType<true> f = 3.14159;\n    NumberType<false> i = 42;\n    cout << \"Float: \" << f << \" | Int: \" << i << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "using NumberType = conditional_t<IsFloat, double, int>;", constructType: "Header / Include", title: "Meta Conditional Alias", explanation: "Selects double if IsFloat is true, else int at compile time.", keyDetails: [{ variableOrConstruct: "conditional_t", role: "Meta Type Alias", whyThisWay: "Compile-time type branching." }] },
+          { lineNum: 2, codeSnippet: "NumberType<true> f = 3.14159;", constructType: "Variable & Initializer", title: "Double Allocation", explanation: "Allocates double based on template bool.", keyDetails: [{ variableOrConstruct: "NumberType<true>", role: "Double Var", whyThisWay: "Evaluates to double." }] },
+          { lineNum: 3, codeSnippet: "NumberType<false> i = 42;", constructType: "Variable & Initializer", title: "Int Allocation", explanation: "Allocates int based on template bool.", keyDetails: [{ variableOrConstruct: "NumberType<false>", role: "Int Var", whyThisWay: "Evaluates to int." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Member Function Pointer Alias (PRO)", category: "PRO / Member Func Pointer",
+        description: "Creates type alias for pointers to class member functions using using MethodPtr = void(MyClass::*)(int).",
+        prosCons: "Pros: Simplifies member function pointer syntax. Cons: Requires object instance to invoke.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 22. Type Aliases - Approach 9: Member Function Pointer Alias\n#include <iostream>\nusing namespace std;\n\nclass Calculator {\npublic:\n    void add(int x) { cout << \"Added: \" << x << endl; }\n};\n\nusing CalcMethod = void(Calculator::*)(int);\n\nint main() {\n    Calculator calc;\n    CalcMethod ptr = &Calculator::add;\n    (calc.*ptr)(100);\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "using CalcMethod = void(Calculator::*)(int);", constructType: "Header / Include", title: "Member Function Pointer Alias", explanation: "Aliasing member function pointer belonging to Calculator class.", keyDetails: [{ variableOrConstruct: "Calculator::*", role: "Member Pointer", whyThisWay: "Encapsulates member function signature." }] },
+          { lineNum: 2, codeSnippet: "CalcMethod ptr = &Calculator::add;", constructType: "Variable & Initializer", title: "Assign Member Address", explanation: "Assigns address of member function to pointer.", keyDetails: [{ variableOrConstruct: "&Calculator::add", role: "Member Addr", whyThisWay: "Holds member function offset." }] },
+          { lineNum: 3, codeSnippet: "(calc.*ptr)(100);", constructType: "Condition & Branch", title: "Invoke Member Pointer", explanation: "Invokes member function on object calc using .* operator.", keyDetails: [{ variableOrConstruct: "(calc.*ptr)", role: "Member Invocation", whyThisWay: "Calls member via pointer." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Fixed Array Type Alias (PRO)", category: "PRO / Array Alias",
+        description: "Creates clean type alias for fixed size C arrays using using IntArray = int[5].",
+        prosCons: "Pros: Replaces awkward typedef int IntArray[5] syntax. Cons: Fixed dimension.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 22. Type Aliases - Approach 10: Fixed Array Alias\n#include <iostream>\nusing namespace std;\n\nusing Int5 = int[5];\n\nvoid printArray(const Int5& arr) {\n    for(int x : arr) cout << x << \" \";\n    cout << endl;\n}\n\nint main() {\n    Int5 data = {1, 2, 3, 4, 5};\n    printArray(data);\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "using Int5 = int[5];", constructType: "Header / Include", title: "Fixed Array Type Alias", explanation: "Defines Int5 as type representing array of 5 integers.", keyDetails: [{ variableOrConstruct: "using Int5 = int[5]", role: "Array Alias", whyThisWay: "Clean C-array type alias." }] },
+          { lineNum: 2, codeSnippet: "void printArray(const Int5& arr)", constructType: "Function Signature", title: "Pass Array by Reference Alias", explanation: "Accepts reference to array of 5 ints without array decay.", keyDetails: [{ variableOrConstruct: "const Int5&", role: "Array Ref", whyThisWay: "Preserves array size type." }] },
+          { lineNum: 3, codeSnippet: "Int5 data = {1, 2, 3, 4, 5};", constructType: "Variable & Initializer", title: "Array Instantiation", explanation: "Instantiates 5-element array cleanly.", keyDetails: [{ variableOrConstruct: "Int5 data", role: "Array Var", whyThisWay: "Uses array type alias." }] }
+        ]
+      }
+    ]
+  };
+}
+
+export function getProblem23Details(): LearnModule {
+  return {
+    id: "easy_cstring",
+    title: "23. C-Style Null-Terminated Strings",
+    category: "Fundamentals",
+    difficulty: "easy",
+    shortDesc: "Working with char arrays, strlen, and null terminator '\\0'.",
+    fullCode: "// 23. C-Style Strings - Approach 1: Null Termination\n#include <iostream>\nusing namespace std;\n\nint main() {\n    char str[] = \"Execium\";\n    cout << \"String: \" << str << endl;\n    cout << \"Size with null: \" << sizeof(str) << \" bytes\" << endl;\n    return 0;\n}",
+    problemStatement: {
+      title: "23. C-Style Null-Terminated Strings",
+      objective: "Master C-style char arrays, null termination ('\\0'), strlen, strcpy, strcmp, buffer safety, and std::string interoperability.",
+      description: "Implement **C-Style Strings** (Fundamentals). Working with char arrays, strlen, and null terminator '\\0'. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Character array buffers and C-string pointers.",
+      outputDesc: "Manipulated string buffers, length counts, and comparison results.",
+      takeaways: [
+        "C-strings are arrays of char terminated by a null byte ('\\0')",
+        "String literals are stored in read-only memory segment (.rodata)",
+        "Always allocate N+1 bytes for a C-string of length N to hold the null terminator",
+        "Use safe bounded functions (strncpy, snprintf) to prevent stack smashing"
+      ],
+      examples: [
+        { id: 1, input: "char str[] = 'Hello';", output: "Length: 5, Sizeof: 6 bytes", explanation: "Implicit '\\0' adds 1 extra byte." },
+        { id: 2, input: "strcmp('apple', 'banana')", output: "Result < 0 (-1)", explanation: "Lexicographical comparison returns negative when first string is smaller." }
+      ],
+      constraints: ["Char arrays must be null-terminated to prevent out-of-bounds memory reads."],
+      companies: ["Microsoft", "Apple", "Google", "Intel"],
+      acceptanceRate: "88.4%",
+      totalAccepted: "1,920,400"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: C-String Declaration & Null Termination (FREE)", category: "FREE / Null Termination",
+        description: "Declares char array initialized with string literal and inspects null terminator.",
+        prosCons: "Pros: Fundamental memory layout knowledge. Cons: Fixed stack size.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: true,
+        code: "// 23. C-Style Strings - Approach 1: Declaration\n#include <iostream>\nusing namespace std;\n\nint main() {\n    char msg[] = \"C++\";\n    cout << \"Msg: \" << msg << endl;\n    cout << \"Last char ASCII: \" << (int)msg[3] << endl; // 0 for '\\0'\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "char msg[] = 'C++';", constructType: "Variable & Initializer", title: "Char Array Allocation", explanation: "Allocates 4 bytes on stack: 'C', '+', '+', '\\0'.", keyDetails: [{ variableOrConstruct: "char msg[]", role: "Char Array", whyThisWay: "Stack array with implicit '\\0'." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Last char ASCII: ' << (int)msg[3];", constructType: "Condition & Branch", title: "Inspect Null Byte", explanation: "Casts index 3 byte to int demonstrating ASCII 0 ('\\0').", keyDetails: [{ variableOrConstruct: "msg[3]", role: "Null Terminator", whyThisWay: "Proves null byte existence." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Manual Loop String Length Calculation (FREE)", category: "FREE / Length Loop",
+        description: "Traverses char array until reaching null terminator '\\0' to count characters.",
+        prosCons: "Pros: Demonstrates how strlen works internally. Cons: O(N) linear walk.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 23. C-Style Strings - Approach 2: Manual Length\n#include <iostream>\nusing namespace std;\n\nint customStrlen(const char* str) {\n    int len = 0;\n    while (str[len] != '\\0') {\n        len++;\n    }\n    return len;\n}\n\nint main() {\n    cout << \"Length: \" << customStrlen(\"Execium Code\") << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "while (str[len] != '\\0') { len++; }", constructType: "Condition & Branch", title: "Null Byte Search Loop", explanation: "Iterates through memory addresses until encountering null terminator byte 0.", keyDetails: [{ variableOrConstruct: "str[len] != '\\0'", role: "Loop Guard", whyThisWay: "Detects string end." }] },
+          { lineNum: 2, codeSnippet: "return len;", constructType: "Return / Cleanup", title: "Return Character Count", explanation: "Returns total number of characters excluding null byte.", keyDetails: [{ variableOrConstruct: "len", role: "Length Count", whyThisWay: "Returns computed length." }] },
+          { lineNum: 3, codeSnippet: "customStrlen('Execium Code')", constructType: "Condition & Branch", title: "Invoke Custom Length", explanation: "Computes length 12.", keyDetails: [{ variableOrConstruct: "customStrlen", role: "Call", whyThisWay: "Tests function." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Standard C Library strlen & strcmp (PRO)", category: "PRO / C Library Functions",
+        description: "Uses <cstring> functions strlen() and strcmp() for length and comparison.",
+        prosCons: "Pros: Optimized SIMD assembly implementations in stdlib. Cons: Unsafe if string lacks '\\0'.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 23. C-Style Strings - Approach 3: cstring Functions\n#include <iostream>\n#include <cstring>\nusing namespace std;\n\nint main() {\n    const char* s1 = \"Apple\";\n    const char* s2 = \"Banana\";\n    cout << \"Len s1: \" << strlen(s1) << endl;\n    cout << \"strcmp: \" << strcmp(s1, s2) << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "strlen(s1)", constructType: "Condition & Branch", title: "Stdlib Length Check", explanation: "Calls optimized C library strlen function.", keyDetails: [{ variableOrConstruct: "strlen", role: "Length Function", whyThisWay: "Standard string length." }] },
+          { lineNum: 2, codeSnippet: "strcmp(s1, s2)", constructType: "Condition & Branch", title: "Lexicographical Compare", explanation: "Compares s1 and s2 byte-by-byte; returns negative since 'Apple' < 'Banana'.", keyDetails: [{ variableOrConstruct: "strcmp", role: "Compare Function", whyThisWay: "Lexicographical comparison." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits program.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Safe String Copying with snprintf (PRO)", category: "PRO / Safe Copy",
+        description: "Uses snprintf to copy strings into buffer with strict bound enforcement.",
+        prosCons: "Pros: Guaranteed null termination and buffer overflow prevention. Cons: Slightly slower than raw memcpy.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: "// 23. C-Style Strings - Approach 4: Safe Copy\n#include <iostream>\n#include <cstdio>\nusing namespace std;\n\nint main() {\n    char buffer[10];\n    snprintf(buffer, sizeof(buffer), \"%s\", \"LongerThanTenChars\");\n    cout << \"Safe Buffer: \" << buffer << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "char buffer[10];", constructType: "Variable & Initializer", title: "Fixed Buffer Allocation", explanation: "Allocates 10-byte stack buffer.", keyDetails: [{ variableOrConstruct: "buffer[10]", role: "Stack Buffer", whyThisWay: "Target buffer." }] },
+          { lineNum: 2, codeSnippet: "snprintf(buffer, sizeof(buffer), '%s', ...);", constructType: "Condition & Branch", title: "Bounded String Formatting", explanation: "Truncates string to 9 chars + '\\0', preventing buffer overflow.", keyDetails: [{ variableOrConstruct: "snprintf", role: "Safe Copy", whyThisWay: "Prevents stack smashing." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Safe Buffer: ' << buffer;", constructType: "Return / Cleanup", title: "Output Safe Result", explanation: "Prints truncated safe string.", keyDetails: [{ variableOrConstruct: "buffer", role: "Output", whyThisWay: "Displays bounded string." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: C-String Concatenation (snprintf) (PRO)", category: "PRO / Concatenation",
+        description: "Safely concatenates multiple C-strings into a destination buffer.",
+        prosCons: "Pros: Safe bounded concatenation. Cons: Manual buffer size calculations.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: "// 23. C-Style Strings - Approach 5: Concatenation\n#include <iostream>\n#include <cstdio>\nusing namespace std;\n\nint main() {\n    char dest[64];\n    const char* p1 = \"Hello \";\n    const char* p2 = \"World!\";\n    snprintf(dest, sizeof(dest), \"%s%s\", p1, p2);\n    cout << \"Combined: \" << dest << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "char dest[64];", constructType: "Variable & Initializer", title: "Destination Buffer", explanation: "Allocates 64-byte destination buffer.", keyDetails: [{ variableOrConstruct: "dest[64]", role: "Dest Buffer", whyThisWay: "Holds combined result." }] },
+          { lineNum: 2, codeSnippet: "snprintf(dest, sizeof(dest), '%s%s', p1, p2);", constructType: "Condition & Branch", title: "Safe Dual String Append", explanation: "Formats p1 and p2 into dest with buffer overflow protection.", keyDetails: [{ variableOrConstruct: "snprintf", role: "Safe Concat", whyThisWay: "Concatenates safely." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Combined: ' << dest;", constructType: "Return / Cleanup", title: "Output Concatenation", explanation: "Prints 'Hello World!'.", keyDetails: [{ variableOrConstruct: "dest", role: "Output", whyThisWay: "Prints result." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: C-String Tokenization (strtok_r) (PRO)", category: "PRO / Tokenization",
+        description: "Splits C-string on delimiter using thread-safe strtok_r / strtok.",
+        prosCons: "Pros: Fast zero-copy string tokenization. Cons: Mutates source char array.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 23. C-Style Strings - Approach 6: Tokenization\n#include <iostream>\n#include <cstring>\nusing namespace std;\n\nint main() {\n    char str[] = \"apple,banana,cherry\";\n    char* token = strtok(str, \",\");\n    while (token != nullptr) {\n        cout << \"Token: \" << token << endl;\n        token = strtok(nullptr, \",\");\n    }\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "char* token = strtok(str, ',');", constructType: "Variable & Initializer", title: "First Token Extraction", explanation: "Replaces comma with '\\0' and returns pointer to first token 'apple'.", keyDetails: [{ variableOrConstruct: "strtok", role: "Tokenizer", whyThisWay: "In-place string splitting." }] },
+          { lineNum: 2, codeSnippet: "while (token != nullptr) { ... token = strtok(nullptr, ','); }", constructType: "Condition & Branch", title: "Token Extraction Loop", explanation: "Continues extracting subsequent tokens passing nullptr.", keyDetails: [{ variableOrConstruct: "strtok(nullptr, ',')", role: "Next Token", whyThisWay: "Resumes tokenization." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Token: ' << token;", constructType: "Return / Cleanup", title: "Output Token", explanation: "Prints each token.", keyDetails: [{ variableOrConstruct: "token", role: "Token Output", whyThisWay: "Prints token." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Interoperability: C-String & std::string (PRO)", category: "PRO / std::string Bridge",
+        description: "Bridges legacy C-strings and modern std::string using .c_str() and constructors.",
+        prosCons: "Pros: Seamless interoperation between modern and C code. Cons: Pointer validity tied to string lifetime.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: "// 23. C-Style Strings - Approach 7: std::string Bridge\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid legacyCFunction(const char* cstr) {\n    cout << \"Legacy C API received: \" << cstr << endl;\n}\n\nint main() {\n    string cppStr = \"Modern C++ String\";\n    legacyCFunction(cppStr.c_str());\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "string cppStr = 'Modern C++ String';", constructType: "Variable & Initializer", title: "std::string Creation", explanation: "Creates std::string object.", keyDetails: [{ variableOrConstruct: "string cppStr", role: "C++ String", whyThisWay: "Modern string container." }] },
+          { lineNum: 2, codeSnippet: "cppStr.c_str()", constructType: "Condition & Branch", title: "Fetch Null-Terminated Pointer", explanation: "Obtains const char* pointer to null-terminated buffer for legacy API.", keyDetails: [{ variableOrConstruct: "c_str()", role: "C-String Pointer", whyThisWay: "Bridges C++ string to C API." }] },
+          { lineNum: 3, codeSnippet: "legacyCFunction(...)", constructType: "Return / Cleanup", title: "Pass to C API", explanation: "Executes legacy C API.", keyDetails: [{ variableOrConstruct: "legacyCFunction", role: "C API Call", whyThisWay: "Invokes legacy function." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: In-Place Char Array Reversal (PRO)", category: "PRO / Two-Pointer Reversal",
+        description: "Reverses C-string in-place using two-pointer swap on char array.",
+        prosCons: "Pros: O(1) auxiliary space in-place modification. Cons: Mutates original array.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 23. C-Style Strings - Approach 8: In-Place Reversal\n#include <iostream>\n#include <cstring>\n#include <utility>\nusing namespace std;\n\nvoid reverseCString(char* str) {\n    int left = 0, right = strlen(str) - 1;\n    while (left < right) {\n        swap(str[left++], str[right--]);\n    }\n}\n\nint main() {\n    char text[] = \"Execium\";\n    reverseCString(text);\n    cout << \"Reversed: \" << text << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int left = 0, right = strlen(str) - 1;", constructType: "Variable & Initializer", title: "Two Pointer Setup", explanation: "Sets left at start and right at last character before '\\0'.", keyDetails: [{ variableOrConstruct: "right = strlen(str) - 1", role: "End Pointer", whyThisWay: "Excludes null byte." }] },
+          { lineNum: 2, codeSnippet: "while (left < right) { swap(str[left++], str[right--]); }", constructType: "Condition & Branch", title: "In-Place Swap Loop", explanation: "Swaps characters from outside inward.", keyDetails: [{ variableOrConstruct: "swap", role: "Character Swap", whyThisWay: "In-place mutation." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Reversed: ' << text;", constructType: "Return / Cleanup", title: "Output Reversed String", explanation: "Prints 'muicexE'.", keyDetails: [{ variableOrConstruct: "text", role: "Reversed Output", whyThisWay: "Displays result." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Const Char Pointer vs Mutable Char Array (PRO)", category: "PRO / Memory Segment Analysis",
+        description: "Analyzes const char* (read-only data segment) vs char[] (mutable stack frame array).",
+        prosCons: "Pros: Deep understanding of binary executable memory segments. Cons: Mutating const char* causes SIGSEGV.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 23. C-Style Strings - Approach 9: Memory Segment Analysis\n#include <iostream>\nusing namespace std;\n\nint main() {\n    const char* literal = \"Read-Only Segment\"; // In .rodata\n    char stackArr[] = \"Mutable Stack Segment\";  // Copy on stack\n    stackArr[0] = 'm'; // Safe!\n    // literal[0] = 'r'; // CRASH! Segmentation Fault\n    cout << \"Modified stack array: \" << stackArr << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "const char* literal = 'Read-Only Segment';", constructType: "Variable & Initializer", title: "String Literal Pointer", explanation: "Points to read-only memory segment (.rodata).", keyDetails: [{ variableOrConstruct: "const char*", role: "RO Pointer", whyThisWay: "Points to string literal." }] },
+          { lineNum: 2, codeSnippet: "char stackArr[] = 'Mutable Stack Segment';", constructType: "Variable & Initializer", title: "Stack Array Copy", explanation: "Copies string literal bytes onto mutable stack frame.", keyDetails: [{ variableOrConstruct: "char stackArr[]", role: "Stack Array", whyThisWay: "Creates mutable copy on stack." }] },
+          { lineNum: 3, codeSnippet: "stackArr[0] = 'm';", constructType: "Condition & Branch", title: "Mutate Stack Byte", explanation: "Safely mutates byte 0 of stack array.", keyDetails: [{ variableOrConstruct: "stackArr[0]", role: "Mutation", whyThisWay: "Mutates stack memory." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Custom RAII C-String Buffer Class (PRO)", category: "PRO / RAII Buffer",
+        description: "Encapsulates dynamic char* buffer inside RAII class for auto cleanup.",
+        prosCons: "Pros: Prevents C-string memory leaks. Cons: Requires writing rule-of-three/five.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: "// 23. C-Style Strings - Approach 10: RAII Buffer\n#include <iostream>\n#include <cstring>\nusing namespace std;\n\nclass CStringBuffer {\nprivate:\n    char* data;\npublic:\n    CStringBuffer(const char* s) {\n        data = new char[strlen(s) + 1];\n        strcpy(data, s);\n    }\n    ~CStringBuffer() { delete[] data; }\n    const char* get() const { return data; }\n};\n\nint main() {\n    CStringBuffer buf(\"RAII C-String\");\n    cout << \"Buffer: \" << buf.get() << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "data = new char[strlen(s) + 1]; strcpy(data, s);", constructType: "Variable & Initializer", title: "Heap Allocation & Copy", explanation: "Allocates strlen(s)+1 bytes on heap and copies string with null byte.", keyDetails: [{ variableOrConstruct: "new char[len+1]", role: "Heap Alloc", whyThisWay: "Allocates buffer for string." }] },
+          { lineNum: 2, codeSnippet: "~CStringBuffer() { delete[] data; }", constructType: "Return / Cleanup", title: "RAII Destructor Cleanup", explanation: "Automatically frees heap memory when object leaves scope.", keyDetails: [{ variableOrConstruct: "delete[] data", role: "RAII Dealloc", whyThisWay: "Prevents memory leaks." }] },
+          { lineNum: 3, codeSnippet: "buf.get()", constructType: "Condition & Branch", title: "Get Buffer Pointer", explanation: "Accesses string buffer safely.", keyDetails: [{ variableOrConstruct: "buf.get()", role: "Getter", whyThisWay: "Returns const char*." }] }
+        ]
+      }
+    ]
+  };
+}
+
+export function getProblem24Details(): LearnModule {
+  return {
+    id: "easy_pair",
+    title: "24. Pair Container (std::pair)",
+    category: "STL Containers",
+    difficulty: "easy",
+    shortDesc: "Storing two heterogeneous objects together with std::pair.",
+    fullCode: "// 24. Pair Container - Approach 1: Basic std::pair\n#include <iostream>\n#include <utility>\n#include <string>\nusing namespace std;\n\nint main() {\n    pair<string, int> user(\"Alice\", 25);\n    cout << \"Name: \" << user.first << \" | Age: \" << user.second << endl;\n    return 0;\n}",
+    problemStatement: {
+      title: "24. Pair Container (std::pair)",
+      objective: "Master std::pair<T1, T2>, make_pair, structured bindings auto [a, b], lexicographical sorting, and multi-value returns.",
+      description: "Implement **Pair Container (std::pair)** (STL Containers). Storing two heterogeneous objects together with std::pair. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Pairs of heterogeneous data types.",
+      outputDesc: "Extracted pair components, sorted pair vectors, and dual return results.",
+      takeaways: [
+        "std::pair<T1, T2> holds two heterogeneous values in .first and .second members",
+        "std::make_pair() automatically deduces element types",
+        "C++17 structured bindings 'auto [x, y] = p;' provide clean variable decomposition",
+        "std::pair compares lexicographically (.first evaluated before .second)"
+      ],
+      examples: [
+        { id: 1, input: "pair<string, double> item('Laptop', 999.99);", output: "Item: Laptop, Price: 999.99", explanation: "Holds string key and double value together." },
+        { id: 2, input: "make_pair(10, 20) < make_pair(10, 30)", output: "true", explanation: "First elements match, so second elements are compared (20 < 30)." }
+      ],
+      constraints: ["std::pair requires <utility> header."],
+      companies: ["Google", "Amazon", "Meta", "Bloomberg"],
+      acceptanceRate: "94.8%",
+      totalAccepted: "2,410,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic std::pair & Direct Member Access (FREE)", category: "FREE / Direct Access",
+        description: "Creates pair<string, int> and accesses members via .first and .second.",
+        prosCons: "Pros: Simple, light, header <utility>. Cons: Limited to exactly 2 elements.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 24. Pair Container - Approach 1: Direct Access\n#include <iostream>\n#include <utility>\n#include <string>\nusing namespace std;\n\nint main() {\n    pair<string, int> p(\"Score\", 100);\n    cout << p.first << \": \" << p.second << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "pair<string, int> p('Score', 100);", constructType: "Variable & Initializer", title: "Pair Construction", explanation: "Constructs pair with string 'Score' and int 100.", keyDetails: [{ variableOrConstruct: "pair<string, int>", role: "Pair Container", whyThisWay: "Binds two heterogenous types." }] },
+          { lineNum: 2, codeSnippet: "cout << p.first << ': ' << p.second << endl;", constructType: "Condition & Branch", title: "Member Access", explanation: "Accesses .first member ('Score') and .second member (100).", keyDetails: [{ variableOrConstruct: "p.first, p.second", role: "Members", whyThisWay: "Direct field access." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Pair Creation via std::make_pair (FREE)", category: "FREE / make_pair",
+        description: "Creates pair using std::make_pair for automatic type deduction.",
+        prosCons: "Pros: Avoids explicit template type arguments. Cons: Minor template instantiation syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 24. Pair Container - Approach 2: make_pair\n#include <iostream>\n#include <utility>\nusing namespace std;\n\nint main() {\n    auto p = make_pair(10, 3.14);\n    cout << \"Int: \" << p.first << \" | Double: \" << p.second << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto p = make_pair(10, 3.14);", constructType: "Variable & Initializer", title: "make_pair Type Deduction", explanation: "Deduces types as pair<int, double> automatically.", keyDetails: [{ variableOrConstruct: "make_pair(10, 3.14)", role: "Helper Factory", whyThisWay: "Deduces pair types automatically." }] },
+          { lineNum: 2, codeSnippet: "p.first, p.second", constructType: "Condition & Branch", title: "Access Fields", explanation: "Accesses int 10 and double 3.14.", keyDetails: [{ variableOrConstruct: "p.first", role: "First Field", whyThisWay: "Reads int." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits program.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: C++17 Structured Binding Decomposition (PRO)", category: "PRO / Structured Binding",
+        description: "Deconstructs pair into named variables using auto [key, value] = p.",
+        prosCons: "Pros: Extremely clean, expressive syntax. Cons: Requires C++17 compiler.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 24. Pair Container - Approach 3: Structured Binding\n#include <iostream>\n#include <utility>\n#include <string>\nusing namespace std;\n\nint main() {\n    pair<string, int> entry(\"Key\", 42);\n    auto [k, v] = entry; // C++17 Structured Binding\n    cout << \"K: \" << k << \" | V: \" << v << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto [k, v] = entry;", constructType: "Variable & Initializer", title: "Structured Binding Unpacking", explanation: "Binds k to entry.first and v to entry.second in a single line.", keyDetails: [{ variableOrConstruct: "auto [k, v]", role: "Structured Binding", whyThisWay: "C++17 clean variable unpacking." }] },
+          { lineNum: 2, codeSnippet: "cout << 'K: ' << k << ' | V: ' << v << endl;", constructType: "Condition & Branch", title: "Use Unpacked Variables", explanation: "Uses k and v directly without entry.first syntax.", keyDetails: [{ variableOrConstruct: "k, v", role: "Decomposed Vars", whyThisWay: "Clean variable usage." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Lexicographical Pair Sorting (PRO)", category: "PRO / Pair Sorting",
+        description: "Sorts vector of pairs; std::pair compares .first then .second automatically.",
+        prosCons: "Pros: Built-in lexicographical sorting. Cons: Default sort prioritizes first element.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 24. Pair Container - Approach 4: Pair Sorting\n#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <utility>\nusing namespace std;\n\nint main() {\n    vector<pair<int, int>> points = {{2, 5}, {1, 9}, {2, 1}, {1, 3}};\n    sort(points.begin(), points.end());\n    for(auto [x, y] : points) cout << \"(\" << x << \",\" << y << \") \";\n    cout << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "sort(points.begin(), points.end());", constructType: "Condition & Branch", title: "Lexicographical Sort", explanation: "Sorts points by x coordinate first; breaks ties using y coordinate.", keyDetails: [{ variableOrConstruct: "std::sort", role: "Pair Sort", whyThisWay: "Uses std::pair built-in operator<." }] },
+          { lineNum: 2, codeSnippet: "for(auto [x, y] : points)", constructType: "Condition & Branch", title: "Range For Unpacking Loop", explanation: "Iterates through sorted points unpacking x and y.", keyDetails: [{ variableOrConstruct: "auto [x, y]", role: "Loop Unpack", whyThisWay: "Clean iteration over pair vector." }] },
+          { lineNum: 3, codeSnippet: "cout << '(' << x << ',' << y << ') ';", constructType: "Return / Cleanup", title: "Output Sorted Points", explanation: "Prints (1,3) (1,9) (2,1) (2,5).", keyDetails: [{ variableOrConstruct: "x, y", role: "Output", whyThisWay: "Prints coordinates." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Pair as Map Element / Key (PRO)", category: "PRO / Map Key Pair",
+        description: "Uses std::pair<int, int> as 2D coordinate key in std::map.",
+        prosCons: "Pros: Convenient 2D grid coordinate mapping. Cons: Requires std::map (std::unordered_map requires custom hash).",
+        timeComplexity: "O(log N)", spaceComplexity: "O(N)", isFree: false,
+        code: "// 24. Pair Container - Approach 5: Map Key Pair\n#include <iostream>\n#include <map>\n#include <utility>\nusing namespace std;\n\nint main() {\n    map<pair<int, int>, string> grid;\n    grid[{0, 0}] = \"Origin\";\n    grid[{1, 2}] = \"Player\";\n    cout << \"At (1,2): \" << grid[{1, 2}] << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "map<pair<int, int>, string> grid;", constructType: "Variable & Initializer", title: "2D Grid Map Declaration", explanation: "Map using pair<int, int> as coordinate key.", keyDetails: [{ variableOrConstruct: "pair<int, int> key", role: "Coordinate Key", whyThisWay: "Provides ordered 2D key." }] },
+          { lineNum: 2, codeSnippet: "grid[{1, 2}] = 'Player';", constructType: "Condition & Branch", title: "Insert via Pair Key", explanation: "Inserts key (1, 2) with value 'Player'.", keyDetails: [{ variableOrConstruct: "grid[{1, 2}]", role: "Pair Key Access", whyThisWay: "Uses initializer list pair syntax." }] },
+          { lineNum: 3, codeSnippet: "cout << 'At (1,2): ' << grid[{1, 2}];", constructType: "Return / Cleanup", title: "Retrieve Value", explanation: "Fetches value at (1, 2).", keyDetails: [{ variableOrConstruct: "grid[{1, 2}]", role: "Lookup", whyThisWay: "Retrieves value." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Returning Pair for Multi-Value Function Returns (PRO)", category: "PRO / Dual Return",
+        description: "Returns pair<bool, int> from function to return success flag and result value.",
+        prosCons: "Pros: Replaces out-parameters. Cons: Limited to 2 returned values.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 24. Pair Container - Approach 6: Dual Return\n#include <iostream>\n#include <utility>\nusing namespace std;\n\npair<bool, int> safeDivide(int a, int b) {\n    if (b == 0) return {false, 0};\n    return {true, a / b};\n}\n\nint main() {\n    auto [ok, res] = safeDivide(10, 2);\n    if (ok) cout << \"Result: \" << res << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (b == 0) return {false, 0};", constructType: "Condition & Branch", title: "Return Error Pair", explanation: "Returns pair with false flag on divide-by-zero.", keyDetails: [{ variableOrConstruct: "{false, 0}", role: "Error Pair", whyThisWay: "Signifies failure." }] },
+          { lineNum: 2, codeSnippet: "return {true, a / b};", constructType: "Return / Cleanup", title: "Return Success Pair", explanation: "Returns pair with true flag and quotient.", keyDetails: [{ variableOrConstruct: "{true, quotient}", role: "Success Pair", whyThisWay: "Returns result." }] },
+          { lineNum: 3, codeSnippet: "auto [ok, res] = safeDivide(10, 2);", constructType: "Condition & Branch", title: "Unpack Result Pair", explanation: "Unpacks success flag and result.", keyDetails: [{ variableOrConstruct: "auto [ok, res]", role: "Unpack Return", whyThisWay: "Decomposes dual return." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Accessing Pair via std::get<N>(p) (PRO)", category: "PRO / Tuple-style Indexing",
+        description: "Accesses pair elements using std::get<0>(p) and std::get<1>(p).",
+        prosCons: "Pros: Enables generic template code operating on pairs and tuples. Cons: Less readable than .first/.second.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 24. Pair Container - Approach 7: std::get Indexing\n#include <iostream>\n#include <utility>\nusing namespace std;\n\nint main() {\n    pair<int, string> p(1, \"One\");\n    cout << \"get<0>: \" << get<0>(p) << endl;\n    cout << \"get<1>: \" << get<1>(p) << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "get<0>(p)", constructType: "Condition & Branch", title: "Get First Element", explanation: "Fetches first pair element (equivalent to p.first).", keyDetails: [{ variableOrConstruct: "get<0>(p)", role: "First Index", whyThisWay: "Tuple-like interface for pair." }] },
+          { lineNum: 2, codeSnippet: "get<1>(p)", constructType: "Condition & Branch", title: "Get Second Element", explanation: "Fetches second pair element (equivalent to p.second).", keyDetails: [{ variableOrConstruct: "get<1>(p)", role: "Second Index", whyThisWay: "Tuple-like interface." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Piecewise Pair Construction (PRO)", category: "PRO / Piecewise Construct",
+        description: "Uses std::piecewise_construct to forward tuples of arguments to pair element constructors.",
+        prosCons: "Pros: Enables in-place construction of non-copyable/non-movable types. Cons: Verbose syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 24. Pair Container - Approach 8: Piecewise Construction\n#include <iostream>\n#include <utility>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    pair<string, string> p(\n        piecewise_construct,\n        forward_as_tuple(5, 'A'),\n        forward_as_tuple(3, 'B')\n    );\n    cout << \"First: \" << p.first << \" | Second: \" << p.second << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "piecewise_construct,", constructType: "Header / Include", title: "Piecewise Tag", explanation: "Signals to pair constructor to forward subsequent tuples to member constructors.", keyDetails: [{ variableOrConstruct: "piecewise_construct", role: "Constructor Tag", whyThisWay: "Direct element constructor forwarding." }] },
+          { lineNum: 2, codeSnippet: "forward_as_tuple(5, 'A'), forward_as_tuple(3, 'B')", constructType: "Variable & Initializer", title: "Tuple Argument Forwarding", explanation: "Constructs p.first as string(5, 'A') -> 'AAAAA' and p.second as 'BBB'.", keyDetails: [{ variableOrConstruct: "forward_as_tuple", role: "Arg Tuple", whyThisWay: "Forwards constructor args." }] },
+          { lineNum: 3, codeSnippet: "cout << 'First: ' << p.first;", constructType: "Return / Cleanup", title: "Output In-Place Constructed Pair", explanation: "Prints 'AAAAA' and 'BBB'.", keyDetails: [{ variableOrConstruct: "p.first", role: "Output", whyThisWay: "Prints constructed pair." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Pair Swap & Move Semantics (PRO)", category: "PRO / Pair Swap & Move",
+        description: "Demonstrates std::move and p1.swap(p2) on pairs.",
+        prosCons: "Pros: Zero-copy swap operation. Cons: Leaves moved-from pair in valid but unspecified state.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 24. Pair Container - Approach 9: Swap & Move\n#include <iostream>\n#include <utility>\n#include <string>\nusing namespace std;\n\nint main() {\n    pair<string, int> p1(\"First\", 1);\n    pair<string, int> p2(\"Second\", 2);\n    p1.swap(p2);\n    cout << \"p1 after swap: \" << p1.first << \", \" << p1.second << endl;\n    pair<string, int> p3 = move(p1);\n    cout << \"p3 after move: \" << p3.first << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "p1.swap(p2);", constructType: "Condition & Branch", title: "O(1) Pair Swap", explanation: "Swaps p1 and p2 contents in O(1) time without copying string buffer.", keyDetails: [{ variableOrConstruct: "p1.swap(p2)", role: "Member Swap", whyThisWay: "Fast no-copy swap." }] },
+          { lineNum: 2, codeSnippet: "pair<string, int> p3 = move(p1);", constructType: "Variable & Initializer", title: "Move Pair", explanation: "Moves ownership of p1 strings into p3.", keyDetails: [{ variableOrConstruct: "std::move(p1)", role: "Move Assignment", whyThisWay: "Zero-copy move transfer." }] },
+          { lineNum: 3, codeSnippet: "cout << 'p3 after move: ' << p3.first;", constructType: "Return / Cleanup", title: "Output Moved Pair", explanation: "Prints 'Second'.", keyDetails: [{ variableOrConstruct: "p3.first", role: "Output", whyThisWay: "Displays moved state." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Custom Lambda Sort Comparator for Pairs (PRO)", category: "PRO / Custom Pair Comparator",
+        description: "Sorts vector of pairs by second element using custom lambda comparator.",
+        prosCons: "Pros: Flexible custom sorting order. Cons: Requires writing custom comparator.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 24. Pair Container - Approach 10: Custom Comparator\n#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <utility>\n#include <string>\nusing namespace std;\n\nint main() {\n    vector<pair<string, int>> scores = {{\"Alice\", 88}, {\"Bob\", 95}, {\"Charlie\", 72}};\n    // Sort descending by score (.second)\n    sort(scores.begin(), scores.end(), [](const auto& a, const auto& b) {\n        return a.second > b.second;\n    });\n    for(auto [name, score] : scores) cout << name << \":\" << score << \" \";\n    cout << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "sort(..., [](const auto& a, const auto& b) { return a.second > b.second; });", constructType: "Condition & Branch", title: "Custom Lambda Sort", explanation: "Sorts vector of pairs descending based on .second score integer.", keyDetails: [{ variableOrConstruct: "a.second > b.second", role: "Descending Comp", whyThisWay: "Custom sort by second element." }] },
+          { lineNum: 2, codeSnippet: "for(auto [name, score] : scores)", constructType: "Condition & Branch", title: "Print Sorted Scores", explanation: "Unpacks and iterates sorted student scores.", keyDetails: [{ variableOrConstruct: "auto [name, score]", role: "Deconstruction", whyThisWay: "Clean iteration." }] },
+          { lineNum: 3, codeSnippet: "cout << name << ':' << score;", constructType: "Return / Cleanup", title: "Output Leaderboard", explanation: "Prints 'Bob:95 Alice:88 Charlie:72'.", keyDetails: [{ variableOrConstruct: "name, score", role: "Leaderboard Output", whyThisWay: "Displays leaderboard." }] }
+        ]
+      }
+    ]
+  };
+}
+
+export function getProblem25Details(): LearnModule {
+  return {
+    id: "easy_tuple_basic",
+    title: "25. Tuples (std::tuple & std::get)",
+    category: "STL Containers",
+    difficulty: "easy",
+    shortDesc: "Fixed-size collection of heterogeneous values with std::tuple.",
+    fullCode: "// 25. Tuples - Approach 1: Basic std::tuple & std::get\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    tuple<string, int, double> student(\"Alice\", 20, 3.85);\n    cout << \"Name: \" << get<0>(student) << \" | Age: \" << get<1>(student) << \" | GPA: \" << get<2>(student) << endl;\n    return 0;\n}",
+    problemStatement: {
+      title: "25. Tuples (std::tuple & std::get)",
+      objective: "Master std::tuple, std::make_tuple, std::get<I>, std::tie, std::ignore, C++17 structured bindings, and std::apply.",
+      description: "Implement **Tuples (std::tuple & std::get)** (STL Containers). Fixed-size collection of heterogeneous values with std::tuple. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Tuples of 3 or more heterogeneous data types.",
+      outputDesc: "Extracted tuple values, unpacked variables, and function invocation results.",
+      takeaways: [
+        "std::tuple<T1, T2, T3...> generalizes std::pair to N heterogeneous elements",
+        "Access elements at compile-time index using std::get<N>(t)",
+        "Use std::tie() with std::ignore for selective multi-variable unpacking",
+        "C++17 std::apply(func, tuple) automatically unpacks tuple arguments into function calls"
+      ],
+      examples: [
+        { id: 1, input: "tuple<int, string, bool> t(101, 'Active', true);", output: "ID: 101, Status: Active, Flag: 1", explanation: "Holds 3 heterogeneous values together." },
+        { id: 2, input: "tie(ignore, age, ignore) = make_tuple('Bob', 25, 95.5);", output: "Age: 25", explanation: "std::ignore skips unpacking unneeded elements." }
+      ],
+      constraints: ["std::tuple requires <tuple> header.", "Index N in std::get<N> must be a compile-time constant."],
+      companies: ["Google", "Meta", "Microsoft", "Amazon"],
+      acceptanceRate: "90.1%",
+      totalAccepted: "1,780,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic std::tuple & std::get Access (FREE)", category: "FREE / Direct Access",
+        description: "Creates tuple<string, int, double> and accesses elements via std::get<N>(t).",
+        prosCons: "Pros: Stores N heterogeneous fields without defining custom struct. Cons: Compile-time numeric indexing.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 25. Tuples - Approach 1: Basic Access\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    tuple<string, int, double> item(\"Widget\", 50, 19.99);\n    cout << \"Item: \" << get<0>(item) << \", Qty: \" << get<1>(item) << \", Price: $\" << get<2>(item) << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "tuple<string, int, double> item('Widget', 50, 19.99);", constructType: "Variable & Initializer", title: "Tuple Construction", explanation: "Constructs 3-element tuple holding string, int, double.", keyDetails: [{ variableOrConstruct: "tuple<string, int, double>", role: "Tuple Var", whyThisWay: "Holds 3 heterogeneous fields." }] },
+          { lineNum: 2, codeSnippet: "get<0>(item), get<1>(item), get<2>(item)", constructType: "Condition & Branch", title: "Compile-Time Index Access", explanation: "Accesses elements at 0-based compile-time index positions.", keyDetails: [{ variableOrConstruct: "get<N>(item)", role: "Tuple Indexer", whyThisWay: "Compile-time element access." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Tuple Creation via std::make_tuple (FREE)", category: "FREE / make_tuple",
+        description: "Creates tuple using std::make_tuple for automatic template type deduction.",
+        prosCons: "Pros: Avoids explicit template type arguments. Cons: Minor syntax overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: "// 25. Tuples - Approach 2: make_tuple\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    auto record = make_tuple(101, \"Server A\", true);\n    cout << \"ID: \" << get<0>(record) << \" | Server: \" << get<1>(record) << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto record = make_tuple(101, 'Server A', true);", constructType: "Variable & Initializer", title: "make_tuple Factory", explanation: "Creates tuple<int, const char*, bool> via automatic type deduction.", keyDetails: [{ variableOrConstruct: "make_tuple", role: "Tuple Factory", whyThisWay: "Automatic type deduction." }] },
+          { lineNum: 2, codeSnippet: "get<0>(record), get<1>(record)", constructType: "Condition & Branch", title: "Read Tuple Members", explanation: "Reads elements 0 and 1.", keyDetails: [{ variableOrConstruct: "get<N>", role: "Read Member", whyThisWay: "Reads tuple value." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits program.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: C++17 Structured Binding Tuple Unpacking (PRO)", category: "PRO / Structured Binding",
+        description: "Deconstructs 3-element tuple using auto [name, age, gpa] = student.",
+        prosCons: "Pros: Cleanest, most readable syntax for tuple variables. Cons: Requires C++17.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 25. Tuples - Approach 3: Structured Binding\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    auto student = make_tuple(string(\"Bob\"), 22, 3.9);\n    auto [name, age, gpa] = student; // C++17 Structured Binding\n    cout << name << \" (Age \" << age << \") GPA: \" << gpa << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto [name, age, gpa] = student;", constructType: "Variable & Initializer", title: "C++17 Structured Binding", explanation: "Decomposes 3 tuple elements into local variables name, age, gpa in single line.", keyDetails: [{ variableOrConstruct: "auto [name, age, gpa]", role: "Decomposition", whyThisWay: "Modern C++17 tuple unpacking." }] },
+          { lineNum: 2, codeSnippet: "cout << name << ' (Age ' << age << ') GPA: ' << gpa;", constructType: "Condition & Branch", title: "Use Unpacked Variables", explanation: "Uses clean named variables directly.", keyDetails: [{ variableOrConstruct: "name, age, gpa", role: "Unpacked Vars", whyThisWay: "Clean variable usage." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Selective Unpacking with std::tie & std::ignore (PRO)", category: "PRO / std::tie & std::ignore",
+        description: "Unpacks selected tuple fields into existing variables while skipping unwanted fields with std::ignore.",
+        prosCons: "Pros: Selectively unpacks only needed fields without unused variable warnings. Cons: Requires pre-declared variables.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 25. Tuples - Approach 4: std::tie & std::ignore\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    auto record = make_tuple(\"Alice\", 25, \"Software Engineer\");\n    int age;\n    // Ignore first and third elements, unpack only second element (age)\n    tie(ignore, age, ignore) = record;\n    cout << \"Extracted Age: \" << age << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "tie(ignore, age, ignore) = record;", constructType: "Variable & Initializer", title: "Selective Unpacking", explanation: "Binds age to element 1 while std::ignore safely discards elements 0 and 2.", keyDetails: [{ variableOrConstruct: "std::ignore", role: "Ignore Marker", whyThisWay: "Ignores unwanted tuple elements." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Extracted Age: ' << age;", constructType: "Condition & Branch", title: "Use Extracted Variable", explanation: "Prints extracted age 25.", keyDetails: [{ variableOrConstruct: "age", role: "Extracted Var", whyThisWay: "Displays extracted field." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: C++17 std::apply to Invoke Function with Tuple (PRO)", category: "PRO / std::apply",
+        description: "Unpacks tuple elements as arguments to a function using std::apply(func, tuple).",
+        prosCons: "Pros: Enables generic function forwarding from tuple data. Cons: Requires C++17.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 25. Tuples - Approach 5: std::apply\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nvoid printUser(const string& name, int age, double score) {\n    cout << \"User: \" << name << \", Age: \" << age << \", Score: \" << score << endl;\n}\n\nint main() {\n    auto userData = make_tuple(\"Charlie\", 30, 99.5);\n    apply(printUser, userData); // Unpacks tuple as args to printUser\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "apply(printUser, userData);", constructType: "Condition & Branch", title: "Apply Function to Tuple", explanation: "Unpacks userData tuple into 3 separate arguments passed to printUser(name, age, score).", keyDetails: [{ variableOrConstruct: "std::apply", role: "Tuple Invoker", whyThisWay: "Forwards tuple elements as function arguments." }] },
+          { lineNum: 2, codeSnippet: "void printUser(const string& name, int age, double score)", constructType: "Function Signature", title: "Target Function Signature", explanation: "Receives unpacked tuple elements as individual parameters.", keyDetails: [{ variableOrConstruct: "printUser", role: "Target Function", whyThisWay: "Receives forwarded args." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Tuple Lexicographical Comparison (PRO)", category: "PRO / Tuple Comparison",
+        description: "Compares multi-field records automatically using operator< on std::tuple.",
+        prosCons: "Pros: Automatic multi-field sorting priority. Cons: Strict element-by-element type matching.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 25. Tuples - Approach 6: Tuple Comparison\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    auto t1 = make_tuple(1, \"A\", 10.0);\n    auto t2 = make_tuple(1, \"B\", 5.0);\n    if (t1 < t2) {\n        cout << \"t1 is less than t2 (element 1 'A' < 'B')\" << endl;\n    }\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (t1 < t2)", constructType: "Condition & Branch", title: "Multi-Field Lexicographical Compare", explanation: "Compares element 0 (1 == 1), then compares element 1 ('A' < 'B' -> true).", keyDetails: [{ variableOrConstruct: "t1 < t2", role: "Tuple Compare", whyThisWay: "Lexicographical multi-field comparison." }] },
+          { lineNum: 2, codeSnippet: "cout << 't1 is less than t2...';", constructType: "Condition & Branch", title: "Branch Output", explanation: "Prints comparison result.", keyDetails: [{ variableOrConstruct: "cout", role: "Branch Output", whyThisWay: "Outputs result." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: std::tuple_size & std::tuple_element Type Traits (PRO)", category: "PRO / Tuple Metaprogramming",
+        description: "Inspects tuple element count and element type at compile time.",
+        prosCons: "Pros: Crucial for template meta-programming over tuples. Cons: Metaprogramming syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 25. Tuples - Approach 7: Type Traits\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    using MyTuple = tuple<int, string, double, char>;\n    cout << \"Tuple element count: \" << tuple_size<MyTuple>::value << endl;\n    using SecondType = tuple_element<1, MyTuple>::type;\n    SecondType str = \"String via tuple_element\";\n    cout << \"Second type val: \" << str << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "tuple_size<MyTuple>::value", constructType: "Header / Include", title: "Compile-Time Tuple Size", explanation: "Obtains total number of elements in tuple (4) at compile time.", keyDetails: [{ variableOrConstruct: "tuple_size", role: "Meta Size", whyThisWay: "Inspects element count." }] },
+          { lineNum: 2, codeSnippet: "using SecondType = tuple_element<1, MyTuple>::type;", constructType: "Header / Include", title: "Compile-Time Element Type Extraction", explanation: "Extracts type of element index 1 (std::string) at compile time.", keyDetails: [{ variableOrConstruct: "tuple_element", role: "Meta Type Trait", whyThisWay: "Extracts element type." }] },
+          { lineNum: 3, codeSnippet: "SecondType str = 'String via tuple_element';", constructType: "Variable & Initializer", title: "Instantiate Extracted Type", explanation: "Instantiates string using meta-extracted type.", keyDetails: [{ variableOrConstruct: "SecondType str", role: "Extracted Type Var", whyThisWay: "Uses extracted type alias." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Concatenating Tuples with std::tuple_cat (PRO)", category: "PRO / tuple_cat",
+        description: "Combines multiple tuples into a single unified tuple using std::tuple_cat.",
+        prosCons: "Pros: Enables dynamic tuple composition. Cons: Creates new tuple type.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 25. Tuples - Approach 8: std::tuple_cat\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    auto t1 = make_tuple(10, \"Apple\");\n    auto t2 = make_tuple(3.14, true);\n    auto combined = tuple_cat(t1, t2);\n    auto [id, name, val, flag] = combined;\n    cout << id << \", \" << name << \", \" << val << \", \" << flag << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto combined = tuple_cat(t1, t2);", constructType: "Variable & Initializer", title: "Tuple Concatenation", explanation: "Combines 2-element t1 and 2-element t2 into 4-element combined tuple.", keyDetails: [{ variableOrConstruct: "std::tuple_cat", role: "Tuple Concatenator", whyThisWay: "Merges multiple tuples into one." }] },
+          { lineNum: 2, codeSnippet: "auto [id, name, val, flag] = combined;", constructType: "Variable & Initializer", title: "Unpack Combined Tuple", explanation: "Unpacks 4 elements from concatenated tuple.", keyDetails: [{ variableOrConstruct: "auto [id, name, val, flag]", role: "Decomposition", whyThisWay: "Unpacks merged tuple." }] },
+          { lineNum: 3, codeSnippet: "cout << id << ', ' << name...", constructType: "Return / Cleanup", title: "Output Merged Values", explanation: "Prints '10, Apple, 3.14, 1'.", keyDetails: [{ variableOrConstruct: "cout", role: "Merged Output", whyThisWay: "Displays result." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Returning Tuples for Multi-Value Results (PRO)", category: "PRO / Multi-Value Return",
+        description: "Returns 3+ values from function cleanly using tuple<int, double, string>.",
+        prosCons: "Pros: Avoids out-parameters or lightweight custom structs. Cons: Caller must unpack.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 25. Tuples - Approach 9: Multi-Value Return\n#include <iostream>\n#include <tuple>\n#include <vector>\n#include <numeric>\n#include <algorithm>\nusing namespace std;\n\ntuple<int, int, double> getStats(const vector<int>& nums) {\n    int minV = *min_element(nums.begin(), nums.end());\n    int maxV = *max_element(nums.begin(), nums.end());\n    double avg = accumulate(nums.begin(), nums.end(), 0.0) / nums.size();\n    return {minV, maxV, avg};\n}\n\nint main() {\n    auto [minV, maxV, avg] = getStats({10, 20, 30, 40, 50});\n    cout << \"Min: \" << minV << \" | Max: \" << maxV << \" | Avg: \" << avg << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "return {minV, maxV, avg};", constructType: "Return / Cleanup", title: "Return Tuple Result", explanation: "Returns min, max, and average values in single tuple.", keyDetails: [{ variableOrConstruct: "{minV, maxV, avg}", role: "Tuple Return", whyThisWay: "Returns 3 values from function." }] },
+          { lineNum: 2, codeSnippet: "auto [minV, maxV, avg] = getStats(...);", constructType: "Variable & Initializer", title: "Unpack Statistics Tuple", explanation: "Decomposes returned stats tuple into local variables.", keyDetails: [{ variableOrConstruct: "auto [minV, maxV, avg]", role: "Deconstruct Return", whyThisWay: "Clean multi-value return handling." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Min: ' << minV...", constructType: "Return / Cleanup", title: "Output Statistics", explanation: "Prints 'Min: 10 | Max: 50 | Avg: 30'.", keyDetails: [{ variableOrConstruct: "cout", role: "Stats Output", whyThisWay: "Prints statistics." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Accessing Tuple Element by Unique Type (PRO)", category: "PRO / std::get<Type>",
+        description: "Accesses element by type name using std::get<Type>(t) when type is unique in tuple.",
+        prosCons: "Pros: Type-safe lookup without numeric index. Cons: Only works if type occurs exactly once in tuple.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: "// 25. Tuples - Approach 10: std::get<Type>\n#include <iostream>\n#include <tuple>\n#include <string>\nusing namespace std;\n\nint main() {\n    tuple<int, string, double> t(42, \"Unique Type Lookup\", 2.718);\n    cout << \"Int val: \" << get<int>(t) << endl;\n    cout << \"String val: \" << get<string>(t) << endl;\n    cout << \"Double val: \" << get<double>(t) << endl;\n    return 0;\n}",
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "get<int>(t)", constructType: "Condition & Branch", title: "Type-Based Lookup (int)", explanation: "Accesses integer element in tuple by type int.", keyDetails: [{ variableOrConstruct: "get<int>(t)", role: "Type Indexing", whyThisWay: "Type-safe element access." }] },
+          { lineNum: 2, codeSnippet: "get<string>(t)", constructType: "Condition & Branch", title: "Type-Based Lookup (string)", explanation: "Accesses string element in tuple by type std::string.", keyDetails: [{ variableOrConstruct: "get<string>(t)", role: "String Lookup", whyThisWay: "Accesses string by type." }] },
+          { lineNum: 3, codeSnippet: "get<double>(t)", constructType: "Condition & Branch", title: "Type-Based Lookup (double)", explanation: "Accesses double element in tuple by type double.", keyDetails: [{ variableOrConstruct: "get<double>(t)", role: "Double Lookup", whyThisWay: "Accesses double by type." }] }
+        ]
+      }
+    ]
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -3572,6 +4343,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_default_args") return getProblem18Details();
   if (id === "easy_overloading") return getProblem19Details();
   if (id === "easy_namespaces") return getProblem20Details();
+  if (id === "easy_static_var") return getProblem21Details();
+  if (id === "easy_typedef") return getProblem22Details();
+  if (id === "easy_cstring") return getProblem23Details();
+  if (id === "easy_pair") return getProblem24Details();
+  if (id === "easy_tuple_basic") return getProblem25Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
