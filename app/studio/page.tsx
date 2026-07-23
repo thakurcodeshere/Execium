@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { useStore } from "@/lib/store";
+import { useStore, DEFAULT_UNTITLED_CODE } from "@/lib/store";
 import LBarVertical from "@/components/studio/LBarVertical";
 import LBarHorizontal from "@/components/studio/LBarHorizontal";
 import AIAgentPanel from "@/components/studio/AIAgentPanel";
@@ -83,7 +83,13 @@ export default function StudioPage() {
           } else if (session.code) {
             setCode(session.code);
             if (session.projectName) setProjectName(session.projectName);
+          } else {
+            setCode(DEFAULT_UNTITLED_CODE);
+            setProjectName("Untitled Project");
           }
+        } else {
+          setCode(DEFAULT_UNTITLED_CODE);
+          setProjectName("Untitled Project");
         }
       }
     } catch {}

@@ -47,9 +47,11 @@ interface Store {
   recordAttempt(id:string):void;
 }
 
+export const DEFAULT_UNTITLED_CODE = `// Untitled Project\n#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}`;
+
 export const useStore = create<Store>((set,get)=>({
-  pid:'for_loop',
-  code: PROGRAMS.for_loop.code,
+  pid:'untitled',
+  code: DEFAULT_UNTITLED_CODE,
   steps: PROGRAMS.for_loop.steps,
   cur:0, playback:'idle', speed:1400,
   aiMode:'beginner', showAI:false, activePanel:'memory', _timer:null,

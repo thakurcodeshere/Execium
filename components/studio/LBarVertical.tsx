@@ -233,9 +233,12 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   };
 
   const handleNewProject = () => {
-    const defaultCode = `// New Execium Project\n#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Welcome to Execium!" << endl;\n    return 0;\n}`;
+    const defaultCode = `// Untitled Project\n#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}`;
     setCode(defaultCode);
+    setProjectName("Untitled Project");
+    setProjectId(null);
     setChallengeId(null);
+    setLearnModuleId(null);
     restart();
     saveToHistory(defaultCode);
   };
