@@ -405,7 +405,7 @@ function getProblem7Details(): LearnModule {
     problemStatement: {
       title: "7. C-Strings vs std::string",
       objective: "Master string manipulation comparing raw null-terminated C-strings (char*, strlen) against modern C++ std::string and zero-copy C++17 std::string_view.",
-      description: "Given a string input `\"execium_cpp\"`, perform concatenation, substring search (`.find()`), C-string null termination analysis (`\\0`), and zero-copy slice inspection using `std::string_view`.",
+      description: "Given a string input `\'execium_cpp\'`, perform concatenation, substring search (`.find()`), C-string null termination analysis (`\\0`), and zero-copy slice inspection using `std::string_view`.",
       inputDesc: 'str = "execium_cpp", sub = "cpp"',
       outputDesc: 'Length = 11 | Found Substring at Index = 8 | View Slice = "execium"',
       takeaways: [
@@ -431,7 +431,7 @@ function getProblem7Details(): LearnModule {
         prosCons: "Pros: High-level, safe, memory managed automatically. Cons: Heap allocation if > SSO bound.",
         timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: true,
         code: `// 7. C-Strings vs std::string - Approach 1: std::string\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid searchSub() {\n    string str = "execium_cpp";\n    size_t pos = str.find("cpp");\n    cout << "Length: " << str.length() << " | Found 'cpp' at: " << pos << endl;\n}\n\nint main() {\n    searchSub();\n    return 0;\n}`,
-        lineBreakdown: [{ lineNum: 1, codeSnippet: `size_t pos = str.find("cpp");`, constructType: "Variable & Initializer", title: "Substring Pattern Search", explanation: "Searches for first occurrence of substring \"cpp\" returning index pos.", keyDetails: [{ variableOrConstruct: "str.find()", role: "Pattern Search", whyThisWay: "Standard string search method." }] }]
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `size_t pos = str.find("cpp");`, constructType: "Variable & Initializer", title: "Substring Pattern Search", explanation: "Searches for first occurrence of substring \'cpp\" returning index pos.", keyDetails: [{ variableOrConstruct: "str.find()", role: "Pattern Search", whyThisWay: "Standard string search method." }] }]
       },
       {
         id: 2, name: "Approach 2: C-Style Null-Terminated Char Array (FREE)", category: "FREE / C-String",
@@ -491,11 +491,11 @@ function getProblem7Details(): LearnModule {
       },
       {
         id: 9, name: "Approach 9: User-Defined String Literals (operator\"\"_s) (PRO)", category: "PRO / Literal Operator",
-        description: "Creates custom string object using C++11 user-defined literal operator\"\"_myStr.",
+        description: "Creates custom string object using C++11 user-defined literal operator\'\'_myStr.",
         prosCons: "Pros: Clean domain-specific literal syntax. Cons: Requires custom literal operator.",
         timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
         code: `// 7. C-Strings vs std::string - Approach 9: User-Defined Literals\n#include <iostream>\n#include <string>\nusing namespace std;\n\nstring operator""_exec(const char* str, size_t len) {\n    return string("EXEC_") + str;\n}\n\nint main() {\n    auto s = "code"_exec;\n    cout << "Literal Result: " << s << endl;\n    return 0;\n}`,
-        lineBreakdown: [{ lineNum: 1, codeSnippet: `string operator""_exec(const char* str, size_t len)`, constructType: "Function Signature", title: "Literal Operator Declaration", explanation: "Defines suffix _exec for string literal creation.", keyDetails: [{ variableOrConstruct: "operator\"\"_exec", role: "Literal Operator", whyThisWay: "Custom literal suffix syntax." }] }]
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `string operator""_exec(const char* str, size_t len)`, constructType: "Function Signature", title: "Literal Operator Declaration", explanation: "Defines suffix _exec for string literal creation.", keyDetails: [{ variableOrConstruct: "operator\'\'_exec", role: "Literal Operator", whyThisWay: "Custom literal suffix syntax." }] }]
       },
       {
         id: 10, name: "Approach 10: String Hashing & Interning (std::hash) (PRO)", category: "PRO / String Hashing",
@@ -1761,7 +1761,7 @@ function getProblem1Details(): LearnModule {
             codeSnippet: `greetUserDirect("Alice", 22);`,
             constructType: "Variable & Initializer",
             title: "Main Function Invocation",
-            explanation: "Calls greetUserDirect passing \"Alice\" and 22 as sample arguments.",
+            explanation: "Calls greetUserDirect passing \'Alice\" and 22 as sample arguments.",
             keyDetails: [{ variableOrConstruct: "greetUserDirect", role: "Caller", whyThisWay: "Executes test case." }]
           }
         ]
@@ -2036,7 +2036,7 @@ function getProblem11Details(): LearnModule {
         code: `// 11. Dynamic Arrays & std::vector - Approach 2: Emplace Back\n#include <iostream>\n#include <vector>\n#include <string>\nusing namespace std;\n\nstruct Item {\n    int id; string name;\n    Item(int i, string n) : id(i), name(n) {}\n};\n\nvoid emplaceDemo() {\n    vector<Item> items;\n    items.emplace_back(101, "Widget");\n    cout << "Emplaced Item: " << items[0].name << endl;\n}\n\nint main() {\n    emplaceDemo();\n    return 0;\n}`,
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `struct Item { int id; string name; Item(int i, string n)... };`, constructType: "Function Signature", title: "Item Struct Definition", explanation: "Defines custom struct with 2-parameter constructor.", keyDetails: [{ variableOrConstruct: "Item", role: "Data Struct", whyThisWay: "Target object for emplace." }] },
-          { lineNum: 2, codeSnippet: `items.emplace_back(101, "Widget");`, constructType: "Variable & Initializer", title: "In-Place Emplace Construction", explanation: "Constructs Item directly inside vector buffer forwarding arguments 101 and \"Widget\".", keyDetails: [{ variableOrConstruct: "emplace_back", role: "In-Place Constructor", whyThisWay: "Zero copy/move constructor overhead." }] },
+          { lineNum: 2, codeSnippet: `items.emplace_back(101, "Widget");`, constructType: "Variable & Initializer", title: "In-Place Emplace Construction", explanation: "Constructs Item directly inside vector buffer forwarding arguments 101 and \'Widget\'.", keyDetails: [{ variableOrConstruct: "emplace_back", role: "In-Place Constructor", whyThisWay: "Zero copy/move constructor overhead." }] },
           { lineNum: 3, codeSnippet: `cout << "Emplaced Item: " << items[0].name << endl;`, constructType: "Return / Cleanup", title: "Access Emplaced Field", explanation: "Accesses emplaced item's name field directly.", keyDetails: [{ variableOrConstruct: "items[0].name", role: "Member Access", whyThisWay: "Verifies emplaced object." }] }
         ]
       },
@@ -2493,7 +2493,7 @@ function getProblem14Details(): LearnModule {
         code: `// 14. Key-Value Maps & Hash Tables - Approach 1: std::map\n#include <iostream>\n#include <map>\n#include <string>\nusing namespace std;\n\nvoid mapDemo() {\n    map<string, int> freq;\n    freq["apple"]++; freq["banana"]++; freq["apple"]++;\n    for (const auto& pair : freq) cout << pair.first << ": " << pair.second << " | ";\n    cout << endl;\n}\n\nint main() {\n    mapDemo();\n    return 0;\n}`,
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `map<string, int> freq;`, constructType: "Variable & Initializer", title: "Map Declaration", explanation: "Instantiates empty Red-Black tree map mapping string keys to int values.", keyDetails: [{ variableOrConstruct: "map<string, int>", role: "Tree Map", whyThisWay: "Sorted key-value container." }] },
-          { lineNum: 2, codeSnippet: `freq["apple"]++; freq["banana"]++; freq["apple"]++;`, constructType: "Loop Construct", title: "Subscript Operator Insert/Update", explanation: "operator[] inserts default 0 if missing, then increments value to 2.", keyDetails: [{ variableOrConstruct: "freq[\"apple\"]++", role: "Subscript Operator", whyThisWay: "Auto-inserts missing key." }] },
+          { lineNum: 2, codeSnippet: `freq["apple"]++; freq["banana"]++; freq["apple"]++;`, constructType: "Loop Construct", title: "Subscript Operator Insert/Update", explanation: "operator[] inserts default 0 if missing, then increments value to 2.", keyDetails: [{ variableOrConstruct: "freq[\'apple\']++", role: "Subscript Operator", whyThisWay: "Auto-inserts missing key." }] },
           { lineNum: 3, codeSnippet: `for (const auto& pair : freq) cout << pair.first << ": " << pair.second << " | ";`, constructType: "Return / Cleanup", title: "Sorted Key Iteration", explanation: "Iterates through map outputting key-value pairs in lexicographical key order.", keyDetails: [{ variableOrConstruct: "pair.first/second", role: "Pair Extractor", whyThisWay: "Reads key and value." }] }
         ]
       },
@@ -2505,7 +2505,7 @@ function getProblem14Details(): LearnModule {
         code: `// 14. Key-Value Maps & Hash Tables - Approach 2: std::unordered_map\n#include <iostream>\n#include <unordered_map>\n#include <string>\nusing namespace std;\n\nvoid unorderedMapDemo() {\n    unordered_map<string, int> umap = {{"A", 100}, {"B", 200}};\n    cout << "Value of B: " << umap["B"] << endl;\n}\n\nint main() {\n    unorderedMapDemo();\n    return 0;\n}`,
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `unordered_map<string, int> umap = {{"A", 100}, {"B", 200}};`, constructType: "Variable & Initializer", title: "Hash Map Setup", explanation: "Initializes hash table mapping strings to ints.", keyDetails: [{ variableOrConstruct: "unordered_map", role: "Hash Map", whyThisWay: "O(1) average lookup." }] },
-          { lineNum: 2, codeSnippet: `cout << "Value of B: " << umap["B"] << endl;`, constructType: "Condition & Branch", title: "O(1) Key Subscript Read", explanation: "Hashes key \"B\" and reads associated value 200 in O(1) average time.", keyDetails: [{ variableOrConstruct: "umap[\"B\"]", role: "Hash Reader", whyThisWay: "Reads value by key." }] },
+          { lineNum: 2, codeSnippet: `cout << "Value of B: " << umap["B"] << endl;`, constructType: "Condition & Branch", title: "O(1) Key Subscript Read", explanation: "Hashes key \'B\" and reads associated value 200 in O(1) average time.", keyDetails: [{ variableOrConstruct: "umap[\'B\']", role: "Hash Reader", whyThisWay: "Reads value by key." }] },
           { lineNum: 3, codeSnippet: `return;`, constructType: "Return / Cleanup", title: "Scope Exit", explanation: "Frees hash map buckets.", keyDetails: [{ variableOrConstruct: "Destructor", role: "Cleanup", whyThisWay: "Frees memory." }] }
         ]
       },
@@ -2517,7 +2517,7 @@ function getProblem14Details(): LearnModule {
         code: `// 14. Key-Value Maps & Hash Tables - Approach 3: insert_or_assign\n#include <iostream>\n#include <map>\n#include <string>\nusing namespace std;\n\nvoid safeInsert() {\n    map<string, int> m;\n    auto [it, inserted] = m.insert_or_assign("key1", 42);\n    cout << "Inserted? " << boolalpha << inserted << " | Value: " << it->second << endl;\n}\n\nint main() {\n    safeInsert();\n    return 0;\n}`,
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `map<string, int> m;`, constructType: "Variable & Initializer", title: "Map Declaration", explanation: "Instantiates empty map.", keyDetails: [{ variableOrConstruct: "m", role: "Map", whyThisWay: "Map instance." }] },
-          { lineNum: 2, codeSnippet: `auto [it, inserted] = m.insert_or_assign("key1", 42);`, constructType: "Loop Construct", title: "C++17 Insert or Assign", explanation: "Inserts \"key1\" with value 42 returning iterator and boolean status.", keyDetails: [{ variableOrConstruct: "insert_or_assign", role: "Safe Inserter", whyThisWay: "Avoids default construction." }] },
+          { lineNum: 2, codeSnippet: `auto [it, inserted] = m.insert_or_assign("key1", 42);`, constructType: "Loop Construct", title: "C++17 Insert or Assign", explanation: "Inserts \'key1\" with value 42 returning iterator and boolean status.", keyDetails: [{ variableOrConstruct: "insert_or_assign", role: "Safe Inserter", whyThisWay: "Avoids default construction." }] },
           { lineNum: 3, codeSnippet: `cout << "Inserted? " << boolalpha << inserted << ...`, constructType: "Return / Cleanup", title: "Inspect Insertion Result", explanation: "Outputs inserted status true and value 42.", keyDetails: [{ variableOrConstruct: "inserted", role: "Status Flag", whyThisWay: "Confirms insertion." }] }
         ]
       },
@@ -2530,7 +2530,7 @@ function getProblem14Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `struct KeyHash { size_t operator()(const Key& k)... };`, constructType: "Function Signature", title: "Key Hash Functor", explanation: "Hashes custom Key struct by XORing hashes of member a and b.", keyDetails: [{ variableOrConstruct: "KeyHash", role: "Custom Hasher", whyThisWay: "Calculates 64-bit hash digest." }] },
           { lineNum: 2, codeSnippet: `unordered_map<Key, string, KeyHash> map;`, constructType: "Variable & Initializer", title: "Custom Hash Map Setup", explanation: "Instantiates hash map using custom KeyHash policy.", keyDetails: [{ variableOrConstruct: "unordered_map<Key, V, Hash>", role: "Custom Map", whyThisWay: "Stores custom Key objects." }] },
-          { lineNum: 3, codeSnippet: `map[{1, 2}] = "Val1";`, constructType: "Loop Construct", title: "Custom Key Insertion", explanation: "Inserts Key{1, 2} mapping to \"Val1\" in O(1) average time.", keyDetails: [{ variableOrConstruct: "map[key]", role: "Key Inserter", whyThisWay: "O(1) key insertion." }] }
+          { lineNum: 3, codeSnippet: `map[{1, 2}] = "Val1";`, constructType: "Loop Construct", title: "Custom Key Insertion", explanation: "Inserts Key{1, 2} mapping to \'Val1\" in O(1) average time.", keyDetails: [{ variableOrConstruct: "map[key]", role: "Key Inserter", whyThisWay: "O(1) key insertion." }] }
         ]
       },
       {
@@ -2553,7 +2553,7 @@ function getProblem14Details(): LearnModule {
         code: `// 14. Key-Value Maps & Hash Tables - Approach 6: multimap\n#include <iostream>\n#include <map>\n#include <string>\nusing namespace std;\n\nvoid multimapDemo() {\n    multimap<string, int> mm;\n    mm.insert({"tag", 10}); mm.insert({"tag", 20});\n    cout << "Entries for 'tag': " << mm.count("tag") << endl;\n}\n\nint main() {\n    multimapDemo();\n    return 0;\n}`,
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `multimap<string, int> mm;`, constructType: "Variable & Initializer", title: "Multimap Declaration", explanation: "Instantiates Red-Black tree multimap.", keyDetails: [{ variableOrConstruct: "multimap<K, V>", role: "Multi-Key Map", whyThisWay: "Permits duplicate keys." }] },
-          { lineNum: 2, codeSnippet: `mm.insert({"tag", 10}); mm.insert({"tag", 20});`, constructType: "Loop Construct", title: "Duplicate Key Insertions", explanation: "Inserts two separate entries under identical key \"tag\".", keyDetails: [{ variableOrConstruct: "mm.insert()", role: "Multi-Key Inserter", whyThisWay: "Appends duplicate key." }] },
+          { lineNum: 2, codeSnippet: `mm.insert({"tag", 10}); mm.insert({"tag", 20});`, constructType: "Loop Construct", title: "Duplicate Key Insertions", explanation: "Inserts two separate entries under identical key \'tag\'.", keyDetails: [{ variableOrConstruct: "mm.insert()", role: "Multi-Key Inserter", whyThisWay: "Appends duplicate key." }] },
           { lineNum: 3, codeSnippet: `cout << "Entries for 'tag': " << mm.count("tag") << endl;`, constructType: "Return / Cleanup", title: "Query Duplicate Count", explanation: "Outputs entry count (2).", keyDetails: [{ variableOrConstruct: "mm.count()", role: "Count Query", whyThisWay: "Counts entries under key." }] }
         ]
       },
@@ -2578,7 +2578,7 @@ function getProblem14Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `map<int, string> m = {{10, "A"}, {20, "B"}, {30, "C"}};`, constructType: "Variable & Initializer", title: "Sorted Map Setup", explanation: "Initializes sorted map.", keyDetails: [{ variableOrConstruct: "m", role: "Sorted Map", whyThisWay: "Tree data setup." }] },
           { lineNum: 2, codeSnippet: `auto lower = m.lower_bound(15);`, constructType: "Loop Construct", title: "Tree Lower Bound Lookup", explanation: "Finds first map iterator whose key is >= 15 (key 20).", keyDetails: [{ variableOrConstruct: "m.lower_bound(15)", role: "Range Finder", whyThisWay: "O(log N) lower bound query." }] },
-          { lineNum: 3, codeSnippet: `cout << "First Key >= 15: " << lower->first << ...`, constructType: "Return / Cleanup", title: "Inspect Bound Entry", explanation: "Outputs key 20 and value \"B\".", keyDetails: [{ variableOrConstruct: "lower->first", role: "Key Access", whyThisWay: "Reads key and value." }] }
+          { lineNum: 3, codeSnippet: `cout << "First Key >= 15: " << lower->first << ...`, constructType: "Return / Cleanup", title: "Inspect Bound Entry", explanation: "Outputs key 20 and value \'B\'.", keyDetails: [{ variableOrConstruct: "lower->first", role: "Key Access", whyThisWay: "Reads key and value." }] }
         ]
       },
       {
@@ -2602,7 +2602,7 @@ function getProblem14Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `vector<pair<int, string>> flatMap = {{10, "A"}, {20, "B"}};`, constructType: "Variable & Initializer", title: "Flat Vector Map Setup", explanation: "Allocates key-value pairs in contiguous memory vector.", keyDetails: [{ variableOrConstruct: "flatMap", role: "Contiguous Map", whyThisWay: "Cache-optimal layout." }] },
           { lineNum: 2, codeSnippet: `auto it = lower_bound(flatMap.begin(), flatMap.end(), ...);`, constructType: "Loop Construct", title: "Contiguous Binary Search", explanation: "Executes std::lower_bound over contiguous vector memory in O(log N) time.", keyDetails: [{ variableOrConstruct: "lower_bound()", role: "Vector Binary Search", whyThisWay: "Cache-friendly binary search." }] },
-          { lineNum: 3, codeSnippet: `cout << "Flat Map Found: " << it->second << endl;`, constructType: "Return / Cleanup", title: "Inspect Found Value", explanation: "Outputs value \"B\".", keyDetails: [{ variableOrConstruct: "it->second", role: "Value Reader", whyThisWay: "Reads value payload." }] }
+          { lineNum: 3, codeSnippet: `cout << "Flat Map Found: " << it->second << endl;`, constructType: "Return / Cleanup", title: "Inspect Found Value", explanation: "Outputs value \'B\'.", keyDetails: [{ variableOrConstruct: "it->second", role: "Value Reader", whyThisWay: "Reads value payload." }] }
         ]
       }
     ],
@@ -2722,7 +2722,7 @@ function getProblem15Details(): LearnModule {
         code: `// 15. Auto Type Deduction - Approach 7: Generic Lambda\n#include <iostream>\nusing namespace std;\n\nvoid genericLambda() {\n    auto printTwo = [](auto a, auto b) {\n        cout << "A: " << a << " | B: " << b << endl;\n    };\n    printTwo(10, "Text");\n}\n\nint main() {\n    genericLambda();\n    return 0;\n}`,
         lineBreakdown: [
           { lineNum: 1, codeSnippet: `auto printTwo = [](auto a, auto b) { ... };`, constructType: "Variable & Initializer", title: "Generic Lambda Declaration", explanation: "Defines polymorphic closure with template auto parameters.", keyDetails: [{ variableOrConstruct: "[](auto a, auto b)", role: "Generic Lambda", whyThisWay: "Polymorphic generic lambda." }] },
-          { lineNum: 2, codeSnippet: `printTwo(10, "Text");`, constructType: "Loop Construct", title: "Invoke Generic Lambda", explanation: "Instantiates lambda template specialization for (int, const char*).", keyDetails: [{ variableOrConstruct: "printTwo(10, \"Text\")", role: "Lambda Invocation", whyThisWay: "Executes generic closure." }] },
+          { lineNum: 2, codeSnippet: `printTwo(10, "Text");`, constructType: "Loop Construct", title: "Invoke Generic Lambda", explanation: "Instantiates lambda template specialization for (int, const char*).", keyDetails: [{ variableOrConstruct: "printTwo(10, \'Text\')", role: "Lambda Invocation", whyThisWay: "Executes generic closure." }] },
           { lineNum: 3, codeSnippet: `return;`, constructType: "Return / Cleanup", title: "Scope Exit", explanation: "Lambda closure object destroyed.", keyDetails: [{ variableOrConstruct: "Scope Exit", role: "Cleanup", whyThisWay: "Destroys closure." }] }
         ]
       },
@@ -3092,7 +3092,7 @@ function getProblem18Details(): LearnModule {
     problemStatement: {
       title: "18. Default Parameter Values",
       objective: "Master default function parameter values, rightmost parameter placement rules, declaration vs definition default specifications, and constructor default parameters.",
-      description: "Given a function logging messages or stepping counters, supply default fallback values (`int step = 1`, `string mode = \"INFO\"`) simplifying caller invocation.",
+      description: "Given a function logging messages or stepping counters, supply default fallback values (`int step = 1`, `string mode = \'INFO\'`) simplifying caller invocation.",
       inputDesc: "val = 10 (step omitted) vs val = 10, step = 5",
       outputDesc: "Default Result = 11 | Custom Step Result = 15",
       takeaways: [
@@ -3126,14 +3126,14 @@ function getProblem18Details(): LearnModule {
       },
       {
         id: 2, name: "Approach 2: Multiple Default Parameters (FREE)", category: "FREE / Multiple Defaults",
-        description: "Defines multiple trailing default parameters: void logMsg(string msg, string level = \"INFO\", int code = 200).",
+        description: "Defines multiple trailing default parameters: void logMsg(string msg, string level = \'INFO\", int code = 200).",
         prosCons: "Pros: Highly flexible configuration calls. Cons: Cannot skip intermediate default parameters.",
         timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
         code: `// 18. Default Parameter Values - Approach 2: Multiple Defaults\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid logMsg(string msg, string level = "INFO", int code = 200) {\n    cout << "[" << level << "] " << msg << " (Code " << code << ")" << endl;\n}\n\nint main() {\n    logMsg("System Ready");\n    logMsg("Memory Low", "WARN", 404);\n    return 0;\n}`,
         lineBreakdown: [
-          { lineNum: 1, codeSnippet: `void logMsg(string msg, string level = "INFO", int code = 200) {`, constructType: "Function Signature", title: "Multiple Default Parameters Signature", explanation: "Defines default values for both level (\"INFO\") and code (200).", keyDetails: [{ variableOrConstruct: "level = \"INFO\", code = 200", role: "Multiple Defaults", whyThisWay: "Cascading default fallbacks." }] },
-          { lineNum: 2, codeSnippet: `logMsg("System Ready");`, constructType: "Condition & Branch", title: "Invoke Using All Defaults", explanation: "Omits level and code using default \"INFO\" and 200.", keyDetails: [{ variableOrConstruct: "logMsg(\"System Ready\")", role: "All Defaults Invocation", whyThisWay: "Uses all default parameters." }] },
-          { lineNum: 3, codeSnippet: `logMsg("Memory Low", "WARN", 404);`, constructType: "Return / Cleanup", title: "Override All Defaults", explanation: "Overrides both default parameters passing \"WARN\" and 404.", keyDetails: [{ variableOrConstruct: "\"WARN\", 404", role: "Override Arguments", whyThisWay: "Overrides all defaults." }] }
+          { lineNum: 1, codeSnippet: `void logMsg(string msg, string level = "INFO", int code = 200) {`, constructType: "Function Signature", title: "Multiple Default Parameters Signature", explanation: "Defines default values for both level (\'INFO\') and code (200).", keyDetails: [{ variableOrConstruct: "level = \'INFO\", code = 200", role: "Multiple Defaults", whyThisWay: "Cascading default fallbacks." }] },
+          { lineNum: 2, codeSnippet: `logMsg("System Ready");`, constructType: "Condition & Branch", title: "Invoke Using All Defaults", explanation: "Omits level and code using default \'INFO\" and 200.", keyDetails: [{ variableOrConstruct: "logMsg(\'System Ready\')", role: "All Defaults Invocation", whyThisWay: "Uses all default parameters." }] },
+          { lineNum: 3, codeSnippet: `logMsg("Memory Low", "WARN", 404);`, constructType: "Return / Cleanup", title: "Override All Defaults", explanation: "Overrides both default parameters passing \'WARN\" and 404.", keyDetails: [{ variableOrConstruct: "\'WARN\", 404", role: "Override Arguments", whyThisWay: "Overrides all defaults." }] }
         ]
       },
       {
@@ -3591,7 +3591,7 @@ export function getProblem21Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: "static int count = 0;", constructType: "Variable & Initializer", title: "Static Variable Declaration", explanation: "Allocates count in data segment and initializes to 0 on first execution.", keyDetails: [{ variableOrConstruct: "static int count", role: "Persistent State", whyThisWay: "Ensures single initialization." }] },
           { lineNum: 2, codeSnippet: "count++;", constructType: "Condition & Branch", title: "State Mutation", explanation: "Increments static count value.", keyDetails: [{ variableOrConstruct: "count++", role: "State Increment", whyThisWay: "Persists value for next invocation." }] },
-          { lineNum: 3, codeSnippet: "cout << \"Counter: \" << count << endl;", constructType: "Return / Cleanup", title: "Output State", explanation: "Prints updated count.", keyDetails: [{ variableOrConstruct: "cout", role: "Output", whyThisWay: "Displays state." }] }
+          { lineNum: 3, codeSnippet: "cout << \'Counter: \' << count << endl;", constructType: "Return / Cleanup", title: "Output State", explanation: "Prints updated count.", keyDetails: [{ variableOrConstruct: "cout", role: "Output", whyThisWay: "Displays state." }] }
         ]
       },
       {
@@ -3639,7 +3639,7 @@ export function getProblem21Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: "static bool init = false;", constructType: "Variable & Initializer", title: "One-Time Guard Flag", explanation: "Initialized to false once at program start.", keyDetails: [{ variableOrConstruct: "static bool init", role: "Guard Flag", whyThisWay: "Tracks execution state." }] },
           { lineNum: 2, codeSnippet: "if (!init) { init = true; ... }", constructType: "Condition & Branch", title: "One-Time Execution", explanation: "Executes block on first call only and sets flag to true.", keyDetails: [{ variableOrConstruct: "if (!init)", role: "One-Time Branch", whyThisWay: "Guards expensive setup." }] },
-          { lineNum: 3, codeSnippet: "cout << \"[WORK] Processing Task...\" << endl;", constructType: "Return / Cleanup", title: "Regular Task Execution", explanation: "Executes normal function body on every call.", keyDetails: [{ variableOrConstruct: "process()", role: "Normal Task", whyThisWay: "Performs task." }] }
+          { lineNum: 3, codeSnippet: "cout << \'[WORK] Processing Task...\' << endl;", constructType: "Return / Cleanup", title: "Regular Task Execution", explanation: "Executes normal function body on every call.", keyDetails: [{ variableOrConstruct: "process()", role: "Normal Task", whyThisWay: "Performs task." }] }
         ]
       },
       {
@@ -3686,8 +3686,8 @@ export function getProblem21Details(): LearnModule {
         code: "// 21. Static Local Variables - Approach 9: Static Method Local\n#include <iostream>\nusing namespace std;\n\nclass Logger {\npublic:\n    static void log(const string& msg) {\n        static int logNum = 1;\n        cout << \"[\" << logNum++ << \"] \" << msg << endl;\n    }\n};\n\nint main() {\n    Logger::log(\"Booting system...\");\n    Logger::log(\"System Ready.\");\n    return 0;\n}",
         lineBreakdown: [
           { lineNum: 1, codeSnippet: "static int logNum = 1;", constructType: "Variable & Initializer", title: "Static Local Log Sequence", explanation: "Maintains log sequence number inside static log method.", keyDetails: [{ variableOrConstruct: "static int logNum", role: "Sequence Counter", whyThisWay: "Sequences log entries." }] },
-          { lineNum: 2, codeSnippet: "cout << \"[\" << logNum++ << \"] \" << msg;", constructType: "Condition & Branch", title: "Format & Increment Log", explanation: "Prints log message with current sequence number.", keyDetails: [{ variableOrConstruct: "logNum++", role: "Format Output", whyThisWay: "Increments sequence." }] },
-          { lineNum: 3, codeSnippet: "Logger::log(\"...\")", constructType: "Return / Cleanup", title: "Invoke Static Method", explanation: "Logs messages.", keyDetails: [{ variableOrConstruct: "Logger::log", role: "Static Call", whyThisWay: "Static method invocation." }] }
+          { lineNum: 2, codeSnippet: "cout << \'[\' << logNum++ << \'] \' << msg;", constructType: "Condition & Branch", title: "Format & Increment Log", explanation: "Prints log message with current sequence number.", keyDetails: [{ variableOrConstruct: "logNum++", role: "Format Output", whyThisWay: "Increments sequence." }] },
+          { lineNum: 3, codeSnippet: "Logger::log(\'...\')", constructType: "Return / Cleanup", title: "Invoke Static Method", explanation: "Logs messages.", keyDetails: [{ variableOrConstruct: "Logger::log", role: "Static Call", whyThisWay: "Static method invocation." }] }
         ]
       },
       {
@@ -3745,7 +3745,7 @@ export function getProblem22Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: "using ScoreMap = map<string, int>;", constructType: "Header / Include", title: "Modern Type Alias Declaration", explanation: "Defines ScoreMap as an exact synonym for map<string, int>.", keyDetails: [{ variableOrConstruct: "using ScoreMap =", role: "Type Alias", whyThisWay: "Clean left-to-right alias syntax." }] },
           { lineNum: 2, codeSnippet: "ScoreMap scores;", constructType: "Variable & Initializer", title: "Instantiate Container via Alias", explanation: "Instantiates map object using alias name.", keyDetails: [{ variableOrConstruct: "ScoreMap scores", role: "Container Var", whyThisWay: "Uses alias as type." }] },
-          { lineNum: 3, codeSnippet: "scores[\"Alice\"] = 100;", constructType: "Condition & Branch", title: "Container Operations", explanation: "Operates on map via alias variable.", keyDetails: [{ variableOrConstruct: "scores[Alice]", role: "Map Insert", whyThisWay: "Normal container usage." }] }
+          { lineNum: 3, codeSnippet: "scores[\'Alice\'] = 100;", constructType: "Condition & Branch", title: "Container Operations", explanation: "Operates on map via alias variable.", keyDetails: [{ variableOrConstruct: "scores[Alice]", role: "Map Insert", whyThisWay: "Normal container usage." }] }
         ]
       },
       {
@@ -3757,7 +3757,7 @@ export function getProblem22Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: "typedef unsigned long long u64;", constructType: "Header / Include", title: "Legacy Typedef Declaration", explanation: "Maps u64 to unsigned long long using C typedef syntax.", keyDetails: [{ variableOrConstruct: "typedef ... u64", role: "C Alias", whyThisWay: "C-compatible alias." }] },
           { lineNum: 2, codeSnippet: "u64 bigNum = 18446744073709551615ULL;", constructType: "Variable & Initializer", title: "64-bit Integer Allocation", explanation: "Allocates 64-bit unsigned int.", keyDetails: [{ variableOrConstruct: "u64 bigNum", role: "Variable", whyThisWay: "Uses typedef alias." }] },
-          { lineNum: 3, codeSnippet: "cout << \"Max u64: \" << bigNum << endl;", constructType: "Return / Cleanup", title: "Output 64-bit Int", explanation: "Prints 64-bit integer.", keyDetails: [{ variableOrConstruct: "bigNum", role: "Output", whyThisWay: "Prints value." }] }
+          { lineNum: 3, codeSnippet: "cout << \'Max u64: \' << bigNum << endl;", constructType: "Return / Cleanup", title: "Output 64-bit Int", explanation: "Prints 64-bit integer.", keyDetails: [{ variableOrConstruct: "bigNum", role: "Output", whyThisWay: "Prints value." }] }
         ]
       },
       {
@@ -3769,7 +3769,7 @@ export function getProblem22Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: "template<typename V> using StringMap = map<string, V>;", constructType: "Header / Include", title: "Template Type Alias", explanation: "Binds first template argument of map to string while leaving second argument free.", keyDetails: [{ variableOrConstruct: "using StringMap =", role: "Template Alias", whyThisWay: "Partial template specialization for aliases." }] },
           { lineNum: 2, codeSnippet: "StringMap<double> prices;", constructType: "Variable & Initializer", title: "Instantiate Template Alias", explanation: "Instantiates map<string, double> via template alias.", keyDetails: [{ variableOrConstruct: "StringMap<double>", role: "Instantiated Type", whyThisWay: "Clean template instantiation." }] },
-          { lineNum: 3, codeSnippet: "cout << \"Price: $\" << prices[\"Apple\"] << endl;", constructType: "Return / Cleanup", title: "Use Map", explanation: "Outputs price value.", keyDetails: [{ variableOrConstruct: "prices[Apple]", role: "Output", whyThisWay: "Prints value." }] }
+          { lineNum: 3, codeSnippet: "cout << \'Price: $\' << prices[\'Apple\'] << endl;", constructType: "Return / Cleanup", title: "Use Map", explanation: "Outputs price value.", keyDetails: [{ variableOrConstruct: "prices[Apple]", role: "Output", whyThisWay: "Prints value." }] }
         ]
       },
       {
@@ -3805,7 +3805,7 @@ export function getProblem22Details(): LearnModule {
         lineBreakdown: [
           { lineNum: 1, codeSnippet: "using value_type = T;", constructType: "Header / Include", title: "Nested Member Alias", explanation: "Defines value_type in public interface of class template.", keyDetails: [{ variableOrConstruct: "using value_type", role: "Member Alias", whyThisWay: "Standard STL container type trait interface." }] },
           { lineNum: 2, codeSnippet: "CustomContainer<int>::value_type val = 50;", constructType: "Variable & Initializer", title: "External Type Access", explanation: "Accesses value_type via scope resolution operator.", keyDetails: [{ variableOrConstruct: "value_type val", role: "Scoped Access", whyThisWay: "Accesses nested type alias." }] },
-          { lineNum: 3, codeSnippet: "cout << \"Type Alias Val: \" << val << endl;", constructType: "Return / Cleanup", title: "Output Value", explanation: "Prints 50.", keyDetails: [{ variableOrConstruct: "val", role: "Output", whyThisWay: "Prints value." }] }
+          { lineNum: 3, codeSnippet: "cout << \'Type Alias Val: \' << val << endl;", constructType: "Return / Cleanup", title: "Output Value", explanation: "Prints 50.", keyDetails: [{ variableOrConstruct: "val", role: "Output", whyThisWay: "Prints value." }] }
         ]
       },
       {
@@ -4322,6 +4322,1709 @@ export function getProblem25Details(): LearnModule {
   };
 }
 
+
+export function getProblem26Details(): LearnModule {
+  return {
+    id: "easy_stack_std",
+    title: "26. Standard Stack (std::stack)",
+    category: "Data Structures",
+    difficulty: "easy",
+    shortDesc: "LIFO (Last In First Out) container adapter: push, pop, top.",
+    fullCode: `// 26. Standard Stack - Approach 1: Basic Push, Top & Pop
+#include <iostream>
+#include <stack>
+using namespace std;
+
+int main() {
+    stack<int> s;
+    s.push(10);
+    s.push(20);
+    s.push(30);
+    cout << "Top element: " << s.top() << endl;
+    s.pop();
+    cout << "New top: " << s.top() << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "26. Standard Stack (std::stack)",
+      objective: "Master LIFO (Last In First Out) queue semantics, stack operations (push, pop, top, empty, size), underlying container adapters, and algorithmic stack applications.",
+      description: "Implement **Standard Stack (std::stack)** (Data Structures). LIFO (Last In First Out) container adapter: push, pop, top. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Sequence of push, pop, top, and empty queries on stack.",
+      outputDesc: "Top elements, popped values, and validation results of stack state.",
+      takeaways: [
+        "std::stack operates strictly on Last-In, First-Out (LIFO) order",
+        "By default, std::stack uses std::deque as its underlying sequential container",
+        "top() accesses top element without removing it; pop() removes top element without returning it",
+        "Stack adapters can use std::vector or std::list as underlying container"
+      ],
+      examples: [
+        { id: 1, input: "s.push(10); s.push(20); s.pop();", output: "Top: 10, Size: 1", explanation: "Pushing 10 then 20 makes 20 top. Popping removes 20 leaving 10." },
+        { id: 2, input: "isValidParentheses('({[]})')", output: "Balanced: true", explanation: "Matching open brackets with LIFO stack pop on closing brackets." },
+        { id: 3, input: "reverseString('Execium')", output: "Reversed: muicexE", explanation: "Pushing characters onto stack and popping reverses string order." }
+      ],
+      constraints: ["std::stack requires <stack> header.", "Calling top() or pop() on an empty stack results in undefined behavior."],
+      companies: ["Google", "Meta", "Amazon", "Microsoft"],
+      acceptanceRate: "93.2%",
+      totalAccepted: "2,580,100"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic LIFO Push, Top & Pop Operations (FREE)", category: "FREE / Direct Stack",
+        description: "Demonstrates fundamental stack operations push(), top(), pop(), empty(), and size().",
+        prosCons: "Pros: Simple O(1) LIFO operations. Cons: Cannot iterate through internal elements directly.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 26. Standard Stack - Approach 1: Push, Top, Pop
+#include <iostream>
+#include <stack>
+using namespace std;
+
+int main() {
+    stack<int> st;
+    st.push(10);
+    st.push(20);
+    st.push(30);
+    cout << "Top element: " << st.top() << endl;
+    st.pop();
+    cout << "Remaining size: " << st.size() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "stack<int> st;", constructType: "Variable & Initializer", title: "Stack Container Instantiation", explanation: "Instantiates LIFO stack container storing integers.", keyDetails: [{ variableOrConstruct: "stack<int> st", role: "LIFO Container", whyThisWay: "Provides LIFO stack interface." }] },
+          { lineNum: 2, codeSnippet: "st.push(10); st.push(20); st.push(30);", constructType: "Condition & Branch", title: "Push Elements", explanation: "Pushes 10, 20, 30 onto top of stack frame.", keyDetails: [{ variableOrConstruct: "st.push()", role: "Push Operation", whyThisWay: "Appends element to stack top." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Top element: ' << st.top() << endl;", constructType: "Return / Cleanup", title: "Inspect Top Element", explanation: "Accesses top element (30) without removing it.", keyDetails: [{ variableOrConstruct: "st.top()", role: "Top Accessor", whyThisWay: "Reads top value without popping." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: String Reversal using Stack (FREE)", category: "FREE / String Reversal",
+        description: "Reverses input string by pushing characters onto stack and popping into output.",
+        prosCons: "Pros: Intuitive LIFO application. Cons: O(N) auxiliary space.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 26. Standard Stack - Approach 2: String Reversal
+#include <iostream>
+#include <stack>
+#include <string>
+using namespace std;
+
+string reverseString(const string& str) {
+    stack<char> st;
+    for (char c : str) st.push(c);
+    string reversed = "";
+    while (!st.empty()) {
+        reversed += st.top();
+        st.pop();
+    }
+    return reversed;
+}
+
+int main() {
+    cout << "Reversed: " << reverseString('Execium') << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "for (char c : str) st.push(c);", constructType: "Loop Construct", title: "Push Characters to Stack", explanation: "Iterates through string pushing each character onto stack.", keyDetails: [{ variableOrConstruct: "st.push(c)", role: "Character Push", whyThisWay: "Stores chars in LIFO order." }] },
+          { lineNum: 2, codeSnippet: "while (!st.empty()) { reversed += st.top(); st.pop(); }", constructType: "Condition & Branch", title: "Pop LIFO Characters", explanation: "Pops top character repeatedly to reverse character sequence.", keyDetails: [{ variableOrConstruct: "reversed += st.top()", role: "Pop Append", whyThisWay: "Constructs reversed string." }] },
+          { lineNum: 3, codeSnippet: "reverseString('Execium')", constructType: "Return / Cleanup", title: "Invoke Reversal", explanation: "Returns 'muicexE'.", keyDetails: [{ variableOrConstruct: "reverseString", role: "Function Call", whyThisWay: "Tests string reversal." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Valid Parentheses / Bracket Matching Algorithm (PRO)", category: "PRO / Bracket Matching",
+        description: "Validates matching brackets (), {}, [] using stack push on open and pop on close.",
+        prosCons: "Pros: Linear O(N) time bracket balance verification. Cons: Requires stack allocation.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 26. Standard Stack - Approach 3: Valid Parentheses
+#include <iostream>
+#include <stack>
+#include <string>
+using namespace std;
+
+bool isValidParentheses(const string& s) {
+    stack<char> st;
+    for (char c : s) {
+        if (c == '(' || c == '{' || c == '[') {
+            st.push(c);
+        } else {
+            if (st.empty()) return false;
+            char top = st.top();
+            if ((c == ')' && top != '(') ||
+                (c == '}' && top != '{') ||
+                (c == ']' && top != '[')) return false;
+            st.pop();
+        }
+    }
+    return st.empty();
+}
+
+int main() {
+    cout << "Valid ({[]}): " << (isValidParentheses('({[]})') ? "True" : "False") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (c == '(' || c == '{' || c == '[') st.push(c);", constructType: "Condition & Branch", title: "Push Open Bracket", explanation: "Pushes opening bracket onto stack waiting for matching closing bracket.", keyDetails: [{ variableOrConstruct: "st.push(c)", role: "Open Bracket Push", whyThisWay: "Stores expected closure." }] },
+          { lineNum: 2, codeSnippet: "if ((c == ')' && top != '(')...) return false;", constructType: "Condition & Branch", title: "Validate Closing Bracket Match", explanation: "Checks if popped top bracket matches current closing bracket type.", keyDetails: [{ variableOrConstruct: "top != '('", role: "Mismatch Check", whyThisWay: "Detects unbalanced brackets." }] },
+          { lineNum: 3, codeSnippet: "return st.empty();", constructType: "Return / Cleanup", title: "Verify Empty Stack", explanation: "Returns true if all opened brackets were successfully closed.", keyDetails: [{ variableOrConstruct: "st.empty()", role: "Balance Return", whyThisWay: "Ensures no unclosed brackets remain." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Stack Adapter with Vector Container (PRO)", category: "PRO / Vector Adapter",
+        description: "Uses std::vector as underlying sequential container for stack adapter.",
+        prosCons: "Pros: Contiguous dynamic array memory allocation for stack elements. Cons: Reallocates on vector resize.",
+        timeComplexity: "O(1) amortized", spaceComplexity: "O(N)", isFree: false,
+        code: `// 26. Standard Stack - Approach 4: Vector Underlying Container
+#include <iostream>
+#include <stack>
+#include <vector>
+using namespace std;
+
+int main() {
+    stack<int, vector<int>> vecStack;
+    vecStack.push(100);
+    vecStack.push(200);
+    cout << "Vector Stack Top: " << vecStack.top() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "stack<int, vector<int>> vecStack;", constructType: "Variable & Initializer", title: "Vector-Backed Stack Declaration", explanation: "Configures stack adapter to use std::vector as underlying container.", keyDetails: [{ variableOrConstruct: "stack<T, vector<T>>", role: "Vector Container Adapter", whyThisWay: "Contiguous vector storage." }] },
+          { lineNum: 2, codeSnippet: "vecStack.push(100); vecStack.push(200);", constructType: "Condition & Branch", title: "Push to Vector Stack", explanation: "Calls push_back on underlying vector.", keyDetails: [{ variableOrConstruct: "vecStack.push", role: "Push", whyThisWay: "Appends to vector." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Vector Stack Top: ' << vecStack.top();", constructType: "Return / Cleanup", title: "Access Vector Stack Top", explanation: "Calls back() on underlying vector to return top.", keyDetails: [{ variableOrConstruct: "vecStack.top()", role: "Top Read", whyThisWay: "Reads vector back element." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Stack Adapter with List Container (PRO)", category: "PRO / List Adapter",
+        description: "Uses std::list (doubly-linked list) as underlying sequential container for stack adapter.",
+        prosCons: "Pros: No reallocations; node-based allocation. Cons: Pointer memory overhead per element.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 26. Standard Stack - Approach 5: List Underlying Container
+#include <iostream>
+#include <stack>
+#include <list>
+#include <string>
+using namespace std;
+
+int main() {
+    stack<string, list<string>> listStack;
+    listStack.push("Node 1");
+    listStack.push("Node 2");
+    cout << "List Stack Top: " << listStack.top() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "stack<string, list<string>> listStack;", constructType: "Variable & Initializer", title: "List-Backed Stack Declaration", explanation: "Configures stack adapter to use std::list as underlying node-based container.", keyDetails: [{ variableOrConstruct: "stack<T, list<T>>", role: "List Container Adapter", whyThisWay: "Node-based storage." }] },
+          { lineNum: 2, codeSnippet: "listStack.push('Node 1');", constructType: "Condition & Branch", title: "Push to List Stack", explanation: "Pushes string onto node-based list stack.", keyDetails: [{ variableOrConstruct: "listStack.push", role: "Push", whyThisWay: "Appends node to list." }] },
+          { lineNum: 3, codeSnippet: "cout << 'List Stack Top: ' << listStack.top();", constructType: "Return / Cleanup", title: "Output List Top", explanation: "Reads top element from node list.", keyDetails: [{ variableOrConstruct: "listStack.top()", role: "Read Top", whyThisWay: "Reads list back element." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Monotonic Increasing Stack Algorithm (PRO)", category: "PRO / Monotonic Stack",
+        description: "Finds Next Greater Element for each array index using monotonic stack.",
+        prosCons: "Pros: Linear O(N) solution for next greater element problem. Cons: Non-trivial stack invariant.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 26. Standard Stack - Approach 6: Monotonic Stack
+#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+vector<int> nextGreaterElement(const vector<int>& arr) {
+    int n = arr.size();
+    vector<int> res(n, -1);
+    stack<int> st; // Stores indices
+    for (int i = 0; i < n; i++) {
+        while (!st.empty() && arr[st.top()] < arr[i]) {
+            res[st.top()] = arr[i];
+            st.pop();
+        }
+        st.push(i);
+    }
+    return res;
+}
+
+int main() {
+    vector<int> arr = {2, 1, 5, 6, 2, 3};
+    auto res = nextGreaterElement(arr);
+    for (int x : res) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "while (!st.empty() && arr[st.top()] < arr[i])", constructType: "Condition & Branch", title: "Monotonic Invariant Maintainer", explanation: "Pops smaller elements from stack when current element is larger.", keyDetails: [{ variableOrConstruct: "arr[st.top()] < arr[i]", role: "Monotonic Condition", whyThisWay: "Finds next greater element." }] },
+          { lineNum: 2, codeSnippet: "res[st.top()] = arr[i]; st.pop();", constructType: "Variable & Initializer", title: "Set Next Greater Element", explanation: "Records current element as next greater element for popped index.", keyDetails: [{ variableOrConstruct: "res[st.top()] = arr[i]", role: "Record Result", whyThisWay: "Updates next greater answer." }] },
+          { lineNum: 3, codeSnippet: "st.push(i);", constructType: "Return / Cleanup", title: "Push Current Index", explanation: "Pushes current index i onto stack.", keyDetails: [{ variableOrConstruct: "st.push(i)", role: "Push Index", whyThisWay: "Tracks index for future elements." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Infix to Postfix (RPN) Expression Evaluator (PRO)", category: "PRO / RPN Evaluator",
+        description: "Evaluates Reverse Polish Notation tokens using integer stack.",
+        prosCons: "Pros: Direct evaluation of postfix mathematical expressions. Cons: Requires valid expression syntax.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 26. Standard Stack - Approach 7: RPN Evaluator
+#include <iostream>
+#include <vector>
+#include <string>
+#include <stack>
+using namespace std;
+
+int evalRPN(const vector<string>& tokens) {
+    stack<int> st;
+    for (const string& t : tokens) {
+        if (t == "+" || t == "-" || t == "*" || t == "/") {
+            int b = st.top(); st.pop();
+            int a = st.top(); st.pop();
+            if (t == "+") st.push(a + b);
+            else if (t == "-") st.push(a - b);
+            else if (t == "*") st.push(a * b);
+            else if (t == "/") st.push(a / b);
+        } else {
+            st.push(stoi(t));
+        }
+    }
+    return st.top();
+}
+
+int main() {
+    vector<string> expr = {"2", "1", "+", "3", "*"};
+    cout << "RPN (2+1)*3 = " << evalRPN(expr) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int b = st.top(); st.pop(); int a = st.top(); st.pop();", constructType: "Variable & Initializer", title: "Pop Dual Operands", explanation: "Pops top two operands b (second) and a (first) from stack.", keyDetails: [{ variableOrConstruct: "st.top() & pop()", role: "Operand Extraction", whyThisWay: "Extracts operands in reverse order." }] },
+          { lineNum: 2, codeSnippet: "if (t == '+') st.push(a + b);", constructType: "Condition & Branch", title: "Evaluate & Push Result", explanation: "Applies arithmetic operator to operands and pushes result back onto stack.", keyDetails: [{ variableOrConstruct: "st.push(a + b)", role: "Push Evaluation", whyThisWay: "Stores intermediate calculation." }] },
+          { lineNum: 3, codeSnippet: "return st.top();", constructType: "Return / Cleanup", title: "Return Final RPN Result", explanation: "Returns final evaluated scalar integer result.", keyDetails: [{ variableOrConstruct: "st.top()", role: "Final Return", whyThisWay: "Returns calculated result." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: O(1) Min-Stack Data Structure Design (PRO)", category: "PRO / Min-Stack",
+        description: "Tracks minimum element in O(1) time using dual stack design.",
+        prosCons: "Pros: O(1) time getMin() lookup. Cons: Doubled memory usage.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 26. Standard Stack - Approach 8: Min-Stack
+#include <iostream>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+class MinStack {
+private:
+    stack<int> mainSt;
+    stack<int> minSt;
+public:
+    void push(int val) {
+        mainSt.push(val);
+        if (minSt.empty() || val <= minSt.top()) minSt.push(val);
+    }
+    void pop() {
+        if (mainSt.top() == minSt.top()) minSt.pop();
+        mainSt.pop();
+    }
+    int top() { return mainSt.top(); }
+    int getMin() { return minSt.top(); }
+};
+
+int main() {
+    MinStack ms;
+    ms.push(5); ms.push(2); ms.push(8); ms.push(1);
+    cout << "Current Min: " << ms.getMin() << endl;
+    ms.pop();
+    cout << "New Min: " << ms.getMin() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (minSt.empty() || val <= minSt.top()) minSt.push(val);", constructType: "Condition & Branch", title: "Track Minimum Value", explanation: "Pushes val onto minSt if val is less than or equal to current minimum.", keyDetails: [{ variableOrConstruct: "val <= minSt.top()", role: "Min Track Condition", whyThisWay: "Maintains current minimum." }] },
+          { lineNum: 2, codeSnippet: "if (mainSt.top() == minSt.top()) minSt.pop();", constructType: "Condition & Branch", title: "Pop Minimum Synchronizer", explanation: "Pops minSt when top of mainSt matches current minimum value.", keyDetails: [{ variableOrConstruct: "minSt.pop()", role: "Min Pop", whyThisWay: "Synchronizes min stack state." }] },
+          { lineNum: 3, codeSnippet: "int getMin() { return minSt.top(); }", constructType: "Return / Cleanup", title: "O(1) Min Fetch", explanation: "Fetches minimum element in O(1) time.", keyDetails: [{ variableOrConstruct: "minSt.top()", role: "Min Getter", whyThisWay: "Returns minimum element." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Emplace In-Place Construction (std::stack::emplace) (PRO)", category: "PRO / Emplace",
+        description: "Constructs complex objects directly in-place on stack using emplace().",
+        prosCons: "Pros: Avoids temporary object copies. Cons: Requires matching object constructor.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 26. Standard Stack - Approach 9: Emplace Construction
+#include <iostream>
+#include <stack>
+#include <string>
+using namespace std;
+
+struct Task {
+    int id;
+    string name;
+    Task(int i, string n) : id(i), name(n) { cout << "Task " << id << " Constructed!" << endl; }
+};
+
+int main() {
+    stack<Task> taskStack;
+    taskStack.emplace(101, "Compile Code"); // Construct in-place
+    cout << "Top Task: " << taskStack.top().name << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "taskStack.emplace(101, 'Compile Code');", constructType: "Variable & Initializer", title: "In-Place Emplace Construction", explanation: "Forwards arguments directly to Task constructor in-place on stack.", keyDetails: [{ variableOrConstruct: "taskStack.emplace()", role: "In-Place Construction", whyThisWay: "Avoids temporary copies." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Top Task: ' << taskStack.top().name;", constructType: "Condition & Branch", title: "Read Emplaced Task Field", explanation: "Reads name field of emplaced task.", keyDetails: [{ variableOrConstruct: "taskStack.top().name", role: "Field Access", whyThisWay: "Reads task object." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Stack Swap & C++11 Move Semantics (PRO)", category: "PRO / Stack Swap & Move",
+        description: "Transfers entire stack state instantly using std::move and s1.swap(s2).",
+        prosCons: "Pros: O(1) zero-copy stack state transfer. Cons: Leaves moved stack empty.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 26. Standard Stack - Approach 10: Swap & Move
+#include <iostream>
+#include <stack>
+#include <utility>
+using namespace std;
+
+int main() {
+    stack<int> s1; s1.push(1); s1.push(2);
+    stack<int> s2; s2.push(99);
+    s1.swap(s2);
+    cout << "s1 top after swap: " << s1.top() << endl;
+    stack<int> s3 = move(s1);
+    cout << "s3 top after move: " << s3.top() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "s1.swap(s2);", constructType: "Condition & Branch", title: "O(1) Stack Swap", explanation: "Swaps internal pointers of s1 and s2 in O(1) time.", keyDetails: [{ variableOrConstruct: "s1.swap(s2)", role: "Container Swap", whyThisWay: "Swaps container state instantly." }] },
+          { lineNum: 2, codeSnippet: "stack<int> s3 = move(s1);", constructType: "Variable & Initializer", title: "Move Transfer Stack", explanation: "Transfers ownership of internal container to s3 without copying elements.", keyDetails: [{ variableOrConstruct: "std::move(s1)", role: "Move Assignment", whyThisWay: "Zero-copy stack transfer." }] },
+          { lineNum: 3, codeSnippet: "cout << 's3 top after move: ' << s3.top();", constructType: "Return / Cleanup", title: "Output Moved Stack Top", explanation: "Prints 99.", keyDetails: [{ variableOrConstruct: "s3.top()", role: "Output", whyThisWay: "Displays moved stack top." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem27Details(): LearnModule {
+  return {
+    id: "easy_queue_std",
+    title: "27. Standard Queue (std::queue)",
+    category: "Data Structures",
+    difficulty: "easy",
+    shortDesc: "FIFO (First In First Out) container adapter: push, pop, front.",
+    fullCode: `// 27. Standard Queue - Approach 1: Basic Push, Front & Pop
+#include <iostream>
+#include <queue>
+#include <string>
+using namespace std;
+
+int main() {
+    queue<string> q;
+    q.push("Alice");
+    q.push("Bob");
+    q.push("Charlie");
+    cout << "Front item: " << q.front() << endl;
+    cout << "Back item: " << q.back() << endl;
+    q.pop();
+    cout << "New front: " << q.front() << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "27. Standard Queue (std::queue)",
+      objective: "Master FIFO (First In First Out) queue semantics, queue operations (push, pop, front, back, empty, size), and queue-based algorithm paradigms.",
+      description: "Implement **Standard Queue (std::queue)** (Data Structures). FIFO (First In First Out) container adapter: push, pop, front. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Sequence of enqueue (push) and dequeue (pop) operations.",
+      outputDesc: "Front and back elements, dequeued items, and processing order.",
+      takeaways: [
+        "std::queue operates strictly on First-In, First-Out (FIFO) order",
+        "Elements enter at back (push) and exit from front (pop)",
+        "By default, std::queue uses std::deque as underlying container",
+        "Essential data structure for Breadth-First Search (BFS) and task scheduling"
+      ],
+      examples: [
+        { id: 1, input: "q.push('A'); q.push('B'); q.pop();", output: "Front: B, Back: B", explanation: "'A' was enqueued first and dequeued first leaving 'B'." },
+        { id: 2, input: "bfsTraversal(graph, startNode)", output: "Level Order: [1, 2, 3, 4]", explanation: "Queue processes graph nodes level-by-level." },
+        { id: 3, input: "movingAverage.next(10); movingAverage.next(20);", output: "Avg: 15.0", explanation: "Queue maintains sliding window of recent stream elements." }
+      ],
+      constraints: ["std::queue requires <queue> header.", "Calling front() or pop() on an empty queue causes undefined behavior."],
+      companies: ["Google", "Amazon", "Meta", "Microsoft"],
+      acceptanceRate: "92.7%",
+      totalAccepted: "2,340,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic FIFO Push, Front, Back & Pop (FREE)", category: "FREE / Direct Queue",
+        description: "Demonstrates basic FIFO queue operations push(), front(), back(), and pop().",
+        prosCons: "Pros: Fundamental FIFO ordering. Cons: Cannot inspect middle elements directly.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 27. Standard Queue - Approach 1: FIFO Operations
+#include <iostream>
+#include <queue>
+#include <string>
+using namespace std;
+
+int main() {
+    queue<string> taskQueue;
+    taskQueue.push("Task 1");
+    taskQueue.push("Task 2");
+    taskQueue.push("Task 3");
+    cout << "Processing: " << taskQueue.front() << endl;
+    taskQueue.pop();
+    cout << "Next task: " << taskQueue.front() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "taskQueue.push('Task 1'); taskQueue.push('Task 2');", constructType: "Condition & Branch", title: "Enqueue Elements", explanation: "Enqueues tasks in order at back of queue.", keyDetails: [{ variableOrConstruct: "taskQueue.push()", role: "Enqueue", whyThisWay: "Appends to queue back." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Processing: ' << taskQueue.front();", constructType: "Return / Cleanup", title: "Read Front Element", explanation: "Reads oldest element at front of queue.", keyDetails: [{ variableOrConstruct: "taskQueue.front()", role: "Front Read", whyThisWay: "Reads FIFO head element." }] },
+          { lineNum: 3, codeSnippet: "taskQueue.pop();", constructType: "Condition & Branch", title: "Dequeue Front Element", explanation: "Removes oldest element from front of queue.", keyDetails: [{ variableOrConstruct: "taskQueue.pop()", role: "Dequeue", whyThisWay: "Removes front element." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Breadth-First Search (BFS) Level Order Traversal (FREE)", category: "FREE / BFS Traversal",
+        description: "Simulates tree/graph level-by-level BFS traversal using queue.",
+        prosCons: "Pros: Guarantees shortest path in unweighted graphs. Cons: O(V) memory space.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: true,
+        code: `// 27. Standard Queue - Approach 2: BFS Level Order
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+void bfsPrint(int startNode, const vector<vector<int>>& adj) {
+    vector<bool> visited(adj.size(), false);
+    queue<int> q;
+    q.push(startNode);
+    visited[startNode] = true;
+    while (!q.empty()) {
+        int node = q.front(); q.pop();
+        cout << node << " ";
+        for (int neighbor : adj[node]) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                q.push(neighbor);
+            }
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    vector<vector<int>> adj = {{1, 2}, {0, 3}, {0, 3}, {1, 2}};
+    bfsPrint(0, adj);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "q.push(startNode); visited[startNode] = true;", constructType: "Variable & Initializer", title: "Enqueue Start Node", explanation: "Enqueues start node into queue and marks visited.", keyDetails: [{ variableOrConstruct: "q.push(startNode)", role: "Start Enqueue", whyThisWay: "Seeds BFS queue." }] },
+          { lineNum: 2, codeSnippet: "int node = q.front(); q.pop();", constructType: "Condition & Branch", title: "Dequeue Current Node", explanation: "Dequeues current level node from queue.", keyDetails: [{ variableOrConstruct: "q.front() & pop()", role: "Node Dequeue", whyThisWay: "Processes node in FIFO order." }] },
+          { lineNum: 3, codeSnippet: "if (!visited[neighbor]) { visited[neighbor] = true; q.push(neighbor); }", constructType: "Condition & Branch", title: "Enqueue Unvisited Neighbors", explanation: "Enqueues adjacent unvisited graph nodes.", keyDetails: [{ variableOrConstruct: "q.push(neighbor)", role: "Neighbor Enqueue", whyThisWay: "Schedules neighbor for next level." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Queue Adapter with std::list Container (PRO)", category: "PRO / List Adapter",
+        description: "Uses std::list (doubly-linked list) as underlying sequential container for queue.",
+        prosCons: "Pros: Node allocation; no dynamic array resizing. Cons: Memory pointer overhead per element.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 27. Standard Queue - Approach 3: List Adapter
+#include <iostream>
+#include <queue>
+#include <list>
+using namespace std;
+
+int main() {
+    queue<int, list<int>> listQueue;
+    listQueue.push(10);
+    listQueue.push(20);
+    cout << "Front: " << listQueue.front() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "queue<int, list<int>> listQueue;", constructType: "Variable & Initializer", title: "List-Backed Queue Declaration", explanation: "Configures queue adapter to use std::list.", keyDetails: [{ variableOrConstruct: "queue<T, list<T>>", role: "List Queue Adapter", whyThisWay: "Node-based FIFO storage." }] },
+          { lineNum: 2, codeSnippet: "listQueue.push(10); listQueue.push(20);", constructType: "Condition & Branch", title: "Enqueue to List Queue", explanation: "Calls push_back on underlying list.", keyDetails: [{ variableOrConstruct: "listQueue.push()", role: "Enqueue", whyThisWay: "Appends node to list." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Front: ' << listQueue.front();", constructType: "Return / Cleanup", title: "Read List Front", explanation: "Calls front() on underlying list.", keyDetails: [{ variableOrConstruct: "listQueue.front()", role: "Front Read", whyThisWay: "Reads list head." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Moving Average Stream Calculator (PRO)", category: "PRO / Moving Average",
+        description: "Calculates running average of last K numbers using queue window.",
+        prosCons: "Pros: O(1) sliding window update time. Cons: Retains K elements in memory.",
+        timeComplexity: "O(1)", spaceComplexity: "O(K)", isFree: false,
+        code: `// 27. Standard Queue - Approach 4: Moving Average
+#include <iostream>
+#include <queue>
+using namespace std;
+
+class MovingAverage {
+private:
+    queue<int> q;
+    int size;
+    double sum;
+public:
+    MovingAverage(int s) : size(s), sum(0.0) {}
+    double next(int val) {
+        if (q.size() == size) {
+            sum -= q.front();
+            q.pop();
+        }
+        q.push(val);
+        sum += val;
+        return sum / q.size();
+    }
+};
+
+int main() {
+    MovingAverage ma(3);
+    cout << "Avg 1: " << ma.next(10) << endl;
+    cout << "Avg 2: " << ma.next(20) << endl;
+    cout << "Avg 3: " << ma.next(30) << endl;
+    cout << "Avg 4: " << ma.next(40) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (q.size() == size) { sum -= q.front(); q.pop(); }", constructType: "Condition & Branch", title: "Evict Oldest Window Element", explanation: "Evicts oldest element from queue front when window reaches max capacity K.", keyDetails: [{ variableOrConstruct: "sum -= q.front()", role: "Window Eviction", whyThisWay: "Maintains sliding window sum." }] },
+          { lineNum: 2, codeSnippet: "q.push(val); sum += val;", constructType: "Variable & Initializer", title: "Enqueue New Element", explanation: "Pushes new value to queue back and updates running sum.", keyDetails: [{ variableOrConstruct: "q.push(val)", role: "Window Addition", whyThisWay: "Adds new element to window." }] },
+          { lineNum: 3, codeSnippet: "return sum / q.size();", constructType: "Return / Cleanup", title: "Return Window Average", explanation: "Returns current sliding window average.", keyDetails: [{ variableOrConstruct: "sum / q.size()", role: "Average Getter", whyThisWay: "Calculates current window average." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Multi-Producer Task Queue Processor (PRO)", category: "PRO / Task Queue",
+        description: "Simulates FIFO background task processing system.",
+        prosCons: "Pros: Strict FIFO execution order for tasks. Cons: Single-threaded processing.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 27. Standard Queue - Approach 5: Task Queue
+#include <iostream>
+#include <queue>
+#include <string>
+using namespace std;
+
+struct PrintJob {
+    int id;
+    string docName;
+};
+
+int main() {
+    queue<PrintJob> printQueue;
+    printQueue.push({101, "Report.pdf"});
+    printQueue.push({102, "Invoice.pdf"});
+    while (!printQueue.empty()) {
+        auto job = printQueue.front();
+        cout << "Printing Job " << job.id << ": " << job.docName << endl;
+        printQueue.pop();
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "printQueue.push({101, 'Report.pdf'});", constructType: "Variable & Initializer", title: "Enqueue Task Struct", explanation: "Enqueues PrintJob struct into queue.", keyDetails: [{ variableOrConstruct: "printQueue.push", role: "Job Enqueue", whyThisWay: "Schedules print job." }] },
+          { lineNum: 2, codeSnippet: "auto job = printQueue.front();", constructType: "Condition & Branch", title: "Fetch Next FIFO Job", explanation: "Inspects oldest print job at front of queue.", keyDetails: [{ variableOrConstruct: "printQueue.front()", role: "Job Inspection", whyThisWay: "Processes jobs in order." }] },
+          { lineNum: 3, codeSnippet: "printQueue.pop();", constructType: "Return / Cleanup", title: "Complete & Pop Job", explanation: "Removes completed print job from queue.", keyDetails: [{ variableOrConstruct: "printQueue.pop()", role: "Job Dequeue", whyThisWay: "Frees front job." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Queue Emplace In-Place Object Construction (PRO)", category: "PRO / Emplace",
+        description: "Constructs queue elements in-place using queue::emplace().",
+        prosCons: "Pros: Avoids temporary object construction and copy. Cons: Requires matching constructor parameters.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 27. Standard Queue - Approach 6: Queue Emplace
+#include <iostream>
+#include <queue>
+#include <string>
+using namespace std;
+
+struct Packet {
+    int seqNum;
+    string payload;
+    Packet(int s, string p) : seqNum(s), payload(p) {}
+};
+
+int main() {
+    queue<Packet> netQueue;
+    netQueue.emplace(1, "SYN");
+    netQueue.emplace(2, "ACK");
+    cout << "Packet 1 Payload: " << netQueue.front().payload << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "netQueue.emplace(1, 'SYN');", constructType: "Variable & Initializer", title: "In-Place Packet Emplace", explanation: "Constructs Packet object directly at queue back without temporary copy.", keyDetails: [{ variableOrConstruct: "netQueue.emplace()", role: "In-Place Emplace", whyThisWay: "Zero-copy object enqueue." }] },
+          { lineNum: 2, codeSnippet: "netQueue.front().payload", constructType: "Condition & Branch", title: "Read Packet Field", explanation: "Reads payload field of front packet.", keyDetails: [{ variableOrConstruct: "front().payload", role: "Field Read", whyThisWay: "Reads packet payload." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Implementing Queue using Two Stacks (PRO)", category: "PRO / Queue via Two Stacks",
+        description: "Implements FIFO queue using two LIFO stacks (inStack and outStack).",
+        prosCons: "Pros: Classic interview question; O(1) amortized operations. Cons: Transfer overhead on empty outStack.",
+        timeComplexity: "O(1) amortized", spaceComplexity: "O(N)", isFree: false,
+        code: `// 27. Standard Queue - Approach 7: Queue via Two Stacks
+#include <iostream>
+#include <stack>
+using namespace std;
+
+class MyQueue {
+private:
+    stack<int> inStack, outStack;
+    void transfer() {
+        if (outStack.empty()) {
+            while (!inStack.empty()) {
+                outStack.push(inStack.top());
+                inStack.pop();
+            }
+        }
+    }
+public:
+    void push(int x) { inStack.push(x); }
+    int pop() {
+        transfer();
+        int val = outStack.top();
+        outStack.pop();
+        return val;
+    }
+    int peek() {
+        transfer();
+        return outStack.top();
+    }
+    bool empty() { return inStack.empty() && outStack.empty(); }
+};
+
+int main() {
+    MyQueue q;
+    q.push(1); q.push(2);
+    cout << "Peek: " << q.peek() << " | Pop: " << q.pop() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "void transfer() { if (outStack.empty()) { while (!inStack.empty()) ... } }", constructType: "Condition & Branch", title: "Stack Transfer Lazy Reversal", explanation: "Transfers elements from inStack to outStack, reversing LIFO to FIFO order.", keyDetails: [{ variableOrConstruct: "outStack.push(inStack.top())", role: "Order Inversion", whyThisWay: "Reverses LIFO order to FIFO." }] },
+          { lineNum: 2, codeSnippet: "int val = outStack.top(); outStack.pop(); return val;", constructType: "Return / Cleanup", title: "Pop FIFO Element from OutStack", explanation: "Pops front FIFO element from outStack top.", keyDetails: [{ variableOrConstruct: "outStack.pop()", role: "FIFO Pop", whyThisWay: "Returns front queue value." }] },
+          { lineNum: 3, codeSnippet: "q.push(1); q.push(2);", constructType: "Variable & Initializer", title: "Push to InStack", explanation: "Pushes incoming elements directly onto inStack.", keyDetails: [{ variableOrConstruct: "inStack.push(x)", role: "Fast Push", whyThisWay: "O(1) push." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Circular Array Buffer Queue Simulation (PRO)", category: "PRO / Circular Buffer Queue",
+        description: "Implements fixed-capacity FIFO queue using circular array indexing.",
+        prosCons: "Pros: Zero dynamic allocation; embedded systems friendly. Cons: Fixed max capacity.",
+        timeComplexity: "O(1)", spaceComplexity: "O(CAP)", isFree: false,
+        code: `// 27. Standard Queue - Approach 8: Circular Buffer
+#include <iostream>
+using namespace std;
+
+class CircularQueue {
+private:
+    int data[5];
+    int head = 0, tail = 0, sz = 0, cap = 5;
+public:
+    bool enqueue(int val) {
+        if (sz == cap) return false;
+        data[tail] = val;
+        tail = (tail + 1) % cap;
+        sz++;
+        return true;
+    }
+    int dequeue() {
+        if (sz == 0) return -1;
+        int val = data[head];
+        head = (head + 1) % cap;
+        sz--;
+        return val;
+    }
+};
+
+int main() {
+    CircularQueue cq;
+    cq.enqueue(10); cq.enqueue(20); cq.enqueue(30);
+    cout << "Dequeued: " << cq.dequeue() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "tail = (tail + 1) % cap;", constructType: "Condition & Branch", title: "Circular Tail Wrapping", explanation: "Wraps tail index back to 0 when reaching array end using modulo operator.", keyDetails: [{ variableOrConstruct: "(tail + 1) % cap", role: "Circular Indexing", whyThisWay: "Wraps tail index cleanly." }] },
+          { lineNum: 2, codeSnippet: "head = (head + 1) % cap;", constructType: "Condition & Branch", title: "Circular Head Wrapping", explanation: "Advances head index circularly on dequeue.", keyDetails: [{ variableOrConstruct: "(head + 1) % cap", role: "Circular Dequeue", whyThisWay: "Advances head index." }] },
+          { lineNum: 3, codeSnippet: "cq.enqueue(10); cq.dequeue();", constructType: "Return / Cleanup", title: "Invoke Circular Queue", explanation: "Tests enqueue and dequeue operations.", keyDetails: [{ variableOrConstruct: "cq.dequeue()", role: "Test Call", whyThisWay: "Verifies circular queue." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Queue Container Swap & Move Semantics (PRO)", category: "PRO / Queue Swap & Move",
+        description: "Performs O(1) container swap and move ownership transfer on queues.",
+        prosCons: "Pros: Zero-copy queue transfer. Cons: Empties moved-from queue.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 27. Standard Queue - Approach 9: Swap & Move
+#include <iostream>
+#include <queue>
+#include <utility>
+using namespace std;
+
+int main() {
+    queue<int> q1; q1.push(10); q1.push(20);
+    queue<int> q2; q2.push(99);
+    q1.swap(q2);
+    cout << "q1 front after swap: " << q1.front() << endl;
+    queue<int> q3 = move(q1);
+    cout << "q3 front after move: " << q3.front() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "q1.swap(q2);", constructType: "Condition & Branch", title: "O(1) Queue Swap", explanation: "Swaps internal container pointers of q1 and q2 in O(1) time.", keyDetails: [{ variableOrConstruct: "q1.swap(q2)", role: "Container Swap", whyThisWay: "O(1) queue swap." }] },
+          { lineNum: 2, codeSnippet: "queue<int> q3 = move(q1);", constructType: "Variable & Initializer", title: "Move Transfer Queue", explanation: "Moves ownership of q1 internal container into q3 without copying elements.", keyDetails: [{ variableOrConstruct: "std::move(q1)", role: "Move Assignment", whyThisWay: "Zero-copy move transfer." }] },
+          { lineNum: 3, codeSnippet: "cout << 'q3 front after move: ' << q3.front();", constructType: "Return / Cleanup", title: "Output Moved Queue Front", explanation: "Prints 99.", keyDetails: [{ variableOrConstruct: "q3.front()", role: "Output", whyThisWay: "Displays moved queue front." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Performance Benchmark: std::queue vs std::vector (PRO)", category: "PRO / Benchmark",
+        description: "Compares FIFO removal performance: std::queue (deque back/front) vs std::vector (erase at front).",
+        prosCons: "Pros: Demonstrates why vector erase(begin()) is O(N) while queue pop() is O(1). Cons: Microbenchmark environment dependent.",
+        timeComplexity: "O(1) vs O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 27. Standard Queue - Approach 10: Benchmark
+#include <iostream>
+#include <queue>
+#include <chrono>
+using namespace std;
+
+int main() {
+    queue<int> q;
+    for(int i=0; i<100000; i++) q.push(i);
+    auto t1 = chrono::high_resolution_clock::now();
+    while(!q.empty()) q.pop();
+    auto t2 = chrono::high_resolution_clock::now();
+    cout << "Queue 100k pop time: " << chrono::duration_cast<chrono::microseconds>(t2 - t1).count() << " us" << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "for(int i=0; i<100000; i++) q.push(i);", constructType: "Variable & Initializer", title: "Populate Queue Buffer", explanation: "Enqueues 100,000 integers into queue.", keyDetails: [{ variableOrConstruct: "q.push(i)", role: "Buffer Enqueue", whyThisWay: "Populates test container." }] },
+          { lineNum: 2, codeSnippet: "while(!q.empty()) q.pop();", constructType: "Loop Construct", title: "O(1) Pop Loop Execution", explanation: "Executes 100,000 O(1) front pop operations.", keyDetails: [{ variableOrConstruct: "q.pop()", role: "O(1) Dequeue", whyThisWay: "Fast front removal." }] },
+          { lineNum: 3, codeSnippet: "chrono::duration_cast<chrono::microseconds>", constructType: "Return / Cleanup", title: "Output Benchmark Duration", explanation: "Prints total execution time in microseconds.", keyDetails: [{ variableOrConstruct: "duration_cast", role: "Timer Output", whyThisWay: "Prints execution duration." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem28Details(): LearnModule {
+  return {
+    id: "easy_set_std",
+    title: "28. Ordered Set (std::set)",
+    category: "Data Structures",
+    difficulty: "easy",
+    shortDesc: "Self-balancing BST storing unique sorted elements.",
+    fullCode: `// 28. Ordered Set - Approach 1: Unique Sorted Insertion
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    set<int> s;
+    s.insert(40);
+    s.insert(10);
+    s.insert(20);
+    s.insert(10); // Duplicate ignored
+    for (int x : s) cout << x << " "; // Output: 10 20 40
+    cout << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "28. Ordered Set (std::set)",
+      objective: "Master Red-Black Tree self-balancing binary search trees, logarithmic insertions and search, unique value constraint, range queries, and custom set comparators.",
+      description: "Implement **Ordered Set (std::set)** (Data Structures). Self-balancing BST storing unique sorted elements. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Element insertions (including duplicate values) and search range queries.",
+      outputDesc: "Deduplicated sorted elements, range query bounds, and existence verification results.",
+      takeaways: [
+        "std::set automatically maintains elements in strict sorted order",
+        "Duplicate insertions are automatically rejected, keeping all elements unique",
+        "Lookup, insertion, and deletion operate in logarithmic time: O(log N)",
+        "Implemented as a self-balancing Red-Black Binary Search Tree (RB-Tree)"
+      ],
+      examples: [
+        { id: 1, input: "s.insert(3); s.insert(1); s.insert(2); s.insert(1);", output: "Set: 1 2 3", explanation: "Elements are sorted automatically; duplicate '1' is ignored." },
+        { id: 2, input: "s.lower_bound(15)", output: "First element >= 15", explanation: "Binary search range lower bound lookup in O(log N) time." },
+        { id: 3, input: "set<int, greater<int>> sDesc = {10, 50, 20};", output: "Set: 50 20 10", explanation: "Custom comparator reverses sort order to descending." }
+      ],
+      constraints: ["std::set requires <set> header.", "Elements stored in std::set are immutable (const); mutate by erasing and re-inserting."],
+      companies: ["Google", "Meta", "Microsoft", "Amazon"],
+      acceptanceRate: "91.8%",
+      totalAccepted: "2,210,500"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Unique Sorted Element Insertion & Iteration (FREE)", category: "FREE / Direct Set",
+        description: "Inserts elements into std::set; duplicates are automatically ignored and values are sorted.",
+        prosCons: "Pros: Automatic sorting and deduplication. Cons: O(log N) insertion overhead compared to O(1) vector push_back.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 28. Ordered Set - Approach 1: Insertion
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    set<int> numSet;
+    numSet.insert(50);
+    numSet.insert(10);
+    numSet.insert(30);
+    numSet.insert(10); // Duplicate
+    for (int val : numSet) cout << val << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "set<int> numSet;", constructType: "Variable & Initializer", title: "Set Container Instantiation", explanation: "Instantiates Red-Black Tree set container storing unique integers.", keyDetails: [{ variableOrConstruct: "set<int>", role: "RB-Tree Set", whyThisWay: "Provides unique sorted tree container." }] },
+          { lineNum: 2, codeSnippet: "numSet.insert(50); numSet.insert(10); ...", constructType: "Condition & Branch", title: "Insert Values", explanation: "Inserts 50, 10, 30, and 10 in O(log N) time per element.", keyDetails: [{ variableOrConstruct: "numSet.insert()", role: "Insert Node", whyThisWay: "Inserts while maintaining RB-Tree invariants." }] },
+          { lineNum: 3, codeSnippet: "for (int val : numSet) cout << val << ' ';", constructType: "Loop Construct", title: "In-Order Tree Traversal", explanation: "Iterates through Red-Black tree in-order, printing elements in sorted order: 10 30 50.", keyDetails: [{ variableOrConstruct: "for (int val : numSet)", role: "In-Order Iteration", whyThisWay: "Traverses tree in sorted order." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Logarithmic Lookup with count() and find() (FREE)", category: "FREE / Logarithmic Lookup",
+        description: "Checks element existence in O(log N) time using set::find() and set::count().",
+        prosCons: "Pros: O(log N) binary search lookup. Cons: Slower than O(1) hash map.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 28. Ordered Set - Approach 2: Lookup
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    set<int> s = {10, 20, 30, 40};
+    if (s.find(20) != s.end()) cout << "Found 20!" << endl;
+    cout << "Count of 30: " << s.count(30) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (s.find(20) != s.end())", constructType: "Condition & Branch", title: "Binary Search Tree Lookup", explanation: "Traverses Red-Black tree branches looking for node value 20 in O(log N) time.", keyDetails: [{ variableOrConstruct: "s.find(20)", role: "Tree Search", whyThisWay: "Logarithmic binary search in tree." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Count of 30: ' << s.count(30);", constructType: "Condition & Branch", title: "Count Lookup", explanation: "Returns 1 if element exists in set, else 0.", keyDetails: [{ variableOrConstruct: "s.count(30)", role: "Count Check", whyThisWay: "Returns 1 or 0 for unique set." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Binary Search Range Queries (lower_bound & upper_bound) (PRO)", category: "PRO / Range Queries",
+        description: "Finds element range boundaries in O(log N) using lower_bound and upper_bound.",
+        prosCons: "Pros: Fast O(log N) range queries in sorted tree. Cons: Requires ordered set.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 28. Ordered Set - Approach 3: Range Queries
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    set<int> numbers = {10, 20, 30, 40, 50, 60};
+    auto low = numbers.lower_bound(25); // First element >= 25 (30)
+    auto up = numbers.upper_bound(50);  // First element > 50 (60)
+    for (auto it = low; it != up; ++it) {
+        cout << *it << " "; // Output: 30 40 50
+    }
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto low = numbers.lower_bound(25);", constructType: "Variable & Initializer", title: "Find Lower Bound Iterator", explanation: "Performs binary search in tree returning iterator to first element >= 25 (30).", keyDetails: [{ variableOrConstruct: "numbers.lower_bound(25)", role: "Lower Bound Search", whyThisWay: "O(log N) tree lower bound search." }] },
+          { lineNum: 2, codeSnippet: "auto up = numbers.upper_bound(50);", constructType: "Variable & Initializer", title: "Find Upper Bound Iterator", explanation: "Performs binary search in tree returning iterator to first element > 50 (60).", keyDetails: [{ variableOrConstruct: "numbers.upper_bound(50)", role: "Upper Bound Search", whyThisWay: "O(log N) tree upper bound search." }] },
+          { lineNum: 3, codeSnippet: "for (auto it = low; it != up; ++it) cout << *it << ' ';", constructType: "Loop Construct", title: "Traverse Range Sub-Tree", explanation: "Iterates through sub-range [30, 50] in sorted order.", keyDetails: [{ variableOrConstruct: "it != up", role: "Range Loop Guard", whyThisWay: "Iterates through matching sub-range." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Custom Comparator Descending Ordered Set (PRO)", category: "PRO / Descending Comparator",
+        description: "Uses std::greater<int> as template comparator parameter for reverse sorting.",
+        prosCons: "Pros: Custom sorting order built directly into container definition. Cons: Incompatible type with std::set<int>.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 28. Ordered Set - Approach 4: Descending Set
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    set<int, greater<int>> descSet = {15, 45, 5, 30};
+    for (int x : descSet) cout << x << " "; // Output: 45 30 15 5
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "set<int, greater<int>> descSet = {15, 45, 5, 30};", constructType: "Variable & Initializer", title: "Descending Set Instantiation", explanation: "Instantiates set using std::greater<int> to sort nodes descending.", keyDetails: [{ variableOrConstruct: "greater<int>", role: "Custom Comparator", whyThisWay: "Sorts elements in descending order." }] },
+          { lineNum: 2, codeSnippet: "for (int x : descSet) cout << x << ' ';", constructType: "Loop Construct", title: "In-Order Descending Traversal", explanation: "Iterates through tree nodes in reverse order: 45 30 15 5.", keyDetails: [{ variableOrConstruct: "for (int x : descSet)", role: "Descending Iterator", whyThisWay: "Traverses descending sorted tree." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Set Operations: Intersection & Union (PRO)", category: "PRO / Set Operations",
+        description: "Computes mathematical set intersection using std::set_intersection.",
+        prosCons: "Pros: STL algorithmic mathematical set operations. Cons: Destination container requires back_inserter/inserter.",
+        timeComplexity: "O(N + M)", spaceComplexity: "O(N + M)", isFree: false,
+        code: `// 28. Ordered Set - Approach 5: Set Operations
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+int main() {
+    set<int> s1 = {1, 2, 3, 4, 5};
+    set<int> s2 = {3, 4, 5, 6, 7};
+    vector<int> intersection;
+    set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), back_inserter(intersection));
+    for (int x : intersection) cout << x << " "; // Output: 3 4 5
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), ...);", constructType: "Condition & Branch", title: "Set Intersection Algorithm", explanation: "Calculates intersection of two sorted sets in linear time.", keyDetails: [{ variableOrConstruct: "set_intersection", role: "STL Set Intersection", whyThisWay: "O(N+M) set intersection algorithm." }] },
+          { lineNum: 2, codeSnippet: "back_inserter(intersection)", constructType: "Variable & Initializer", title: "Output Iterator Inserter", explanation: "Appends matching intersection elements into vector.", keyDetails: [{ variableOrConstruct: "back_inserter", role: "Output Inserter", whyThisWay: "Appends output elements cleanly." }] },
+          { lineNum: 3, codeSnippet: "for (int x : intersection) cout << x << ' ';", constructType: "Loop Construct", title: "Print Intersection Set", explanation: "Prints common elements 3 4 5.", keyDetails: [{ variableOrConstruct: "x", role: "Output", whyThisWay: "Prints intersection values." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Set of Custom Structs with Operator< Overload (PRO)", category: "PRO / Custom Struct Set",
+        description: "Stores custom struct elements in std::set by overloading operator<.",
+        prosCons: "Pros: Enables storing complex user types in set. Cons: Operator< must establish strict weak ordering.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 28. Ordered Set - Approach 6: Custom Struct Set
+#include <iostream>
+#include <set>
+#include <string>
+using namespace std;
+
+struct Student {
+    int id;
+    string name;
+    bool operator<(const Student& other) const {
+        return id < other.id; // Sorted by ID
+    }
+};
+
+int main() {
+    set<Student> roster;
+    roster.insert({102, "Bob"});
+    roster.insert({101, "Alice"});
+    for (const auto& s : roster) cout << s.id << ": " << s.name << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "bool operator<(const Student& other) const { return id < other.id; }", constructType: "Function Signature", title: "Overload Strict Weak Ordering", explanation: "Defines operator< comparison logic required by std::set for sorting and uniqueness.", keyDetails: [{ variableOrConstruct: "operator<", role: "Tree Comparator", whyThisWay: "Establishes tree ordering invariant." }] },
+          { lineNum: 2, codeSnippet: "roster.insert({102, 'Bob'}); roster.insert({101, 'Alice'});", constructType: "Variable & Initializer", title: "Insert Custom Structs", explanation: "Inserts custom Student objects into set.", keyDetails: [{ variableOrConstruct: "roster.insert()", role: "Struct Insertion", whyThisWay: "Inserts struct into RB-Tree." }] },
+          { lineNum: 3, codeSnippet: "for (const auto& s : roster) cout << s.id << ': ' << s.name;", constructType: "Loop Construct", title: "Iterate Sorted Roster", explanation: "Prints roster sorted by ID (101: Alice, 102: Bob).", keyDetails: [{ variableOrConstruct: "s.id", role: "Sorted Field Access", whyThisWay: "Displays sorted custom objects." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Vector Deduplication via Set Conversion (PRO)", category: "PRO / Vector Deduplication",
+        description: "Deduplicates vector elements by constructing set from vector iterators.",
+        prosCons: "Pros: Single line vector element deduplication. Cons: Loses original element order.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 28. Ordered Set - Approach 7: Deduplication
+#include <iostream>
+#include <vector>
+#include <set>
+using namespace std;
+
+int main() {
+    vector<int> nums = {4, 1, 2, 4, 3, 2, 1};
+    set<int> uniqueNums(nums.begin(), nums.end());
+    vector<int> cleanNums(uniqueNums.begin(), uniqueNums.end());
+    for (int x : cleanNums) cout << x << " "; // Output: 1 2 3 4
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "set<int> uniqueNums(nums.begin(), nums.end());", constructType: "Variable & Initializer", title: "Range Construction Set Conversion", explanation: "Constructs set from vector iterators, stripping duplicate values in O(N log N) time.", keyDetails: [{ variableOrConstruct: "set(begin, end)", role: "Range Deduplicator", whyThisWay: "Deduplicates container." }] },
+          { lineNum: 2, codeSnippet: "vector<int> cleanNums(uniqueNums.begin(), uniqueNums.end());", constructType: "Variable & Initializer", title: "Set to Vector Range Conversion", explanation: "Converts unique sorted set back into contiguous vector.", keyDetails: [{ variableOrConstruct: "vector(begin, end)", role: "Vector Restorer", whyThisWay: "Rebuilds dynamic array." }] },
+          { lineNum: 3, codeSnippet: "for (int x : cleanNums) cout << x << ' ';", constructType: "Loop Construct", title: "Output Clean Vector", explanation: "Prints 1 2 3 4.", keyDetails: [{ variableOrConstruct: "cleanNums", role: "Output", whyThisWay: "Displays unique vector." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Erasure by Value & Iterator (set::erase) (PRO)", category: "PRO / Erasure",
+        description: "Removes set elements by value or by iterator position.",
+        prosCons: "Pros: O(log N) tree node deletion. Cons: Iterator invalidation on erased node.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 28. Ordered Set - Approach 8: Erasure
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    set<int> s = {10, 20, 30, 40, 50};
+    s.erase(30); // Erase by value
+    auto it = s.find(20);
+    if (it != s.end()) s.erase(it); // Erase by iterator
+    for (int x : s) cout << x << " "; // Output: 10 40 50
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "s.erase(30);", constructType: "Condition & Branch", title: "Erase Node by Value", explanation: "Searches and erases node containing value 30 in O(log N) time.", keyDetails: [{ variableOrConstruct: "s.erase(30)", role: "Value Erasure", whyThisWay: "Removes matching node." }] },
+          { lineNum: 2, codeSnippet: "if (it != s.end()) s.erase(it);", constructType: "Condition & Branch", title: "Erase Node by Iterator", explanation: "Erases node at iterator position in amortized O(1) time.", keyDetails: [{ variableOrConstruct: "s.erase(it)", role: "Iterator Erasure", whyThisWay: "Removes node directly." }] },
+          { lineNum: 3, codeSnippet: "for (int x : s) cout << x << ' ';", constructType: "Loop Construct", title: "Print Remaining Set", explanation: "Prints 10 40 50.", keyDetails: [{ variableOrConstruct: "x", role: "Output", whyThisWay: "Prints remaining set elements." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: C++17 Node Extraction & Re-Keying (set::extract) (PRO)", category: "PRO / C++17 Extract",
+        description: "Extracts node handle from set without dynamic memory reallocation using C++17 set::extract.",
+        prosCons: "Pros: Zero heap reallocations when moving node keys. Cons: Requires C++17.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 28. Ordered Set - Approach 9: C++17 Extract
+#include <iostream>
+#include <set>
+using namespace std;
+
+int main() {
+    set<int> s = {10, 20, 30};
+    auto node = s.extract(20); // Extract node handle
+    if (!node.empty()) {
+        node.value() = 25; // Modify key inside node handle
+        s.insert(move(node)); // Re-insert node into tree
+    }
+    for (int x : s) cout << x << " "; // Output: 10 25 30
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto node = s.extract(20);", constructType: "Variable & Initializer", title: "Extract Node Handle", explanation: "Detaches node containing 20 from set tree without freeing heap memory.", keyDetails: [{ variableOrConstruct: "s.extract(20)", role: "Node Extractor", whyThisWay: "Extracts node without deallocating." }] },
+          { lineNum: 2, codeSnippet: "node.value() = 25; s.insert(move(node));", constructType: "Condition & Branch", title: "Re-Key & Re-Insert Node", explanation: "Modifies node value to 25 and re-inserts node handle into set tree.", keyDetails: [{ variableOrConstruct: "node.value() = 25", role: "Key Mutation", whyThisWay: "Re-keys detached node." }] },
+          { lineNum: 3, codeSnippet: "for (int x : s) cout << x << ' ';", constructType: "Loop Construct", title: "Print Re-Keyed Set", explanation: "Prints 10 25 30.", keyDetails: [{ variableOrConstruct: "x", role: "Output", whyThisWay: "Displays re-keyed tree set." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: In-Place Node Construction (std::set::emplace) (PRO)", category: "PRO / Emplace",
+        description: "Constructs set elements directly inside tree node using set::emplace().",
+        prosCons: "Pros: Avoids temporary object construction and copy. Cons: Returns pair<iterator, bool>.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 28. Ordered Set - Approach 10: Emplace
+#include <iostream>
+#include <set>
+#include <string>
+using namespace std;
+
+int main() {
+    set<string> strSet;
+    auto [it, inserted] = strSet.emplace("In-Place String");
+    if (inserted) cout << "Successfully emplaced: " << *it << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto [it, inserted] = strSet.emplace('In-Place String');", constructType: "Variable & Initializer", title: "In-Place Tree Node Emplace", explanation: "Constructs string directly in Red-Black tree node, returning pair of iterator and inserted boolean flag.", keyDetails: [{ variableOrConstruct: "strSet.emplace()", role: "In-Place Emplace", whyThisWay: "Constructs tree node in-place." }] },
+          { lineNum: 2, codeSnippet: "if (inserted) cout << 'Successfully emplaced: ' << *it;", constructType: "Condition & Branch", title: "Verify Insertion Flag", explanation: "Verifies if emplace was successful using returned boolean flag.", keyDetails: [{ variableOrConstruct: "inserted", role: "Insertion Flag", whyThisWay: "Confirms node insertion." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem29Details(): LearnModule {
+  return {
+    id: "easy_map_std",
+    title: "29. Ordered Map (std::map)",
+    category: "Data Structures",
+    difficulty: "easy",
+    shortDesc: "Key-value associative container sorted by keys.",
+    fullCode: `// 29. Ordered Map - Approach 1: Basic Key-Value Operations
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<string, int> ages;
+    ages["Alice"] = 25;
+    ages["Bob"] = 30;
+    ages["Charlie"] = 22;
+    for (auto const& [name, age] : ages) {
+        cout << name << ": " << age << " years" << endl;
+    }
+    return 0;
+}`,
+    problemStatement: {
+      title: "29. Ordered Map (std::map)",
+      objective: "Master Red-Black Tree key-value mapping, logarithmic operations, operator[] vs at(), insert_or_assign, try_emplace, structured bindings, and map range searches.",
+      description: "Implement **Ordered Map (std::map)** (Data Structures). Key-value associative container sorted by keys. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Key-value pairs inserted into map container.",
+      outputDesc: "Retrieved values by key, sorted key-value pairs, and range bounds.",
+      takeaways: [
+        "std::map maintains key-value pairs sorted automatically by key",
+        "Keys are unique; operator[] inserts default value if key is not found",
+        "Lookup, insertion, and removal run in logarithmic time O(log N)",
+        "Implemented as a self-balancing Red-Black Binary Search Tree"
+      ],
+      examples: [
+        { id: 1, input: "m['b'] = 2; m['a'] = 1;", output: "a:1, b:2", explanation: "Entries are automatically sorted by key." },
+        { id: 2, input: "m.at('missing')", output: "Throws std::out_of_range", explanation: "m.at() throws exception if key is absent; operator[] would insert default value." },
+        { id: 3, input: "m.try_emplace('key', 100)", output: "Inserts key=100 without overwrite", explanation: "try_emplace inserts only if key does not exist." }
+      ],
+      constraints: ["std::map requires <map> header.", "operator[] requires default constructor for Value type."],
+      companies: ["Google", "Amazon", "Microsoft", "Meta"],
+      acceptanceRate: "90.5%",
+      totalAccepted: "2,450,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Key-Value Insertion & Subscript Access (FREE)", category: "FREE / Direct Map",
+        description: "Uses operator[] for inserting and accessing map key-value pairs.",
+        prosCons: "Pros: Extremely convenient operator[] syntax. Cons: Unexpectedly inserts default element if key missing.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 29. Ordered Map - Approach 1: Subscript Access
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<string, int> wordCount;
+    wordCount["apple"] = 5;
+    wordCount["banana"] = 3;
+    wordCount["apple"]++; // Increment value
+    cout << "Apple count: " << wordCount["apple"] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "map<string, int> wordCount;", constructType: "Variable & Initializer", title: "Map Declaration", explanation: "Instantiates Red-Black Tree map binding string keys to int values.", keyDetails: [{ variableOrConstruct: "map<string, int>", role: "Associative Tree", whyThisWay: "Provides ordered key-value lookup." }] },
+          { lineNum: 2, codeSnippet: "wordCount['apple'] = 5; wordCount['apple']++;", constructType: "Condition & Branch", title: "Subscript Insertion & Mutation", explanation: "Inserts 'apple'=5 then increments value to 6.", keyDetails: [{ variableOrConstruct: "wordCount['apple']", role: "Subscript Operator", whyThisWay: "Inserts or mutates key value." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Apple count: ' << wordCount['apple'];", constructType: "Return / Cleanup", title: "Read Map Value", explanation: "Fetches value for 'apple' (6).", keyDetails: [{ variableOrConstruct: "wordCount['apple']", role: "Value Read", whyThisWay: "Reads value by key." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Safe Lookup with map::at() & map::find() (FREE)", category: "FREE / Safe Lookup",
+        description: "Uses map::find() and map::at() for const-safe bounds-checked key lookups.",
+        prosCons: "Pros: Avoids accidental default insertion on missing keys. Cons: Requires explicit end iterator check.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 29. Ordered Map - Approach 2: Safe Lookup
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<string, int> scores = {{"Alice", 95}, {"Bob", 88}};
+    auto it = scores.find("Bob");
+    if (it != scores.end()) {
+        cout << "Bob score: " << it->second << endl;
+    }
+    cout << "Alice score: " << scores.at("Alice") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto it = scores.find('Bob');", constructType: "Variable & Initializer", title: "Logarithmic Tree Find", explanation: "Searches Red-Black tree for key 'Bob' returning iterator.", keyDetails: [{ variableOrConstruct: "scores.find('Bob')", role: "Tree Search", whyThisWay: "O(log N) key lookup." }] },
+          { lineNum: 2, codeSnippet: "if (it != scores.end()) cout << it->second;", constructType: "Condition & Branch", title: "Safely Access Pair Value", explanation: "Verifies iterator is valid and accesses it->second value.", keyDetails: [{ variableOrConstruct: "it->second", role: "Value Access", whyThisWay: "Reads pair value safely." }] },
+          { lineNum: 3, codeSnippet: "cout << scores.at('Alice');", constructType: "Return / Cleanup", title: "Bounds-Checked at() Access", explanation: "Fetches 'Alice' value safely using at().", keyDetails: [{ variableOrConstruct: "scores.at('Alice')", role: "Bounds Checked Read", whyThisWay: "Throws exception if key absent." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: C++17 Structured Binding Map Iteration (PRO)", category: "PRO / Structured Binding",
+        description: "Iterates through map entries cleanly using C++17 for (auto& [k, v] : m).",
+        prosCons: "Pros: Extremely clean variable unpacking. Cons: Requires C++17.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 29. Ordered Map - Approach 3: Structured Binding
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<int, string> idMap = {{101, "Server 1"}, {102, "Server 2"}};
+    for (const auto& [id, name] : idMap) {
+        cout << "ID: " << id << " -> " << name << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "for (const auto& [id, name] : idMap)", constructType: "Loop Construct", title: "Structured Binding Unpacking Loop", explanation: "Iterates through map entries unpacking key to id and value to name.", keyDetails: [{ variableOrConstruct: "auto& [id, name]", role: "Map Deconstruction", whyThisWay: "Clean C++17 key-value iteration." }] },
+          { lineNum: 2, codeSnippet: "cout << 'ID: ' << id << ' -> ' << name;", constructType: "Condition & Branch", title: "Output Unpacked Pair", explanation: "Prints unpacked key and value fields.", keyDetails: [{ variableOrConstruct: "id, name", role: "Unpacked Field Access", whyThisWay: "Prints fields directly." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Map Range Search (lower_bound & upper_bound) (PRO)", category: "PRO / Range Search",
+        description: "Performs range searches over sorted map keys using lower_bound and upper_bound.",
+        prosCons: "Pros: Efficient sub-range key iteration. Cons: Requires ordered keys.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 29. Ordered Map - Approach 4: Range Search
+#include <iostream>
+#include <map>
+using namespace std;
+
+int main() {
+    map<int, string> events = {{100, "Start"}, {200, "Mid"}, {300, "End"}};
+    auto low = events.lower_bound(150); // First key >= 150 (200)
+    for (auto it = low; it != events.end(); ++it) {
+        cout << it->first << ": " << it->second << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto low = events.lower_bound(150);", constructType: "Variable & Initializer", title: "Find Map Lower Bound", explanation: "Performs binary search in map tree returning iterator to first key >= 150.", keyDetails: [{ variableOrConstruct: "events.lower_bound(150)", role: "Map Range Search", whyThisWay: "Logarithmic map lower bound search." }] },
+          { lineNum: 2, codeSnippet: "for (auto it = low; it != events.end(); ++it)", constructType: "Loop Construct", title: "Iterate Range Sub-Tree", explanation: "Iterates through sub-range of map entries.", keyDetails: [{ variableOrConstruct: "it->first", role: "Key Access", whyThisWay: "Traverses sub-range entries." }] },
+          { lineNum: 3, codeSnippet: "cout << it->first << ': ' << it->second;", constructType: "Return / Cleanup", title: "Output Key-Value Entry", explanation: "Prints matched range entries.", keyDetails: [{ variableOrConstruct: "it->second", role: "Value Access", whyThisWay: "Prints entry." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Custom Key Comparator Map (std::greater) (PRO)", category: "PRO / Descending Map",
+        description: "Configures map with std::greater key comparator for descending key ordering.",
+        prosCons: "Pros: Automatically sorts map keys in descending order. Cons: Incompatible type with std::map<K, V>.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 29. Ordered Map - Approach 5: Descending Map
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<int, string, greater<int>> leaderBoard = {{100, "Alice"}, {300, "Charlie"}, {200, "Bob"}};
+    for (const auto& [score, name] : leaderBoard) {
+        cout << score << ": " << name << endl; // Output: 300 200 100
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "map<int, string, greater<int>> leaderBoard = ...;", constructType: "Variable & Initializer", title: "Descending Map Instantiation", explanation: "Instantiates map using std::greater<int> key comparator.", keyDetails: [{ variableOrConstruct: "greater<int>", role: "Key Comparator", whyThisWay: "Sorts map keys descending." }] },
+          { lineNum: 2, codeSnippet: "for (const auto& [score, name] : leaderBoard)", constructType: "Loop Construct", title: "Iterate Descending Leaderboard", explanation: "Prints entries sorted by score descending (300, 200, 100).", keyDetails: [{ variableOrConstruct: "score, name", role: "Leaderboard Entry", whyThisWay: "Iterates descending keys." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: C++17 try_emplace & insert_or_assign (PRO)", category: "PRO / Modern Insert",
+        description: "Uses C++17 try_emplace for zero-copy insertion when key is absent and insert_or_assign for explicit overwrite.",
+        prosCons: "Pros: Avoids unnecessary temporary construction of value object when key exists. Cons: Requires C++17.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 29. Ordered Map - Approach 6: C++17 try_emplace
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<string, string> config;
+    config.try_emplace("host", "localhost"); // Inserted
+    config.try_emplace("host", "127.0.0.1"); // Ignored (key exists)
+    config.insert_or_assign("port", "8080"); // Inserted/Assigned
+    cout << "Host: " << config["host"] << " | Port: " << config["port"] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "config.try_emplace('host', 'localhost');", constructType: "Variable & Initializer", title: "Insert If Absent (try_emplace)", explanation: "Inserts 'host'='localhost' without constructing value if key exists.", keyDetails: [{ variableOrConstruct: "config.try_emplace", role: "Emplace Guard", whyThisWay: "Prevents overwriting existing key." }] },
+          { lineNum: 2, codeSnippet: "config.insert_or_assign('port', '8080');", constructType: "Variable & Initializer", title: "Insert or Assign (insert_or_assign)", explanation: "Inserts 'port' or updates existing value if key is present.", keyDetails: [{ variableOrConstruct: "insert_or_assign", role: "Emplace Overwriter", whyThisWay: "Explicitly inserts or overwrites value." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Host: ' << config['host'];", constructType: "Return / Cleanup", title: "Output Configuration", explanation: "Prints 'Host: localhost | Port: 8080'.", keyDetails: [{ variableOrConstruct: "config['host']", role: "Output", whyThisWay: "Displays config." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Map of Vectors for Multi-Value Category Grouping (PRO)", category: "PRO / Multi-Value Grouping",
+        description: "Groups values into vector lists associated with each map key.",
+        prosCons: "Pros: Convenient 1-to-N key-value relationship mapping. Cons: Nested container allocation.",
+        timeComplexity: "O(N log K)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 29. Ordered Map - Approach 7: Multi-Value Grouping
+#include <iostream>
+#include <map>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+    map<string, vector<string>> categories;
+    categories["Fruit"].push_back("Apple");
+    categories["Fruit"].push_back("Banana");
+    categories["Veggie"].push_back("Carrot");
+    for (const auto& [cat, items] : categories) {
+        cout << cat << ": ";
+        for (const auto& item : items) cout << item << " ";
+        cout << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "map<string, vector<string>> categories;", constructType: "Variable & Initializer", title: "Nested Map Declaration", explanation: "Maps string category key to vector of strings value.", keyDetails: [{ variableOrConstruct: "map<string, vector<string>>", role: "1-to-N Map", whyThisWay: "Groups multiple values per key." }] },
+          { lineNum: 2, codeSnippet: "categories['Fruit'].push_back('Apple');", constructType: "Condition & Branch", title: "Append to Vector Value", explanation: "Accesses vector for 'Fruit' key and appends 'Apple'.", keyDetails: [{ variableOrConstruct: "push_back", role: "Vector Append", whyThisWay: "Appends element to vector value." }] },
+          { lineNum: 3, codeSnippet: "for (const auto& item : items) cout << item << ' ';", constructType: "Loop Construct", title: "Iterate Nested Vector Items", explanation: "Prints all item strings contained in category vector.", keyDetails: [{ variableOrConstruct: "items", role: "Nested Loop", whyThisWay: "Iterates vector items." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: In-Place Entry Construction (map::emplace) (PRO)", category: "PRO / Map Emplace",
+        description: "Constructs map key-value pair in-place using map::emplace().",
+        prosCons: "Pros: Avoids temporary pair creation. Cons: Does not overwrite existing keys.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 29. Ordered Map - Approach 8: Map Emplace
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<int, string> userMap;
+    auto [it, success] = userMap.emplace(101, "Alice");
+    if (success) cout << "Emplaced user: " << it->second << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto [it, success] = userMap.emplace(101, 'Alice');", constructType: "Variable & Initializer", title: "In-Place Pair Emplace", explanation: "Constructs key-value pair in-place in tree node.", keyDetails: [{ variableOrConstruct: "userMap.emplace()", role: "In-Place Emplace", whyThisWay: "Zero-copy pair insertion." }] },
+          { lineNum: 2, codeSnippet: "if (success) cout << 'Emplaced user: ' << it->second;", constructType: "Condition & Branch", title: "Verify Emplace Success", explanation: "Verifies boolean success flag returned from emplace.", keyDetails: [{ variableOrConstruct: "success", role: "Success Flag", whyThisWay: "Confirms insertion." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Map Key Renaming with C++17 Node Extraction (PRO)", category: "PRO / C++17 Map Extract",
+        description: "Extracts map node, mutates key, and re-inserts into map without reallocating value.",
+        prosCons: "Pros: Modifies map key without value reallocation or copy. Cons: Requires C++17.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 29. Ordered Map - Approach 9: Map Extract
+#include <iostream>
+#include <map>
+#include <string>
+using namespace std;
+
+int main() {
+    map<int, string> m = {{1, "One"}, {2, "Two"}};
+    auto node = m.extract(1);
+    if (!node.empty()) {
+        node.key() = 10; // Change key from 1 to 10
+        m.insert(move(node)); // Re-insert node into map
+    }
+    for (const auto& [k, v] : m) cout << k << ":" << v << " "; // Output: 2:Two 10:One
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto node = m.extract(1);", constructType: "Variable & Initializer", title: "Extract Map Node Handle", explanation: "Detaches node containing key 1 without deallocating value memory.", keyDetails: [{ variableOrConstruct: "m.extract(1)", role: "Map Node Extractor", whyThisWay: "Extracts node handle." }] },
+          { lineNum: 2, codeSnippet: "node.key() = 10; m.insert(move(node));", constructType: "Condition & Branch", title: "Mutate Key & Re-Insert Node", explanation: "Changes node key to 10 and re-inserts node handle into map tree.", keyDetails: [{ variableOrConstruct: "node.key() = 10", role: "Key Renamer", whyThisWay: "Renames key without copying value." }] },
+          { lineNum: 3, codeSnippet: "for (const auto& [k, v] : m) ...", constructType: "Loop Construct", title: "Output Re-Keyed Map", explanation: "Prints updated map entries.", keyDetails: [{ variableOrConstruct: "k, v", role: "Output", whyThisWay: "Displays re-keyed map." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Map Erasure & In-Loop Removal (PRO)", category: "PRO / Map Erasure",
+        description: "Safely erases map elements during loop iteration using returned iterator.",
+        prosCons: "Pros: Safe element removal during traversal. Cons: Must use returned iterator to prevent dangling iterator.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 29. Ordered Map - Approach 10: Safe In-Loop Erasure
+#include <iostream>
+#include <map>
+using namespace std;
+
+int main() {
+    map<int, int> m = {{1, 10}, {2, 20}, {3, 30}, {4, 40}};
+    for (auto it = m.begin(); it != m.end(); ) {
+        if (it->second < 25) {
+            it = m.erase(it); // Erase and return next valid iterator
+        } else {
+            ++it;
+        }
+    }
+    for (const auto& [k, v] : m) cout << k << ":" << v << " "; // Output: 3:30 4:40
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (it->second < 25) { it = m.erase(it); }", constructType: "Condition & Branch", title: "Safe In-Loop Iterator Erase", explanation: "Erases matching map node and assigns returned valid next iterator to it.", keyDetails: [{ variableOrConstruct: "it = m.erase(it)", role: "Safe Iterator Erasure", whyThisWay: "Prevents iterator invalidation." }] },
+          { lineNum: 2, codeSnippet: "else { ++it; }", constructType: "Condition & Branch", title: "Advance Iterator", explanation: "Advances iterator when no element is erased.", keyDetails: [{ variableOrConstruct: "++it", role: "Iterator Increment", whyThisWay: "Advances loop iterator." }] },
+          { lineNum: 3, codeSnippet: "for (const auto& [k, v] : m) ...", constructType: "Loop Construct", title: "Print Filtered Map", explanation: "Prints 3:30 4:40.", keyDetails: [{ variableOrConstruct: "k, v", role: "Output", whyThisWay: "Displays filtered map." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem30Details(): LearnModule {
+  return {
+    id: "easy_unordered_map",
+    title: "30. Hash Map (std::unordered_map)",
+    category: "Data Structures",
+    difficulty: "easy",
+    shortDesc: "O(1) average lookup key-value store using hashing.",
+    fullCode: `// 30. Hash Map - Approach 1: O(1) Average Frequency Counter
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+int main() {
+    vector<int> nums = {1, 2, 2, 3, 3, 3, 4};
+    unordered_map<int, int> freq;
+    for (int x : nums) freq[x]++;
+    for (auto const& [val, count] : freq) {
+        cout << val << " appears " << count << " times" << endl;
+    }
+    return 0;
+}`,
+    problemStatement: {
+      title: "30. Hash Map (std::unordered_map)",
+      objective: "Master hash tables, O(1) average lookup/insertion, load factor, rehashing, custom hash functions, bucket inspection, and frequency counting.",
+      description: "Implement **Hash Map (std::unordered_map)** (Data Structures). O(1) average lookup key-value store using hashing. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Key-value entries inserted into hash table.",
+      outputDesc: "O(1) average lookups, frequency maps, and bucket metrics.",
+      takeaways: [
+        "std::unordered_map uses a hash table providing O(1) average time complexity",
+        "Keys are unsorted; order depends on internal bucket hash function values",
+        "Worst-case complexity is O(N) when hash collisions collapse elements into single bucket",
+        "Use reserve(N) to preallocate buckets and prevent expensive rehashing"
+      ],
+      examples: [
+        { id: 1, input: "freq[x]++ for [1, 2, 2, 3]", output: "1:1, 2:2, 3:1", explanation: "O(1) average update per element." },
+        { id: 2, input: "twoSum([2,7,11,15], target=9)", output: "Indices: [0, 1]", explanation: "O(N) total time using hash map complement lookup." },
+        { id: 3, input: "um.bucket_count()", output: "Bucket Count: 13", explanation: "Inspects internal hash table bucket array size." }
+      ],
+      constraints: ["std::unordered_map requires <unordered_map> header.", "Custom keys require std::hash specialization or custom hash functor."],
+      companies: ["Google", "Meta", "Amazon", "Apple", "Microsoft"],
+      acceptanceRate: "92.1%",
+      totalAccepted: "2,890,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: O(1) Average Frequency Counter (FREE)", category: "FREE / Frequency Counter",
+        description: "Counts element occurrences in O(N) total time using std::unordered_map.",
+        prosCons: "Pros: O(1) average lookup and update. Cons: Unsorted iteration order.",
+        timeComplexity: "O(N) Total", spaceComplexity: "O(N)", isFree: true,
+        code: `// 30. Hash Map - Approach 1: Frequency Counter
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+using namespace std;
+
+int main() {
+    vector<int> data = {10, 20, 10, 30, 20, 10};
+    unordered_map<int, int> counts;
+    for (int x : data) counts[x]++;
+    cout << "Count of 10: " << counts[10] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "unordered_map<int, int> counts;", constructType: "Variable & Initializer", title: "Hash Map Declaration", explanation: "Instantiates hash table mapping integer keys to integer count values.", keyDetails: [{ variableOrConstruct: "unordered_map<int, int>", role: "Hash Table", whyThisWay: "O(1) average lookup hash table." }] },
+          { lineNum: 2, codeSnippet: "for (int x : data) counts[x]++;", constructType: "Loop Construct", title: "O(1) Frequency Increment", explanation: "Hashes x and increments count value in O(1) average time.", keyDetails: [{ variableOrConstruct: "counts[x]++", role: "Hash Update", whyThisWay: "Increments count in O(1) average time." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Count of 10: ' << counts[10];", constructType: "Return / Cleanup", title: "Read Frequency Value", explanation: "Fetches count for key 10 (3).", keyDetails: [{ variableOrConstruct: "counts[10]", role: "Value Read", whyThisWay: "Reads value by key." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Two-Sum Problem via Hash Map Lookup (FREE)", category: "FREE / Two-Sum",
+        description: "Solves Two-Sum problem in O(N) linear time using hash map complement lookup.",
+        prosCons: "Pros: Optimal O(N) time solution vs O(N^2) brute force. Cons: O(N) space auxiliary map.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 30. Hash Map - Approach 2: Two-Sum
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+vector<int> twoSum(const vector<int>& nums, int target) {
+    unordered_map<int, int> seen;
+    for (int i = 0; i < nums.size(); i++) {
+        int complement = target - nums[i];
+        if (seen.count(complement)) return {seen[complement], i};
+        seen[nums[i]] = i;
+    }
+    return {};
+}
+
+int main() {
+    auto res = twoSum({2, 7, 11, 15}, 9);
+    if (!res.empty()) cout << "Indices: " << res[0] << ", " << res[1] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int complement = target - nums[i];", constructType: "Variable & Initializer", title: "Calculate Complement", explanation: "Calculates required complement value target - current num.", keyDetails: [{ variableOrConstruct: "target - nums[i]", role: "Complement Calc", whyThisWay: "Identifies target counterpart." }] },
+          { lineNum: 2, codeSnippet: "if (seen.count(complement)) return {seen[complement], i};", constructType: "Condition & Branch", title: "Hash Lookup Complement", explanation: "Checks if complement exists in hash map in O(1) average time.", keyDetails: [{ variableOrConstruct: "seen.count()", role: "O(1) Hash Lookup", whyThisWay: "Instant lookup in hash table." }] },
+          { lineNum: 3, codeSnippet: "seen[nums[i]] = i;", constructType: "Variable & Initializer", title: "Record Current Number Index", explanation: "Stores current number and its index in hash map.", keyDetails: [{ variableOrConstruct: "seen[nums[i]] = i", role: "Hash Insert", whyThisWay: "Records seen index." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Bucket & Load Factor Inspection (PRO)", category: "PRO / Bucket Inspection",
+        description: "Inspects hash table internal metrics bucket_count(), load_factor(), and rehash thresholds.",
+        prosCons: "Pros: Deep insight into internal hash table mechanics and performance. Cons: Low-level diagnostic details.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 30. Hash Map - Approach 3: Bucket Metrics
+#include <iostream>
+#include <unordered_map>
+using namespace std;
+
+int main() {
+    unordered_map<int, int> m;
+    for(int i=0; i<100; i++) m[i] = i * 10;
+    cout << "Bucket count: " << m.bucket_count() << endl;
+    cout << "Load factor: " << m.load_factor() << endl;
+    cout << "Max load factor: " << m.max_load_factor() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "m.bucket_count()", constructType: "Condition & Branch", title: "Inspect Hash Buckets", explanation: "Returns total number of internal hash buckets allocated in table array.", keyDetails: [{ variableOrConstruct: "m.bucket_count()", role: "Bucket Metric", whyThisWay: "Inspects internal bucket array size." }] },
+          { lineNum: 2, codeSnippet: "m.load_factor()", constructType: "Condition & Branch", title: "Inspect Load Factor", explanation: "Returns ratio of element count to bucket count (elements / buckets).", keyDetails: [{ variableOrConstruct: "m.load_factor()", role: "Load Factor Metric", whyThisWay: "Measures table occupancy density." }] },
+          { lineNum: 3, codeSnippet: "m.max_load_factor()", constructType: "Return / Cleanup", title: "Inspect Rehash Threshold", explanation: "Returns threshold load factor triggering automatic rehashing (default 1.0).", keyDetails: [{ variableOrConstruct: "max_load_factor()", role: "Rehash Threshold", whyThisWay: "Triggers automatic rehashing." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Custom Hash Function for Custom Struct Keys (PRO)", category: "PRO / Custom Hash",
+        description: "Defines custom hash functor struct to use custom Point struct as unordered_map key.",
+        prosCons: "Pros: Enables custom structs as unordered_map keys. Cons: Requires writing robust hash combination logic.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 30. Hash Map - Approach 4: Custom Hash
+#include <iostream>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+struct Point {
+    int x, y;
+    bool operator==(const Point& o) const { return x == o.x && y == o.y; }
+};
+
+struct PointHash {
+    size_t operator()(const Point& p) const {
+        return hash<int>()(p.x) ^ (hash<int>()(p.y) << 1);
+    }
+};
+
+int main() {
+    unordered_map<Point, string, PointHash> grid;
+    grid[{1, 2}] = "Player";
+    cout << "At (1,2): " << grid[{1, 2}] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "size_t operator()(const Point& p) const { ... }", constructType: "Function Signature", title: "Custom Hash Functor", explanation: "Hashes x and y coordinates and combines bitwise for hash table bucket lookup.", keyDetails: [{ variableOrConstruct: "PointHash", role: "Hash Functor", whyThisWay: "Generates size_t hash code." }] },
+          { lineNum: 2, codeSnippet: "bool operator==(const Point& o) const", constructType: "Function Signature", title: "Equality Operator Overload", explanation: "Compares Point instances for exact match during bucket collision resolution.", keyDetails: [{ variableOrConstruct: "operator==", role: "Equality Comparator", whyThisWay: "Resolves bucket collisions." }] },
+          { lineNum: 3, codeSnippet: "unordered_map<Point, string, PointHash> grid;", constructType: "Variable & Initializer", title: "Custom Hash Map Declaration", explanation: "Instantiates hash map using custom Point key and PointHash functor.", keyDetails: [{ variableOrConstruct: "PointHash", role: "Map Template Param", whyThisWay: "Passes custom hash functor." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Pre-Allocating Buckets with reserve() (PRO)", category: "PRO / Hash Reserve",
+        description: "Pre-allocates hash table buckets using reserve(N) to prevent expensive rehashes.",
+        prosCons: "Pros: Prevents rehash performance dips during bulk insertions. Cons: Allocates memory up-front.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 30. Hash Map - Approach 5: Reserve
+#include <iostream>
+#include <unordered_map>
+using namespace std;
+
+int main() {
+    unordered_map<int, int> fastMap;
+    fastMap.reserve(10000); // Preallocate 10,000 buckets
+    for(int i=0; i<10000; i++) fastMap[i] = i;
+    cout << "Buckets allocated: " << fastMap.bucket_count() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "fastMap.reserve(10000);", constructType: "Variable & Initializer", title: "Preallocate Hash Buckets", explanation: "Preallocates bucket array to hold at least 10,000 elements without rehashing.", keyDetails: [{ variableOrConstruct: "fastMap.reserve()", role: "Bucket Preallocation", whyThisWay: "Prevents rehashing during insertions." }] },
+          { lineNum: 2, codeSnippet: "for(int i=0; i<10000; i++) fastMap[i] = i;", constructType: "Loop Construct", title: "Fast Bulk Insertions", explanation: "Inserts 10,000 items into preallocated hash table.", keyDetails: [{ variableOrConstruct: "fastMap[i] = i", role: "Fast Insert", whyThisWay: "O(1) insertion without rehash." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Buckets allocated: ' << fastMap.bucket_count();", constructType: "Return / Cleanup", title: "Output Bucket Count", explanation: "Prints bucket count.", keyDetails: [{ variableOrConstruct: "bucket_count()", role: "Bucket Output", whyThisWay: "Verifies preallocation." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Group Anagrams using Hash Map (PRO)", category: "PRO / Group Anagrams",
+        description: "Groups anagram strings together into vector lists by sorting key string.",
+        prosCons: "Pros: Linear time relative to total character count. Cons: Extra space for sorted key.",
+        timeComplexity: "O(N * K log K)", spaceComplexity: "O(N * K)", isFree: false,
+        code: `// 30. Hash Map - Approach 6: Group Anagrams
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<string> words = {"eat", "tea", "tan", "ate", "nat", "bat"};
+    unordered_map<string, vector<string>> groups;
+    for (const string& w : words) {
+        string key = w;
+        sort(key.begin(), key.end());
+        groups[key].push_back(w);
+    }
+    for (const auto& [key, list] : groups) {
+        cout << "[" << key << "]: ";
+        for (const string& s : list) cout << s << " ";
+        cout << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "string key = w; sort(key.begin(), key.end());", constructType: "Variable & Initializer", title: "Generate Canonical Anagram Key", explanation: "Sorts word characters to generate canonical key (e.g. 'eat' -> 'aet').", keyDetails: [{ variableOrConstruct: "sort(key.begin(), key.end())", role: "Key Canonicalizer", whyThisWay: "Generates identical key for anagrams." }] },
+          { lineNum: 2, codeSnippet: "groups[key].push_back(w);", constructType: "Condition & Branch", title: "Group Word into Hash Map Vector", explanation: "Pushes word into vector associated with canonical key.", keyDetails: [{ variableOrConstruct: "groups[key].push_back", role: "Group Vector Append", whyThisWay: "Groups anagrams under same key." }] },
+          { lineNum: 3, codeSnippet: "for (const auto& [key, list] : groups)", constructType: "Loop Construct", title: "Print Anagram Groups", explanation: "Iterates and prints anagram word groups.", keyDetails: [{ variableOrConstruct: "groups", role: "Group Output", whyThisWay: "Displays anagram categories." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: First Non-Repeating Character in String (PRO)", category: "PRO / First Unique Char",
+        description: "Finds first unique character in string in O(N) using frequency hash map.",
+        prosCons: "Pros: O(N) linear time two-pass string scan. Cons: Extra space for frequency table.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1) (char space)", isFree: false,
+        code: `// 30. Hash Map - Approach 7: First Non-Repeating Char
+#include <iostream>
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+int firstUniqChar(const string& s) {
+    unordered_map<char, int> freq;
+    for (char c : s) freq[c]++;
+    for (int i = 0; i < s.size(); i++) {
+        if (freq[s[i]] == 1) return i;
+    }
+    return -1;
+}
+
+int main() {
+    cout << "First unique idx: " << firstUniqChar("leetcode") << endl; // Output: 0 ('l')
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "for (char c : s) freq[c]++;", constructType: "Loop Construct", title: "Build Character Frequency Table", explanation: "Populates frequency counts for all characters in string.", keyDetails: [{ variableOrConstruct: "freq[c]++", role: "Freq Accumulator", whyThisWay: "Counts char occurrences." }] },
+          { lineNum: 2, codeSnippet: "if (freq[s[i]] == 1) return i;", constructType: "Condition & Branch", title: "Identify First Unique Character", explanation: "Traverses string order checking frequency map for count == 1.", keyDetails: [{ variableOrConstruct: "freq[s[i]] == 1", role: "Uniqueness Check", whyThisWay: "Finds first unique char index." }] },
+          { lineNum: 3, codeSnippet: "firstUniqChar('leetcode')", constructType: "Return / Cleanup", title: "Invoke Function", explanation: "Returns index 0.", keyDetails: [{ variableOrConstruct: "firstUniqChar", role: "Test Call", whyThisWay: "Tests function." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Safe Insert-if-Absent with try_emplace (PRO)", category: "PRO / try_emplace",
+        description: "Uses try_emplace to insert key-value pair only if key does not exist.",
+        prosCons: "Pros: Zero overhead when key exists. Cons: Requires C++17.",
+        timeComplexity: "O(1) average", spaceComplexity: "O(1)", isFree: false,
+        code: `// 30. Hash Map - Approach 8: try_emplace
+#include <iostream>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+int main() {
+    unordered_map<string, int> scores;
+    scores.try_emplace("Alice", 100);
+    scores.try_emplace("Alice", 200); // Does nothing
+    cout << "Alice score: " << scores["Alice"] << endl; // Output: 100
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "scores.try_emplace('Alice', 100);", constructType: "Variable & Initializer", title: "First Emplace Insertion", explanation: "Inserts 'Alice'=100 into hash table.", keyDetails: [{ variableOrConstruct: "try_emplace", role: "First Insert", whyThisWay: "Inserts key-value pair." }] },
+          { lineNum: 2, codeSnippet: "scores.try_emplace('Alice', 200);", constructType: "Condition & Branch", title: "Ignored Second Emplace", explanation: "Detects key 'Alice' is present and ignores insertion without evaluating 200.", keyDetails: [{ variableOrConstruct: "try_emplace (duplicate)", role: "Emplace Guard", whyThisWay: "Ignores insertion if key exists." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Alice score: ' << scores['Alice'];", constructType: "Return / Cleanup", title: "Output Score", explanation: "Prints 'Alice score: 100'.", keyDetails: [{ variableOrConstruct: "scores['Alice']", role: "Output", whyThisWay: "Displays score." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: C++17 Node Extraction in Unordered Map (PRO)", category: "PRO / C++17 Extract",
+        description: "Extracts node handle from unordered_map and moves to another map without re-hashing key.",
+        prosCons: "Pros: Zero-rehash node transfer between unordered maps. Cons: Requires C++17.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 30. Hash Map - Approach 9: Node Extract
+#include <iostream>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+int main() {
+    unordered_map<int, string> src = {{1, "One"}, {2, "Two"}};
+    unordered_map<int, string> dst;
+    auto node = src.extract(1);
+    dst.insert(move(node));
+    cout << "dst size: " << dst.size() << " | src size: " << src.size() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto node = src.extract(1);", constructType: "Variable & Initializer", title: "Extract Node Handle from Source Map", explanation: "Extracts node with key 1 from src map without reallocating node memory.", keyDetails: [{ variableOrConstruct: "src.extract(1)", role: "Node Extractor", whyThisWay: "Detaches node handle." }] },
+          { lineNum: 2, codeSnippet: "dst.insert(move(node));", constructType: "Condition & Branch", title: "Insert Node Handle into Destination Map", explanation: "Inserts detached node handle into dst map in O(1) time.", keyDetails: [{ variableOrConstruct: "dst.insert(move(node))", role: "Node Transfer", whyThisWay: "Moves node handle into destination map." }] },
+          { lineNum: 3, codeSnippet: "cout << 'dst size: ' << dst.size()...", constructType: "Return / Cleanup", title: "Output Map Sizes", explanation: "Prints 'dst size: 1 | src size: 1'.", keyDetails: [{ variableOrConstruct: "dst.size()", role: "Output", whyThisWay: "Verifies node transfer." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Performance Benchmark: std::map vs std::unordered_map (PRO)", category: "PRO / Benchmark",
+        description: "Compares lookup timing of std::map O(log N) vs std::unordered_map O(1).",
+        prosCons: "Pros: Highlights performance difference between binary search trees and hash tables. Cons: Microbenchmark environment dependent.",
+        timeComplexity: "O(log N) vs O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 30. Hash Map - Approach 10: Benchmark
+#include <iostream>
+#include <map>
+#include <unordered_map>
+#include <chrono>
+using namespace std;
+
+int main() {
+    unordered_map<int, int> um;
+    for(int i=0; i<100000; i++) um[i] = i;
+    auto t1 = chrono::high_resolution_clock::now();
+    int sum = 0;
+    for(int i=0; i<100000; i++) sum += um[i];
+    auto t2 = chrono::high_resolution_clock::now();
+    cout << "unordered_map 100k lookup: " << chrono::duration_cast<chrono::microseconds>(t2 - t1).count() << " us" << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "for(int i=0; i<100000; i++) um[i] = i;", constructType: "Variable & Initializer", title: "Populate Hash Map", explanation: "Inserts 100,000 key-value pairs into hash map.", keyDetails: [{ variableOrConstruct: "um[i] = i", role: "Populate Map", whyThisWay: "Prepares hash table." }] },
+          { lineNum: 2, codeSnippet: "for(int i=0; i<100000; i++) sum += um[i];", constructType: "Loop Construct", title: "Execute O(1) Lookups", explanation: "Executes 100,000 O(1) average lookup operations.", keyDetails: [{ variableOrConstruct: "um[i]", role: "O(1) Lookup", whyThisWay: "Tests lookup speed." }] },
+          { lineNum: 3, codeSnippet: "chrono::duration_cast<chrono::microseconds>", constructType: "Return / Cleanup", title: "Output Benchmark Result", explanation: "Prints total lookup duration in microseconds.", keyDetails: [{ variableOrConstruct: "duration_cast", role: "Duration Output", whyThisWay: "Outputs execution duration." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -4348,6 +6051,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_cstring") return getProblem23Details();
   if (id === "easy_pair") return getProblem24Details();
   if (id === "easy_tuple_basic") return getProblem25Details();
+  if (id === "easy_stack_std") return getProblem26Details();
+  if (id === "easy_queue_std") return getProblem27Details();
+  if (id === "easy_set_std") return getProblem28Details();
+  if (id === "easy_map_std") return getProblem29Details();
+  if (id === "easy_unordered_map") return getProblem30Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
