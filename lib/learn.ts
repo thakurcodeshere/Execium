@@ -276,9 +276,316 @@ function generateTopicExamplesAndConstraints(meta: { id: string; title: string; 
   return { examples, constraints };
 }
 
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 1 ──
+function getProblem1Details(): LearnModule {
+  return {
+    id: "easy_hello",
+    title: "1. Hello World & I/O Streams",
+    shortDesc: "Input/output streams using std::cout, std::cin, and std::endl.",
+    difficulty: "easy",
+    category: "Fundamentals",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "1. Hello World & I/O Streams",
+      objective: "Master C++ standard stream I/O formatting using std::cout, std::cin, and stream manipulators.",
+      description: "Given a user's name (`string`) and age (`integer`), read standard input streams and output a formatted greeting line: `Hello <name>! You are <age> years old.` using standard C++ I/O stream operations.",
+      inputDesc: 'name = "Alice", age = 22',
+      outputDesc: '"Hello Alice! You are 22 years old."',
+      takeaways: [
+        "Master std::cout stream insertion (<<)",
+        "Understand std::cin stream extraction (>>)",
+        "Learn std::endl vs '\\n' buffer flushing semantics",
+        "Compare stream formatting with printf, stringstream, and C++20 std::format"
+      ],
+      examples: [
+        {
+          id: 1,
+          input: 'name = "Alice", age = 22',
+          output: '"Hello Alice! You are 22 years old."',
+          explanation: 'Reads name and age from cin and streams formatted greeting to stdout cout.'
+        },
+        {
+          id: 2,
+          input: 'name = "Bob", age = 30',
+          output: '"Hello Bob! You are 30 years old."'
+        },
+        {
+          id: 3,
+          input: 'name = "Code", age = 1',
+          output: '"Hello Code! You are 1 years old."'
+        }
+      ],
+      constraints: [
+        "1 <= name.length <= 50",
+        "0 <= age <= 120",
+        "Output must match format: Hello <name>! You are <age> years old."
+      ],
+      companies: ["Google", "Microsoft", "Meta", "Amazon"],
+      acceptanceRate: "94.2%",
+      totalAccepted: "3,840,120"
+    },
+    approaches: [
+      {
+        id: 1,
+        name: "Approach 1: Direct std::cout Chaining (FREE)",
+        category: "FREE / Streams",
+        description: "Direct stream insertion operator (<<) chaining with std::endl stream buffer flushing.",
+        prosCons: "Pros: Simple, idiomatic, type-safe. Cons: std::endl forces frequent buffer flushes.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: true,
+        code: `// 1. Hello World & I/O Streams - Approach 1: Direct std::cout Chaining\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid greetUserDirect(const string& name, int age) {\n    cout << "Hello " << name << "! You are " << age << " years old." << endl;\n}\n\nint main() {\n    greetUserDirect("Alice", 22);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `void greetUserDirect(const string& name, int age) {`,
+            constructType: "Function Signature",
+            title: "Function Signature Declaration",
+            explanation: "Declares greetUserDirect receiving const string reference and integer age parameter.",
+            keyDetails: [{ variableOrConstruct: "greetUserDirect", role: "Function Entry", whyThisWay: "Passes string by const reference to avoid unnecessary memory copy." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `cout << "Hello " << name << "! You are " << age << " years old." << endl;`,
+            constructType: "Return / Cleanup",
+            title: "Direct Stream Insertion Chaining",
+            explanation: "Chains stream insertion operator << to output string literals, name, and age to std::cout, ending with std::endl.",
+            keyDetails: [{ variableOrConstruct: "std::cout <<", role: "Stream Operator", whyThisWay: "Sequential left-to-right type-safe stream evaluation." }]
+          },
+          {
+            lineNum: 3,
+            codeSnippet: `greetUserDirect("Alice", 22);`,
+            constructType: "Variable & Initializer",
+            title: "Main Function Invocation",
+            explanation: "Calls greetUserDirect passing \"Alice\" and 22 as sample arguments.",
+            keyDetails: [{ variableOrConstruct: "greetUserDirect", role: "Caller", whyThisWay: "Executes test case." }]
+          }
+        ]
+      },
+      {
+        id: 2,
+        name: "Approach 2: String Concatenation with \\n (FREE)",
+        category: "FREE / String Plus",
+        description: "Pre-concatenates message string with to_string(age) and uses '\\n' to prevent unnecessary stream buffer flushes.",
+        prosCons: "Pros: Avoids std::endl performance hit. Cons: Creates temporary std::string objects.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: true,
+        code: `// 1. Hello World & I/O Streams - Approach 2: String Concatenation (+ & \\n)\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid greetUserConcat(const string& name, int age) {\n    string message = "Hello " + name + "! You are " + to_string(age) + " years old.\\n";\n    cout << message;\n}\n\nint main() {\n    greetUserConcat("Alice", 22);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `string message = "Hello " + name + "! You are " + to_string(age) + " years old.\\n";`,
+            constructType: "Variable & Initializer",
+            title: "String Concatenation & Conversion",
+            explanation: "Converts age to string via to_string(age) and concatenates greeting parts into single buffer ending in newline \\n.",
+            keyDetails: [{ variableOrConstruct: "to_string(age)", role: "String Converter", whyThisWay: "Converts primitive integer into std::string." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `cout << message;`,
+            constructType: "Return / Cleanup",
+            title: "Single Stream Push",
+            explanation: "Streams concatenated message to stdout in one operation.",
+            keyDetails: [{ variableOrConstruct: "cout << message", role: "Stream Push", whyThisWay: "Reduces stream function calls." }]
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: "Approach 3: C-Style Formatted printf (PRO)",
+        category: "PRO / C-Style",
+        description: "Uses C standard library printf with %s and %d format specifiers for direct C-string output.",
+        prosCons: "Pros: High performance and concise format strings. Cons: Not type-safe if specifiers mismatch.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 1. Hello World & I/O Streams - Approach 3: C-Style printf\n#include <cstdio>\n#include <string>\nusing namespace std;\n\nvoid greetUserPrintf(const string& name, int age) {\n    printf("Hello %s! You are %d years old.\\n", name.c_str(), age);\n}\n\nint main() {\n    greetUserPrintf("Alice", 22);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `#include <cstdio>`,
+            constructType: "Header / Include",
+            title: "C Standard I/O Include",
+            explanation: "Includes <cstdio> header providing printf C-style formatting function.",
+            keyDetails: [{ variableOrConstruct: "<cstdio>", role: "C Standard Library", whyThisWay: "Bypasses C++ stream overhead." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `printf("Hello %s! You are %d years old.\\n", name.c_str(), age);`,
+            constructType: "Return / Cleanup",
+            title: "Printf Specifier Formatting",
+            explanation: "Passes format string with %s for name.c_str() raw char pointer and %d for integer age.",
+            keyDetails: [{ variableOrConstruct: "name.c_str()", role: "C-String Pointer", whyThisWay: "Converts std::string to const char* for printf." }]
+          }
+        ]
+      },
+      {
+        id: 4,
+        name: "Approach 4: std::stringstream Memory Buffer (PRO)",
+        category: "PRO / Memory Buffer",
+        description: "Buffers formatted string in memory using std::stringstream before writing to std::cout.",
+        prosCons: "Pros: Thread-safe formatted string construction. Cons: Heap memory allocation for stringstream buffer.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 1. Hello World & I/O Streams - Approach 4: std::stringstream Memory Buffer\n#include <iostream>\n#include <sstream>\n#include <string>\nusing namespace std;\n\nvoid greetUserStream(const string& name, int age) {\n    stringstream ss;\n    ss << "Hello " << name << "! You are " << age << " years old.";\n    cout << ss.str() << endl;\n}\n\nint main() {\n    greetUserStream("Alice", 22);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `stringstream ss;`,
+            constructType: "Variable & Initializer",
+            title: "Memory Buffer Instantiation",
+            explanation: "Creates stringstream object ss to hold in-memory stream buffer.",
+            keyDetails: [{ variableOrConstruct: "stringstream ss", role: "Memory Stream Buffer", whyThisWay: "Constructs formatted text in RAM before IO." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `cout << ss.str() << endl;`,
+            constructType: "Return / Cleanup",
+            title: "Buffer Extraction & Output",
+            explanation: "Converts stream buffer to string via ss.str() and writes to std::cout.",
+            keyDetails: [{ variableOrConstruct: "ss.str()", role: "Buffer Extractor", whyThisWay: "Returns string representation." }]
+          }
+        ]
+      },
+      {
+        id: 5,
+        name: "Approach 5: C++20 Type-Safe std::format (PRO)",
+        category: "PRO / C++20 Modern",
+        description: "Modern C++20 std::format positional format specifiers ({}) for python-like string formatting.",
+        prosCons: "Pros: Type-safe, high performance, clean syntax. Cons: Requires C++20 compiler support.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 1. Hello World & I/O Streams - Approach 5: C++20 std::format\n#include <iostream>\n#include <string>\n#include <format>\nusing namespace std;\n\nvoid greetUserFormat(const string& name, int age) {\n    string result = std::format("Hello {}! You are {} years old.\\n", name, age);\n    cout << result;\n}\n\nint main() {\n    greetUserFormat("Alice", 22);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `string result = std::format("Hello {}! You are {} years old.\\n", name, age);`,
+            constructType: "Variable & Initializer",
+            title: "C++20 std::format Evaluation",
+            explanation: "Replaces {} placeholders with name and age arguments safely at compile-checked call site.",
+            keyDetails: [{ variableOrConstruct: "std::format", role: "C++20 Formatter", whyThisWay: "Modern type-safe formatting standard." }]
+          }
+        ]
+      },
+      {
+        id: 6,
+        name: "Approach 6: Fast I/O Stream Decoupling (PRO)",
+        category: "PRO / Fast IO",
+        description: "Disables sync_with_stdio and unties cin from cout for competitive programming performance.",
+        prosCons: "Pros: Maximum I/O throughput. Cons: Cannot mix C printf and C++ cout safely.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 1. Hello World & I/O Streams - Approach 6: Fast I/O Optimization\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid greetUserFastIO(const string& name, int age) {\n    ios_base::sync_with_stdio(false);\n    cin.tie(NULL);\n    cout << "Hello " << name << "! You are " << age << " years old.\\n";\n}\n\nint main() {\n    greetUserFastIO("Alice", 22);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `ios_base::sync_with_stdio(false); cin.tie(NULL);`,
+            constructType: "Condition & Branch",
+            title: "Stream Optimization Settings",
+            explanation: "Unties cin/cout interaction and un-syncs stdio buffers to eliminate I/O latency.",
+            keyDetails: [{ variableOrConstruct: "sync_with_stdio(false)", role: "IO Optimizer", whyThisWay: "Increases IO speed by 3x-5x." }]
+          }
+        ]
+      },
+      {
+        id: 7,
+        name: "Approach 7: Field Alignment with std::setw (PRO)",
+        category: "PRO / Manipulators",
+        description: "Uses <iomanip> manipulators (std::setw, std::left) for fixed-width aligned stream outputs.",
+        prosCons: "Pros: Precise column alignment. Cons: Verbose manipulator syntax.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 1. Hello World & I/O Streams - Approach 7: Stream Manipulators (<iomanip>)\n#include <iostream>\n#include <iomanip>\n#include <string>\nusing namespace std;\n\nvoid greetUserManipulators(const string& name, int age) {\n    cout << left << "Hello " << setw(8) << name << "! You are " << setw(3) << age << " years old." << endl;\n}\n\nint main() {\n    greetUserManipulators("Alice", 22);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `cout << left << "Hello " << setw(8) << name << "! You are " << setw(3) << age << " years old." << endl;`,
+            constructType: "Return / Cleanup",
+            title: "Manipulator Alignment Pipeline",
+            explanation: "Applies left alignment and sets width of name field to 8 characters and age field to 3 characters.",
+            keyDetails: [{ variableOrConstruct: "setw(8)", role: "Width Manipulator", whyThisWay: "Pads field with spaces to width 8." }]
+          }
+        ]
+      },
+      {
+        id: 8,
+        name: "Approach 8: Custom Operator<< Struct Overload (PRO)",
+        category: "PRO / OOP Overload",
+        description: "Encapsulates user data in a UserProfile struct and overloads operator<< for direct stream printing.",
+        prosCons: "Pros: OOP encapsulation, reusable print syntax. Cons: Slightly more boilerplate code.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 1. Hello World & I/O Streams - Approach 8: Custom Struct & Operator<<\n#include <iostream>\n#include <string>\nusing namespace std;\n\nstruct UserProfile {\n    string name;\n    int age;\n    friend ostream& operator<<(ostream& os, const UserProfile& u) {\n        os << "Hello " << u.name << "! You are " << u.age << " years old.";\n        return os;\n    }\n};\n\nint main() {\n    UserProfile user{"Alice", 22};\n    cout << user << endl;\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `friend ostream& operator<<(ostream& os, const UserProfile& u)`,
+            constructType: "Function Signature",
+            title: "Operator<< Friend Declaration",
+            explanation: "Overloads output stream operator for UserProfile struct allowing cout << user syntax.",
+            keyDetails: [{ variableOrConstruct: "operator<<", role: "Stream Overload", whyThisWay: "Provides idiomatic C++ streaming capability for objects." }]
+          }
+        ]
+      },
+      {
+        id: 9,
+        name: "Approach 9: Templated Variadic Fold Printer (PRO)",
+        category: "PRO / Templates",
+        description: "C++17 binary left fold expression ((cout << ... << args)) in a variadic template function.",
+        prosCons: "Pros: Completely generic print utility for any data types. Cons: Metaprogramming overhead.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 1. Hello World & I/O Streams - Approach 9: Templated Variadic Pack Printer\n#include <iostream>\n#include <string>\nusing namespace std;\n\ntemplate<typename... Args>\nvoid printGreeting(Args... args) {\n    (cout << ... << args) << endl; // C++17 binary left fold\n}\n\nint main() {\n    printGreeting("Hello ", "Alice", "! You are ", 22, " years old.");\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `(cout << ... << args) << endl;`,
+            constructType: "Loop Construct",
+            title: "C++17 Binary Fold Expression",
+            explanation: "Expands variadic parameter pack args... streaming each item sequentially into cout at compile time.",
+            keyDetails: [{ variableOrConstruct: "(cout << ... << args)", role: "Fold Operator", whyThisWay: "C++17 feature for parameter pack expansion." }]
+          }
+        ]
+      },
+      {
+        id: 10,
+        name: "Approach 10: POSIX Direct System Call write() (PRO)",
+        category: "PRO / POSIX Kernel",
+        description: "Direct POSIX kernel system call write(1, buffer, len) targeting standard output file descriptor STDOUT_FILENO.",
+        prosCons: "Pros: Direct OS kernel interaction, zero C++ stream abstraction. Cons: Non-portable OS dependency.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 1. Hello World & I/O Streams - Approach 10: POSIX System Call write()\n#include <unistd.h>\n#include <string>\nusing namespace std;\n\nvoid greetUserSysCall(const string& name, int age) {\n    string msg = "Hello " + name + "! You are " + to_string(age) + " years old.\\n";\n    write(STDOUT_FILENO, msg.c_str(), msg.length());\n}\n\nint main() {\n    greetUserSysCall("Alice", 22);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `write(STDOUT_FILENO, msg.c_str(), msg.length());`,
+            constructType: "Return / Cleanup",
+            title: "POSIX Kernel System Call",
+            explanation: "Invokes POSIX write system call passing stdout file descriptor 1, buffer pointer, and byte length.",
+            keyDetails: [{ variableOrConstruct: "write(STDOUT_FILENO)", role: "Syscall", whyThisWay: "Direct OS kernel buffer write." }]
+          }
+        ]
+      }
+    ],
+    fullCode: `// 1. Hello World & I/O Streams - Approach 1: Direct std::cout Chaining\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid greetUserDirect(const string& name, int age) {\n    cout << "Hello " << name << "! You are " << age << " years old." << endl;\n}\n\nint main() {\n    greetUserDirect("Alice", 22);\n    return 0;\n}`
+  };
+}
+
 // ── TOPIC-SPECIFIC CONTENT BUILDER ──
 // Generates unique problem objectives, input/output descriptions, takeaways, and 10 topic-tailored mental model approaches with code & line breakdowns for every module.
 export function getLearnModuleDetails(id: string): LearnModule {
+  if (id === "easy_hello") {
+    return getProblem1Details();
+  }
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
