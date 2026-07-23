@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { PROGRAMS, Step } from './engine';
 import { VSTheme, THEMES, DEFAULT_THEME_ID } from './themes';
+import { saveSessionToStorageAndUrl } from './session';
 
 type Playback = 'idle'|'playing'|'paused'|'done';
 type AIMode = 'beginner'|'intermediate'|'expert';
@@ -71,6 +72,7 @@ export const useStore = create<Store>((set,get)=>({
 
   setCode(code){
     set({code});
+    saveSessionToStorageAndUrl({ code });
   },
 
   play(){
@@ -129,10 +131,24 @@ export const useStore = create<Store>((set,get)=>({
   setTheme(id:string){set({theme:THEMES[id]??THEMES[DEFAULT_THEME_ID]})},
   setCollapsed(collapsed){set({isCollapsed:collapsed})},
   toggleCollapsed(){set(s=>({isCollapsed:!s.isCollapsed}))},
-  setProjectName(name){set({projectName:name})},
-  setProjectId(id){set({projectId:id})},
-  setChallengeId(id){set({activeChallengeId:id, activeLearnModuleId: id ? null : get().activeLearnModuleId})},
-  setLearnModuleId(id){set({activeLearnModuleId:id, activeChallengeId: id ? null : get().activeChallengeId})},
+  setProjectName(name){
+    set({projectName:name});
+    saveSessionToStorageAndUrl({ projectName: name });
+  },
+  setProjectId(id){
+    set({projectId:id});
+    saveSessionToStorageAndUrl({ projectId: id });
+  },
+  setChallengeId(id){
+    const nextLearn = id ? null : get().activeLearnModuleId;
+    set({activeChallengeId:id, activeLearnModuleId: nextLearn});
+    saveSessionToStorageAndUrl({ activeChallengeId: id, activeLearnModuleId: nextLearn });
+  },
+  setLearnModuleId(id){
+    const nextChallenge = id ? null : get().activeChallengeId;
+    set({activeLearnModuleId:id, activeChallengeId: nextChallenge});
+    saveSessionToStorageAndUrl({ activeLearnModuleId: id, activeChallengeId: nextChallenge });
+  },
   recordAttempt(id){
     if (!id) return;
     const { attemptedChallenges } = get();

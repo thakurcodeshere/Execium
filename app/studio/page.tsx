@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useStore } from "@/lib/store";
+import { hydrateSessionFromStore } from "@/lib/session";
 import LBarVertical from "@/components/studio/LBarVertical";
 import LBarHorizontal from "@/components/studio/LBarHorizontal";
 import AIAgentPanel from "@/components/studio/AIAgentPanel";
@@ -13,6 +14,11 @@ const CodeEditor = dynamic(() => import("@/components/studio/CodeEditor"), { ssr
 export default function StudioPage() {
   const { theme, showAI, isCollapsed, activeChallengeId, activeLearnModuleId } = useStore();
   const T = theme;
+
+  // Hydrate active session & URL search parameters on client mount
+  useEffect(() => {
+    hydrateSessionFromStore();
+  }, []);
 
   // Sidebar drag-to-resize states
   const [sidebarWidth, setSidebarWidth] = useState(64);
