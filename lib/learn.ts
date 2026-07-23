@@ -128,7 +128,7 @@ const RAW_MODULE_TOPICS: Array<{
   { id: "med_dp_1d", title: "61. 1D Dynamic Programming", shortDesc: "Tabulation and memoization for subproblem optimization.", difficulty: "medium", category: "Dynamic Programming", traceKey: "factorial" },
   { id: "med_dp_knapsack", title: "62. 0/1 Knapsack DP Problem", shortDesc: "Optimal subset selection under weight capacity bounds.", difficulty: "medium", category: "Dynamic Programming", traceKey: "factorial" },
   { id: "med_backtracking", title: "63. Backtracking Subsets Generator", shortDesc: "State space tree search with recursive choice and undo step.", difficulty: "medium", category: "Backtracking", traceKey: "factorial" },
-  { id: "med_bit_manipulation", title: "64. Bitwise Tricks & Bitmasks", shortDesc: "Brian Kernighan's bit count, XOR single number, and bitmasks.", difficulty: "medium", category: "Bit Manipulation", traceKey: "for_loop" },
+  { id: "med_bit_manipulation", title: "64. Bitwise Tricks & Bitmasks", shortDesc: "Brian Kernighans bit count, XOR single number, and bitmasks.", difficulty: "medium", category: "Bit Manipulation", traceKey: "for_loop" },
   { id: "med_custom_alloc", title: "65. Manual Heap Memory Allocation", shortDesc: "Low-level memory management with new[], delete[], and placement new.", difficulty: "medium", category: "Memory & Pointers", traceKey: "smart_ptr" },
   { id: "med_optional", title: "66. Optional Values (std::optional)", shortDesc: "Type-safe optional value wrapper without null pointers (C++17).", difficulty: "medium", category: "Modern C++", traceKey: "for_loop" },
   { id: "med_variant", title: "67. Type-Safe Unions (std::variant)", shortDesc: "Tagged unions with std::variant and std::visit pattern matching.", difficulty: "medium", category: "Modern C++", traceKey: "for_loop" },
@@ -6025,6 +6025,1666 @@ int main() {
 }
 
 
+
+export function getProblem31Details(): LearnModule {
+  return {
+    id: 'easy_algorithms_basic',
+    title: '31. Basic STL Algorithms',
+    category: 'STL Algorithms',
+    difficulty: 'easy',
+    shortDesc: 'std::sort, std::reverse, std::min, std::max, and std::count.',
+    fullCode: `// 31. Basic STL Algorithms - Approach 1: Sort & Reverse
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> nums = {40, 10, 50, 20, 30};
+    sort(nums.begin(), nums.end());
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    reverse(nums.begin(), nums.end());
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: '31. Basic STL Algorithms',
+      objective: 'Master foundational C++ Standard Template Library algorithms: sorting, searching, bounds inspection, reductions, transformations, and range predicates.',
+      description: 'Implement **Basic STL Algorithms** (STL Algorithms). std::sort, std::reverse, std::min, std::max, and std::count. Construct an efficient solution that optimizes runtime performance and respects memory bounds.',
+      inputDesc: 'Sequential containers passed to STL algorithm functions.',
+      outputDesc: 'Transformed, sorted, or reduced scalar and container values.',
+      takeaways: [
+        'std::sort uses IntroSort (QuickSort + HeapSort + InsertionSort) operating in O(N log N) time',
+        'std::min_element and std::max_element return iterators to minimum and maximum range elements',
+        'std::transform applies inline unary or binary functions across container ranges',
+        'STL algorithms operate uniformly over iterator ranges [begin, end)'
+      ],
+      examples: [
+        { id: 1, input: 'sort(v.begin(), v.end()) for [3, 1, 2]', output: 'Vector: [1, 2, 3]', explanation: 'Sorts range in O(N log N) time in ascending order.' },
+        { id: 2, input: '*min_element(v.begin(), v.end()) for [40, 10, 30]', output: 'Min: 10', explanation: 'Returns iterator pointing to minimum element in container range.' },
+        { id: 3, input: 'count(v.begin(), v.end(), 5) for [5, 2, 5, 5, 1]', output: 'Count: 3', explanation: 'Counts exact matches in linear time O(N).' }
+      ],
+      constraints: ['STL algorithms require <algorithm> or <numeric> header.', 'Container iterators must satisfy range requirements (e.g. RandomAccessIterator for std::sort).'],
+      companies: ['Google', 'Amazon', 'Meta', 'Microsoft'],
+      acceptanceRate: '93.8%',
+      totalAccepted: '2,670,000'
+    },
+    approaches: [
+      {
+        id: 1, name: 'Approach 1: Vector Sorting & Reversing (std::sort & std::reverse) (FREE)', category: 'FREE / Direct Algorithms',
+        description: 'Sorts vector elements ascending with std::sort and inverts range order with std::reverse.',
+        prosCons: 'Pros: Highly optimized IntroSort. Cons: Requires random access iterators.',
+        timeComplexity: 'O(N log N)', spaceComplexity: 'O(log N)', isFree: true,
+        code: `// 31. Basic STL Algorithms - Approach 1: Sort & Reverse
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> nums = {30, 10, 50, 20, 40};
+    sort(nums.begin(), nums.end());
+    cout << "Sorted: ";
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    reverse(nums.begin(), nums.end());
+    cout << "Reversed: ";
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "sort(nums.begin(), nums.end());", constructType: "Condition & Branch", title: "O(N log N) IntroSort", explanation: "Sorts vector elements in ascending order in O(N log N) time.", keyDetails: [{ variableOrConstruct: "sort()", role: "Range Sort", whyThisWay: "Optimized introsort implementation." }] },
+          { lineNum: 2, codeSnippet: "reverse(nums.begin(), nums.end());", constructType: "Condition & Branch", title: "In-Place Range Reversal", explanation: "Reverses element order in-place in linear O(N) time.", keyDetails: [{ variableOrConstruct: "reverse()", role: "Range Inverter", whyThisWay: "Reverses elements in-place." }] },
+          { lineNum: 3, codeSnippet: "for (int x : nums) cout << x << ' ';", constructType: "Loop Construct", title: "Print Transformed Range", explanation: "Prints reversed container elements.", keyDetails: [{ variableOrConstruct: "x", role: "Output", whyThisWay: "Displays container values." }] }
+        ]
+      },
+      {
+        id: 2, name: 'Approach 2: Min/Max Element & Count Inspection (FREE)', category: 'FREE / Range Inspection',
+        description: 'Finds minimum, maximum, and occurrence counts in container range.',
+        prosCons: 'Pros: Simple linear range scans. Cons: O(N) traversal per algorithm call.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(1)', isFree: true,
+        code: `// 31. Basic STL Algorithms - Approach 2: Min, Max & Count
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> data = {7, 2, 9, 2, 5, 2, 8};
+    auto minIt = min_element(data.begin(), data.end());
+    auto maxIt = max_element(data.begin(), data.end());
+    int twos = count(data.begin(), data.end(), 2);
+    cout << "Min: " << *minIt << " | Max: " << *maxIt << " | Twos: " << twos << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto minIt = min_element(data.begin(), data.end());", constructType: "Variable & Initializer", title: "Find Minimum Element Iterator", explanation: "Returns iterator to minimum element in range.", keyDetails: [{ variableOrConstruct: "min_element", role: "Min Finder", whyThisWay: "Finds minimum in linear scan." }] },
+          { lineNum: 2, codeSnippet: "auto maxIt = max_element(data.begin(), data.end());", constructType: "Variable & Initializer", title: "Find Maximum Element Iterator", explanation: "Returns iterator to maximum element in range.", keyDetails: [{ variableOrConstruct: "max_element", role: "Max Finder", whyThisWay: "Finds maximum in linear scan." }] },
+          { lineNum: 3, codeSnippet: "int twos = count(data.begin(), data.end(), 2);", constructType: "Variable & Initializer", title: "Count Element Occurrences", explanation: "Counts total occurrences of value 2 in range.", keyDetails: [{ variableOrConstruct: "count", role: "Value Counter", whyThisWay: "Counts matching elements." }] }
+        ]
+      },
+      {
+        id: 3, name: 'Approach 3: Linear & Binary Search Algorithms (std::find & std::binary_search) (PRO)', category: 'PRO / Search Algorithms',
+        description: 'Compares O(N) std::find with O(log N) std::binary_search on sorted vector.',
+        prosCons: 'Pros: Fast logarithmic search when sorted. Cons: Binary search requires pre-sorted range.',
+        timeComplexity: 'O(log N) vs O(N)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 31. Basic STL Algorithms - Approach 3: Search
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> sortedVec = {10, 20, 30, 40, 50};
+    auto it = find(sortedVec.begin(), sortedVec.end(), 30);
+    if (it != sortedVec.end()) cout << "Found 30 at index: " << distance(sortedVec.begin(), it) << endl;
+    bool found = binary_search(sortedVec.begin(), sortedVec.end(), 40);
+    cout << "Binary search 40: " << (found ? "True" : "False") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto it = find(sortedVec.begin(), sortedVec.end(), 30);", constructType: "Variable & Initializer", title: "Linear Search Find", explanation: "Scans container range sequentially returning iterator to matching element.", keyDetails: [{ variableOrConstruct: "find()", role: "Linear Search", whyThisWay: "O(N) sequential search." }] },
+          { lineNum: 2, codeSnippet: "bool found = binary_search(sortedVec.begin(), sortedVec.end(), 40);", constructType: "Variable & Initializer", title: "Logarithmic Binary Search", explanation: "Performs binary search on sorted range returning boolean exists flag.", keyDetails: [{ variableOrConstruct: "binary_search()", role: "Logarithmic Search", whyThisWay: "O(log N) binary search." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Binary search 40: ' << (found ? 'True' : 'False');", constructType: "Return / Cleanup", title: "Output Search Result", explanation: "Prints search result boolean flag.", keyDetails: [{ variableOrConstruct: "found", role: "Output Flag", whyThisWay: "Displays search result." }] }
+        ]
+      },
+      {
+        id: 4, name: 'Approach 4: Array Sum Reduction with std::accumulate (PRO)', category: 'PRO / Accumulate',
+        description: 'Reduces container elements to single sum using std::accumulate from <numeric>.',
+        prosCons: 'Pros: Declarative range reduction algorithm. Cons: Requires correct initial sum type to avoid overflow.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 31. Basic STL Algorithms - Approach 4: Accumulate
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+int main() {
+    vector<int> nums = {10, 20, 30, 40, 50};
+    int sum = accumulate(nums.begin(), nums.end(), 0);
+    cout << "Total Sum: " << sum << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int sum = accumulate(nums.begin(), nums.end(), 0);", constructType: "Variable & Initializer", title: "Numeric Accumulation Reduction", explanation: "Reduces range elements by adding them to initial value 0.", keyDetails: [{ variableOrConstruct: "accumulate()", role: "Range Reduction", whyThisWay: "Sums container range." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Total Sum: ' << sum;", constructType: "Condition & Branch", title: "Output Sum Result", explanation: "Prints computed total sum 150.", keyDetails: [{ variableOrConstruct: "sum", role: "Sum Result", whyThisWay: "Displays sum." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 5, name: 'Approach 5: Element Range Filling with std::fill & std::fill_n (PRO)', category: 'PRO / Range Fill',
+        description: 'Fills container range or N elements with specific value using fill and fill_n.',
+        prosCons: 'Pros: Fast memset-style value initialization for containers. Cons: Target range must be pre-allocated.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 31. Basic STL Algorithms - Approach 5: Fill Range
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> vec(5);
+    fill(vec.begin(), vec.end(), 7);
+    fill_n(vec.begin(), 3, 9);
+    for (int x : vec) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "fill(vec.begin(), vec.end(), 7);", constructType: "Condition & Branch", title: "Fill Entire Container Range", explanation: "Fills all 5 elements in vector range with value 7.", keyDetails: [{ variableOrConstruct: "fill()", role: "Range Filler", whyThisWay: "Fills range with constant value." }] },
+          { lineNum: 2, codeSnippet: "fill_n(vec.begin(), 3, 9);", constructType: "Condition & Branch", title: "Fill N Count Elements", explanation: "Fills first 3 elements from iterator with value 9.", keyDetails: [{ variableOrConstruct: "fill_n()", role: "Count Filler", whyThisWay: "Fills N elements." }] },
+          { lineNum: 3, codeSnippet: "for (int x : vec) cout << x << ' ';", constructType: "Loop Construct", title: "Print Filled Container", explanation: "Prints 9 9 9 7 7.", keyDetails: [{ variableOrConstruct: "x", role: "Output", whyThisWay: "Displays filled values." }] }
+        ]
+      },
+      {
+        id: 6, name: 'Approach 6: Container Transformation with std::transform (PRO)', category: 'PRO / Transform',
+        description: 'Applies transformation function to every element using std::transform.',
+        prosCons: 'Pros: Functional-style map operation over ranges. Cons: Destination container must have sufficient space.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(N)', isFree: false,
+        code: `// 31. Basic STL Algorithms - Approach 6: Transform
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> src = {1, 2, 3, 4, 5};
+    vector<int> dst(src.size());
+    transform(src.begin(), src.end(), dst.begin(), [](int x) { return x * x; });
+    for (int x : dst) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "transform(src.begin(), src.end(), dst.begin(), [](int x) { return x * x; });", constructType: "Condition & Branch", title: "Apply Lambda Transformation Range", explanation: "Applies lambda squaring function to each element, writing result to dst.", keyDetails: [{ variableOrConstruct: "transform()", role: "Range Map", whyThisWay: "Applies function to container range." }] },
+          { lineNum: 2, codeSnippet: "for (int x : dst) cout << x << ' ';", constructType: "Loop Construct", title: "Print Transformed Values", explanation: "Prints 1 4 9 16 25.", keyDetails: [{ variableOrConstruct: "x", role: "Output", whyThisWay: "Displays transformed values." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 7, name: 'Approach 7: Predicate Inspection (std::all_of, std::any_of, std::none_of) (PRO)', category: 'PRO / Range Predicates',
+        description: 'Verifies range conditions using boolean predicate algorithms all_of, any_of, and none_of.',
+        prosCons: 'Pros: Short-circuiting range boolean evaluations. Cons: Requires unary predicate lambda.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 31. Basic STL Algorithms - Approach 7: Range Predicates
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> nums = {2, 4, 6, 8, 10};
+    bool allEven = all_of(nums.begin(), nums.end(), [](int x) { return x % 2 == 0; });
+    bool hasNegative = any_of(nums.begin(), nums.end(), [](int x) { return x < 0; });
+    cout << "All even: " << (allEven ? "True" : "False") << endl;
+    cout << "Has negative: " << (hasNegative ? "True" : "False") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "bool allEven = all_of(nums.begin(), nums.end(), [](int x) { return x % 2 == 0; });", constructType: "Variable & Initializer", title: "Check All Of Predicate", explanation: "Verifies if all elements satisfy even number predicate.", keyDetails: [{ variableOrConstruct: "all_of()", role: "All Predicate", whyThisWay: "Returns true if all elements match." }] },
+          { lineNum: 2, codeSnippet: "bool hasNegative = any_of(nums.begin(), nums.end(), [](int x) { return x < 0; });", constructType: "Variable & Initializer", title: "Check Any Of Predicate", explanation: "Verifies if any element satisfies negative number predicate.", keyDetails: [{ variableOrConstruct: "any_of()", role: "Any Predicate", whyThisWay: "Returns true if at least one matches." }] },
+          { lineNum: 3, codeSnippet: "cout << 'All even: ' << (allEven ? 'True' : 'False');", constructType: "Return / Cleanup", title: "Output Predicate Results", explanation: "Prints predicate result flags.", keyDetails: [{ variableOrConstruct: "allEven", role: "Output Flag", whyThisWay: "Displays result." }] }
+        ]
+      },
+      {
+        id: 8, name: 'Approach 8: Duplicate Removal with std::unique (PRO)', category: 'PRO / Unique Erase',
+        description: 'Compacts contiguous duplicates using std::unique and erases leftover capacity.',
+        prosCons: 'Pros: Standard erase-remove idiom for container deduplication. Cons: Requires pre-sorted range.',
+        timeComplexity: 'O(N log N)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 31. Basic STL Algorithms - Approach 8: Unique
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> nums = {1, 2, 2, 3, 4, 4, 4, 5};
+    auto last = unique(nums.begin(), nums.end());
+    nums.erase(last, nums.end());
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto last = unique(nums.begin(), nums.end());", constructType: "Variable & Initializer", title: "Compact Contiguous Duplicates", explanation: "Re-arranges range so duplicate consecutive elements are pushed to end, returning iterator to new logical end.", keyDetails: [{ variableOrConstruct: "unique()", role: "Duplicate Compactor", whyThisWay: "Compacts duplicates to range tail." }] },
+          { lineNum: 2, codeSnippet: "nums.erase(last, nums.end());", constructType: "Condition & Branch", title: "Erase Leftover Tail Capacity", explanation: "Erases leftover elements beyond unique logical end.", keyDetails: [{ variableOrConstruct: "nums.erase()", role: "Erase Tail", whyThisWay: "Shrinks container to unique size." }] },
+          { lineNum: 3, codeSnippet: "for (int x : nums) cout << x << ' ';", constructType: "Loop Construct", title: "Print Unique Container", explanation: "Prints 1 2 3 4 5.", keyDetails: [{ variableOrConstruct: "x", role: "Output", whyThisWay: "Displays unique elements." }] }
+        ]
+      },
+      {
+        id: 9, name: 'Approach 9: Range Partitioning with std::partition (PRO)', category: 'PRO / Partition',
+        description: 'Rearranges elements based on predicate using std::partition.',
+        prosCons: 'Pros: Linear time O(N) range partitioning. Cons: Does not preserve relative order.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 31. Basic STL Algorithms - Approach 9: Partition
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8};
+    auto pivot = partition(nums.begin(), nums.end(), [](int x) { return x % 2 == 0; });
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto pivot = partition(nums.begin(), nums.end(), [](int x) { return x % 2 == 0; });", constructType: "Variable & Initializer", title: "Partition Range by Predicate", explanation: "Rearranges container so even elements precede odd elements, returning iterator pivot boundary.", keyDetails: [{ variableOrConstruct: "partition()", role: "Range Partitioner", whyThisWay: "Partitions container in-place." }] },
+          { lineNum: 2, codeSnippet: "for (int x : nums) cout << x << ' ';", constructType: "Loop Construct", title: "Print Partitioned Range", explanation: "Prints evens followed by odds.", keyDetails: [{ variableOrConstruct: "x", role: "Output", whyThisWay: "Displays partitioned values." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 10, name: 'Approach 10: Custom Sort Comparator Lambda (PRO)', category: 'PRO / Custom Sort',
+        description: 'Sorts vector using custom lambda comparator.',
+        prosCons: 'Pros: Flexible custom sorting order. Cons: Lambda comparison logic overhead.',
+        timeComplexity: 'O(N log N)', spaceComplexity: 'O(log N)', isFree: false,
+        code: `// 31. Basic STL Algorithms - Approach 10: Custom Sort
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<string> words = {"banana", "apple", "fig", "date"};
+    sort(words.begin(), words.end(), [](const string& a, const string& b) {
+        return a.length() < b.length();
+    });
+    for (const string& w : words) cout << w << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "sort(words.begin(), words.end(), [](const string& a, const string& b) { ... });", constructType: "Condition & Branch", title: "Custom Lambda Sort", explanation: "Sorts words vector by string length ascending using custom lambda comparator.", keyDetails: [{ variableOrConstruct: "a.length() < b.length()", role: "Custom Comparator", whyThisWay: "Sorts by custom length criterion." }] },
+          { lineNum: 2, codeSnippet: "for (const string& w : words) cout << w << ' ';", constructType: "Loop Construct", title: "Print Length Sorted Words", explanation: "Prints 'fig date apple banana'.", keyDetails: [{ variableOrConstruct: "w", role: "Output", whyThisWay: "Displays sorted words." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem32Details(): LearnModule {
+  return {
+    id: 'easy_recursion_basic',
+    title: '32. Introduction to Recursion',
+    category: 'Recursion',
+    difficulty: 'easy',
+    shortDesc: 'Recursive base cases and self-referencing function calls.',
+    fullCode: `// 32. Introduction to Recursion - Approach 1: Factorial
+#include <iostream>
+using namespace std;
+
+int factorial(int n) {
+    if (n <= 1) return 1;
+    return n * factorial(n - 1);
+}
+
+int main() {
+    cout << "Factorial of 5: " << factorial(5) << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: '32. Introduction to Recursion',
+      objective: 'Master recursive problem decomposition, base cases, call stack unwinding, recurrence relations, and tail recursion optimizations.',
+      description: 'Implement **Introduction to Recursion** (Recursion). Recursive base cases and self-referencing function calls. Construct an efficient solution that optimizes runtime performance and respects memory bounds.',
+      inputDesc: 'Scalar inputs or containers passed to recursive functions.',
+      outputDesc: 'Unwound recursive call stack results and computed values.',
+      takeaways: [
+        'Every recursive function MUST have a valid base case to prevent infinite stack recursion',
+        'Each recursive call creates a new stack frame on the call stack',
+        'Tail recursion allows compiler optimization to reuse the current stack frame',
+        'Divide-and-conquer recursion breaks complex problems into smaller subproblems'
+      ],
+      examples: [
+        { id: 1, input: 'factorial(5)', output: '120', explanation: '5 * 4 * 3 * 2 * 1 = 120.' },
+        { id: 2, input: 'fibonacci(6)', output: '8', explanation: 'F(6) = F(5) + F(4) = 5 + 3 = 8.' },
+        { id: 3, input: 'gcd(48, 18)', output: '6', explanation: 'Euclidean algorithm gcd(48, 18) -> gcd(18, 12) -> gcd(12, 6) -> 6.' }
+      ],
+      constraints: ['Recursion depth is limited by system stack memory size.', 'Avoid redundant overlapping subproblems without memoization.'],
+      companies: ['Google', 'Meta', 'Amazon', 'Microsoft'],
+      acceptanceRate: '91.2%',
+      totalAccepted: '2,490,000'
+    },
+    approaches: [
+      {
+        id: 1, name: 'Approach 1: Basic Factorial Recurrence Relation (FREE)', category: 'FREE / Factorial',
+        description: 'Computes N! recursively using base case n <= 1 and recurrence n * factorial(n-1).',
+        prosCons: 'Pros: Fundamental recursion paradigm example. Cons: O(N) call stack overhead.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(N) Stack', isFree: true,
+        code: `// 32. Introduction to Recursion - Approach 1: Factorial
+#include <iostream>
+using namespace std;
+
+int fact(int n) {
+    if (n <= 1) return 1;
+    return n * fact(n - 1);
+}
+
+int main() {
+    cout << "5! = " << fact(5) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (n <= 1) return 1;", constructType: "Condition & Branch", title: "Recursive Base Case Guard", explanation: "Halts recursion when n reaches 1 or 0, returning base value 1.", keyDetails: [{ variableOrConstruct: "n <= 1", role: "Base Case", whyThisWay: "Prevents infinite call stack recursion." }] },
+          { lineNum: 2, codeSnippet: "return n * fact(n - 1);", constructType: "Return / Cleanup", title: "Recursive Reduction Step", explanation: "Multiplies n by result of self-invocation with decremented n-1 parameter.", keyDetails: [{ variableOrConstruct: "fact(n - 1)", role: "Recursive Invocation", whyThisWay: "Drives call stack towards base case." }] },
+          { lineNum: 3, codeSnippet: "fact(5)", constructType: "Condition & Branch", title: "Invoke Factorial", explanation: "Computes 5! = 120.", keyDetails: [{ variableOrConstruct: "fact(5)", role: "Function Call", whyThisWay: "Tests factorial function." }] }
+        ]
+      },
+      {
+        id: 2, name: 'Approach 2: Fibonacci Sequence Recursive Calculation (FREE)', category: 'FREE / Fibonacci',
+        description: 'Computes F(N) = F(N-1) + F(N-2) with dual base cases.',
+        prosCons: 'Pros: Demonstrates dual recursive tree branching. Cons: Exponential O(2^N) time complexity without memoization.',
+        timeComplexity: 'O(2^N)', spaceComplexity: 'O(N) Stack', isFree: true,
+        code: `// 32. Introduction to Recursion - Approach 2: Fibonacci
+#include <iostream>
+using namespace std;
+
+int fib(int n) {
+    if (n <= 0) return 0;
+    if (n == 1) return 1;
+    return fib(n - 1) + fib(n - 2);
+}
+
+int main() {
+    cout << "fib(6) = " << fib(6) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (n <= 0) return 0; if (n == 1) return 1;", constructType: "Condition & Branch", title: "Dual Base Case Guards", explanation: "Returns 0 for n=0 and 1 for n=1.", keyDetails: [{ variableOrConstruct: "n <= 0 / n == 1", role: "Dual Base Cases", whyThisWay: "Handles initial Fibonacci terms." }] },
+          { lineNum: 2, codeSnippet: "return fib(n - 1) + fib(n - 2);", constructType: "Return / Cleanup", title: "Dual Tree Branching", explanation: "Recursively computes sum of preceding two Fibonacci terms.", keyDetails: [{ variableOrConstruct: "fib(n - 1) + fib(n - 2)", role: "Dual Recursive Branch", whyThisWay: "Evaluates recurrence relation." }] },
+          { lineNum: 3, codeSnippet: "fib(6)", constructType: "Condition & Branch", title: "Invoke Fibonacci", explanation: "Computes F(6) = 8.", keyDetails: [{ variableOrConstruct: "fib(6)", role: "Test Call", whyThisWay: "Tests fibonacci." }] }
+        ]
+      },
+      {
+        id: 3, name: 'Approach 3: Recursive Sum of Array Elements (PRO)', category: 'PRO / Array Sum',
+        description: 'Computes sum of array elements recursively by index step.',
+        prosCons: 'Pros: Demonstrates container traversal via recursion. Cons: Iterative loop is more memory efficient.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(N) Stack', isFree: false,
+        code: `// 32. Introduction to Recursion - Approach 3: Array Sum
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int sumArray(const vector<int>& arr, int idx) {
+    if (idx >= arr.size()) return 0;
+    return arr[idx] + sumArray(arr, idx + 1);
+}
+
+int main() {
+    vector<int> nums = {10, 20, 30, 40};
+    cout << "Array Sum: " << sumArray(nums, 0) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (idx >= arr.size()) return 0;", constructType: "Condition & Branch", title: "Index Out of Bounds Base Case", explanation: "Returns 0 when index reaches end of array.", keyDetails: [{ variableOrConstruct: "idx >= arr.size()", role: "Array Bounds Guard", whyThisWay: "Halts array traversal." }] },
+          { lineNum: 2, codeSnippet: "return arr[idx] + sumArray(arr, idx + 1);", constructType: "Return / Cleanup", title: "Add Current & Recurse Next", explanation: "Adds current element arr[idx] to sum of remaining array elements.", keyDetails: [{ variableOrConstruct: "sumArray(arr, idx + 1)", role: "Next Index Recurse", whyThisWay: "Advances array index." }] },
+          { lineNum: 3, codeSnippet: "sumArray(nums, 0)", constructType: "Condition & Branch", title: "Invoke Recursive Array Sum", explanation: "Computes sum 100.", keyDetails: [{ variableOrConstruct: "sumArray", role: "Test Call", whyThisWay: "Tests sum function." }] }
+        ]
+      },
+      {
+        id: 4, name: 'Approach 4: Tail Recursive Factorial Optimization (PRO)', category: 'PRO / Tail Recursion',
+        description: 'Accumulates result in parameter allowing compiler tail-call optimization (TCO).',
+        prosCons: 'Pros: Compiles to O(1) space iterative assembly loop in optimized builds. Cons: Non-standard syntax.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(1) with TCO', isFree: false,
+        code: `// 32. Introduction to Recursion - Approach 4: Tail Recursion
+#include <iostream>
+using namespace std;
+
+int factTail(int n, int acc = 1) {
+    if (n <= 1) return acc;
+    return factTail(n - 1, n * acc);
+}
+
+int main() {
+    cout << "Tail 5! = " << factTail(5) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (n <= 1) return acc;", constructType: "Condition & Branch", title: "Return Accumulated Result", explanation: "Returns accumulated product when n reaches base case 1.", keyDetails: [{ variableOrConstruct: "return acc", role: "Acc Return", whyThisWay: "Returns accumulated answer." }] },
+          { lineNum: 2, codeSnippet: "return factTail(n - 1, n * acc);", constructType: "Return / Cleanup", title: "Tail Call Invocation", explanation: "Self-invocation is absolute final operation in function allowing frame reuse.", keyDetails: [{ variableOrConstruct: "factTail(n - 1, n * acc)", role: "Tail Call", whyThisWay: "Enables tail-call optimization." }] },
+          { lineNum: 3, codeSnippet: "factTail(5)", constructType: "Condition & Branch", title: "Invoke Tail Factorial", explanation: "Computes 120.", keyDetails: [{ variableOrConstruct: "factTail", role: "Test Call", whyThisWay: "Tests tail recursion." }] }
+        ]
+      },
+      {
+        id: 5, name: 'Approach 5: Recursive Exponentiation (Binary Powering) (PRO)', category: 'PRO / Binary Powering',
+        description: 'Computes A^B in O(log B) time using divide-and-conquer exponentiation.',
+        prosCons: 'Pros: O(log B) fast exponentiation. Cons: Risk of integer overflow.',
+        timeComplexity: 'O(log B)', spaceComplexity: 'O(log B) Stack', isFree: false,
+        code: `// 32. Introduction to Recursion - Approach 5: Binary Powering
+#include <iostream>
+using namespace std;
+
+long long power(long long base, int exp) {
+    if (exp == 0) return 1;
+    long long half = power(base, exp / 2);
+    if (exp % 2 == 0) return half * half;
+    return base * half * half;
+}
+
+int main() {
+    cout << "2^10 = " << power(2, 10) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (exp == 0) return 1;", constructType: "Condition & Branch", title: "Exponent Zero Base Case", explanation: "Returns 1 when exponent reaches 0.", keyDetails: [{ variableOrConstruct: "exp == 0", role: "Exponent Base Case", whyThisWay: "Base case for exponentiation." }] },
+          { lineNum: 2, codeSnippet: "long long half = power(base, exp / 2);", constructType: "Variable & Initializer", title: "Divide Exponent in Half", explanation: "Recursively computes base^(exp/2) in O(log B) steps.", keyDetails: [{ variableOrConstruct: "exp / 2", role: "Divide Step", whyThisWay: "Halves exponent each step." }] },
+          { lineNum: 3, codeSnippet: "if (exp % 2 == 0) return half * half; else return base * half * half;", constructType: "Return / Cleanup", title: "Combine Half Exponents", explanation: "Squares half result for even exponents or multiplies by base for odd exponents.", keyDetails: [{ variableOrConstruct: "half * half", role: "Conquer Step", whyThisWay: "Recombines halved power." }] }
+        ]
+      },
+      {
+        id: 6, name: 'Approach 6: Greatest Common Divisor (Euclidean Algorithm) (PRO)', category: 'PRO / GCD Recursion',
+        description: 'Computes gcd(A, B) = gcd(B, A % B) using Euclidean algorithm.',
+        prosCons: 'Pros: Ultra-fast logarithmic GCD computation. Cons: Requires positive integer parameters.',
+        timeComplexity: 'O(log(min(A, B)))', spaceComplexity: 'O(log N) Stack', isFree: false,
+        code: `// 32. Introduction to Recursion - Approach 6: Euclidean GCD
+#include <iostream>
+using namespace std;
+
+int gcd(int a, int b) {
+    if (b == 0) return a;
+    return gcd(b, a % b);
+}
+
+int main() {
+    cout << "gcd(48, 18) = " << gcd(48, 18) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (b == 0) return a;", constructType: "Condition & Branch", title: "Remainder Zero Base Case", explanation: "Returns a when remainder b becomes 0.", keyDetails: [{ variableOrConstruct: "b == 0", role: "GCD Base Case", whyThisWay: "Halts Euclidean algorithm." }] },
+          { lineNum: 2, codeSnippet: "return gcd(b, a % b);", constructType: "Return / Cleanup", title: "Recursive Modulo Step", explanation: "Passes b as new a and (a % b) as new b.", keyDetails: [{ variableOrConstruct: "gcd(b, a % b)", role: "Modulo Recurse", whyThisWay: "Reduces problem size via modulo." }] },
+          { lineNum: 3, codeSnippet: "gcd(48, 18)", constructType: "Condition & Branch", title: "Invoke GCD", explanation: "Computes GCD 6.", keyDetails: [{ variableOrConstruct: "gcd", role: "Test Call", whyThisWay: "Tests GCD." }] }
+        ]
+      },
+      {
+        id: 7, name: 'Approach 7: Recursive String Reversal (PRO)', category: 'PRO / String Reversal',
+        description: 'Reverses string recursively by swapping outer characters inward.',
+        prosCons: 'Pros: Elegantly expresses string symmetry. Cons: Stack memory allocation.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(N) Stack', isFree: false,
+        code: `// 32. Introduction to Recursion - Approach 7: String Reversal
+#include <iostream>
+#include <string>
+#include <utility>
+using namespace std;
+
+void reverseRec(string& s, int l, int r) {
+    if (l >= r) return;
+    swap(s[l], s[r]);
+    reverseRec(s, l + 1, r - 1);
+}
+
+int main() {
+    string text = "Recursion";
+    reverseRec(text, 0, text.length() - 1);
+    cout << "Reversed: " << text << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (l >= r) return;", constructType: "Condition & Branch", title: "Pointer Crossing Base Case", explanation: "Halts recursion when left pointer crosses right pointer.", keyDetails: [{ variableOrConstruct: "l >= r", role: "Pointer Guard", whyThisWay: "Stops when middle is reached." }] },
+          { lineNum: 2, codeSnippet: "swap(s[l], s[r]);", constructType: "Condition & Branch", title: "Swap Outer Characters", explanation: "Swaps character at left index with character at right index.", keyDetails: [{ variableOrConstruct: "swap", role: "Char Swap", whyThisWay: "In-place character swap." }] },
+          { lineNum: 3, codeSnippet: "reverseRec(s, l + 1, r - 1);", constructType: "Return / Cleanup", title: "Recurse Inward", explanation: "Recurses inward advancing left index and decrementing right index.", keyDetails: [{ variableOrConstruct: "reverseRec", role: "Inward Recurse", whyThisWay: "Advances pointers inward." }] }
+        ]
+      },
+      {
+        id: 8, name: 'Approach 8: Recursive Digit Sum Calculation (PRO)', category: 'PRO / Digit Sum',
+        description: 'Sums digits of integer N using N % 10 + sumDigits(N / 10).',
+        prosCons: 'Pros: Concise digit processing algorithm. Cons: Limited to positive integers.',
+        timeComplexity: 'O(log10 N)', spaceComplexity: 'O(log10 N) Stack', isFree: false,
+        code: `// 32. Introduction to Recursion - Approach 8: Digit Sum
+#include <iostream>
+using namespace std;
+
+int sumDigits(int n) {
+    if (n == 0) return 0;
+    return (n % 10) + sumDigits(n / 10);
+}
+
+int main() {
+    cout << "Sum digits of 12345: " << sumDigits(12345) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (n == 0) return 0;", constructType: "Condition & Branch", title: "Zero Digit Base Case", explanation: "Returns 0 when all digits have been processed.", keyDetails: [{ variableOrConstruct: "n == 0", role: "Digit Base Case", whyThisWay: "Halts digit processing." }] },
+          { lineNum: 2, codeSnippet: "return (n % 10) + sumDigits(n / 10);", constructType: "Return / Cleanup", title: "Extract Last Digit & Recurse Rest", explanation: "Extracts last digit via n % 10 and adds to sum of remaining digits n / 10.", keyDetails: [{ variableOrConstruct: "n % 10", role: "Digit Extractor", whyThisWay: "Extracts last base-10 digit." }] },
+          { lineNum: 3, codeSnippet: "sumDigits(12345)", constructType: "Condition & Branch", title: "Invoke Digit Sum", explanation: "Computes 1+2+3+4+5 = 15.", keyDetails: [{ variableOrConstruct: "sumDigits", role: "Test Call", whyThisWay: "Tests digit sum." }] }
+        ]
+      },
+      {
+        id: 9, name: 'Approach 9: Pre-Order vs Post-Order Stack Unwinding (PRO)', category: 'PRO / Stack Unwinding',
+        description: 'Demonstrates differences between code executed before call vs after call unwinding.',
+        prosCons: 'Pros: Teaches exact call stack execution order. Cons: Purely diagnostic demonstration.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(N) Stack', isFree: false,
+        code: `// 32. Introduction to Recursion - Approach 9: Stack Traversal
+#include <iostream>
+using namespace std;
+
+void traceStack(int n) {
+    if (n <= 0) return;
+    cout << "Pre-call: " << n << " | ";
+    traceStack(n - 1);
+    cout << "Post-call: " << n << " | ";
+}
+
+int main() {
+    traceStack(3);
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "cout << 'Pre-call: ' << n << ' | ';", constructType: "Condition & Branch", title: "Pre-Call Processing", explanation: "Executes work before pushing next stack frame (3, 2, 1).", keyDetails: [{ variableOrConstruct: "Pre-call", role: "Pre-Order Work", whyThisWay: "Executes on way down stack." }] },
+          { lineNum: 2, codeSnippet: "traceStack(n - 1);", constructType: "Condition & Branch", title: "Recursive Call Push", explanation: "Pushes child frame onto call stack.", keyDetails: [{ variableOrConstruct: "traceStack(n - 1)", role: "Stack Push", whyThisWay: "Pushes frame to stack." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Post-call: ' << n << ' | ';", constructType: "Return / Cleanup", title: "Post-Call Unwinding Processing", explanation: "Executes work after child frame pops and unwinds (1, 2, 3).", keyDetails: [{ variableOrConstruct: "Post-call", role: "Post-Order Work", whyThisWay: "Executes on way up stack." }] }
+        ]
+      },
+      {
+        id: 10, name: 'Approach 10: Tower of Hanoi Recursive Solver (PRO)', category: 'PRO / Tower of Hanoi',
+        description: 'Solves Tower of Hanoi problem moving N disks between 3 pegs using divide-and-conquer recursion.',
+        prosCons: 'Pros: Classic 3-step recursive problem. Cons: Exponential O(2^N - 1) moves required.',
+        timeComplexity: 'O(2^N)', spaceComplexity: 'O(N) Stack', isFree: false,
+        code: `// 32. Introduction to Recursion - Approach 10: Tower of Hanoi
+#include <iostream>
+using namespace std;
+
+void hanoi(int n, char src, char aux, char dst) {
+    if (n == 1) {
+        cout << "Move disk 1 from " << src << " to " << dst << endl;
+        return;
+    }
+    hanoi(n - 1, src, dst, aux);
+    cout << "Move disk " << n << " from " << src << " to " << dst << endl;
+    hanoi(n - 1, aux, src, dst);
+}
+
+int main() {
+    hanoi(3, 'A', 'B', 'C');
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "hanoi(n - 1, src, dst, aux);", constructType: "Condition & Branch", title: "Step 1: Move N-1 Disks to Aux", explanation: "Recursively moves top N-1 disks from source peg to auxiliary peg.", keyDetails: [{ variableOrConstruct: "hanoi(n-1, src, dst, aux)", role: "Sub-Problem 1", whyThisWay: "Clears path for largest disk." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Move disk ' << n << ' from ' << src << ' to ' << dst;", constructType: "Condition & Branch", title: "Step 2: Move Largest Disk to Dst", explanation: "Prints move of single remaining largest disk from source to destination peg.", keyDetails: [{ variableOrConstruct: "Move disk n", role: "Primary Move", whyThisWay: "Moves target largest disk." }] },
+          { lineNum: 3, codeSnippet: "hanoi(n - 1, aux, src, dst);", constructType: "Return / Cleanup", title: "Step 3: Move N-1 Disks from Aux to Dst", explanation: "Recursively moves N-1 disks from auxiliary peg to destination peg.", keyDetails: [{ variableOrConstruct: "hanoi(n-1, aux, src, dst)", role: "Sub-Problem 2", whyThisWay: "Places remaining disks on top." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem33Details(): LearnModule {
+  return {
+    id: 'easy_bit_basic',
+    title: '33. Bitwise Operators (&, |, ^, ~)',
+    category: 'Bit Manipulation',
+    difficulty: 'easy',
+    shortDesc: 'Bit manipulation, bit shifts (<<, >>), and mask evaluations.',
+    fullCode: `// 33. Bitwise Operators - Approach 1: AND, OR, XOR, NOT
+#include <iostream>
+using namespace std;
+
+int main() {
+    int a = 0b1100;
+    int b = 0b1010;
+    cout << "AND (a & b): " << (a & b) << endl;
+    cout << "OR  (a | b): " << (a | b) << endl;
+    cout << "XOR (a ^ b): " << (a ^ b) << endl;
+    cout << "NOT (~a):    " << (~a) << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: '33. Bitwise Operators (&, |, ^, ~)',
+      objective: 'Master binary register bit manipulation: bitwise AND (&), OR (|), XOR (^), NOT (~), left shift (<<), right shift (>>), bitmasks, and hardware bitwise tricks.',
+      description: 'Implement **Bitwise Operators (&, |, ^, ~)** (Bit Manipulation). Bit manipulation, bit shifts (<<, >>), and mask evaluations. Construct an efficient solution that optimizes runtime performance and respects memory bounds.',
+      inputDesc: 'Binary integer bit patterns and bit position masks.',
+      outputDesc: 'Manipulated binary bit flags, shifted values, and bitwise evaluation results.',
+      takeaways: [
+        'Bitwise AND (&) evaluates 1 only if BOTH corresponding bits are 1',
+        'Bitwise OR (|) evaluates 1 if EITHER corresponding bit is 1',
+        'Bitwise XOR (^) evaluates 1 if corresponding bits are DIFFERENT',
+        'Left shift (x << k) multiplies x by 2^k; right shift (x >> k) divides x by 2^k'
+      ],
+      examples: [
+        { id: 1, input: '5 & 3 (0b101 & 0b011)', output: '1 (0b001)', explanation: 'Bitwise AND keeps only bits set in both numbers.' },
+        { id: 2, input: '(n & (n - 1)) == 0 for n=16', output: 'True', explanation: 'Powers of 2 have exactly one 1 bit; subtracting 1 flips all lower bits.' },
+        { id: 3, input: 'findSingleNumber([4, 1, 2, 1, 2])', output: '4', explanation: 'XORing all elements cancels duplicate pairs (X ^ X = 0), leaving single number 4.' }
+      ],
+      constraints: ['Shift count k in (x << k) must be non-negative and less than total bit width (e.g. < 32 for int).'],
+      companies: ['Google', 'Apple', 'Microsoft', 'Meta'],
+      acceptanceRate: '92.6%',
+      totalAccepted: '2,380,000'
+    },
+    approaches: [
+      {
+        id: 1, name: 'Approach 1: Basic Bitwise AND, OR, XOR & NOT Operations (FREE)', category: 'FREE / Direct Bitwise',
+        description: 'Executes AND (&), OR (|), XOR (^), and NOT (~) operators on binary numbers.',
+        prosCons: 'Pros: Single CPU instruction speed. Cons: Requires bit-level binary thinking.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: true,
+        code: `// 33. Bitwise Operators - Approach 1: Basic Operations
+#include <iostream>
+using namespace std;
+
+int main() {
+    int x = 12;
+    int y = 10;
+    cout << "x & y: " << (x & y) << endl;
+    cout << "x | y: " << (x | y) << endl;
+    cout << "x ^ y: " << (x ^ y) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "cout << 'x & y: ' << (x & y);", constructType: "Condition & Branch", title: "Bitwise AND Evaluation", explanation: "Evaluates bitwise AND between 0b1100 and 0b1010 resulting in 0b1000 (8).", keyDetails: [{ variableOrConstruct: "x & y", role: "Bitwise AND", whyThisWay: "Keeps bits set in both numbers." }] },
+          { lineNum: 2, codeSnippet: "cout << 'x | y: ' << (x | y);", constructType: "Condition & Branch", title: "Bitwise OR Evaluation", explanation: "Evaluates bitwise OR resulting in 0b1110 (14).", keyDetails: [{ variableOrConstruct: "x | y", role: "Bitwise OR", whyThisWay: "Sets bits present in either number." }] },
+          { lineNum: 3, codeSnippet: "cout << 'x ^ y: ' << (x ^ y);", constructType: "Condition & Branch", title: "Bitwise XOR Evaluation", explanation: "Evaluates bitwise XOR resulting in 0b0110 (6).", keyDetails: [{ variableOrConstruct: "x ^ y", role: "Bitwise XOR", whyThisWay: "Sets bits where inputs differ." }] }
+        ]
+      },
+      {
+        id: 2, name: 'Approach 2: Bit Shifting & Power of Two Multiplication/Division (FREE)', category: 'FREE / Bit Shift',
+        description: 'Uses left shift (<<) and right shift (>>) for fast power of two math.',
+        prosCons: 'Pros: Single instruction bit shift. Cons: Shift by >= bit width is undefined behavior.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: true,
+        code: `// 33. Bitwise Operators - Approach 2: Bit Shifts
+#include <iostream>
+using namespace std;
+
+int main() {
+    int val = 5;
+    cout << "val << 1 (val * 2): " << (val << 1) << endl;
+    cout << "val << 3 (val * 8): " << (val << 3) << endl;
+    int num = 40;
+    cout << "num >> 2 (num / 4): " << (num >> 2) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "(val << 1)", constructType: "Condition & Branch", title: "Left Shift Multiply by 2", explanation: "Shifts binary representation left by 1 bit, multiplying value by 2.", keyDetails: [{ variableOrConstruct: "val << 1", role: "Left Shift", whyThisWay: "Fast hardware multiply by 2." }] },
+          { lineNum: 2, codeSnippet: "(val << 3)", constructType: "Condition & Branch", title: "Left Shift Multiply by 8", explanation: "Shifts binary representation left by 3 bits, multiplying value by 8.", keyDetails: [{ variableOrConstruct: "val << 3", role: "Left Shift 3", whyThisWay: "Fast multiply by 2^3." }] },
+          { lineNum: 3, codeSnippet: "(num >> 2)", constructType: "Condition & Branch", title: "Right Shift Divide by 4", explanation: "Shifts binary representation right by 2 bits, dividing value by 4.", keyDetails: [{ variableOrConstruct: "num >> 2", role: "Right Shift 2", whyThisWay: "Fast integer division by 2^2." }] }
+        ]
+      },
+      {
+        id: 3, name: 'Approach 3: Checking & Setting Specific Bit Flags (PRO)', category: 'PRO / Bit Flags',
+        description: 'Checks if k-th bit is set and sets k-th bit to 1.',
+        prosCons: 'Pros: Precise single-bit inspection and modification. Cons: 0-based bit index indexing.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 33. Bitwise Operators - Approach 3: Check & Set Bit
+#include <iostream>
+using namespace std;
+
+bool isBitSet(int num, int k) {
+    return (num & (1 << k)) != 0;
+}
+
+int setBit(int num, int k) {
+    return num | (1 << k);
+}
+
+int main() {
+    int num = 8;
+    cout << "Is 3rd bit set in 8? " << (isBitSet(num, 3) ? "Yes" : "No") << endl;
+    cout << "Setting 1st bit: " << setBit(num, 1) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "return (num & (1 << k)) != 0;", constructType: "Condition & Branch", title: "Check Bit via Mask", explanation: "Creates bitmask with 1 shifted left k places, ANDing with num to test if k-th bit is set.", keyDetails: [{ variableOrConstruct: "1 << k", role: "Single Bitmask", whyThisWay: "Isolates k-th bit." }] },
+          { lineNum: 2, codeSnippet: "return num | (1 << k);", constructType: "Return / Cleanup", title: "Set Bit via OR Mask", explanation: "Uses bitwise OR with mask (1 << k) to force k-th bit to 1.", keyDetails: [{ variableOrConstruct: "num | (1 << k)", role: "Bit Setter", whyThisWay: "Sets k-th bit to 1." }] },
+          { lineNum: 3, codeSnippet: "setBit(num, 1)", constructType: "Condition & Branch", title: "Invoke Bit Setter", explanation: "Sets bit 1, producing 10.", keyDetails: [{ variableOrConstruct: "setBit", role: "Test Call", whyThisWay: "Tests bit setting." }] }
+        ]
+      },
+      {
+        id: 4, name: 'Approach 4: Toggling & Clearing Specific Bit Flags (PRO)', category: 'PRO / Clear & Toggle Bit',
+        description: 'Clears k-th bit to 0 and toggles k-th bit.',
+        prosCons: 'Pros: Single instruction bit clearing and toggling. Cons: Mask creation syntax.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 33. Bitwise Operators - Approach 4: Clear & Toggle Bit
+#include <iostream>
+using namespace std;
+
+int clearBit(int num, int k) {
+    return num & ~(1 << k);
+}
+
+int toggleBit(int num, int k) {
+    return num ^ (1 << k);
+}
+
+int main() {
+    int num = 15;
+    cout << "Clear 2nd bit: " << clearBit(num, 2) << endl;
+    cout << "Toggle 0th bit: " << toggleBit(num, 0) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "return num & ~(1 << k);", constructType: "Return / Cleanup", title: "Clear Bit via Inverted Mask", explanation: "Inverts bitmask ~(1 << k) to create zero at position k, clearing k-th bit.", keyDetails: [{ variableOrConstruct: "~(1 << k)", role: "Inverted Mask", whyThisWay: "Zeroes out k-th bit." }] },
+          { lineNum: 2, codeSnippet: "return num ^ (1 << k);", constructType: "Return / Cleanup", title: "Toggle Bit via XOR Mask", explanation: "Uses bitwise XOR with (1 << k) to flip k-th bit from 0 to 1 or 1 to 0.", keyDetails: [{ variableOrConstruct: "num ^ (1 << k)", role: "XOR Toggle", whyThisWay: "Flips k-th bit." }] },
+          { lineNum: 3, codeSnippet: "clearBit(num, 2)", constructType: "Condition & Branch", title: "Invoke Bit Clear", explanation: "Clears bit 2 producing 11.", keyDetails: [{ variableOrConstruct: "clearBit", role: "Test Call", whyThisWay: "Tests bit clearing." }] }
+        ]
+      },
+      {
+        id: 5, name: 'Approach 5: Power of Two Verification (n & (n - 1)) (PRO)', category: 'PRO / Power of Two',
+        description: 'Checks if integer is power of 2 in O(1) time using (n & (n - 1)) == 0.',
+        prosCons: 'Pros: Single instruction power of 2 test. Cons: Must guard against n <= 0.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 33. Bitwise Operators - Approach 5: Power of Two
+#include <iostream>
+using namespace std;
+
+bool isPowerOfTwo(int n) {
+    return n > 0 && (n & (n - 1)) == 0;
+}
+
+int main() {
+    cout << "Is 16 Power of 2? " << (isPowerOfTwo(16) ? "Yes" : "No") << endl;
+    cout << "Is 18 Power of 2? " << (isPowerOfTwo(18) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "return n > 0 && (n & (n - 1)) == 0;", constructType: "Return / Cleanup", title: "Power of Two Bit Trick", explanation: "Subtracting 1 from power of 2 (0b1000 -> 0b0111) flips all lower bits; ANDing results in 0.", keyDetails: [{ variableOrConstruct: "n & (n - 1)", role: "Power of Two Bitmask", whyThisWay: "Clears lowest set bit in O(1) time." }] },
+          { lineNum: 2, codeSnippet: "isPowerOfTwo(16)", constructType: "Condition & Branch", title: "Test Power of Two True", explanation: "Returns true for 16.", keyDetails: [{ variableOrConstruct: "isPowerOfTwo", role: "True Check", whyThisWay: "Tests 16." }] },
+          { lineNum: 3, codeSnippet: "isPowerOfTwo(18)", constructType: "Condition & Branch", title: "Test Power of Two False", explanation: "Returns false for 18.", keyDetails: [{ variableOrConstruct: "isPowerOfTwo", role: "False Check", whyThisWay: "Tests 18." }] }
+        ]
+      },
+      {
+        id: 6, name: 'Approach 6: Counting Set Bits (Brian Kernighans Algorithm) (PRO)', category: 'PRO / Set Bit Count',
+        description: 'Counts total 1-bits by repeatedly clearing lowest set bit n = n & (n - 1).',
+        prosCons: 'Pros: Runs in O(set bits) time instead of O(32) loop. Cons: Requires loop until n becomes 0.',
+        timeComplexity: 'O(K) where K = set bits', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 33. Bitwise Operators - Approach 6: Brian Kernighan
+#include <iostream>
+using namespace std;
+
+int countSetBits(int n) {
+    int count = 0;
+    while (n > 0) {
+        n &= (n - 1);
+        count++;
+    }
+    return count;
+}
+
+int main() {
+    cout << "Set bits in 29: " << countSetBits(29) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "n &= (n - 1);", constructType: "Condition & Branch", title: "Clear Lowest Set Bit", explanation: "Clears rightmost set bit in single bitwise operation.", keyDetails: [{ variableOrConstruct: "n &= (n - 1)", role: "Lowest Bit Cleaner", whyThisWay: "Clears lowest 1 bit." }] },
+          { lineNum: 2, codeSnippet: "count++;", constructType: "Variable & Initializer", title: "Increment Set Bit Count", explanation: "Increments set bit count.", keyDetails: [{ variableOrConstruct: "count++", role: "Counter", whyThisWay: "Counts set bits." }] },
+          { lineNum: 3, codeSnippet: "countSetBits(29)", constructType: "Return / Cleanup", title: "Return Bit Count", explanation: "Returns 4 for 0b11101.", keyDetails: [{ variableOrConstruct: "countSetBits", role: "Test Call", whyThisWay: "Tests bit counting." }] }
+        ]
+      },
+      {
+        id: 7, name: 'Approach 7: Single Number Detection via XOR Property (PRO)', category: 'PRO / Single Number XOR',
+        description: 'Finds unique element in array where every other element appears twice using X ^ X = 0 property.',
+        prosCons: 'Pros: O(N) time and O(1) auxiliary space. Cons: Only works when duplicates appear exactly twice.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 33. Bitwise Operators - Approach 7: Single Number XOR
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int findSingleNumber(const vector<int>& nums) {
+    int result = 0;
+    for (int x : nums) result ^= x;
+    return result;
+}
+
+int main() {
+    vector<int> nums = {4, 1, 2, 1, 2};
+    cout << "Single number: " << findSingleNumber(nums) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int result = 0;", constructType: "Variable & Initializer", title: "Initialize XOR Accumulator", explanation: "Initializes result accumulator to 0 (since 0 ^ X = X).", keyDetails: [{ variableOrConstruct: "result = 0", role: "XOR Accumulator", whyThisWay: "Identity element for XOR." }] },
+          { lineNum: 2, codeSnippet: "for (int x : nums) result ^= x;", constructType: "Loop Construct", title: "Accumulate XOR Values", explanation: "XORs all elements together; matching pairs cancel out (X ^ X = 0), leaving single unique value.", keyDetails: [{ variableOrConstruct: "result ^= x", role: "XOR Accumulation", whyThisWay: "Cancels matching pairs." }] },
+          { lineNum: 3, codeSnippet: "return result;", constructType: "Return / Cleanup", title: "Return Unique Number", explanation: "Returns remaining non-cancelled single number (4).", keyDetails: [{ variableOrConstruct: "result", role: "Unique Number Return", whyThisWay: "Returns single number." }] }
+        ]
+      },
+      {
+        id: 8, name: 'Approach 8: In-Place Variable Swap via Bitwise XOR (PRO)', category: 'PRO / XOR Swap',
+        description: 'Swaps two variables in-place without temporary memory using XOR.',
+        prosCons: 'Pros: Zero auxiliary memory variable swap. Cons: Undefined behavior if a and b refer to same memory location.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 33. Bitwise Operators - Approach 8: XOR Swap
+#include <iostream>
+using namespace std;
+
+void xorSwap(int& a, int& b) {
+    if (&a == &b) return;
+    a ^= b;
+    b ^= a;
+    a ^= b;
+}
+
+int main() {
+    int x = 10, y = 20;
+    xorSwap(x, y);
+    cout << "Swapped: x=" << x << ", y=" << y << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "a ^= b;", constructType: "Variable & Initializer", title: "First XOR Step", explanation: "Stores combined bit pattern (a ^ b) in variable a.", keyDetails: [{ variableOrConstruct: "a ^= b", role: "Step 1", whyThisWay: "Encodes both values into a." }] },
+          { lineNum: 2, codeSnippet: "b ^= a;", constructType: "Variable & Initializer", title: "Second XOR Step", explanation: "Extracts original value of a into variable b.", keyDetails: [{ variableOrConstruct: "b ^= a", role: "Step 2", whyThisWay: "Assigns original a to b." }] },
+          { lineNum: 3, codeSnippet: "a ^= b;", constructType: "Return / Cleanup", title: "Third XOR Step", explanation: "Extracts original value of b into variable a, completing swap.", keyDetails: [{ variableOrConstruct: "a ^= b", role: "Step 3", whyThisWay: "Assigns original b to a." }] }
+        ]
+      },
+      {
+        id: 9, name: 'Approach 9: Bitmask Permission Flag System (PRO)', category: 'PRO / Permission Flags',
+        description: 'Manages read/write/execute file permissions using bitmasks.',
+        prosCons: 'Pros: Compact memory representation of multiple boolean flags. Cons: Bitwise mask code readability.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 33. Bitwise Operators - Approach 9: Permission Bitmask
+#include <iostream>
+using namespace std;
+
+const int READ = 1 << 0;
+const int WRITE = 1 << 1;
+const int EXEC = 1 << 2;
+
+int main() {
+    int myPerms = READ | WRITE;
+    bool canWrite = (myPerms & WRITE) != 0;
+    bool canExec = (myPerms & EXEC) != 0;
+    cout << "Can Write: " << (canWrite ? "Yes" : "No") << endl;
+    cout << "Can Exec:  " << (canExec ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int myPerms = READ | WRITE;", constructType: "Variable & Initializer", title: "Combine Permission Flags", explanation: "Combines READ (0b001) and WRITE (0b010) bitmasks into single integer 0b011.", keyDetails: [{ variableOrConstruct: "READ | WRITE", role: "Flag Combiner", whyThisWay: "Combines flag bits." }] },
+          { lineNum: 2, codeSnippet: "bool canWrite = (myPerms & WRITE) != 0;", constructType: "Condition & Branch", title: "Test Specific Permission Flag", explanation: "Tests if WRITE bit flag is set in permissions integer.", keyDetails: [{ variableOrConstruct: "myPerms & WRITE", role: "Flag Test", whyThisWay: "Checks if bit is enabled." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Can Write: ' << (canWrite ? 'Yes' : 'No');", constructType: "Return / Cleanup", title: "Output Permission Check", explanation: "Prints 'Can Write: Yes'.", keyDetails: [{ variableOrConstruct: "canWrite", role: "Output", whyThisWay: "Displays result." }] }
+        ]
+      },
+      {
+        id: 10, name: 'Approach 10: Standard Library Bit Inspection (std::bitset) (PRO)', category: 'PRO / std::bitset',
+        description: 'Uses std::bitset container wrapper to format and inspect binary representations.',
+        prosCons: 'Pros: Convenient string formatting and bit manipulation methods. Cons: Fixed size at compile time.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 33. Bitwise Operators - Approach 10: std::bitset
+#include <iostream>
+#include <bitset>
+using namespace std;
+
+int main() {
+    bitset<8> bits(42);
+    cout << "Binary: " << bits << endl;
+    bits.set(0);
+    cout << "Modified: " << bits << endl;
+    cout << "Count 1s: " << bits.count() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "bitset<8> bits(42);", constructType: "Variable & Initializer", title: "Bitset Instantiation", explanation: "Instantiates 8-bit bitset initialized with value 42 (00101010).", keyDetails: [{ variableOrConstruct: "bitset<8>", role: "Bit Container", whyThisWay: "Provides bitwise utility methods." }] },
+          { lineNum: 2, codeSnippet: "bits.set(0);", constructType: "Condition & Branch", title: "Set Bit via Method", explanation: "Sets 0-th bit of bitset to 1.", keyDetails: [{ variableOrConstruct: "bits.set()", role: "Bit Setter Method", whyThisWay: "Sets bit position." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Count 1s: ' << bits.count();", constructType: "Return / Cleanup", title: "Count 1-Bits via Method", explanation: "Returns total number of set 1-bits in bitset.", keyDetails: [{ variableOrConstruct: "bits.count()", role: "Set Bit Counter Method", whyThisWay: "Returns set bit count." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem34Details(): LearnModule {
+  return {
+    id: 'easy_exception_basic',
+    title: '34. Exception Handling (try/catch)',
+    category: 'Fundamentals',
+    difficulty: 'easy',
+    shortDesc: 'Handling runtime errors with try, catch, and throw.',
+    fullCode: `// 34. Exception Handling - Approach 1: Try, Catch & Throw
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+double divide(double a, double b) {
+    if (b == 0) throw runtime_error("Division by zero!");
+    return a / b;
+}
+
+int main() {
+    try {
+        cout << divide(10.0, 0.0) << endl;
+    } catch (const runtime_error& e) {
+        cout << "Caught exception: " << e.what() << endl;
+    }
+    return 0;
+}`,
+    problemStatement: {
+      title: '34. Exception Handling (try/catch)',
+      objective: 'Master C++ exception handling: try, catch, throw, std::exception hierarchy, std::runtime_error, std::out_of_range, custom exception classes, and noexcept specifiers.',
+      description: 'Implement **Exception Handling (try/catch)** (Fundamentals). Handling runtime errors with try, catch, and throw. Construct an efficient solution that optimizes runtime performance and respects memory bounds.',
+      inputDesc: 'Functions executing operations that may encounter runtime error conditions.',
+      outputDesc: 'Caught exception messages, error recovery flows, and clean execution paths.',
+      takeaways: [
+        'Use throw to signal runtime errors; execution jumps to matching catch block',
+        'Inherit custom exceptions from std::exception and override virtual const char* what() const noexcept',
+        'Stack unwinding automatically destroys local RAII stack objects when exception is thrown',
+        'Catch exceptions by const reference (const std::exception& e) to avoid slicing'
+      ],
+      examples: [
+        { id: 1, input: 'divide(10.0, 0.0)', output: 'Caught exception: Division by zero!', explanation: 'Throwing std::runtime_error when divisor is zero.' },
+        { id: 2, input: 'vec.at(100) for size 5 vector', output: 'Caught std::out_of_range exception', explanation: 'Bounds-checked at() throws std::out_of_range.' },
+        { id: 3, input: 'customException.what()', output: 'Custom Error Message', explanation: 'Custom exception class overriding what() method.' }
+      ],
+      constraints: ['Do not throw exceptions inside class destructors to prevent std::terminate.', 'Catch specific exceptions before base std::exception.'],
+      companies: ['Google', 'Microsoft', 'Amazon', 'Meta'],
+      acceptanceRate: '90.4%',
+      totalAccepted: '2,150,000'
+    },
+    approaches: [
+      {
+        id: 1, name: 'Approach 1: Basic Try, Catch & Throw Flow (FREE)', category: 'FREE / Direct Exception',
+        description: 'Demonstrates basic throw, try block, and catch block error handling flow.',
+        prosCons: 'Pros: Separates error handling from normal execution path. Cons: Minor exception table runtime overhead.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: true,
+        code: `// 34. Exception Handling - Approach 1: Try Catch Throw
+#include <iostream>
+using namespace std;
+
+void checkAge(int age) {
+    if (age < 18) throw "Access Denied: Under 18!";
+    cout << "Access Granted." << endl;
+}
+
+int main() {
+    try {
+        checkAge(15);
+    } catch (const char* msg) {
+        cout << "Error: " << msg << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (age < 18) throw 'Access Denied: Under 18!';", constructType: "Condition & Branch", title: "Throw Exception", explanation: "Throws string literal exception when validation fails.", keyDetails: [{ variableOrConstruct: "throw", role: "Exception Signal", whyThisWay: "Signals error condition." }] },
+          { lineNum: 2, codeSnippet: "try { checkAge(15); }", constructType: "Condition & Branch", title: "Try Block Execution Guard", explanation: "Encloses potentially throwing code inside try block.", keyDetails: [{ variableOrConstruct: "try", role: "Execution Guard", whyThisWay: "Guards code that may throw." }] },
+          { lineNum: 3, codeSnippet: "catch (const char* msg) { cout << 'Error: ' << msg; }", constructType: "Return / Cleanup", title: "Catch Exception Handler", explanation: "Catches thrown string literal and prints error message.", keyDetails: [{ variableOrConstruct: "catch (const char*)", role: "Exception Handler", whyThisWay: "Catches thrown error." }] }
+        ]
+      },
+      {
+        id: 2, name: 'Approach 2: Standard Exceptions (std::runtime_error & std::invalid_argument) (FREE)', category: 'FREE / Standard Exceptions',
+        description: 'Uses standard exception classes from <stdexcept> header.',
+        prosCons: 'Pros: Standard C++ exception hierarchy. Cons: Requires including <stdexcept>.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: true,
+        code: `// 34. Exception Handling - Approach 2: Standard Exceptions
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+void setSpeed(int speed) {
+    if (speed < 0) throw invalid_argument("Speed cannot be negative!");
+    cout << "Speed set to: " << speed << endl;
+}
+
+int main() {
+    try {
+        setSpeed(-50);
+    } catch (const invalid_argument& e) {
+        cout << "Invalid Argument: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "throw invalid_argument('Speed cannot be negative!');", constructType: "Condition & Branch", title: "Throw Standard Invalid Argument Exception", explanation: "Throws std::invalid_argument object initialized with error string.", keyDetails: [{ variableOrConstruct: "invalid_argument", role: "Standard Exception", whyThisWay: "Signals invalid function argument." }] },
+          { lineNum: 2, codeSnippet: "catch (const invalid_argument& e)", constructType: "Condition & Branch", title: "Catch by Const Reference", explanation: "Catches exception by const reference to avoid object slicing.", keyDetails: [{ variableOrConstruct: "const invalid_argument&", role: "Const Ref Catch", whyThisWay: "Prevents exception object slicing." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Invalid Argument: ' << e.what();", constructType: "Return / Cleanup", title: "Print Exception Message", explanation: "Prints error string using e.what() method.", keyDetails: [{ variableOrConstruct: "e.what()", role: "Message Getter", whyThisWay: "Retrieves error string." }] }
+        ]
+      },
+      {
+        id: 3, name: 'Approach 3: Out-of-Range Guard with std::out_of_range (PRO)', category: 'PRO / out_of_range',
+        description: 'Catches container bounds check exceptions thrown by vector::at().',
+        prosCons: 'Pros: Prevents silent out-of-bounds memory corruption. Cons: Slight overhead vs raw operator[].',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 34. Exception Handling - Approach 3: out_of_range
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+using namespace std;
+
+int main() {
+    vector<int> nums = {10, 20, 30};
+    try {
+        cout << nums.at(100) << endl;
+    } catch (const out_of_range& e) {
+        cout << "Caught out_of_range: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "cout << nums.at(100);", constructType: "Condition & Branch", title: "Bounds-Checked Vector Access", explanation: "Invokes at(100) which checks bounds and throws std::out_of_range exception.", keyDetails: [{ variableOrConstruct: "nums.at(100)", role: "Bounds Checked Access", whyThisWay: "Throws exception on invalid index." }] },
+          { lineNum: 2, codeSnippet: "catch (const out_of_range& e)", constructType: "Condition & Branch", title: "Catch out_of_range Exception", explanation: "Catches out_of_range exception object.", keyDetails: [{ variableOrConstruct: "out_of_range", role: "Out of Range Exception", whyThisWay: "Catches bounds exception." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Caught out_of_range: ' << e.what();", constructType: "Return / Cleanup", title: "Output Out-of-Range Error", explanation: "Prints out_of_range error description.", keyDetails: [{ variableOrConstruct: "e.what()", role: "Error Message", whyThisWay: "Displays error message." }] }
+        ]
+      },
+      {
+        id: 4, name: 'Approach 4: Multiple Cascading Catch Blocks (PRO)', category: 'PRO / Multiple Catch',
+        description: 'Handles different exception types using ordered cascading catch blocks.',
+        prosCons: 'Pros: Type-specific exception recovery. Cons: Catch order must go from derived to base.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 34. Exception Handling - Approach 4: Multiple Catch
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+void process(int code) {
+    if (code == 1) throw invalid_argument("Bad argument!");
+    if (code == 2) throw out_of_range("Out of range!");
+    throw runtime_error("General runtime error!");
+}
+
+int main() {
+    try {
+        process(1);
+    } catch (const invalid_argument& e) {
+        cout << "Invalid Arg Handler: " << e.what() << endl;
+    } catch (const out_of_range& e) {
+        cout << "Out of Range Handler: " << e.what() << endl;
+    } catch (const exception& e) {
+        cout << "General Exception Handler: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "catch (const invalid_argument& e) { ... }", constructType: "Condition & Branch", title: "Specific Derived Exception Catch", explanation: "Catches specific invalid_argument exception.", keyDetails: [{ variableOrConstruct: "invalid_argument", role: "Specific Handler", whyThisWay: "Catches specific derived exception first." }] },
+          { lineNum: 2, codeSnippet: "catch (const out_of_range& e) { ... }", constructType: "Condition & Branch", title: "Secondary Exception Catch", explanation: "Catches specific out_of_range exception.", keyDetails: [{ variableOrConstruct: "out_of_range", role: "Secondary Handler", whyThisWay: "Catches out of range exception." }] },
+          { lineNum: 3, codeSnippet: "catch (const exception& e) { ... }", constructType: "Return / Cleanup", title: "General Base Exception Catch Fallback", explanation: "Catches any remaining derived std::exception objects as fallback.", keyDetails: [{ variableOrConstruct: "std::exception", role: "Base Fallback Handler", whyThisWay: "Catches all remaining standard exceptions." }] }
+        ]
+      },
+      {
+        id: 5, name: 'Approach 5: Custom User-Defined Exception Class (PRO)', category: 'PRO / Custom Exception',
+        description: 'Creates custom exception class inheriting from std::exception and overriding what().',
+        prosCons: 'Pros: Domain-specific custom error types and messages. Cons: Requires writing custom class.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 34. Exception Handling - Approach 5: Custom Exception
+#include <iostream>
+#include <exception>
+#include <string>
+using namespace std;
+
+class DatabaseException : public exception {
+private:
+    string msg;
+public:
+    DatabaseException(const string& m) : msg(m) {}
+    const char* what() const noexcept override {
+        return msg.c_str();
+    }
+};
+
+int main() {
+    try {
+        throw DatabaseException("Connection timeout!");
+    } catch (const DatabaseException& e) {
+        cout << "DB Error: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "class DatabaseException : public exception { ... };", constructType: "Header / Include", title: "Custom Exception Class Definition", explanation: "Inherits from std::exception base class.", keyDetails: [{ variableOrConstruct: "public exception", role: "Base Class Inheritance", whyThisWay: "Integrates with std::exception hierarchy." }] },
+          { lineNum: 2, codeSnippet: "const char* what() const noexcept override { return msg.c_str(); }", constructType: "Function Signature", title: "Override Virtual what() Method", explanation: "Overrides virtual what() method decorated with noexcept to return custom error string.", keyDetails: [{ variableOrConstruct: "what() const noexcept", role: "Virtual Method Override", whyThisWay: "Returns custom error string safely." }] },
+          { lineNum: 3, codeSnippet: "throw DatabaseException('Connection timeout!');", constructType: "Condition & Branch", title: "Throw Custom Exception", explanation: "Throws instance of custom DatabaseException.", keyDetails: [{ variableOrConstruct: "DatabaseException", role: "Custom Exception Object", whyThisWay: "Signals domain-specific error." }] }
+        ]
+      },
+      {
+        id: 6, name: 'Approach 6: Exception Re-throwing (throw;) (PRO)', category: 'PRO / Re-throwing',
+        description: 'Catches, logs, and re-throws exception using throw; statement.',
+        prosCons: 'Pros: Intercepts error for logging while preserving original exception for higher-level handler. Cons: Multi-level error propagation.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 34. Exception Handling - Approach 6: Re-throwing
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+void logAndRethrow() {
+    try {
+        throw runtime_error("Network Timeout!");
+    } catch (...) {
+        cout << "[LOG] Logging exception before rethrow..." << endl;
+        throw;
+    }
+}
+
+int main() {
+    try {
+        logAndRethrow();
+    } catch (const runtime_error& e) {
+        cout << "Caught rethrown: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "catch (...) { cout << '[LOG] ...'; throw; }", constructType: "Condition & Branch", title: "Catch All & Log Interceptor", explanation: "Catches any exception, executes logging, then calls throw; to rethrow active exception.", keyDetails: [{ variableOrConstruct: "throw;", role: "Rethrow Statement", whyThisWay: "Rethrows exact active exception object." }] },
+          { lineNum: 2, codeSnippet: "logAndRethrow()", constructType: "Condition & Branch", title: "Invoke Function That Rethrows", explanation: "Executes logAndRethrow function.", keyDetails: [{ variableOrConstruct: "logAndRethrow", role: "Rethrow Invocation", whyThisWay: "Triggers rethrow flow." }] },
+          { lineNum: 3, codeSnippet: "catch (const runtime_error& e) { cout << 'Caught rethrown: ' << e.what(); }", constructType: "Return / Cleanup", title: "Catch Rethrown Exception in Main", explanation: "Catches original rethrown runtime_error exception in main.", keyDetails: [{ variableOrConstruct: "catch (runtime_error)", role: "Outer Handler", whyThisWay: "Handles rethrown exception." }] }
+        ]
+      },
+      {
+        id: 7, name: 'Approach 7: RAII Stack Unwinding Destructor Safety (PRO)', category: 'PRO / Stack Unwinding',
+        description: 'Demonstrates automatic destructor invocation on stack objects during exception stack unwinding.',
+        prosCons: 'Pros: Prevents resource leaks during exceptions. Cons: Destructors MUST NOT throw exceptions.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 34. Exception Handling - Approach 7: Stack Unwinding
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+struct Resource {
+    Resource() { cout << "Resource Acquired!" << endl; }
+    ~Resource() { cout << "Resource Released by Stack Unwinding!" << endl; }
+};
+
+void fail() {
+    Resource res;
+    throw runtime_error("Error inside fail()");
+}
+
+int main() {
+    try {
+        fail();
+    } catch (const runtime_error& e) {
+        cout << "Caught: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "~Resource() { cout << 'Resource Released by Stack Unwinding!'; }", constructType: "Function Signature", title: "RAII Destructor Cleanup", explanation: "Destructor executes automatically during stack unwinding when exception is thrown.", keyDetails: [{ variableOrConstruct: "~Resource()", role: "RAII Destructor", whyThisWay: "Guarantees resource release during unwinding." }] },
+          { lineNum: 2, codeSnippet: "Resource res; throw runtime_error(...);", constructType: "Condition & Branch", title: "Instantiate & Throw", explanation: "Instantiates stack object res then throws runtime error.", keyDetails: [{ variableOrConstruct: "Resource res", role: "Stack Object", whyThisWay: "Stack frame object." }] },
+          { lineNum: 3, codeSnippet: "catch (const runtime_error& e)", constructType: "Return / Cleanup", title: "Catch After Unwinding Complete", explanation: "Catches exception after stack unwinding destroyed res object.", keyDetails: [{ variableOrConstruct: "catch", role: "Unwound Catch", whyThisWay: "Catches exception post-unwinding." }] }
+        ]
+      },
+      {
+        id: 8, name: 'Approach 8: Specifying Non-Throwing Functions (noexcept) (PRO)', category: 'PRO / noexcept Specifier',
+        description: 'Uses noexcept specifier to signal compiler that function will not throw exceptions.',
+        prosCons: 'Pros: Enables compiler optimizations and move constructor optimizations in STL containers. Cons: Calls std::terminate if noexcept function throws.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 34. Exception Handling - Approach 8: noexcept
+#include <iostream>
+using namespace std;
+
+void safeFunction() noexcept {
+    cout << "Non-throwing noexcept function executed safely!" << endl;
+}
+
+int main() {
+    cout << "Is safeFunction noexcept? " << (noexcept(safeFunction()) ? "Yes" : "No") << endl;
+    safeFunction();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "void safeFunction() noexcept { ... }", constructType: "Function Signature", title: "noexcept Function Decorator", explanation: "Declares safeFunction will never throw exceptions, allowing compiler optimizations.", keyDetails: [{ variableOrConstruct: "noexcept", role: "Non-Throwing Guarantee", whyThisWay: "Guarantees function does not throw." }] },
+          { lineNum: 2, codeSnippet: "noexcept(safeFunction())", constructType: "Condition & Branch", title: "Compile-Time noexcept Operator Check", explanation: "Queries compile-time noexcept status of function.", keyDetails: [{ variableOrConstruct: "noexcept operator", role: "Compile Check", whyThisWay: "Inspects noexcept property at build time." }] },
+          { lineNum: 3, codeSnippet: "safeFunction()", constructType: "Return / Cleanup", title: "Invoke noexcept Function", explanation: "Executes safeFunction safely.", keyDetails: [{ variableOrConstruct: "safeFunction", role: "Function Call", whyThisWay: "Invokes safe function." }] }
+        ]
+      },
+      {
+        id: 9, name: 'Approach 9: Catching Memory Allocation Failures (std::bad_alloc) (PRO)', category: 'PRO / bad_alloc',
+        description: 'Catches std::bad_alloc thrown when heap memory allocation fails.',
+        prosCons: 'Pros: Prevents process crash on memory exhaustion. Cons: Hard to recover cleanly from out-of-memory.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 34. Exception Handling - Approach 9: bad_alloc
+#include <iostream>
+#include <new>
+using namespace std;
+
+int main() {
+    try {
+        size_t huge = 1000000000000000000ULL;
+        char* ptr = new char[huge];
+        delete[] ptr;
+    } catch (const bad_alloc& e) {
+        cout << "Caught bad_alloc: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "char* ptr = new char[huge];", constructType: "Variable & Initializer", title: "Enormous Heap Allocation Attempt", explanation: "Attempts allocating impossible byte quantity, triggering std::bad_alloc.", keyDetails: [{ variableOrConstruct: "new char[huge]", role: "Heap Allocation", whyThisWay: "Triggers heap allocation failure." }] },
+          { lineNum: 2, codeSnippet: "catch (const bad_alloc& e)", constructType: "Condition & Branch", title: "Catch Heap Allocation Exception", explanation: "Catches std::bad_alloc thrown by operator new.", keyDetails: [{ variableOrConstruct: "bad_alloc", role: "Allocation Error Exception", whyThisWay: "Catches out-of-memory exception." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Caught bad_alloc: ' << e.what();", constructType: "Return / Cleanup", title: "Output Allocation Exception Message", explanation: "Prints 'Caught bad_alloc: std::bad_alloc'.", keyDetails: [{ variableOrConstruct: "e.what()", role: "Output", whyThisWay: "Displays bad_alloc message." }] }
+        ]
+      },
+      {
+        id: 10, name: 'Approach 10: Function-Try-Blocks in Constructor Initializers (PRO)', category: 'PRO / Function-Try-Block',
+        description: 'Uses function-try-block syntax to catch exceptions thrown during constructor initializer list execution.',
+        prosCons: 'Pros: Only way to catch exceptions from member initializer lists. Cons: Rare syntax.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 34. Exception Handling - Approach 10: Function-Try-Block
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+struct ThrowingMember {
+    ThrowingMember() { throw runtime_error("Member constructor failed!"); }
+};
+
+class MyClass {
+private:
+    ThrowingMember mem;
+public:
+    MyClass() try : mem() {
+        cout << "Constructor body." << endl;
+    } catch (const runtime_error& e) {
+        cout << "Function-try-block caught: " << e.what() << endl;
+    }
+};
+
+int main() {
+    try {
+        MyClass obj;
+    } catch (...) {
+        cout << "Caught in main." << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "MyClass() try : mem() { ... }", constructType: "Function Signature", title: "Function-Try-Block Constructor Header", explanation: "Encloses constructor initializer list inside try block.", keyDetails: [{ variableOrConstruct: "try : mem()", role: "Function Try Block", whyThisWay: "Guards initializer list." }] },
+          { lineNum: 2, codeSnippet: "catch (const runtime_error& e) { cout << 'Function-try-block caught: ' << e.what(); }", constructType: "Condition & Branch", title: "Catch Initializer Exception", explanation: "Catches exception thrown while initializing member mem.", keyDetails: [{ variableOrConstruct: "catch (runtime_error)", role: "Member Exception Catch", whyThisWay: "Catches member initialization error." }] },
+          { lineNum: 3, codeSnippet: "catch (...) { cout << 'Caught in main.'; }", constructType: "Return / Cleanup", title: "Catch Auto-Rethrown Exception in Main", explanation: "Function-try-block constructors automatically rethrow exceptions after catch block.", keyDetails: [{ variableOrConstruct: "catch (...)", role: "Outer Handler", whyThisWay: "Catches rethrown constructor exception." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem35Details(): LearnModule {
+  return {
+    id: 'easy_class_basic',
+    title: '35. Classes & Access Modifiers',
+    category: 'OOP Basics',
+    difficulty: 'easy',
+    shortDesc: 'Object-oriented encapsulation with public and private members.',
+    fullCode: `// 35. Classes & Access Modifiers - Approach 1: Public & Private Members
+#include <iostream>
+#include <string>
+using namespace std;
+
+class BankAccount {
+private:
+    double balance;
+public:
+    BankAccount(double initialBalance) : balance(initialBalance) {}
+    void deposit(double amount) { balance += amount; }
+    double getBalance() const { return balance; }
+};
+
+int main() {
+    BankAccount acc(100.0);
+    acc.deposit(50.0);
+    cout << "Current Balance: $" << acc.getBalance() << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: '35. Classes & Access Modifiers',
+      objective: 'Master Object-Oriented Encapsulation: class vs struct, public, private, protected access specifiers, constructors, member initializer lists, getters, setters, and static members.',
+      description: 'Implement **Classes & Access Modifiers** (OOP Basics). Object-oriented encapsulation with public and private members. Construct an efficient solution that optimizes runtime performance and respects memory bounds.',
+      inputDesc: 'Object instantiation calls, member method invocations, and state mutations.',
+      outputDesc: 'Encapsulated member state values, constructor logs, and method execution results.',
+      takeaways: [
+        'class members are private by default; struct members are public by default',
+        'Encapsulation hides implementation details behind public getters and setters',
+        'Member initializer lists (: var(val)) initialize members directly before constructor body executes',
+        'Const member functions (void print() const) guarantee they will not mutate member variables'
+      ],
+      examples: [
+        { id: 1, input: 'acc.deposit(50.0)', output: 'Balance: $150.00', explanation: 'Mutates private balance field through public deposit method.' },
+        { id: 2, input: 'Car c("Toyota", 2024)', output: 'Model: Toyota, Year: 2024', explanation: 'Initializes member variables via constructor initializer list.' },
+        { id: 3, input: 'Counter::getCount()', output: 'Count: 3', explanation: 'Static class method accessing shared static count variable.' }
+      ],
+      constraints: ['Private member variables cannot be accessed directly outside class scope.', 'Const objects can only call const member functions.'],
+      companies: ['Google', 'Meta', 'Microsoft', 'Amazon', 'Apple'],
+      acceptanceRate: '94.5%',
+      totalAccepted: '3,120,000'
+    },
+    approaches: [
+      {
+        id: 1, name: 'Approach 1: Basic Class Declaration with Public & Private Access (FREE)', category: 'FREE / Encapsulation',
+        description: 'Encapsulates private state behind public getter and setter methods.',
+        prosCons: 'Pros: Fundamental OOP encapsulation. Cons: Boilerplate getter/setter functions.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: true,
+        code: `// 35. Classes - Approach 1: Public & Private
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Person {
+private:
+    string name;
+    int age;
+public:
+    void setName(const string& n) { name = n; }
+    void setAge(int a) { age = a; }
+    string getName() const { return name; }
+    int getAge() const { return age; }
+};
+
+int main() {
+    Person p;
+    p.setName("Alice");
+    p.setAge(25);
+    cout << p.getName() << " is " << p.getAge() << " years old." << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "private: string name; int age;", constructType: "Variable & Initializer", title: "Private Member Encapsulation", explanation: "Restricts direct member access from outside class scope.", keyDetails: [{ variableOrConstruct: "private:", role: "Access Modifier", whyThisWay: "Encapsulates private data." }] },
+          { lineNum: 2, codeSnippet: "public: void setName(const string& n) { name = n; }", constructType: "Function Signature", title: "Public Setter Method", explanation: "Provides controlled public interface to mutate private name member.", keyDetails: [{ variableOrConstruct: "public:", role: "Public Interface", whyThisWay: "Exposes public method interface." }] },
+          { lineNum: 3, codeSnippet: "string getName() const { return name; }", constructType: "Return / Cleanup", title: "Const Getter Method", explanation: "Returns private member value without allowing object mutation.", keyDetails: [{ variableOrConstruct: "const", role: "Const Qualifier", whyThisWay: "Guarantees read-only behavior." }] }
+        ]
+      },
+      {
+        id: 2, name: 'Approach 2: Class Constructors & Initializer Lists (FREE)', category: 'FREE / Initializer List',
+        description: 'Initializes class members directly using member initializer list.',
+        prosCons: 'Pros: Avoids default construction followed by assignment. Cons: Syntax order must match declaration order.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: true,
+        code: `// 35. Classes - Approach 2: Initializer List
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Rectangle {
+private:
+    int width;
+    int height;
+public:
+    Rectangle(int w, int h) : width(w), height(h) {}
+    int getArea() const { return width * height; }
+};
+
+int main() {
+    Rectangle rect(10, 5);
+    cout << "Area: " << rect.getArea() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Rectangle(int w, int h) : width(w), height(h) {}", constructType: "Function Signature", title: "Member Initializer List Constructor", explanation: "Initializes width and height directly before constructor body executes.", keyDetails: [{ variableOrConstruct: ": width(w), height(h)", role: "Member Initializer List", whyThisWay: "Direct member initialization." }] },
+          { lineNum: 2, codeSnippet: "int getArea() const { return width * height; }", constructType: "Return / Cleanup", title: "Const Method Area Calculation", explanation: "Calculates area width * height without mutating object.", keyDetails: [{ variableOrConstruct: "getArea()", role: "Method", whyThisWay: "Calculates area." }] },
+          { lineNum: 3, codeSnippet: "Rectangle rect(10, 5)", constructType: "Variable & Initializer", title: "Instantiate Object with Constructor", explanation: "Instantiates rect object passing 10 and 5.", keyDetails: [{ variableOrConstruct: "rect(10, 5)", role: "Object Instantiation", whyThisWay: "Constructs object." }] }
+        ]
+      },
+      {
+        id: 3, name: 'Approach 3: Const Member Functions & Read-Only Objects (PRO)', category: 'PRO / Const Members',
+        description: 'Enforces const immutability on member functions allowing invocation on const objects.',
+        prosCons: 'Pros: Enables const-correct object interfaces. Cons: Cannot mutate member variables inside const methods.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 35. Classes - Approach 3: Const Objects
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Book {
+private:
+    string title;
+public:
+    Book(const string& t) : title(t) {}
+    void printTitle() const { cout << "Book: " << title << endl; }
+};
+
+int main() {
+    const Book b("Clean Code");
+    b.printTitle();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "void printTitle() const { cout << 'Book: ' << title; }", constructType: "Function Signature", title: "Const Member Function Qualifier", explanation: "Qualifies method with const keyword guaranteeing zero side-effects on member state.", keyDetails: [{ variableOrConstruct: "const method qualifier", role: "Const Qualifier", whyThisWay: "Guarantees non-mutating method." }] },
+          { lineNum: 2, codeSnippet: "const Book b('Clean Code');", constructType: "Variable & Initializer", title: "Const Read-Only Object", explanation: "Instantiates const Book object which can only invoke const methods.", keyDetails: [{ variableOrConstruct: "const Book", role: "Const Object", whyThisWay: "Creates read-only object." }] },
+          { lineNum: 3, codeSnippet: "b.printTitle();", constructType: "Return / Cleanup", title: "Invoke Const Method on Const Object", explanation: "Invokes printTitle() on const object b.", keyDetails: [{ variableOrConstruct: "b.printTitle()", role: "Const Method Call", whyThisWay: "Calls const method." }] }
+        ]
+      },
+      {
+        id: 4, name: 'Approach 4: Static Class Members & Methods (PRO)', category: 'PRO / Static Members',
+        description: 'Shares static member variable across all class instances with static method accessor.',
+        prosCons: 'Pros: Shared class-level state without global variables. Cons: Requires out-of-line static member definition.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 35. Classes - Approach 4: Static Members
+#include <iostream>
+using namespace std;
+
+class Widget {
+private:
+    static int count;
+public:
+    Widget() { count++; }
+    ~Widget() { count--; }
+    static int getCount() { return count; }
+};
+
+int Widget::count = 0;
+
+int main() {
+    Widget w1, w2, w3;
+    cout << "Active Widgets: " << Widget::getCount() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "static int count;", constructType: "Variable & Initializer", title: "Static Member Variable Declaration", explanation: "Declares class-level static count shared by all instances.", keyDetails: [{ variableOrConstruct: "static int count", role: "Class State", whyThisWay: "Single shared counter across instances." }] },
+          { lineNum: 2, codeSnippet: "int Widget::count = 0;", constructType: "Variable & Initializer", title: "Out-of-Line Definition", explanation: "Defines and initializes static member variable in global scope.", keyDetails: [{ variableOrConstruct: "Widget::count = 0", role: "Static Definition", whyThisWay: "Allocates static memory." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Active Widgets: ' << Widget::getCount();", constructType: "Return / Cleanup", title: "Invoke Static Method", explanation: "Calls static getCount() method without object instance.", keyDetails: [{ variableOrConstruct: "Widget::getCount()", role: "Static Method Call", whyThisWay: "Reads shared class state." }] }
+        ]
+      },
+      {
+        id: 5, name: 'Approach 5: Multiple Constructor Overloading (PRO)', category: 'PRO / Overloaded Constructors',
+        description: 'Provides default and parameterized overloaded constructor signatures.',
+        prosCons: 'Pros: Flexible object instantiation choices. Cons: Code duplication if constructors do not delegate.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 35. Classes - Approach 5: Overloaded Constructors
+#include <iostream>
+#include <string>
+using namespace std;
+
+class User {
+private:
+    string name;
+    int roleId;
+public:
+    User() : name("Guest"), roleId(0) {}
+    User(string n, int r) : name(n), roleId(r) {}
+    void print() const { cout << name << " (Role: " << roleId << ")" << endl; }
+};
+
+int main() {
+    User u1;
+    User u2("Admin", 1);
+    u1.print(); u2.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "User() : name('Guest'), roleId(0) {}", constructType: "Function Signature", title: "Default Constructor Overload", explanation: "Initializes User with default 'Guest' name and role 0.", keyDetails: [{ variableOrConstruct: "User()", role: "Default Constructor", whyThisWay: "Provides default fallback state." }] },
+          { lineNum: 2, codeSnippet: "User(string n, int r) : name(n), roleId(r) {}", constructType: "Function Signature", title: "Parameterized Constructor Overload", explanation: "Initializes User with custom name and roleId arguments.", keyDetails: [{ variableOrConstruct: "User(string, int)", role: "Parameterized Constructor", whyThisWay: "Custom initialization." }] },
+          { lineNum: 3, codeSnippet: "User u1; User u2('Admin', 1);", constructType: "Variable & Initializer", title: "Instantiate Overloaded Objects", explanation: "Instantiates u1 using default constructor and u2 using parameterized constructor.", keyDetails: [{ variableOrConstruct: "User u1, u2", role: "Overloaded Instantiation", whyThisWay: "Demonstrates constructor overloading." }] }
+        ]
+      },
+      {
+        id: 6, name: 'Approach 6: Class Encapsulating Dynamic Heap Resource (RAII) (PRO)', category: 'PRO / RAII Class',
+        description: 'Encapsulates dynamic heap array allocation and destructor deallocation inside class.',
+        prosCons: 'Pros: Automatic resource management (RAII). Cons: Requires writing Rule of 5 for safety.',
+        timeComplexity: 'O(N)', spaceComplexity: 'O(N)', isFree: false,
+        code: `// 35. Classes - Approach 6: RAII Class
+#include <iostream>
+using namespace std;
+
+class IntArray {
+private:
+    int* data;
+    size_t size;
+public:
+    IntArray(size_t s) : size(s), data(new int[s]()) {}
+    ~IntArray() { delete[] data; }
+    int& operator[](size_t idx) { return data[idx]; }
+    size_t getSize() const { return size; }
+};
+
+int main() {
+    IntArray arr(5);
+    arr[0] = 42;
+    cout << "arr[0] = " << arr[0] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "IntArray(size_t s) : size(s), data(new int[s]()) {}", constructType: "Function Signature", title: "RAII Constructor Heap Allocation", explanation: "Allocates dynamic heap array of s integers initialized to 0.", keyDetails: [{ variableOrConstruct: "new int[s]()", role: "Heap Allocation", whyThisWay: "Allocates dynamic resource." }] },
+          { lineNum: 2, codeSnippet: "~IntArray() { delete[] data; }", constructType: "Function Signature", title: "RAII Destructor Heap Cleanup", explanation: "Automatically frees dynamic heap array when IntArray object leaves scope.", keyDetails: [{ variableOrConstruct: "delete[] data", role: "Heap Cleanup", whyThisWay: "Prevents heap memory leaks." }] },
+          { lineNum: 3, codeSnippet: "int& operator[](size_t idx) { return data[idx]; }", constructType: "Function Signature", title: "Subscript Operator Overload", explanation: "Overloads operator[] returning reference to index byte.", keyDetails: [{ variableOrConstruct: "operator[]", role: "Subscript Overload", whyThisWay: "Enables array subscript syntax." }] }
+        ]
+      },
+      {
+        id: 7, name: 'Approach 7: Friend Functions & Friend Classes (PRO)', category: 'PRO / Friend Access',
+        description: 'Grants external function access to private class members using friend keyword.',
+        prosCons: 'Pros: Allows specific non-member functions to access private state. Cons: Weakens strict encapsulation.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 35. Classes - Approach 7: Friend Function
+#include <iostream>
+using namespace std;
+
+class Box {
+private:
+    int width;
+public:
+    Box(int w) : width(w) {}
+    friend void printWidth(const Box& b);
+};
+
+void printWidth(const Box& b) {
+    cout << "Box Width: " << b.width << endl;
+}
+
+int main() {
+    Box box(50);
+    printWidth(box);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "friend void printWidth(const Box& b);", constructType: "Function Signature", title: "Friend Declaration", explanation: "Grants non-member printWidth function access to private width member.", keyDetails: [{ variableOrConstruct: "friend", role: "Friend Access", whyThisWay: "Bypasses private access check." }] },
+          { lineNum: 2, codeSnippet: "void printWidth(const Box& b) { cout << 'Box Width: ' << b.width; }", constructType: "Condition & Branch", title: "Access Private Member in Friend", explanation: "Accesses private b.width directly inside non-member function.", keyDetails: [{ variableOrConstruct: "b.width", role: "Private Field Access", whyThisWay: "Reads private member via friend declaration." }] },
+          { lineNum: 3, codeSnippet: "printWidth(box)", constructType: "Return / Cleanup", title: "Invoke Friend Function", explanation: "Invokes non-member printWidth function.", keyDetails: [{ variableOrConstruct: "printWidth", role: "Function Call", whyThisWay: "Calls friend function." }] }
+        ]
+      },
+      {
+        id: 8, name: 'Approach 8: Explicit Constructor Conversion Guard (explicit) (PRO)', category: 'PRO / explicit Guard',
+        description: 'Prevents implicit single-argument constructor type conversions using explicit.',
+        prosCons: 'Pros: Prevents silent unexpected implicit type casting bugs. Cons: Requires explicit constructor calls.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 35. Classes - Approach 8: Explicit Constructor
+#include <iostream>
+using namespace std;
+
+class Distance {
+private:
+    int meters;
+public:
+    explicit Distance(int m) : meters(m) {}
+    int getMeters() const { return meters; }
+};
+
+void displayDistance(Distance d) {
+    cout << "Meters: " << d.getMeters() << endl;
+}
+
+int main() {
+    displayDistance(Distance(5));
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "explicit Distance(int m) : meters(m) {}", constructType: "Function Signature", title: "Explicit Single-Arg Constructor", explanation: "Blocks implicit conversion from int to Distance (e.g. displayDistance(5)).", keyDetails: [{ variableOrConstruct: "explicit", role: "Conversion Guard", whyThisWay: "Prevents implicit constructor conversion." }] },
+          { lineNum: 2, codeSnippet: "displayDistance(Distance(5));", constructType: "Variable & Initializer", title: "Explicit Constructor Call", explanation: "Constructs Distance explicitly.", keyDetails: [{ variableOrConstruct: "Distance(5)", role: "Explicit Call", whyThisWay: "Passes explicit Distance object." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 9, name: 'Approach 9: Operator Overloading inside Class Member (PRO)', category: 'PRO / Operator Overloading',
+        description: 'Overloads operator+ and operator== member functions inside class.',
+        prosCons: 'Pros: Natural infix mathematical expressions for custom objects. Cons: Must obey standard math semantics.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 35. Classes - Approach 9: Operator Overloading
+#include <iostream>
+using namespace std;
+
+class Complex {
+public:
+    double real, imag;
+    Complex(double r = 0, double i = 0) : real(r), imag(i) {}
+    Complex operator+(const Complex& other) const {
+        return Complex(real + other.real, imag + other.imag);
+    }
+    bool operator==(const Complex& other) const {
+        return real == other.real && imag == other.imag;
+    }
+};
+
+int main() {
+    Complex c1(3.0, 4.0), c2(1.0, 2.0);
+    Complex sum = c1 + c2;
+    cout << "Sum: " << sum.real << " + " << sum.imag << "i" << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Complex operator+(const Complex& other) const { ... }", constructType: "Function Signature", title: "Operator+ Overload Method", explanation: "Overloads + operator returning new Complex sum object.", keyDetails: [{ variableOrConstruct: "operator+", role: "Addition Overload", whyThisWay: "Enables c1 + c2 syntax." }] },
+          { lineNum: 2, codeSnippet: "Complex sum = c1 + c2;", constructType: "Variable & Initializer", title: "Infix Addition Invocation", explanation: "Invokes c1.operator+(c2) using clean infix + syntax.", keyDetails: [{ variableOrConstruct: "c1 + c2", role: "Infix Operation", whyThisWay: "Infix operator syntax." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Sum: ' << sum.real...", constructType: "Return / Cleanup", title: "Output Complex Sum", explanation: "Prints 'Sum: 4 + 6i'.", keyDetails: [{ variableOrConstruct: "sum.real", role: "Output", whyThisWay: "Displays result." }] }
+        ]
+      },
+      {
+        id: 10, name: 'Approach 10: Nested Inner Helper Class & Enum (PRO)', category: 'PRO / Nested Class',
+        description: 'Encapsulates inner helper class Node and State enum inside parent class.',
+        prosCons: 'Pros: Clean namespace encapsulation for helper structures. Cons: Increased class scoping depth.',
+        timeComplexity: 'O(1)', spaceComplexity: 'O(1)', isFree: false,
+        code: `// 35. Classes - Approach 10: Nested Class & Enum
+#include <iostream>
+#include <string>
+using namespace std;
+
+class NetworkConnection {
+public:
+    enum class State { DISCONNECTED, CONNECTING, CONNECTED };
+    class Packet {
+    public:
+        int id;
+        Packet(int i) : id(i) {}
+    };
+private:
+    State state;
+public:
+    NetworkConnection() : state(State::DISCONNECTED) {}
+    void connect() { state = State::CONNECTED; }
+    bool isConnected() const { return state == State::CONNECTED; }
+};
+
+int main() {
+    NetworkConnection conn;
+    conn.connect();
+    NetworkConnection::Packet p(101);
+    cout << "Connected: " << (conn.isConnected() ? "Yes" : "No") << " | Packet ID: " << p.id << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "enum class State { DISCONNECTED, CONNECTING, CONNECTED };", constructType: "Header / Include", title: "Nested Enum Class", explanation: "Encapsulates scoped State enum inside NetworkConnection class scope.", keyDetails: [{ variableOrConstruct: "enum class State", role: "Nested Enum", whyThisWay: "Scoped state constants." }] },
+          { lineNum: 2, codeSnippet: "class Packet { public: int id; Packet(int i) : id(i) {} };", constructType: "Header / Include", title: "Nested Helper Class", explanation: "Encapsulates Packet helper class inside NetworkConnection.", keyDetails: [{ variableOrConstruct: "class Packet", role: "Nested Class", whyThisWay: "Helper class encapsulation." }] },
+          { lineNum: 3, codeSnippet: "NetworkConnection::Packet p(101);", constructType: "Variable & Initializer", title: "Instantiate Nested Class Object", explanation: "Instantiates Packet object via parent scope resolution operator NetworkConnection::Packet.", keyDetails: [{ variableOrConstruct: "NetworkConnection::Packet", role: "Scoped Nested Class", whyThisWay: "Instantiates nested class." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -6056,6 +7716,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_set_std") return getProblem28Details();
   if (id === "easy_map_std") return getProblem29Details();
   if (id === "easy_unordered_map") return getProblem30Details();
+  if (id === "easy_algorithms_basic") return getProblem31Details();
+  if (id === "easy_recursion_basic") return getProblem32Details();
+  if (id === "easy_bit_basic") return getProblem33Details();
+  if (id === "easy_exception_basic") return getProblem34Details();
+  if (id === "easy_class_basic") return getProblem35Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
