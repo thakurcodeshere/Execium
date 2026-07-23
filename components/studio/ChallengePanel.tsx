@@ -21,8 +21,27 @@ export default function ChallengePanel() {
 
       const attempted = localStorage.getItem("execium_attempted_challenges");
       if (attempted) setLocalAttempted(JSON.parse(attempted));
+
+      if (activeChallengeId) {
+        const savedViewState = localStorage.getItem(`execium_challenge_state_${activeChallengeId}`);
+        if (savedViewState) {
+          const { tab, solIdx } = JSON.parse(savedViewState);
+          if (tab) setActiveTab(tab);
+          if (typeof solIdx === 'number') setSelectedSolIdx(solIdx);
+        }
+      }
     } catch {}
   }, [activeChallengeId, attemptedChallenges]);
+
+  useEffect(() => {
+    if (!activeChallengeId) return;
+    try {
+      localStorage.setItem(`execium_challenge_state_${activeChallengeId}`, JSON.stringify({
+        tab: activeTab,
+        solIdx: selectedSolIdx
+      }));
+    } catch {}
+  }, [activeChallengeId, activeTab, selectedSolIdx]);
 
   if (!activeChallengeId) return null;
 

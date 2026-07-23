@@ -45,8 +45,26 @@ export default function LearnPanel() {
       } else {
         setSubmissions([]);
       }
+
+      // Restore active tab and selected approach index for this module
+      const savedViewState = localStorage.getItem(`execium_learn_state_${activeLearnModuleId}`);
+      if (savedViewState) {
+        const { tab, approachIdx } = JSON.parse(savedViewState);
+        if (tab) setActiveTab(tab);
+        if (typeof approachIdx === 'number') setSelectedApproachIdx(approachIdx);
+      }
     } catch {}
   }, [activeLearnModuleId]);
+
+  useEffect(() => {
+    if (!activeLearnModuleId) return;
+    try {
+      localStorage.setItem(`execium_learn_state_${activeLearnModuleId}`, JSON.stringify({
+        tab: activeTab,
+        approachIdx: selectedApproachIdx
+      }));
+    } catch {}
+  }, [activeLearnModuleId, activeTab, selectedApproachIdx]);
 
   if (!activeLearnModuleId) return null;
 

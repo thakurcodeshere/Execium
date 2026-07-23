@@ -2,27 +2,131 @@
 import { useState, useEffect, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useStore } from "@/lib/store";
-import { hydrateSessionFromStore } from "@/lib/session";
 import LBarVertical from "@/components/studio/LBarVertical";
 import LBarHorizontal from "@/components/studio/LBarHorizontal";
 import AIAgentPanel from "@/components/studio/AIAgentPanel";
 import ChallengePanel from "@/components/studio/ChallengePanel";
 import LearnPanel from "@/components/studio/LearnPanel";
 
+import { getLearnModuleDetails } from "@/lib/learn";
+import { getChallengeDetails } from "@/lib/challenges";
+
 const CodeEditor = dynamic(() => import("@/components/studio/CodeEditor"), { ssr: false });
 
 export default function StudioPage() {
-  const { theme, showAI, isCollapsed, activeChallengeId, activeLearnModuleId } = useStore();
+  const { 
+    theme, showAI, isCollapsed, activeChallengeId, activeLearnModuleId,
+    setLearnModuleId, setChallengeId, setProjectId, setProjectName, setCode,
+    code, projectId, projectName, pid
+  } = useStore();
   const T = theme;
-
-  // Hydrate active session & URL search parameters on client mount
-  useEffect(() => {
-    hydrateSessionFromStore();
-  }, []);
+  const [hydrated, setHydrated] = useState(false);
 
   // Sidebar drag-to-resize states
   const [sidebarWidth, setSidebarWidth] = useState(64);
   const [isResizing, setIsResizing] = useState(false);
+
+  // 1. Initial State Restoration from URL query params or localStorage
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const learnParam = params.get("learn");
+      const challengeParam = params.get("challenge");
+      const projParam = params.get("proj");
+
+      if (learnParam) {
+        setLearnModuleId(learnParam);
+        const savedCode = localStorage.getItem(`execium_code_learn_${learnParam}`);
+        if (savedCode) {
+          setCode(savedCode);
+        } else {
+          const mod = getLearnModuleDetails(learnParam);
+          if (mod?.fullCode) setCode(mod.fullCode);
+        }
+      } else if (challengeParam) {
+        setChallengeId(challengeParam);
+        const savedCode = localStorage.getItem(`execium_code_challenge_${challengeParam}`);
+        if (savedCode) {
+          setCode(savedCode);
+        } else {
+          const ch = getChallengeDetails(challengeParam);
+          if (ch?.starterCode) setCode(ch.starterCode);
+        }
+      } else if (projParam) {
+        setProjectId(projParam);
+        const projs = localStorage.getItem("execium_projects");
+        if (projs) {
+          const list = JSON.parse(projs);
+          const found = list.find((p: any) => p.id === projParam);
+          if (found) {
+            setProjectName(found.name);
+            setCode(found.code);
+          }
+        }
+      } else {
+        // Fallback to active session snapshot in localStorage
+        const rawSession = localStorage.getItem("execium_studio_session");
+        if (rawSession) {
+          const session = JSON.parse(rawSession);
+          if (session.activeLearnModuleId) {
+            setLearnModuleId(session.activeLearnModuleId);
+            const savedCode = localStorage.getItem(`execium_code_learn_${session.activeLearnModuleId}`) || session.code;
+            if (savedCode) setCode(savedCode);
+          } else if (session.activeChallengeId) {
+            setChallengeId(session.activeChallengeId);
+            const savedCode = localStorage.getItem(`execium_code_challenge_${session.activeChallengeId}`) || session.code;
+            if (savedCode) setCode(savedCode);
+          } else if (session.projectId) {
+            setProjectId(session.projectId);
+            if (session.projectName) setProjectName(session.projectName);
+            if (session.code) setCode(session.code);
+          } else if (session.code) {
+            setCode(session.code);
+            if (session.projectName) setProjectName(session.projectName);
+          }
+        }
+      }
+    } catch {}
+    setHydrated(true);
+  }, []);
+
+  // 2. State & URL Synchronization effect (persist active session & URL query)
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      const session = {
+        activeLearnModuleId,
+        activeChallengeId,
+        projectId,
+        projectName,
+        code,
+        pid
+      };
+      localStorage.setItem("execium_studio_session", JSON.stringify(session));
+
+      // Also persist per-module code if in learn or challenge view
+      if (activeLearnModuleId && code) {
+        localStorage.setItem(`execium_code_learn_${activeLearnModuleId}`, code);
+      }
+      if (activeChallengeId && code) {
+        localStorage.setItem(`execium_code_challenge_${activeChallengeId}`, code);
+      }
+
+      // Update URL search parameters seamlessly without page reload
+      let newUrl = "/studio";
+      if (activeLearnModuleId) {
+        newUrl = `/studio?learn=${activeLearnModuleId}`;
+      } else if (activeChallengeId) {
+        newUrl = `/studio?challenge=${activeChallengeId}`;
+      } else if (projectId) {
+        newUrl = `/studio?proj=${projectId}`;
+      }
+
+      if (window.location.pathname + window.location.search !== newUrl) {
+        window.history.replaceState(null, "", newUrl);
+      }
+    } catch {}
+  }, [hydrated, activeLearnModuleId, activeChallengeId, projectId, projectName, code, pid]);
 
   const startResizing = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
