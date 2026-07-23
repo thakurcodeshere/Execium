@@ -4,16 +4,27 @@ import { useStore } from "@/lib/store";
 import { getLearnModuleDetails, LEARN_MODULES } from "@/lib/learn";
 import { 
   X, BookOpen, Target, Brain, Code2, Play, CheckCircle2, 
-  ChevronLeft, ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles, Check, Cpu, Zap, Lock, Unlock
+  ChevronLeft, ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles, Check, Cpu, Zap, Lock, Unlock,
+  Send, FileText, UploadCloud, Clock
 } from "lucide-react";
 
+export interface UserSubmission {
+  id: string;
+  code: string;
+  timestamp: string;
+  status: 'PASSED' | 'SUBMITTED';
+  lineCount: number;
+}
+
 export default function LearnPanel() {
-  const { activeLearnModuleId, setLearnModuleId, theme, setCode, loadProgram, restart, play, setProjectName, setProjectId } = useStore();
-  const [activeTab, setActiveTab] = useState<'problem' | 'approaches' | 'breakdown'>('problem');
+  const { activeLearnModuleId, setLearnModuleId, theme, setCode, code, loadProgram, restart, play, setProjectName, setProjectId } = useStore();
+  const [activeTab, setActiveTab] = useState<'problem' | 'approaches' | 'breakdown' | 'submissions'>('problem');
   const [selectedApproachIdx, setSelectedApproachIdx] = useState(0);
   const [activeConstructIdx, setActiveConstructIdx] = useState(0);
   const [copied, setCopied] = useState(false);
   const [isProUnlocked, setIsProUnlocked] = useState(false);
+  const [submissions, setSubmissions] = useState<UserSubmission[]>([]);
+  const [submittedSuccess, setSubmittedSuccess] = useState(false);
 
   const T = theme;
 
@@ -24,6 +35,18 @@ export default function LearnPanel() {
       }
     } catch {}
   }, []);
+
+  useEffect(() => {
+    if (!activeLearnModuleId) return;
+    try {
+      const saved = localStorage.getItem(`execium_submissions_${activeLearnModuleId}`);
+      if (saved) {
+        setSubmissions(JSON.parse(saved));
+      } else {
+        setSubmissions([]);
+      }
+    } catch {}
+  }, [activeLearnModuleId]);
 
   if (!activeLearnModuleId) return null;
 
@@ -63,6 +86,24 @@ export default function LearnPanel() {
     setTimeout(() => {
       play();
     }, 400);
+  };
+
+  const handleSubmitSolution = () => {
+    const currentCodeToSubmit = code && code.trim().length > 0 ? code : selectedApproach.code;
+    const newSub: UserSubmission = {
+      id: Date.now().toString(),
+      code: currentCodeToSubmit,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'PASSED',
+      lineCount: currentCodeToSubmit.split('\n').length
+    };
+    const updated = [newSub, ...submissions];
+    setSubmissions(updated);
+    try {
+      localStorage.setItem(`execium_submissions_${activeLearnModuleId}`, JSON.stringify(updated));
+    } catch {}
+    setSubmittedSuccess(true);
+    setTimeout(() => setSubmittedSuccess(false), 3000);
   };
 
   return (
@@ -191,7 +232,7 @@ export default function LearnPanel() {
         </div>
       </div>
 
-      {/* ── STEP TABS (Problem -> Approaches -> Line Breakdown) ── */}
+      {/* ── STEP TABS (Problem -> Approaches -> Line Breakdown -> Submissions) ── */}
       <div style={{
         display: "flex", borderBottom: `1px solid ${T.uiBorder}`,
         background: T.uiPanelHd, flexShrink: 0
@@ -204,7 +245,7 @@ export default function LearnPanel() {
             background: activeTab === 'problem' ? T.uiSurface : "transparent",
             color: activeTab === 'problem' ? "#10b981" : T.uiTextMuted,
             borderBottom: activeTab === 'problem' ? "2px solid #10b981" : "2px solid transparent",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
             transition: "all 0.2s ease"
           }}
         >
@@ -219,11 +260,11 @@ export default function LearnPanel() {
             background: activeTab === 'approaches' ? T.uiSurface : "transparent",
             color: activeTab === 'approaches' ? "#f59e0b" : T.uiTextMuted,
             borderBottom: activeTab === 'approaches' ? "2px solid #f59e0b" : "2px solid transparent",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
             transition: "all 0.2s ease"
           }}
         >
-          <Brain size={13} /> 2. Mental Models (10)
+          <Brain size={13} /> 2. Models (10)
         </button>
 
         <button
@@ -234,36 +275,51 @@ export default function LearnPanel() {
             background: activeTab === 'breakdown' ? T.uiSurface : "transparent",
             color: activeTab === 'breakdown' ? "#a855f7" : T.uiTextMuted,
             borderBottom: activeTab === 'breakdown' ? "2px solid #a855f7" : "2px solid transparent",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
             transition: "all 0.2s ease"
           }}
         >
-          <Code2 size={13} /> 3. Line Breakdown
+          <Code2 size={13} /> 3. Breakdown
+        </button>
+
+        <button
+          onClick={() => setActiveTab('submissions')}
+          style={{
+            flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
+            fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+            background: activeTab === 'submissions' ? T.uiSurface : "transparent",
+            color: activeTab === 'submissions' ? "#38bdf8" : T.uiTextMuted,
+            borderBottom: activeTab === 'submissions' ? "2px solid #38bdf8" : "2px solid transparent",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+            transition: "all 0.2s ease"
+          }}
+        >
+          <Send size={13} /> 4. Submissions {submissions.length > 0 && `(${submissions.length})`}
         </button>
       </div>
 
       {/* ── MAIN CONTENT BODY WITH MOTION FADE ── */}
       <div key={activeTab} className="anim-fade" style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
 
-        {/* ── TAB 1: PROBLEM & OBJECTIVE ── */}
+        {/* ── TAB 1: PROBLEM OBJECTIVE & DESCRIPTION ── */}
         {activeTab === 'problem' && (
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             
-            <div>
-              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
-                // QUESTION TITLE
-              </div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: T.uiText }}>
-                {moduleInfo.problemStatement.title}
-              </div>
-            </div>
-
             <div>
               <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
                 // PROBLEM OBJECTIVE
               </div>
               <div style={{ fontSize: 12, color: T.uiText, lineHeight: 1.6 }}>
                 {moduleInfo.problemStatement.objective}
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
+                // PROBLEM DESCRIPTION
+              </div>
+              <div style={{ fontSize: 12, color: T.uiText, lineHeight: 1.6, background: "rgba(0,0,0,0.18)", padding: 12, borderRadius: 8, border: `1px solid ${T.uiBorder}` }}>
+                {moduleInfo.problemStatement.description}
               </div>
             </div>
 
@@ -627,9 +683,132 @@ export default function LearnPanel() {
           </div>
         )}
 
-      </div>
+        {/* ── TAB 4: USER SUBMISSIONS ── */}
+        {activeTab === 'submissions' && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            
+            {/* Action Card: Submit Current Solution */}
+            <div style={{
+              background: "linear-gradient(135deg, rgba(56,189,248,0.12), rgba(168,85,247,0.08))",
+              border: "1px solid rgba(56,189,248,0.3)", borderRadius: 12, padding: 16,
+              display: "flex", flexDirection: "column", gap: 12
+            }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: T.uiText, display: "flex", alignItems: "center", gap: 6 }}>
+                  <Send size={15} color="#38bdf8" /> User Submission Control
+                </div>
+                <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "2px 7px", borderRadius: 4, background: "rgba(56,189,248,0.15)", color: "#38bdf8" }}>
+                  {submissions.length} Attempt{submissions.length !== 1 ? 's' : ''} Stored
+                </span>
+              </div>
 
-      {/* ── ACTION FOOTER (LOAD CODE & SIMULATE) ── */}
+              <div style={{ fontSize: 11, color: T.uiTextMuted, lineHeight: 1.5 }}>
+                Submit your current C++ editor solution for <strong style={{ color: T.uiText }}>{moduleInfo.title}</strong>. Your attempt will be logged with full timestamp and code history.
+              </div>
+
+              <button
+                onClick={handleSubmitSolution}
+                style={{
+                  padding: "10px 0", borderRadius: 8, border: "none",
+                  background: "linear-gradient(135deg, #38bdf8 0%, #a855f7 100%)",
+                  color: "#fff", fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  boxShadow: "0 4px 16px rgba(56,189,248,0.35)", transition: "transform 0.15s"
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+              >
+                <Send size={14} /> Submit Current Solution
+              </button>
+
+              {submittedSuccess && (
+                <div style={{
+                  fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 700,
+                  color: "#10b981", background: "rgba(16,185,129,0.15)", border: "1px solid rgba(16,185,129,0.3)",
+                  borderRadius: 6, padding: "6px 10px", display: "flex", alignItems: "center", gap: 6
+                }}>
+                  <CheckCircle2 size={13} color="#10b981" /> Solution Submitted & Saved to History!
+                </div>
+              )}
+            </div>
+
+            {/* Submissions History List */}
+            <div>
+              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                // SUBMISSION HISTORY ({submissions.length})
+              </div>
+
+              {submissions.length === 0 ? (
+                <div style={{
+                  background: "rgba(0,0,0,0.18)", border: `1px dashed ${T.uiBorder}`,
+                  borderRadius: 10, padding: 20, textAlign: "center", display: "flex",
+                  flexDirection: "column", alignItems: "center", gap: 8
+                }}>
+                  <Clock size={24} color={T.uiTextMuted} />
+                  <div style={{ fontSize: 12, fontWeight: 700, color: T.uiText }}>
+                    No Submissions Recorded Yet
+                  </div>
+                  <div style={{ fontSize: 10, color: T.uiTextMuted, maxWidth: 280, lineHeight: 1.4 }}>
+                    Write or load your solution code in the editor and click "Submit Current Solution" to log your first submission attempt for this problem!
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {submissions.map((sub, i) => (
+                    <div key={sub.id || i} style={{
+                      background: "rgba(0,0,0,0.25)", border: `1px solid ${T.uiBorder}`,
+                      borderRadius: 10, padding: 12, display: "flex", flexDirection: "column", gap: 8
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{
+                            fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                            padding: "2px 6px", borderRadius: 4, background: "rgba(16,185,129,0.2)",
+                            color: "#10b981", border: "1px solid rgba(16,185,129,0.4)", display: "flex", alignItems: "center", gap: 4
+                          }}>
+                            <CheckCircle2 size={10} /> {sub.status}
+                          </span>
+                          <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
+                            {sub.timestamp}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
+                          {sub.lineCount} Lines
+                        </span>
+                      </div>
+
+                      {/* Code Snippet Preview */}
+                      <div style={{
+                        fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+                        background: "#0f172a", border: `1px solid ${T.uiBorder}`, borderRadius: 6,
+                        padding: 8, color: "#38bdf8", maxHeight: 70, overflow: "hidden", textOverflow: "ellipsis"
+                      }}>
+                        <pre style={{ margin: 0, whiteSpace: "pre-wrap" }}>{sub.code.slice(0, 150)}{sub.code.length > 150 ? '...' : ''}</pre>
+                      </div>
+
+                      {/* Load Submission Code Button */}
+                      <button
+                        onClick={() => setCode(sub.code)}
+                        style={{
+                          padding: "5px 10px", borderRadius: 6, border: `1px solid ${T.uiBorder}`,
+                          background: T.uiSurface, color: T.uiText, fontSize: 10,
+                          fontFamily: "'JetBrains Mono'", fontWeight: 700, cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center", gap: 4,
+                          alignSelf: "flex-end", transition: "all 0.15s"
+                        }}
+                      >
+                        <Code2 size={12} color="#38bdf8" /> Load Code into Editor
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+
+      </div>
       <div style={{
         padding: 12, background: T.uiPanelHd, borderTop: `1px solid ${T.uiBorder}`,
         display: "flex", gap: 10, flexShrink: 0

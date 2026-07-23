@@ -34,6 +34,7 @@ export interface LearnModule {
   problemStatement: {
     title: string;
     objective: string;
+    description: string;
     inputDesc: string;
     outputDesc: string;
     takeaways: string[];
@@ -174,6 +175,7 @@ export function getLearnModuleDetails(id: string): LearnModule {
   const problemStatement = {
     title: meta.title,
     objective: `Master the core mechanisms of ${cleanTitle} in C++. Write clean, optimal code that directly solves ${meta.shortDesc.toLowerCase()} while analyzing trade-offs across 10 distinct paradigms.`,
+    description: `In modern C++, ${cleanTitle} plays a critical role within the ${meta.category} paradigm. ${meta.shortDesc} This module explores syntax construction, memory mechanics, and algorithmic efficiency.`,
     inputDesc: `Input parameters & test datasets relevant to ${meta.category} (${cleanTitle}).`,
     outputDesc: `Executed results showing correct state mutations, performance metrics, and console logs for ${cleanTitle}.`,
     takeaways: [
