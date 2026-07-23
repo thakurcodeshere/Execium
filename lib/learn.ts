@@ -4413,10 +4413,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
       timeComp: "O(N)",
       spaceComp: "O(N) Stack",
       desc: `Recursive call stack unwinding for ${cleanTitle} decomposing problem into subproblems.`,
-      code: `// ${meta.title} - Approach 3: Recursive Decomposition\n#include <iostream>\nusing namespace std;\n\nint solve${fnTag}Rec(int depth) {\n    if (depth <= 0) return 1; // Base case guard\n    return depth * solve${fnTag}Rec(depth - 1);\n}\n\nint main() {\n    cout << "Recursive Result for ${cleanTitle}: " << solve${fnTag}Rec(5) << endl;\n    return 0;\n}`,
+      code: `// ${meta.title} - Approach 3: Recursive Decomposition\n#include <iostream>\nusing namespace std;\n\nint solve${fnTag}Rec(int depth) {\n    if (depth <= 0) return 1;\n    cout << "Recursion step for ${cleanTitle}: " << depth << endl;\n    return depth * solve${fnTag}Rec(depth - 1);\n}\n\nint main() {\n    cout << "Recursive Result for ${cleanTitle}: " << solve${fnTag}Rec(5) << endl;\n    return 0;\n}`,
       breakdown: [
         { lineNum: 1, snippet: `if (depth <= 0) return 1;`, type: "Condition & Branch" as const, title: "Recursive Base Case Termination", exp: `Halts call stack expansion when depth threshold reaches 0.`, varName: "depth <= 0", role: "Termination Guard", rationale: "Prevents stack overflow error." },
-        { lineNum: 2, snippet: `return depth * solve${fnTag}Rec(depth - 1);`, type: "Return / Cleanup" as const, title: "Self-Referential Subproblem Call", exp: `Recursively invokes function with decremented state parameter.`, varName: `solve${fnTag}Rec(depth - 1)`, role: "Subproblem Invocation", rationale: "Drives reduction towards base case." }
+        { lineNum: 2, snippet: `cout << "Recursion step for ${cleanTitle}: " << depth;`, type: "Variable & Initializer" as const, title: "Step Trace Logging", exp: `Logs current recursion stack level.`, varName: "cout", role: "Logger", rationale: "Tracks call stack trace." },
+        { lineNum: 3, snippet: `return depth * solve${fnTag}Rec(depth - 1);`, type: "Return / Cleanup" as const, title: "Self-Referential Subproblem Call", exp: `Recursively invokes function with decremented state parameter.`, varName: `solve${fnTag}Rec(depth - 1)`, role: "Subproblem Invocation", rationale: "Drives reduction towards base case." }
       ]
     },
     {
@@ -4426,11 +4427,12 @@ export function getLearnModuleDetails(id: string): LearnModule {
       isFree: false,
       timeComp: "O(N)",
       spaceComp: "O(1)",
-      desc: `Dual converging pointer pointers optimizing spatial memory overhead for ${cleanTitle}.`,
+      desc: `Dual converging pointer markers optimizing spatial memory overhead for ${cleanTitle}.`,
       code: `// ${meta.title} - Approach 4: Two Pointers\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid solve${fnTag}TwoPointers(const vector<int>& vec) {\n    int left = 0, right = vec.size() - 1;\n    while (left < right) {\n        left++; right--;\n    }\n    cout << "Converged Window for ${cleanTitle} at Left Index: " << left << endl;\n}\n\nint main() {\n    solve${fnTag}TwoPointers({1, 2, 3, 4, 5});\n    return 0;\n}`,
       breakdown: [
         { lineNum: 1, snippet: `int left = 0, right = vec.size() - 1;`, type: "Variable & Initializer" as const, title: "Boundary Pointer Initializers", exp: `Positions left pointer at index 0 and right pointer at array tail.`, varName: "left / right", role: "Boundary Traversers", rationale: "Enables inward convergence." },
-        { lineNum: 2, snippet: `while (left < right) { left++; right--; }`, type: "Loop Construct" as const, title: "Inward Convergence Loop", exp: `Advances left and right pointers towards array center simultaneously.`, varName: "while (left < right)", role: "Loop Guard", rationale: "Halts iteration when pointers cross." }
+        { lineNum: 2, snippet: `while (left < right) { left++; right--; }`, type: "Loop Construct" as const, title: "Inward Convergence Loop", exp: `Advances left and right pointers towards array center simultaneously.`, varName: "while (left < right)", role: "Loop Guard", rationale: "Halts iteration when pointers cross." },
+        { lineNum: 3, snippet: `cout << "Converged Window for ${cleanTitle}...";`, type: "Return / Cleanup" as const, title: "Output Window State", exp: `Prints final converged left index boundary.`, varName: "cout", role: "Window Output", rationale: "Verifies traversal bounds." }
       ]
     },
     {
@@ -4441,10 +4443,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
       timeComp: "O(N)",
       spaceComp: "O(1)",
       desc: `Direct memory address manipulation using raw pointers and offset increments for ${cleanTitle}.`,
-      code: `// ${meta.title} - Approach 5: Raw Pointer Arithmetic\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid solve${fnTag}RawPointer(const vector<int>& vec) {\n    const int* ptr = vec.data();\n    const int* endPtr = ptr + vec.size();\n    int acc = 0;\n    while (ptr < endPtr) {\n        acc += *ptr;\n        ptr++; // Address increment\n    }\n    cout << "Raw Memory Accumulation for ${cleanTitle}: " << acc << endl;\n}\n\nint main() {\n    solve${fnTag}RawPointer({100, 200, 300});\n    return 0;\n}`,
+      code: `// ${meta.title} - Approach 5: Raw Pointer Arithmetic\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nvoid solve${fnTag}RawPointer(const vector<int>& vec) {\n    const int* ptr = vec.data();\n    const int* endPtr = ptr + vec.size();\n    int acc = 0;\n    while (ptr < endPtr) {\n        acc += *ptr;\n        ptr++;\n    }\n    cout << "Raw Memory Accumulation for ${cleanTitle}: " << acc << endl;\n}\n\nint main() {\n    solve${fnTag}RawPointer({100, 200, 300});\n    return 0;\n}`,
       breakdown: [
         { lineNum: 1, snippet: `const int* ptr = vec.data();`, type: "Variable & Initializer" as const, title: "Raw Address Extraction", exp: `Retrieves memory address of contiguous heap vector buffer.`, varName: "vec.data()", role: "Memory Pointer", rationale: "Bypasses operator[] bounds checks." },
-        { lineNum: 2, snippet: `acc += *ptr; ptr++;`, type: "Loop Construct" as const, title: "Dereference & Address Increment", exp: `Dereferences memory value *ptr and advances address by sizeof(int).`, varName: "*ptr", role: "Dereference Operator", rationale: "Fetches value directly from RAM address." }
+        { lineNum: 2, snippet: `acc += *ptr; ptr++;`, type: "Loop Construct" as const, title: "Dereference & Address Increment", exp: `Dereferences memory value *ptr and advances address by sizeof(int).`, varName: "*ptr", role: "Dereference Operator", rationale: "Fetches value directly from RAM address." },
+        { lineNum: 3, snippet: `cout << "Raw Memory Accumulation...";`, type: "Return / Cleanup" as const, title: "Output Memory Accumulation", exp: `Prints accumulated memory total.`, varName: "cout", role: "Output Result", rationale: "Displays raw arithmetic result." }
       ]
     },
     {
@@ -4458,7 +4461,8 @@ export function getLearnModuleDetails(id: string): LearnModule {
       code: `// ${meta.title} - Approach 6: Lambda Closures\n#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nvoid solve${fnTag}Lambda(const vector<int>& vec) {\n    int sum = 0;\n    auto processElem = [&sum](int x) {\n        sum += x;\n    };\n    for_each(vec.begin(), vec.end(), processElem);\n    cout << "Lambda Closure Sum for ${cleanTitle}: " << sum << endl;\n}\n\nint main() {\n    solve${fnTag}Lambda({5, 10, 15});\n    return 0;\n}`,
       breakdown: [
         { lineNum: 1, snippet: `auto processElem = [&sum](int x) { sum += x; };`, type: "Variable & Initializer" as const, title: "Lambda Capture Declaration", exp: `Defines anonymous functor capturing sum variable by reference [&sum].`, varName: "[&sum]", role: "Reference Capture", rationale: "Allows inline mutation of local scope state." },
-        { lineNum: 2, snippet: `for_each(vec.begin(), vec.end(), processElem);`, type: "Loop Construct" as const, title: "Functor Range Dispatch", exp: `Dispatches processElem closure over container iterator range.`, varName: "for_each", role: "Range Applicator", rationale: "Clean declarative iteration." }
+        { lineNum: 2, snippet: `for_each(vec.begin(), vec.end(), processElem);`, type: "Loop Construct" as const, title: "Functor Range Dispatch", exp: `Dispatches processElem closure over container iterator range.`, varName: "for_each", role: "Range Applicator", rationale: "Clean declarative iteration." },
+        { lineNum: 3, snippet: `cout << "Lambda Closure Sum...";`, type: "Return / Cleanup" as const, title: "Output Functor Result", exp: `Outputs accumulated sum via std::cout stream.`, varName: "cout", role: "Result Output", rationale: "Verifies closure execution." }
       ]
     },
     {
@@ -4472,7 +4476,8 @@ export function getLearnModuleDetails(id: string): LearnModule {
       code: `// ${meta.title} - Approach 7: Bitwise Masking\n#include <iostream>\nusing namespace std;\n\nvoid solve${fnTag}Bitwise(int value) {\n    int mask = 0xFF;\n    int maskedVal = value & mask;\n    int shiftedVal = value >> 2;\n    cout << "Bitwise Output for ${cleanTitle}: Masked=" << maskedVal << " Shifted=" << shiftedVal << endl;\n}\n\nint main() {\n    solve${fnTag}Bitwise(0b11011011);\n    return 0;\n}`,
       breakdown: [
         { lineNum: 1, snippet: `int maskedVal = value & mask;`, type: "Condition & Branch" as const, title: "Bitwise AND Masking", exp: `Applies 0xFF bitmask using binary AND operator to extract lower byte.`, varName: "value & mask", role: "Bitmask Filter", rationale: "Zeroes out upper bit fields." },
-        { lineNum: 2, snippet: `int shiftedVal = value >> 2;`, type: "Variable & Initializer" as const, title: "Logical Right Bit Shift", exp: `Shifts bit pattern 2 positions right equivalent to integer division by 4.`, varName: "value >> 2", role: "Right Shift Operator", rationale: "Fast hardware CPU register shift." }
+        { lineNum: 2, snippet: `int shiftedVal = value >> 2;`, type: "Variable & Initializer" as const, title: "Logical Right Bit Shift", exp: `Shifts bit pattern 2 positions right equivalent to integer division by 4.`, varName: "value >> 2", role: "Right Shift Operator", rationale: "Fast hardware CPU register shift." },
+        { lineNum: 3, snippet: `cout << "Bitwise Output for ${cleanTitle}...";`, type: "Return / Cleanup" as const, title: "Output Bit Fields", exp: `Prints masked and shifted binary values.`, varName: "cout", role: "Output", rationale: "Displays bit manipulation results." }
       ]
     },
     {
@@ -4486,7 +4491,8 @@ export function getLearnModuleDetails(id: string): LearnModule {
       code: `// ${meta.title} - Approach 8: Template Metaprogramming\n#include <iostream>\n#include <type_traits>\nusing namespace std;\n\ntemplate<typename T>\nvoid solve${fnTag}Template(T val) {\n    static_assert(std::is_arithmetic_v<T>, "Parameter must be numeric!");\n    cout << "Template Metaprogramming Value for ${cleanTitle}: " << val << endl;\n}\n\nint main() {\n    solve${fnTag}Template(123.45);\n    return 0;\n}`,
       breakdown: [
         { lineNum: 1, snippet: `template<typename T>`, type: "Function Signature" as const, title: "Generic Template Header", exp: `Instantiates generic compiler template parameterized by type T.`, varName: "typename T", role: "Type Placeholder", rationale: "Generates type-safe overloads at build time." },
-        { lineNum: 2, snippet: `static_assert(std::is_arithmetic_v<T>);`, type: "Condition & Branch" as const, title: "Compile-Time Type Assertion", exp: `Enforces type constraint verifying T is an arithmetic type during build.`, varName: "static_assert", role: "Compile Guard", rationale: "Catches type mismatches before runtime." }
+        { lineNum: 2, snippet: `static_assert(std::is_arithmetic_v<T>);`, type: "Condition & Branch" as const, title: "Compile-Time Type Assertion", exp: `Enforces type constraint verifying T is an arithmetic type during build.`, varName: "static_assert", role: "Compile Guard", rationale: "Catches type mismatches before runtime." },
+        { lineNum: 3, snippet: `cout << "Template Metaprogramming Value...";`, type: "Return / Cleanup" as const, title: "Output Template Value", exp: `Prints template parameter value.`, varName: "cout", role: "Output", rationale: "Displays template output." }
       ]
     },
     {
@@ -4500,7 +4506,8 @@ export function getLearnModuleDetails(id: string): LearnModule {
       code: `// ${meta.title} - Approach 9: Multithreaded Async\n#include <iostream>\n#include <future>\nusing namespace std;\n\nint computeTask(int id) {\n    return id * 10;\n}\n\nvoid solve${fnTag}Concurrent() {\n    auto fut = std::async(std::launch::async, computeTask, 42);\n    int res = fut.get();\n    cout << "Async Future Result for ${cleanTitle}: " << res << endl;\n}\n\nint main() {\n    solve${fnTag}Concurrent();\n    return 0;\n}`,
       breakdown: [
         { lineNum: 1, snippet: `auto fut = std::async(std::launch::async, computeTask, 42);`, type: "Variable & Initializer" as const, title: "Async Task Worker Launch", exp: `Spawns background thread executing computeTask worker function concurrently.`, varName: "std::async", role: "Task Dispatcher", rationale: "Offloads work to OS thread pool." },
-        { lineNum: 2, snippet: `int res = fut.get();`, type: "Return / Cleanup" as const, title: "Future Synchronization & Join", exp: `Blocks caller until background future completes and retrieves result.`, varName: "fut.get()", role: "Future Synchronizer", rationale: "Joins thread result safely." }
+        { lineNum: 2, snippet: `int res = fut.get();`, type: "Return / Cleanup" as const, title: "Future Synchronization & Join", exp: `Blocks caller until background future completes and retrieves result.`, varName: "fut.get()", role: "Future Synchronizer", rationale: "Joins thread result safely." },
+        { lineNum: 3, snippet: `cout << "Async Future Result...";`, type: "Return / Cleanup" as const, title: "Output Async Result", exp: `Prints result returned from background thread future.`, varName: "cout", role: "Output", rationale: "Displays thread result." }
       ]
     },
     {
@@ -4514,7 +4521,8 @@ export function getLearnModuleDetails(id: string): LearnModule {
       code: `// ${meta.title} - Approach 10: C++20 Ranges\n#include <iostream>\n#include <vector>\n#include <ranges>\nusing namespace std;\n\nvoid solve${fnTag}Ranges(const vector<int>& vec) {\n    auto view = vec \n        | std::views::filter([](int x){ return x > 0; })\n        | std::views::transform([](int x){ return x * 2; });\n    \n    cout << "C++20 Ranges Output for ${cleanTitle}: ";\n    for (int elem : view) cout << elem << " ";\n    cout << endl;\n}\n\nint main() {\n    solve${fnTag}Ranges({-2, -1, 3, 5, 8});\n    return 0;\n}`,
       breakdown: [
         { lineNum: 1, snippet: `auto view = vec | std::views::filter(...) | std::views::transform(...);`, type: "Variable & Initializer" as const, title: "C++20 Range Pipeline Composition", exp: `Composes lazy range filter and transform adaptors using pipe operator.`, varName: "std::views::filter", role: "Range Adaptor", rationale: "Zero memory allocation lazy view." },
-        { lineNum: 2, snippet: `for (int elem : view) cout << elem << " ";`, type: "Loop Construct" as const, title: "Lazy View Element Traversal", exp: `Iterates over range view, evaluating filter and transform on-the-fly.`, varName: "for (int elem : view)", role: "View Evaluator", rationale: "Triggers computation per element on access." }
+        { lineNum: 2, snippet: `for (int elem : view) cout << elem << " ";`, type: "Loop Construct" as const, title: "Lazy View Element Traversal", exp: `Iterates over range view, evaluating filter and transform on-the-fly.`, varName: "for (int elem : view)", role: "View Evaluator", rationale: "Triggers computation per element on access." },
+        { lineNum: 3, snippet: `cout << endl;`, type: "Return / Cleanup" as const, title: "Flush Stream Output", exp: `Flushes output stream after range iteration completes.`, varName: "cout", role: "Stream Flush", rationale: "Ensures console output completion." }
       ]
     }
   ];
