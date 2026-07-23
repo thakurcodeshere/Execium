@@ -70,16 +70,17 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
       const solved = localStorage.getItem("execium_solved_challenges");
       if (solved) setSolvedChallenges(JSON.parse(solved));
 
-      // Restore popover state on reload
-      const activePop = localStorage.getItem("execium_active_popover");
-      if (activePop === "learn" || activeLearnModuleId) {
+      // Restore popover state if active module/challenge exists
+      if (activeLearnModuleId) {
         setShowLearn(true);
-      } else if (activePop === "questions" || activeChallengeId) {
+      } else if (activeChallengeId) {
         setShowQuestions(true);
-      } else if (activePop === "history") {
-        setShowHistory(true);
-      } else if (activePop === "progs") {
-        setShowProgs(true);
+      } else {
+        setShowLearn(false);
+        setShowQuestions(false);
+        setShowHistory(false);
+        setShowProgs(false);
+        setShowProfile(false);
       }
     } catch {}
   }, [activeLearnModuleId, activeChallengeId]);

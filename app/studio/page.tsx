@@ -26,7 +26,7 @@ export default function StudioPage() {
   const [sidebarWidth, setSidebarWidth] = useState(64);
   const [isResizing, setIsResizing] = useState(false);
 
-  // 1. Initial State Restoration from URL query params or localStorage
+  // 1. Initial State Restoration from URL query params or clean Untitled Project entrance
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -64,33 +64,13 @@ export default function StudioPage() {
           }
         }
       } else {
-        // Fallback to active session snapshot in localStorage
-        const rawSession = localStorage.getItem("execium_studio_session");
-        if (rawSession) {
-          const session = JSON.parse(rawSession);
-          if (session.activeLearnModuleId) {
-            setLearnModuleId(session.activeLearnModuleId);
-            const savedCode = localStorage.getItem(`execium_code_learn_${session.activeLearnModuleId}`) || session.code;
-            if (savedCode) setCode(savedCode);
-          } else if (session.activeChallengeId) {
-            setChallengeId(session.activeChallengeId);
-            const savedCode = localStorage.getItem(`execium_code_challenge_${session.activeChallengeId}`) || session.code;
-            if (savedCode) setCode(savedCode);
-          } else if (session.projectId) {
-            setProjectId(session.projectId);
-            if (session.projectName) setProjectName(session.projectName);
-            if (session.code) setCode(session.code);
-          } else if (session.code) {
-            setCode(session.code);
-            if (session.projectName) setProjectName(session.projectName);
-          } else {
-            setCode(DEFAULT_UNTITLED_CODE);
-            setProjectName("Untitled Project");
-          }
-        } else {
-          setCode(DEFAULT_UNTITLED_CODE);
-          setProjectName("Untitled Project");
-        }
+        // Entering Studio fresh without query parameters: Default to clean full-width Untitled Project
+        setLearnModuleId(null);
+        setChallengeId(null);
+        setProjectId(null);
+        setProjectName("Untitled Project");
+        setCode(DEFAULT_UNTITLED_CODE);
+        localStorage.removeItem("execium_active_popover");
       }
     } catch {}
     setHydrated(true);
