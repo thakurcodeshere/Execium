@@ -336,8 +336,6 @@ export default function LearnPanel() {
 
             {/* Problem Narrative Statement */}
             <div style={{ fontSize: 13, lineHeight: 1.6, color: T.uiText }}>
-              You are tasked with implementing <strong style={{ color: "#38bdf8" }}>{moduleInfo.title}</strong> using optimal C++ data structures and execution mechanics.
-              <br /><br />
               {moduleInfo.problemStatement.description}
             </div>
 
