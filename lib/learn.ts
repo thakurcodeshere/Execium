@@ -276,7 +276,591 @@ function generateTopicExamplesAndConstraints(meta: { id: string; title: string; 
   return { examples, constraints };
 }
 
-// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 2 ──
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 6 ──
+function getProblem6Details(): LearnModule {
+  return {
+    id: "easy_arrays",
+    title: "6. Fixed Arrays & std::array",
+    shortDesc: "Contiguous stack memory arrays (int arr[N]) and std::array wrapper.",
+    difficulty: "easy",
+    category: "Data Structures",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "6. Fixed Arrays & std::array",
+      objective: "Master contiguous stack memory allocation using C-style fixed arrays (type arr[N]) and C++11 std::array<T, N> with bounds-checked access (.at()).",
+      description: "Given a fixed array of integers `[10, 20, 30, 40, 50]`, perform element access, boundary checks, sum computation, and 2D matrix traversal using stack-allocated C-arrays and `std::array` wrappers.",
+      inputDesc: "arr = [10, 20, 30, 40, 50], N = 5",
+      outputDesc: "Sum = 150 | First = 10, Last = 50 | Bound Check at index 2 = 30",
+      takeaways: [
+        "Master C-style fixed array stack allocation (int arr[N])",
+        "Utilize C++11 std::array<T, N> for type-safe stack buffers with STL iterator support",
+        "Prevent buffer overflow with std::array::at() bounds checking",
+        "Traverse multidimensional 2D arrays efficiently in row-major order"
+      ],
+      examples: [
+        { id: 1, input: 'arr = [10, 20, 30, 40, 50]', output: 'Sum = 150 | First = 10, Last = 50', explanation: 'Contiguous memory layout accessed in O(1) time per element.' },
+        { id: 2, input: 'arr = [5, 5, 5, 5]', output: 'Sum = 20 | First = 5, Last = 5' },
+        { id: 3, input: 'matrix = [[1,2],[3,4]]', output: 'Matrix Sum = 10', explanation: '2x2 row-major contiguous memory traversal.' }
+      ],
+      constraints: ["1 <= N <= 100", "Memory allocation must be strictly stack-based.", "Index access out-of-bounds must throw std::out_of_range via .at()."],
+      companies: ["Google", "Amazon", "Microsoft", "Apple"],
+      acceptanceRate: "92.7%",
+      totalAccepted: "2,740,100"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: C-Style Fixed Array & Index Iteration (FREE)", category: "FREE / C-Array",
+        description: "Declares raw C-array int arr[5] on the stack and iterates using index subscript operator[].",
+        prosCons: "Pros: Zero overhead, raw memory access. Cons: Decays to raw pointer, no bounds checking.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 6. Fixed Arrays & std::array - Approach 1: C-Style Array\n#include <iostream>\nusing namespace std;\n\nint sumCArray() {\n    int arr[5] = {10, 20, 30, 40, 50};\n    int sum = 0;\n    for (int i = 0; i < 5; i++) sum += arr[i];\n    return sum;\n}\n\nint main() {\n    cout << "C-Array Sum: " << sumCArray() << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `int arr[5] = {10, 20, 30, 40, 50};`, constructType: "Variable & Initializer", title: "Stack Array Allocation", explanation: "Allocates 5 * sizeof(int) = 20 contiguous bytes on the stack.", keyDetails: [{ variableOrConstruct: "int arr[5]", role: "Stack Allocation", whyThisWay: "Fixed size contiguous memory." }] }]
+      },
+      {
+        id: 2, name: "Approach 2: Modern std::array<int, N> with .at() Bounds Check (FREE)", category: "FREE / std::array",
+        description: "Uses C++11 std::array<int, 5> container wrapper with .at() bounds checking.",
+        prosCons: "Pros: STL iterator support, .at() throws std::out_of_range. Cons: Fixed compile-time size.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 6. Fixed Arrays & std::array - Approach 2: std::array .at()\n#include <iostream>\n#include <array>\nusing namespace std;\n\nint sumStdArray() {\n    array<int, 5> arr = {10, 20, 30, 40, 50};\n    return arr.at(0) + arr.at(4);\n}\n\nint main() {\n    cout << "std::array Bounds Checked Sum: " << sumStdArray() << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `return arr.at(0) + arr.at(4);`, constructType: "Return / Cleanup", title: "Bounds-Checked Access", explanation: "Accesses elements safely, throwing exception if index >= 5.", keyDetails: [{ variableOrConstruct: "arr.at(i)", role: "Safe Access", whyThisWay: "Guards against stack buffer overflow." }] }]
+      },
+      {
+        id: 3, name: "Approach 3: Multidimensional 2D Matrix Traversal (PRO)", category: "PRO / 2D Matrix",
+        description: "Nested loops traversing 2D fixed array int matrix[3][3] in row-major order.",
+        prosCons: "Pros: Cache-friendly row-major memory layout. Cons: Fixed matrix dimensions.",
+        timeComplexity: "O(R * C)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 6. Fixed Arrays & std::array - Approach 3: 2D Matrix\n#include <iostream>\nusing namespace std;\n\nint sumMatrix() {\n    int mat[2][2] = {{1, 2}, {3, 4}};\n    int sum = 0;\n    for (int r = 0; r < 2; r++)\n        for (int c = 0; c < 2; c++)\n            sum += mat[r][c];\n    return sum;\n}\n\nint main() {\n    cout << "Matrix Sum: " << sumMatrix() << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `sum += mat[r][c];`, constructType: "Variable & Initializer", title: "Row-Major Indexing", explanation: "Accesses element at memory offset (r * C + c) * sizeof(int).", keyDetails: [{ variableOrConstruct: "mat[r][c]", role: "2D Element", whyThisWay: "Cache optimal contiguous stride." }] }]
+      },
+      {
+        id: 4, name: "Approach 4: C++17 Structured Bindings Unpack (PRO)", category: "PRO / Structured Binding",
+        description: "Decomposes fixed std::array elements directly into named variables: auto [a, b, c, d, e] = arr.",
+        prosCons: "Pros: Clean syntax for tuple/array unpacking. Cons: Element count must match exact array size.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 6. Fixed Arrays & std::array - Approach 4: Structured Binding\n#include <iostream>\n#include <array>\nusing namespace std;\n\nvoid unpackArray() {\n    array<int, 3> arr = {10, 20, 30};\n    auto [a, b, c] = arr;\n    cout << "Unpacked: " << a << ", " << b << ", " << c << endl;\n}\n\nint main() {\n    unpackArray();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `auto [a, b, c] = arr;`, constructType: "Variable & Initializer", title: "C++17 Array Decomposition", explanation: "Binds names a, b, c to arr[0], arr[1], arr[2] at compile time.", keyDetails: [{ variableOrConstruct: "auto [a,b,c]", role: "Binding", whyThisWay: "Decomposes array elements." }] }]
+      },
+      {
+        id: 5, name: "Approach 5: Compile-Time constexpr std::array (PRO)", category: "PRO / Constexpr Array",
+        description: "Creates and evaluates constexpr std::array during compilation for zero runtime lookup cost.",
+        prosCons: "Pros: Zero runtime computation. Cons: Size and elements must be compile-time constants.",
+        timeComplexity: "O(1) Compile", spaceComplexity: "O(1)", isFree: false,
+        code: `// 6. Fixed Arrays & std::array - Approach 5: constexpr std::array\n#include <iostream>\n#include <array>\nusing namespace std;\n\nconstexpr array<int, 3> kArray = {100, 200, 300};\n\nint main() {\n    static_assert(kArray[0] == 100, "Compile check");\n    cout << "Constexpr Element 0: " << kArray[0] << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `constexpr array<int, 3> kArray = {100, 200, 300};`, constructType: "Variable & Initializer", title: "Compile-Time Array Table", explanation: "Embeds array data into constant read-only binary section.", keyDetails: [{ variableOrConstruct: "constexpr array", role: "Compile Table", whyThisWay: "Zero runtime initialization." }] }]
+      },
+      {
+        id: 6, name: "Approach 6: STL Algorithms (std::fill & std::copy) (PRO)", category: "PRO / STL Algorithms",
+        description: "Applies STL algorithm functions std::fill and std::copy to array iterators.",
+        prosCons: "Pros: High-level STL composition. Cons: Requires algorithm header.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 6. Fixed Arrays & std::array - Approach 6: STL Algorithms\n#include <iostream>\n#include <array>\n#include <algorithm>\nusing namespace std;\n\nvoid fillAndCopy() {\n    array<int, 4> arr;\n    fill(arr.begin(), arr.end(), 42);\n    cout << "Filled Element 0: " << arr[0] << endl;\n}\n\nint main() {\n    fillAndCopy();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `fill(arr.begin(), arr.end(), 42);`, constructType: "Loop Construct", title: "STL Fill Algorithm", explanation: "Sets all elements in iterator range [begin, end) to 42.", keyDetails: [{ variableOrConstruct: "std::fill", role: "STL Algorithm", whyThisWay: "Uses optimized memset under the hood." }] }]
+      },
+      {
+        id: 7, name: "Approach 7: Raw Pointer Decay via .data() (PRO)", category: "PRO / Raw Pointer Decay",
+        description: "Accesses underlying raw contiguous memory pointer via arr.data() for C-API interoperability.",
+        prosCons: "Pros: Seamless C library compatibility. Cons: Bypasses C++ safety bounds.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 6. Fixed Arrays & std::array - Approach 7: Raw Pointer Decay\n#include <iostream>\n#include <array>\nusing namespace std;\n\nvoid processRawC(const int* ptr, int len) {\n    cout << "Raw C Pointer Element 0: " << ptr[0] << endl;\n}\n\nint main() {\n    array<int, 3> arr = {10, 20, 30};\n    processRawC(arr.data(), arr.size());\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `processRawC(arr.data(), arr.size());`, constructType: "Return / Cleanup", title: "Pointer Decay Bridge", explanation: "Extracts const int* buffer pointer from std::array object.", keyDetails: [{ variableOrConstruct: "arr.data()", role: "Pointer Extractor", whyThisWay: "Passes raw array pointer to C functions." }] }]
+      },
+      {
+        id: 8, name: "Approach 8: Dynamic Stack Allocation (std::alloca) (PRO)", category: "PRO / alloca Stack",
+        description: "Dynamically allocates runtime array size on the stack frame using alloca().",
+        prosCons: "Pros: Fast dynamic stack allocation without heap overhead. Cons: Stack overflow risk if size is large.",
+        timeComplexity: "O(1) Alloc", spaceComplexity: "O(N)", isFree: false,
+        code: `// 6. Fixed Arrays & std::array - Approach 8: alloca Dynamic Stack\n#include <iostream>\n#include <alloca.h>\nusing namespace std;\n\nvoid stackDynamicAlloc(int count) {\n    int* arr = (int*)alloca(count * sizeof(int));\n    arr[0] = 99;\n    cout << "Dynamic Stack Element 0: " << arr[0] << endl;\n}\n\nint main() {\n    stackDynamicAlloc(5);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `int* arr = (int*)alloca(count * sizeof(int));`, constructType: "Variable & Initializer", title: "Stack Frame Allocation", explanation: "Adjusts stack pointer register to allocate space on current stack frame.", keyDetails: [{ variableOrConstruct: "alloca", role: "Stack Allocator", whyThisWay: "Fast zero-heap allocation." }] }]
+      },
+      {
+        id: 9, name: "Approach 9: SIMD Vectorized Array Processing (PRO)", category: "PRO / SIMD Vectorization",
+        description: "Compiler auto-vectorization hint #pragma omp simd for parallel 128-bit SIMD register processing.",
+        prosCons: "Pros: 4x-8x speedup using CPU AVX/SSE registers. Cons: Requires aligned memory layout.",
+        timeComplexity: "O(N / VectorLen)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 6. Fixed Arrays & std::array - Approach 9: SIMD Vectorized\n#include <iostream>\n#include <array>\nusing namespace std;\n\nint simdArraySum() {\n    array<int, 8> arr = {1, 2, 3, 4, 5, 6, 7, 8};\n    int sum = 0;\n    #pragma omp simd reduction(+:sum)\n    for (size_t i = 0; i < arr.size(); i++) sum += arr[i];\n    return sum;\n}\n\nint main() {\n    cout << "SIMD Array Sum: " << simdArraySum() << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `#pragma omp simd reduction(+:sum)`, constructType: "Header / Include", title: "SIMD Vectorization Pragma", explanation: "Instructs compiler to generate CPU SSE/AVX vector register instructions.", keyDetails: [{ variableOrConstruct: "#pragma omp simd", role: "Vectorization", whyThisWay: "Hardware AVX SIMD execution." }] }]
+      },
+      {
+        id: 10, name: "Approach 10: Custom Fixed Array Container Wrapper (PRO)", category: "PRO / Custom Container",
+        description: "Implements custom StackArray<T, N> template struct overloading operator[] and size().",
+        prosCons: "Pros: Full customization over memory layout. Cons: Custom container boilerplate.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 6. Fixed Arrays & std::array - Approach 10: Custom Container\n#include <iostream>\nusing namespace std;\n\ntemplate<typename T, size_t N>\nstruct StackArray {\n    T data[N];\n    T& operator[](size_t i) { return data[i]; }\n    size_t size() const { return N; }\n};\n\nint main() {\n    StackArray<int, 3> myArr = {{10, 20, 30}};\n    cout << "Custom Wrapper[1]: " << myArr[1] << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `T& operator[](size_t i) { return data[i]; }`, constructType: "Function Signature", title: "Subscript Operator Overload", explanation: "Overloads [] to return reference to internal stack array buffer.", keyDetails: [{ variableOrConstruct: "operator[]", role: "Subscript Operator", whyThisWay: "Provides array subscript syntax." }] }]
+      }
+    ],
+    fullCode: `// 6. Fixed Arrays & std::array - Approach 1: C-Style Array\n#include <iostream>\nusing namespace std;\n\nint sumCArray() {\n    int arr[5] = {10, 20, 30, 40, 50};\n    int sum = 0;\n    for (int i = 0; i < 5; i++) sum += arr[i];\n    return sum;\n}\n\nint main() {\n    cout << "C-Array Sum: " << sumCArray() << endl;\n    return 0;\n}`
+  };
+}
+
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 7 ──
+function getProblem7Details(): LearnModule {
+  return {
+    id: "easy_strings",
+    title: "7. C-Strings vs std::string",
+    shortDesc: "C-style char arrays (null-terminated) vs modern C++ std::string.",
+    difficulty: "easy",
+    category: "Data Structures",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "7. C-Strings vs std::string",
+      objective: "Master string manipulation comparing raw null-terminated C-strings (char*, strlen) against modern C++ std::string and zero-copy C++17 std::string_view.",
+      description: "Given a string input `\"execium_cpp\"`, perform concatenation, substring search (`.find()`), C-string null termination analysis (`\\0`), and zero-copy slice inspection using `std::string_view`.",
+      inputDesc: 'str = "execium_cpp", sub = "cpp"',
+      outputDesc: 'Length = 11 | Found Substring at Index = 8 | View Slice = "execium"',
+      takeaways: [
+        "Master C-string null-termination semantics (\\0) and strlen()",
+        "Utilize std::string dynamic heap allocation, concatenation (+), and find()",
+        "Apply C++17 std::string_view for zero-copy read-only string slicing",
+        "Understand Small String Optimization (SSO) stack allocation bounds"
+      ],
+      examples: [
+        { id: 1, input: 'str = "execium_cpp", sub = "cpp"', output: 'Length = 11 | Index = 8', explanation: 'std::string::find performs substring pattern lookup in O(N) time.' },
+        { id: 2, input: 'str = "hello", sub = "world"', output: 'std::string::npos (-1)', explanation: 'Returns npos when substring is not present.' },
+        { id: 3, input: 'c_str = "hello\\0hidden"', output: 'C-String Length = 5', explanation: 'C-string functions stop at first null terminator \\0.' }
+      ],
+      constraints: ["0 <= str.length <= 10^5", "String contains valid ASCII characters.", "std::string_view operations must execute in O(1) time."],
+      companies: ["Meta", "Google", "Amazon", "Microsoft"],
+      acceptanceRate: "90.2%",
+      totalAccepted: "3,210,800"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: std::string Methods & Substring Search (FREE)", category: "FREE / std::string",
+        description: "Uses std::string concatenation (+), .length(), and .find() substring lookup.",
+        prosCons: "Pros: High-level, safe, memory managed automatically. Cons: Heap allocation if > SSO bound.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 7. C-Strings vs std::string - Approach 1: std::string\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid searchSub() {\n    string str = "execium_cpp";\n    size_t pos = str.find("cpp");\n    cout << "Length: " << str.length() << " | Found 'cpp' at: " << pos << endl;\n}\n\nint main() {\n    searchSub();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `size_t pos = str.find("cpp");`, constructType: "Variable & Initializer", title: "Substring Pattern Search", explanation: "Searches for first occurrence of substring \"cpp\" returning index pos.", keyDetails: [{ variableOrConstruct: "str.find()", role: "Pattern Search", whyThisWay: "Standard string search method." }] }]
+      },
+      {
+        id: 2, name: "Approach 2: C-Style Null-Terminated Char Array (FREE)", category: "FREE / C-String",
+        description: "Manipulates raw null-terminated char array (char str[]) using <cstring> strlen and strcmp.",
+        prosCons: "Pros: Zero heap overhead. Cons: Risk of buffer overflow if null byte '\\0' is missing.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 7. C-Strings vs std::string - Approach 2: C-String Null Terminator\n#include <iostream>\n#include <cstring>\nusing namespace std;\n\nvoid inspectCString() {\n    const char* str = "execium_cpp";\n    cout << "Raw C-String Length: " << strlen(str) << endl;\n}\n\nint main() {\n    inspectCString();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `cout << "Raw C-String Length: " << strlen(str) << endl;`, constructType: "Return / Cleanup", title: "strlen Null Byte Traversal", explanation: "Traverses raw memory until encountering null byte '\\0'.", keyDetails: [{ variableOrConstruct: "strlen(str)", role: "Length Calculator", whyThisWay: "Counts characters up to null terminator." }] }]
+      },
+      {
+        id: 3, name: "Approach 3: C++17 Zero-Copy std::string_view Slicing (PRO)", category: "PRO / string_view",
+        description: "Creates non-owning zero-copy string slice using C++17 std::string_view.",
+        prosCons: "Pros: O(1) slice creation without heap allocation. Cons: Must not outlive underlying buffer.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 7. C-Strings vs std::string - Approach 3: std::string_view\n#include <iostream>\n#include <string_view>\nusing namespace std;\n\nvoid printSlice(string_view sv) {\n    string_view prefix = sv.substr(0, 7);\n    cout << "Zero-Copy Prefix Slice: " << prefix << endl;\n}\n\nint main() {\n    printSlice("execium_cpp");\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `string_view prefix = sv.substr(0, 7);`, constructType: "Variable & Initializer", title: "Zero-Copy Substring View", explanation: "Creates pointer-length window over string without allocating memory.", keyDetails: [{ variableOrConstruct: "sv.substr()", role: "Zero-Copy Slice", whyThisWay: "Avoids allocating string copy." }] }]
+      },
+      {
+        id: 4, name: "Approach 4: Small String Optimization (SSO) Inspection (PRO)", category: "PRO / SSO Inspection",
+        description: "Demonstrates Small String Optimization (SSO) storing short strings (<15 chars) on the stack.",
+        prosCons: "Pros: Avoids heap allocation for short strings. Cons: Implementation defined capacity.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 7. C-Strings vs std::string - Approach 4: SSO Stack Inspection\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid checkSSO() {\n    string shortStr = "short"; // SSO stack buffer\n    string longStr = "this_is_a_very_long_string_that_exceeds_sso_buffer"; // Heap allocation\n    cout << "Short Capacity: " << shortStr.capacity() << " | Long Capacity: " << longStr.capacity() << endl;\n}\n\nint main() {\n    checkSSO();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `cout << "Short Capacity: " << shortStr.capacity() << ...`, constructType: "Return / Cleanup", title: "SSO Buffer Capacity Query", explanation: "Shows SSO capacity allocated on stack vs heap.", keyDetails: [{ variableOrConstruct: "shortStr.capacity()", role: "Capacity Query", whyThisWay: "Inspects SSO buffer threshold." }] }]
+      },
+      {
+        id: 5, name: "Approach 5: In-Place String Mutation (std::transform) (PRO)", category: "PRO / In-Place Mutation",
+        description: "Mutates string characters in-place to uppercase using std::transform and ::toupper.",
+        prosCons: "Pros: Zero new memory allocation. Cons: Overwrites original string.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 7. C-Strings vs std::string - Approach 5: In-Place Mutation\n#include <iostream>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\nvoid toUpper() {\n    string str = "execium";\n    transform(str.begin(), str.end(), str.begin(), ::toupper);\n    cout << "Uppercase: " << str << endl;\n}\n\nint main() {\n    toUpper();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `transform(str.begin(), str.end(), str.begin(), ::toupper);`, constructType: "Loop Construct", title: "In-Place Character Transformation", explanation: "Applies ::toupper to each char in-place.", keyDetails: [{ variableOrConstruct: "std::transform", role: "Mutator", whyThisWay: "Transforms string in-place." }] }]
+      },
+      {
+        id: 6, name: "Approach 6: String Splitting via std::stringstream (PRO)", category: "PRO / String Stream",
+        description: "Splits string by delimiter '_' into tokens using std::stringstream and getline.",
+        prosCons: "Pros: Flexible text tokenization. Cons: String copies during token extraction.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 7. C-Strings vs std::string - Approach 6: StringStream Tokenizer\n#include <iostream>\n#include <sstream>\n#include <string>\nusing namespace std;\n\nvoid splitTokens() {\n    string data = "execium_cpp_engine";\n    stringstream ss(data);\n    string token;\n    while (getline(ss, token, '_')) cout << "Token: " << token << " | ";\n    cout << endl;\n}\n\nint main() {\n    splitTokens();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `while (getline(ss, token, '_'))`, constructType: "Loop Construct", title: "Delimiter Tokenizer Loop", explanation: "Extracts substring tokens up to '_' character.", keyDetails: [{ variableOrConstruct: "getline(ss, token, '_')", role: "Tokenizer", whyThisWay: "Parses delimited text input." }] }]
+      },
+      {
+        id: 7, name: "Approach 7: Regex Pattern Matching (<regex>) (PRO)", category: "PRO / Regex Match",
+        description: "Performs regular expression matching using C++ <regex> std::regex_match.",
+        prosCons: "Pros: Powerful pattern matching. Cons: Regex compilation overhead.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 7. C-Strings vs std::string - Approach 7: Regex Matching\n#include <iostream>\n#include <regex>\n#include <string>\nusing namespace std;\n\nvoid matchRegex() {\n    string str = "execium_2026";\n    regex pattern("execium_[0-9]+");\n    bool matched = regex_match(str, pattern);\n    cout << "Regex Matched: " << boolalpha << matched << endl;\n}\n\nint main() {\n    matchRegex();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `bool matched = regex_match(str, pattern);`, constructType: "Condition & Branch", title: "Regex Engine Evaluation", explanation: "Evaluates input string against compiled regex pattern.", keyDetails: [{ variableOrConstruct: "regex_match", role: "Regex Evaluator", whyThisWay: "Pattern validation." }] }]
+      },
+      {
+        id: 8, name: "Approach 8: Custom String Class with Deep Copy RAII (PRO)", category: "PRO / Custom String RAII",
+        description: "Implements custom MyString class managing dynamic char* memory with deep copy semantics.",
+        prosCons: "Pros: Full control over memory allocation and destructor. Cons: Rule of 5 boilerplate.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 7. C-Strings vs std::string - Approach 8: Custom String RAII\n#include <iostream>\n#include <cstring>\nusing namespace std;\n\nclass MyString {\n    char* data;\npublic:\n    MyString(const char* s) { data = new char[strlen(s) + 1]; strcpy(data, s); }\n    ~MyString() { delete[] data; }\n    const char* c_str() const { return data; }\n};\n\nint main() {\n    MyString str("Custom RAII String");\n    cout << str.c_str() << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `~MyString() { delete[] data; }`, constructType: "Return / Cleanup", title: "RAII Destructor Memory Cleanup", explanation: "Frees heap memory allocated by new[] in destructor.", keyDetails: [{ variableOrConstruct: "delete[] data", role: "Destructor", whyThisWay: "Prevents memory leak." }] }]
+      },
+      {
+        id: 9, name: "Approach 9: User-Defined String Literals (operator\"\"_s) (PRO)", category: "PRO / Literal Operator",
+        description: "Creates custom string object using C++11 user-defined literal operator\"\"_myStr.",
+        prosCons: "Pros: Clean domain-specific literal syntax. Cons: Requires custom literal operator.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 7. C-Strings vs std::string - Approach 9: User-Defined Literals\n#include <iostream>\n#include <string>\nusing namespace std;\n\nstring operator""_exec(const char* str, size_t len) {\n    return string("EXEC_") + str;\n}\n\nint main() {\n    auto s = "code"_exec;\n    cout << "Literal Result: " << s << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `string operator""_exec(const char* str, size_t len)`, constructType: "Function Signature", title: "Literal Operator Declaration", explanation: "Defines suffix _exec for string literal creation.", keyDetails: [{ variableOrConstruct: "operator\"\"_exec", role: "Literal Operator", whyThisWay: "Custom literal suffix syntax." }] }]
+      },
+      {
+        id: 10, name: "Approach 10: String Hashing & Interning (std::hash) (PRO)", category: "PRO / String Hashing",
+        description: "Computes 64-bit string hash value using std::hash<std::string> for O(1) string comparison.",
+        prosCons: "Pros: Fast O(1) integer hash comparison. Cons: Hash collision risk.",
+        timeComplexity: "O(N) Hash", spaceComplexity: "O(1)", isFree: false,
+        code: `// 7. C-Strings vs std::string - Approach 10: String Hashing\n#include <iostream>\n#include <string>\n#include <functional>\nusing namespace std;\n\nvoid hashString() {\n    string str = "execium_cpp";\n    size_t hashVal = hash<string>{}(str);\n    cout << "String 64-bit Hash: " << hex << hashVal << dec << endl;\n}\n\nint main() {\n    hashString();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `size_t hashVal = hash<string>{}(str);`, constructType: "Variable & Initializer", title: "std::hash Value Calculation", explanation: "Computes 64-bit hash digest of string content.", keyDetails: [{ variableOrConstruct: "std::hash", role: "Hasher", whyThisWay: "Enables fast O(1) hash map keys." }] }]
+      }
+    ],
+    fullCode: `// 7. C-Strings vs std::string - Approach 1: std::string\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid searchSub() {\n    string str = "execium_cpp";\n    size_t pos = str.find("cpp");\n    cout << "Length: " << str.length() << " | Found 'cpp' at: " << pos << endl;\n}\n\nint main() {\n    searchSub();\n    return 0;\n}`
+  };
+}
+
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 8 ──
+function getProblem8Details(): LearnModule {
+  return {
+    id: "easy_funcs",
+    title: "8. Functions, Pass-by-Value & Reference",
+    shortDesc: "Function signatures, parameter passing semantics, and RVO.",
+    difficulty: "easy",
+    category: "Core Language",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "8. Functions, Pass-by-Value & Reference",
+      objective: "Master C++ function signatures, parameter passing mechanics (by-value, by-reference T&, by-const-reference const T&, by-pointer T*), default arguments, and Return Value Optimization (RVO).",
+      description: "Given a integer counter `value = 10`, mutate it in-place using pass-by-reference (`int&`), inspect read-only parameters via `const int&`, handle null pointer parameters (`int*`), and compare with pass-by-value copy semantics.",
+      inputDesc: "initial value = 10, increment = 5",
+      outputDesc: "Pass-by-Value = 10 (uncopied) | Pass-by-Ref = 15 (mutated in-place)",
+      takeaways: [
+        "Understand Pass-by-Value copy semantics vs Pass-by-Reference (T&) in-place mutation",
+        "Use Pass-by-Const-Reference (const T&) for zero-copy read-only parameters",
+        "Handle Pass-by-Pointer (T*) with explicit nullptr guards",
+        "Master Return Value Optimization (RVO/NRVO) compiler copy elision"
+      ],
+      examples: [
+        { id: 1, input: 'val = 10, inc = 5', output: 'ValueCopy = 10, RefMutated = 15', explanation: 'Pass-by-value creates copy leaving original unchanged; pass-by-ref mutates in-place.' },
+        { id: 2, input: 'val = 100, inc = 25', output: 'ValueCopy = 100, RefMutated = 125' },
+        { id: 3, input: 'ptr = nullptr', output: 'Pointer Guard = Handled Safely' }
+      ],
+      constraints: ["Parameters must use const T& for objects > 16 bytes.", "Pointer parameters must include nullptr check.", "Execution time: O(1)."],
+      companies: ["Microsoft", "Google", "Amazon", "Apple"],
+      acceptanceRate: "94.8%",
+      totalAccepted: "3,510,900"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Pass-by-Value Copy Semantics (FREE)", category: "FREE / Pass-by-Value",
+        description: "Passes parameter by value (int val), copying original argument into function stack frame.",
+        prosCons: "Pros: Safe, original argument cannot be mutated. Cons: Memory copy overhead for large objects.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 1: Pass-by-Value\n#include <iostream>\nusing namespace std;\n\nvoid tryIncrementVal(int x) {\n    x += 5; // Mutates local stack copy\n}\n\nint main() {\n    int val = 10;\n    tryIncrementVal(val);\n    cout << "Original Value (Unchanged): " << val << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `void tryIncrementVal(int x) {`, constructType: "Function Signature", title: "Pass-by-Value Parameter", explanation: "Creates local copy of integer parameter on function stack.", keyDetails: [{ variableOrConstruct: "int x", role: "Local Copy", whyThisWay: "Isolates function state." }] }]
+      },
+      {
+        id: 2, name: "Approach 2: Pass-by-Reference (int&) In-Place Mutation (FREE)", category: "FREE / Pass-by-Ref",
+        description: "Passes reference alias (int& x) allowing direct in-place mutation of caller's variable.",
+        prosCons: "Pros: Zero copy overhead, mutates original variable. Cons: Caller state can be modified.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 2: Pass-by-Ref\n#include <iostream>\nusing namespace std;\n\nvoid incrementRef(int& x) {\n    x += 5; // Mutates caller's original variable directly\n}\n\nint main() {\n    int val = 10;\n    incrementRef(val);\n    cout << "Original Value (Mutated): " << val << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `void incrementRef(int& x) {`, constructType: "Function Signature", title: "Pass-by-Reference Parameter", explanation: "Binds reference alias x directly to caller variable.", keyDetails: [{ variableOrConstruct: "int& x", role: "Reference Alias", whyThisWay: "Mutates caller variable directly." }] }]
+      },
+      {
+        id: 3, name: "Approach 3: Pass-by-Const-Reference (const T&) Read-Only (PRO)", category: "PRO / Pass-by-Const-Ref",
+        description: "Passes read-only reference (const string&) achieving zero-copy with immutability safety.",
+        prosCons: "Pros: Zero copy overhead, prevents accidental mutation. Cons: Cannot modify argument.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 3: Pass-by-Const-Ref\n#include <iostream>\n#include <string>\nusing namespace std;\n\nvoid printConstRef(const string& msg) {\n    cout << "Read-Only Const Ref: " << msg << endl;\n}\n\nint main() {\n    printConstRef("Zero Copy String");\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `void printConstRef(const string& msg) {`, constructType: "Function Signature", title: "Const Reference Parameter", explanation: "Passes string by const reference eliminating copy overhead.", keyDetails: [{ variableOrConstruct: "const string&", role: "Const Reference", whyThisWay: "Zero-copy read-only standard idiom." }] }]
+      },
+      {
+        id: 4, name: "Approach 4: Pass-by-Pointer (int*) with nullptr Guard (PRO)", category: "PRO / Pass-by-Pointer",
+        description: "Passes pointer parameter (int* ptr) with explicit nullptr validation guard.",
+        prosCons: "Pros: Allows optional parameter (can pass nullptr). Cons: Requires explicit null check.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 4: Pass-by-Pointer\n#include <iostream>\nusing namespace std;\n\nvoid incrementPtr(int* ptr) {\n    if (ptr != nullptr) *ptr += 5;\n}\n\nint main() {\n    int val = 10;\n    incrementPtr(&val);\n    cout << "Pointer Mutated Val: " << val << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `if (ptr != nullptr) *ptr += 5;`, constructType: "Condition & Branch", title: "Pointer Null Guard & Dereference", explanation: "Verifies ptr is non-null before dereferencing *ptr.", keyDetails: [{ variableOrConstruct: "*ptr += 5", role: "Pointer Mutation", whyThisWay: "Safely mutates pointed value." }] }]
+      },
+      {
+        id: 5, name: "Approach 5: Default Function Arguments (PRO)", category: "PRO / Default Args",
+        description: "Provides default argument values in function signature: void func(int step = 5).",
+        prosCons: "Pros: Simplifies caller code. Cons: Default arguments must be rightmost parameters.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 5: Default Args\n#include <iostream>\nusing namespace std;\n\nint addStep(int val, int step = 5) {\n    return val + step;\n}\n\nint main() {\n    cout << "Default Step: " << addStep(10) << " | Custom Step: " << addStep(10, 20) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `int addStep(int val, int step = 5) {`, constructType: "Function Signature", title: "Default Parameter Signature", explanation: "Assigns default value 5 to step parameter if omitted by caller.", keyDetails: [{ variableOrConstruct: "step = 5", role: "Default Argument", whyThisWay: "Optional parameter fallback." }] }]
+      },
+      {
+        id: 6, name: "Approach 6: Function Overloading by Parameter Type (PRO)", category: "PRO / Overloading",
+        description: "Defines multiple functions with same name but distinct parameter signatures.",
+        prosCons: "Pros: Polymorphic function naming. Cons: Overload resolution ambiguity if signatures overlap.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 6: Overloading\n#include <iostream>\nusing namespace std;\n\nvoid display(int x) { cout << "Int: " << x << endl; }\nvoid display(double x) { cout << "Double: " << x << endl; }\n\nint main() {\n    display(10);\n    display(3.14);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `void display(double x) { cout << "Double: " << x << endl; }`, constructType: "Function Signature", title: "Overloaded Function Signature", explanation: "Compile-time overload resolution selects function based on argument type.", keyDetails: [{ variableOrConstruct: "display(double)", role: "Overload", whyThisWay: "Type-specific processing." }] }]
+      },
+      {
+        id: 7, name: "Approach 7: Inline Function Hint (inline) (PRO)", category: "PRO / Inline",
+        description: "Applies inline keyword requesting compiler to expand function body at call site.",
+        prosCons: "Pros: Eliminates function call stack frame overhead. Cons: May increase code binary size.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 7: Inline\n#include <iostream>\nusing namespace std;\n\ninline int fastAdd(int a, int b) {\n    return a + b;\n}\n\nint main() {\n    cout << "Inline Fast Add: " << fastAdd(10, 5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `inline int fastAdd(int a, int b) {`, constructType: "Function Signature", title: "Inline Function Hint", explanation: "Requests compiler inline expansion.", keyDetails: [{ variableOrConstruct: "inline", role: "Inline Hint", whyThisWay: "Removes call stack frame creation." }] }]
+      },
+      {
+        id: 8, name: "Approach 8: C++11 Lambda Function Expressions (PRO)", category: "PRO / Lambda Expressions",
+        description: "Creates anonymous inline closure using lambda syntax [capture](params) { body }.",
+        prosCons: "Pros: Local inline function definition. Cons: Capture list scope rules.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 8: Lambda\n#include <iostream>\nusing namespace std;\n\nvoid runLambda() {\n    int factor = 5;\n    auto calc = [factor](int x) { return x * factor; };\n    cout << "Lambda Calc: " << calc(10) << endl;\n}\n\nint main() {\n    runLambda();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `auto calc = [factor](int x) { return x * factor; };`, constructType: "Variable & Initializer", title: "Lambda Closure Declaration", explanation: "Captures factor by value and defines anonymous callable.", keyDetails: [{ variableOrConstruct: "[capture](params)", role: "Lambda", whyThisWay: "Inline anonymous function." }] }]
+      },
+      {
+        id: 9, name: "Approach 9: Named Return Value Optimization (NRVO) (PRO)", category: "PRO / RVO Copy Elision",
+        description: "Demonstrates compiler Named Return Value Optimization (NRVO) constructing returned object directly in caller space.",
+        prosCons: "Pros: Eliminates object copy/move constructors on return. Cons: Compiler dependent.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 9: NRVO\n#include <iostream>\n#include <string>\nusing namespace std;\n\nstring buildString() {\n    string result = "NRVO Optimized String Return";\n    return result; // NRVO elides copy\n}\n\nint main() {\n    string s = buildString();\n    cout << s << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `return result;`, constructType: "Return / Cleanup", title: "NRVO Copy Elision Return", explanation: "Compiler constructs result directly in caller s memory space.", keyDetails: [{ variableOrConstruct: "NRVO", role: "Copy Elision", whyThisWay: "Zero copy cost on function return." }] }]
+      },
+      {
+        id: 10, name: "Approach 10: Polymorphic std::function Wrapper (PRO)", category: "PRO / std::function",
+        description: "Wraps any callable entity (function pointer, lambda, functor) in std::function<int(int)>.",
+        prosCons: "Pros: Universal callable wrapper. Cons: Dynamic memory allocation and virtual call overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 8. Functions, Pass-by-Value & Reference - Approach 10: std::function\n#include <iostream>\n#include <functional>\nusing namespace std;\n\nvoid executeCallback(function<int(int)> fn, int val) {\n    cout << "Callback Executed Result: " << fn(val) << endl;\n}\n\nint main() {\n    executeCallback([](int x){ return x + 5; }, 10);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `void executeCallback(function<int(int)> fn, int val) {`, constructType: "Function Signature", title: "std::function Wrapper Parameter", explanation: "Accepts any callable matching signature int(int).", keyDetails: [{ variableOrConstruct: "std::function", role: "Type Erasure", whyThisWay: "Universal function wrapper." }] }]
+      }
+    ],
+    fullCode: `// 8. Functions, Pass-by-Value & Reference - Approach 1: Pass-by-Value\n#include <iostream>\nusing namespace std;\n\nvoid tryIncrementVal(int x) {\n    x += 5; // Mutates local stack copy\n}\n\nint main() {\n    int val = 10;\n    tryIncrementVal(val);\n    cout << "Original Value (Unchanged): " << val << endl;\n    return 0;\n}`
+  };
+}
+
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 9 ──
+function getProblem9Details(): LearnModule {
+  return {
+    id: "easy_pointers",
+    title: "9. Raw Pointers, References & Addresses",
+    shortDesc: "Memory addresses (&), pointer dereferencing (*), and pointer arithmetic.",
+    difficulty: "easy",
+    category: "Memory Management",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "9. Raw Pointers, References & Addresses",
+      objective: "Master RAM memory addresses (&), raw pointer dereferencing (*), pointer arithmetic (ptr + i), double pointers (**), and void pointers (void*).",
+      description: "Given a variable `var = 42` and a stack array `[10, 20, 30]`, inspect its RAM address (`&var`), dereference raw pointers (`*ptr`), traverse contiguous memory via pointer arithmetic (`*(ptr + i)`), and safely handle `nullptr` checks.",
+      inputDesc: "var = 42, array = [10, 20, 30]",
+      outputDesc: "RAM Address = 0x7ffd... | Dereferenced *ptr = 42 | Pointer Arithmetic *(ptr + 2) = 30",
+      takeaways: [
+        "Understand address-of (&) and pointer dereference (*) operators",
+        "Master pointer arithmetic (ptr + i) moving by sizeof(type) bytes",
+        "Handle nullptr guards to prevent segmentation fault crashes",
+        "Utilize void* raw pointers and reinterpret_cast for low-level memory inspection"
+      ],
+      examples: [
+        { id: 1, input: 'var = 42, ptr = &var', output: 'Address = 0x7ffd... | Dereferenced = 42', explanation: '& fetches RAM memory address; * dereferences value stored at address.' },
+        { id: 2, input: 'arr = [10, 20, 30], ptr = arr', output: '*(ptr + 2) = 30', explanation: 'Pointer arithmetic advances memory offset by 2 * sizeof(int).' },
+        { id: 3, input: 'ptr = nullptr', output: 'Null Check = Prevented Segmentation Fault' }
+      ],
+      constraints: ["Pointers must be checked against nullptr before dereferencing.", "Pointer arithmetic must remain inside allocated buffer bounds.", "Execution time: O(1)."],
+      companies: ["Apple", "Google", "Microsoft", "Meta"],
+      acceptanceRate: "88.6%",
+      totalAccepted: "2,680,300"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Address-Of (&) and Dereference (*) Operators (FREE)", category: "FREE / Pointer Basics",
+        description: "Uses & to fetch memory address of variable and * to dereference value.",
+        prosCons: "Pros: Direct low-level RAM address access. Cons: Uninitialized pointers cause UB.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 1: Address & Dereference\n#include <iostream>\nusing namespace std;\n\nvoid inspectAddress() {\n    int var = 42;\n    int* ptr = &var;\n    cout << "Address: " << ptr << " | Dereferenced *ptr: " << *ptr << endl;\n}\n\nint main() {\n    inspectAddress();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `int* ptr = &var;`, constructType: "Variable & Initializer", title: "Address-Of Operator Assignment", explanation: "Fetches RAM memory address of var using & and stores it in pointer ptr.", keyDetails: [{ variableOrConstruct: "&var", role: "Address-Of", whyThisWay: "Returns memory address pointer." }] }]
+      },
+      {
+        id: 2, name: "Approach 2: Reference Aliasing (int& ref = var) (FREE)", category: "FREE / Reference Alias",
+        description: "Creates non-null reference alias int& ref = var pointing directly to same memory location.",
+        prosCons: "Pros: Syntactically cleaner than pointers, cannot be null. Cons: Must be initialized on creation.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 2: Reference Alias\n#include <iostream>\nusing namespace std;\n\nvoid inspectRef() {\n    int var = 42;\n    int& ref = var;\n    ref = 99;\n    cout << "Mutated var via Reference: " << var << endl;\n}\n\nint main() {\n    inspectRef();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `int& ref = var;`, constructType: "Variable & Initializer", title: "Reference Alias Declaration", explanation: "Creates alternative name ref for memory location of var.", keyDetails: [{ variableOrConstruct: "int& ref", role: "Reference Alias", whyThisWay: "Cannot be reassigned or null." }] }]
+      },
+      {
+        id: 3, name: "Approach 3: Pointer Arithmetic Offset Traversal (PRO)", category: "PRO / Pointer Arithmetic",
+        description: "Advances pointer across contiguous array memory using *(ptr + i).",
+        prosCons: "Pros: Fast pointer increment arithmetic. Cons: Out-of-bounds access risks.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 3: Pointer Arithmetic\n#include <iostream>\nusing namespace std;\n\nvoid traversePointer() {\n    int arr[3] = {10, 20, 30};\n    int* ptr = arr;\n    for (int i = 0; i < 3; i++) cout << "*(ptr + " << i << "): " << *(ptr + i) << " | ";\n    cout << endl;\n}\n\nint main() {\n    traversePointer();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `cout << "*(ptr + " << i << "): " << *(ptr + i);`, constructType: "Loop Construct", title: "Pointer Offset Dereference", explanation: "Adds i * sizeof(int) bytes to ptr base address and dereferences value.", keyDetails: [{ variableOrConstruct: "*(ptr + i)", role: "Pointer Arithmetic", whyThisWay: "Navigates contiguous memory." }] }]
+      },
+      {
+        id: 4, name: "Approach 4: Double Pointer (int** ptrToPtr) (PRO)", category: "PRO / Double Pointer",
+        description: "Declares pointer-to-pointer int** storing address of another pointer variable.",
+        prosCons: "Pros: Allows mutating pointer address inside functions. Cons: Double indirection memory lookup.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 4: Double Pointer\n#include <iostream>\nusing namespace std;\n\nvoid doublePointer() {\n    int val = 42;\n    int* ptr = &val;\n    int** ptrToPtr = &ptr;\n    cout << "Double Dereference **ptrToPtr: " << **ptrToPtr << endl;\n}\n\nint main() {\n    doublePointer();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `int** ptrToPtr = &ptr;`, constructType: "Variable & Initializer", title: "Pointer to Pointer Assignment", explanation: "Stores address of pointer variable ptr in double pointer ptrToPtr.", keyDetails: [{ variableOrConstruct: "int**", role: "Double Pointer", whyThisWay: "Indirection for pointer modification." }] }]
+      },
+      {
+        id: 5, name: "Approach 5: Const Pointers vs Pointer to Const (PRO)", category: "PRO / Const Pointer",
+        description: "Distinguishes const int* (pointer to constant data) vs int* const (constant pointer address).",
+        prosCons: "Pros: Precise const correctness enforcement. Cons: Confusing syntax rules.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 5: Const Pointers\n#include <iostream>\nusing namespace std;\n\nvoid constPointerDemo() {\n    int a = 10, b = 20;\n    const int* ptrToConst = &a; // Data is const\n    int* const constPtr = &a;   // Pointer address is const\n    cout << "*ptrToConst: " << *ptrToConst << " | *constPtr: " << *constPtr << endl;\n}\n\nint main() {\n    constPointerDemo();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `const int* ptrToConst = &a;`, constructType: "Variable & Initializer", title: "Pointer to Const Data", explanation: "Prevents mutating target value via *ptrToConst.", keyDetails: [{ variableOrConstruct: "const int*", role: "Read-Only Target", whyThisWay: "Enforces immutability of pointed data." }] }]
+      },
+      {
+        id: 6, name: "Approach 6: nullptr Safety Guard Check (PRO)", category: "PRO / Null Guard",
+        description: "Guards raw pointer dereferencing with explicit nullptr validation.",
+        prosCons: "Pros: Prevents segmentation fault crashes. Cons: Requires explicit if check.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 6: Null Guard\n#include <iostream>\nusing namespace std;\n\nvoid safeDereference(int* ptr) {\n    if (ptr != nullptr) cout << "Safe Value: " << *ptr << endl;\n    else cout << "Pointer is nullptr, skipped!" << endl;\n}\n\nint main() {\n    safeDereference(nullptr);\n    int x = 42;\n    safeDereference(&x);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `if (ptr != nullptr)`, constructType: "Condition & Branch", title: "Null Pointer Guard Check", explanation: "Verifies pointer address is non-zero before dereferencing.", keyDetails: [{ variableOrConstruct: "ptr != nullptr", role: "Safety Guard", whyThisWay: "Prevents OS page fault crash." }] }]
+      },
+      {
+        id: 7, name: "Approach 7: Generic void* Pointer & reinterpret_cast (PRO)", category: "PRO / Generic void*",
+        description: "Uses untyped void* raw memory pointer and reinterpret_cast to inspect raw bytes.",
+        prosCons: "Pros: Low-level type-agnostic byte manipulation. Cons: Dangerous if cast to wrong type.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 7: Generic void*\n#include <iostream>\nusing namespace std;\n\nvoid inspectRawBytes(void* rawPtr) {\n    int* intPtr = static_cast<int*>(rawPtr);\n    cout << "Generic Void Pointer Cast Result: " << *intPtr << endl;\n}\n\nint main() {\n    int x = 42;\n    inspectRawBytes(&x);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `int* intPtr = static_cast<int*>(rawPtr);`, constructType: "Variable & Initializer", title: "Void Pointer Casting", explanation: "Casts untyped void* address back to typed int* pointer.", keyDetails: [{ variableOrConstruct: "static_cast<int*>", role: "Type Restorer", whyThisWay: "Restores type information for dereference." }] }]
+      },
+      {
+        id: 8, name: "Approach 8: Function Pointers & Callback Invocation (PRO)", category: "PRO / Function Pointer",
+        description: "Stores code entry address in function pointer void (*funcPtr)(int) and invokes it.",
+        prosCons: "Pros: C-style dynamic callback mechanism. Cons: Complex syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 8: Function Pointer\n#include <iostream>\nusing namespace std;\n\nvoid printVal(int x) { cout << "Function Pointer Invoked: " << x << endl; }\n\nint main() {\n    void (*funcPtr)(int) = &printVal;\n    funcPtr(42);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `void (*funcPtr)(int) = &printVal;`, constructType: "Variable & Initializer", title: "Function Pointer Assignment", explanation: "Stores code instruction memory address of printVal function.", keyDetails: [{ variableOrConstruct: "funcPtr(42)", role: "Function Pointer", whyThisWay: "Indirect function call via address." }] }]
+      },
+      {
+        id: 9, name: "Approach 9: Pointer Distance (ptrdiff_t) Calculation (PRO)", category: "PRO / ptrdiff_t",
+        description: "Calculates element distance between two pointers using <cstddef> ptrdiff_t.",
+        prosCons: "Pros: Exact element count between pointer locations. Cons: Pointers must belong to same array.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 9: ptrdiff_t\n#include <iostream>\n#include <cstddef>\nusing namespace std;\n\nvoid calcDistance() {\n    int arr[5] = {10, 20, 30, 40, 50};\n    int* p1 = &arr[0];\n    int* p2 = &arr[4];\n    ptrdiff_t dist = p2 - p1;\n    cout << "Pointer Element Distance: " << dist << " elements" << endl;\n}\n\nint main() {\n    calcDistance();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `ptrdiff_t dist = p2 - p1;`, constructType: "Variable & Initializer", title: "Pointer Subtraction Offset", explanation: "Subtracts p1 from p2 returning number of elements between them.", keyDetails: [{ variableOrConstruct: "ptrdiff_t", role: "Pointer Distance", whyThisWay: "Standard signed type for pointer subtraction." }] }]
+      },
+      {
+        id: 10, name: "Approach 10: Custom Smart Pointer RAII Wrapper (PRO)", category: "PRO / Custom Smart Pointer",
+        description: "Encapsulates raw pointer in custom SmartPtr class with RAII delete in destructor and operator*.",
+        prosCons: "Pros: Prevents raw pointer memory leaks. Cons: Custom wrapper overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 9. Raw Pointers, References & Addresses - Approach 10: Smart Pointer RAII\n#include <iostream>\nusing namespace std;\n\ntemplate<typename T>\nclass SmartPtr {\n    T* ptr;\npublic:\n    explicit SmartPtr(T* p = nullptr) : ptr(p) {}\n    ~SmartPtr() { delete ptr; }\n    T& operator*() { return *ptr; }\n};\n\nint main() {\n    SmartPtr<int> sp(new int(42));\n    cout << "Smart Pointer Value: " << *sp << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `~SmartPtr() { delete ptr; }`, constructType: "Return / Cleanup", title: "RAII Smart Destructor", explanation: "Automatically frees heap memory when SmartPtr goes out of scope.", keyDetails: [{ variableOrConstruct: "delete ptr", role: "RAII Destructor", whyThisWay: "Guarantees zero memory leak." }] }]
+      }
+    ],
+    fullCode: `// 9. Raw Pointers, References & Addresses - Approach 1: Address & Dereference\n#include <iostream>\nusing namespace std;\n\nvoid inspectAddress() {\n    int var = 42;\n    int* ptr = &var;\n    cout << "Address: " << ptr << " | Dereferenced *ptr: " << *ptr << endl;\n}\n\nint main() {\n    inspectAddress();\n    return 0;\n}`
+  };
+}
+
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 10 ──
+function getProblem10Details(): LearnModule {
+  return {
+    id: "easy_structs",
+    title: "10. Structs, Unions & Memory Alignment",
+    shortDesc: "Data encapsulation using structs, memory-sharing unions, and byte alignment.",
+    difficulty: "easy",
+    category: "Core Language",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "10. Structs, Unions & Memory Alignment",
+      objective: "Master struct data encapsulation, member initialization, union memory sharing, #pragma pack padding, and byte alignment (alignof).",
+      description: "Given a `Point` struct (`x`, `y`) and a `DataUnion` memory-sharing union, construct data structures, inspect memory alignment padding (`alignof`), and apply C++17 designated initializers (`Point p{.x=10, .y=20}`).",
+      inputDesc: "Point x = 10, y = 20 | Union intVal = 42",
+      outputDesc: "Point = (10, 20) | Union Shared Memory Size = 4 bytes | Struct Alignment = 4 bytes",
+      takeaways: [
+        "Encapsulate compound data using C++ struct constructs",
+        "Share memory across variant fields using C++ union",
+        "Inspect struct padding and byte alignment via alignof and #pragma pack",
+        "Apply C++20 Designated Initializers for readable struct construction"
+      ],
+      examples: [
+        { id: 1, input: 'p = Point{10, 20}', output: 'x = 10, y = 20 | Size = 8 bytes', explanation: 'Struct allocates memory sequentially for member variables.' },
+        { id: 2, input: 'u.intVal = 42', output: 'Union Size = 4 bytes', explanation: 'Union members share identical overlapping memory location.' },
+        { id: 3, input: 'p = Point{.x = 5, .y = 15}', output: 'Designated Initialized (5, 15)' }
+      ],
+      constraints: ["Struct memory padding depends on hardware architecture (32/64-bit).", "Union can safely read only the last written member.", "Execution time: O(1)."],
+      companies: ["Meta", "Google", "Amazon", "Microsoft"],
+      acceptanceRate: "91.3%",
+      totalAccepted: "2,490,100"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Standard Struct Member Initialization (FREE)", category: "FREE / Struct Basics",
+        description: "Declares struct Point { int x; int y; } and accesses members using dot operator (.).",
+        prosCons: "Pros: Clean data encapsulation. Cons: Padding bytes can increase struct size.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 1: Standard Struct\n#include <iostream>\nusing namespace std;\n\nstruct Point {\n    int x;\n    int y;\n};\n\nint main() {\n    Point p = {10, 20};\n    cout << "Point: (" << p.x << ", " << p.y << ") | Size: " << sizeof(Point) << " bytes" << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `Point p = {10, 20};`, constructType: "Variable & Initializer", title: "Struct Aggregate Initialization", explanation: "Instantiates Point struct initializing x = 10 and y = 20.", keyDetails: [{ variableOrConstruct: "Point p", role: "Struct Instance", whyThisWay: "Sequential stack member allocation." }] }]
+      },
+      {
+        id: 2, name: "Approach 2: C++20 Designated Initializers (.x = 10) (FREE)", category: "FREE / Designated Init",
+        description: "C++20 designated initializers Point p{.x = 10, .y = 20} for explicit field assignment.",
+        prosCons: "Pros: Highly readable and self-documenting syntax. Cons: Requires C++20 compiler.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 2: Designated Initializers\n#include <iostream>\nusing namespace std;\n\nstruct Point {\n    int x;\n    int y;\n};\n\nint main() {\n    Point p{.x = 10, .y = 20};\n    cout << "Designated Init Point: (" << p.x << ", " << p.y << ")" << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `Point p{.x = 10, .y = 20};`, constructType: "Variable & Initializer", title: "C++20 Designated Initializer", explanation: "Explicitly names fields .x and .y during aggregate initialization.", keyDetails: [{ variableOrConstruct: ".x = 10", role: "Field Designator", whyThisWay: "Prevents accidental field position bugs." }] }]
+      },
+      {
+        id: 3, name: "Approach 3: Memory-Sharing C-Style Union (PRO)", category: "PRO / C-Union",
+        description: "Uses union DataUnion where all members share identical starting memory address.",
+        prosCons: "Pros: Saves memory by overlapping fields. Cons: Reading inactive field causes UB.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 3: C-Union\n#include <iostream>\nusing namespace std;\n\nunion DataUnion {\n    int intVal;\n    float floatVal;\n};\n\nint main() {\n    DataUnion u;\n    u.intVal = 42;\n    cout << "Union intVal: " << u.intVal << " | Union Total Size: " << sizeof(DataUnion) << " bytes" << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `union DataUnion {`, constructType: "Variable & Initializer", title: "Union Memory Overlay", explanation: "Allocates single buffer size equal to max member (4 bytes for int/float).", keyDetails: [{ variableOrConstruct: "union", role: "Memory Overlay", whyThisWay: "Shared overlapping memory region." }] }]
+      },
+      {
+        id: 4, name: "Approach 4: Struct Padding & #pragma pack(1) Alignment (PRO)", category: "PRO / Struct Packing",
+        description: "Inspects memory alignment padding (alignof) and removes padding using #pragma pack(1).",
+        prosCons: "Pros: Eliminates memory padding gaps for network serialization. Cons: Unaligned memory accesses can slow CPU.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 4: #pragma pack(1)\n#include <iostream>\nusing namespace std;\n\n#pragma pack(push, 1)\nstruct PackedStruct {\n    char c;\n    int i;\n};\n#pragma pack(pop)\n\nint main() {\n    cout << "Packed Struct Size (No Padding): " << sizeof(PackedStruct) << " bytes (Expected 5)" << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `#pragma pack(push, 1)`, constructType: "Header / Include", title: "1-Byte Alignment Packing Pragma", explanation: "Forces compiler to pack struct members tightly without padding bytes.", keyDetails: [{ variableOrConstruct: "#pragma pack(1)", role: "Packing Directive", whyThisWay: "Eliminates alignment padding." }] }]
+      },
+      {
+        id: 5, name: "Approach 5: Bit-Fields Struct Packing (PRO)", category: "PRO / Bit Fields",
+        description: "Declares bit-field struct members struct Flags { unsigned int flagA : 1; unsigned int flagB : 3; }.",
+        prosCons: "Pros: Fits multiple boolean flags into single byte. Cons: Bitwise manipulation overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 5: Bit-Fields\n#include <iostream>\nusing namespace std;\n\nstruct SystemFlags {\n    unsigned int isReady : 1;\n    unsigned int mode : 3;\n};\n\nint main() {\n    SystemFlags flags{1, 5};\n    cout << "Ready: " << flags.isReady << " | Mode: " << flags.mode << " | Struct Size: " << sizeof(SystemFlags) << " bytes" << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `unsigned int isReady : 1;`, constructType: "Variable & Initializer", title: "1-Bit Field Declaration", explanation: "Allocates exactly 1 bit for isReady field inside 32-bit container.", keyDetails: [{ variableOrConstruct: ": 1", role: "Bit Width", whyThisWay: "Stores boolean in 1 bit." }] }]
+      },
+      {
+        id: 6, name: "Approach 6: Modern C++17 Type-Safe std::variant (PRO)", category: "PRO / std::variant",
+        description: "Replaces C-style union with type-safe C++17 std::variant<int, float, string>.",
+        prosCons: "Pros: Type-safe, tracks active type index safely. Cons: Variant metadata overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 6: std::variant\n#include <iostream>\n#include <variant>\nusing namespace std;\n\nvoid useVariant() {\n    variant<int, float> v = 42;\n    cout << "Variant int: " << get<int>(v) << endl;\n}\n\nint main() {\n    useVariant();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `variant<int, float> v = 42;`, constructType: "Variable & Initializer", title: "Type-Safe Variant Assignment", explanation: "Stores int 42 inside variant container tracking current type index.", keyDetails: [{ variableOrConstruct: "std::variant", role: "Type-Safe Union", whyThisWay: "Prevents undefined behavior." }] }]
+      },
+      {
+        id: 7, name: "Approach 7: C++17 Structured Bindings for Structs (PRO)", category: "PRO / Struct Binding",
+        description: "Decomposes struct members into local variables: auto [x, y] = point.",
+        prosCons: "Pros: Clean member extraction. Cons: Requires C++17.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 7: Struct Binding\n#include <iostream>\nusing namespace std;\n\nstruct Point { int x; int y; };\n\nint main() {\n    Point p{10, 20};\n    auto [px, py] = p;\n    cout << "Bound px: " << px << ", py: " << py << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `auto [px, py] = p;`, constructType: "Variable & Initializer", title: "Struct Member Binding", explanation: "Binds px and py to members p.x and p.y.", keyDetails: [{ variableOrConstruct: "auto [px, py]", role: "Struct Binding", whyThisWay: "Unpacks struct members cleanly." }] }]
+      },
+      {
+        id: 8, name: "Approach 8: Struct Member Operator Overloading (PRO)", category: "PRO / Struct Operator",
+        description: "Overloads operator== inside struct for direct structural equality comparison.",
+        prosCons: "Pros: Enables p1 == p2 syntax. Cons: Requires writing operator overloads.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 8: Struct Operator\n#include <iostream>\nusing namespace std;\n\nstruct Point {\n    int x, y;\n    bool operator==(const Point& o) const { return x == o.x && y == o.y; }\n};\n\nint main() {\n    Point p1{10, 20}, p2{10, 20};\n    cout << "Equal Structs: " << boolalpha << (p1 == p2) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `bool operator==(const Point& o) const {`, constructType: "Function Signature", title: "Equality Operator Method", explanation: "Compares member x and y fields of both structs for equality.", keyDetails: [{ variableOrConstruct: "operator==", role: "Equality Method", whyThisWay: "Provides structural comparison." }] }]
+      },
+      {
+        id: 9, name: "Approach 9: Deep Copy Constructor & Copy Assignment (PRO)", category: "PRO / Deep Copy RAII",
+        description: "Implements custom Copy Constructor and Copy Assignment Operator for deep memory cloning.",
+        prosCons: "Pros: Prevents double-free heap crashes. Cons: Requires Rule of 3/5 boilerplate.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 9: Deep Copy\n#include <iostream>\nusing namespace std;\n\nstruct Buffer {\n    int* data;\n    Buffer(int val) { data = new int(val); }\n    Buffer(const Buffer& o) { data = new int(*o.data); } // Deep Copy\n    ~Buffer() { delete data; }\n};\n\nint main() {\n    Buffer b1(42);\n    Buffer b2 = b1;\n    cout << "Deep Copied b2 Value: " << *b2.data << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `Buffer(const Buffer& o) { data = new int(*o.data); }`, constructType: "Function Signature", title: "Deep Copy Constructor", explanation: "Allocates new memory buffer and copies target value rather than sharing pointer.", keyDetails: [{ variableOrConstruct: "Deep Copy", role: "Copy Constructor", whyThisWay: "Prevents double-free runtime crash." }] }]
+      },
+      {
+        id: 10, name: "Approach 10: Binary Struct Buffer Serialization (PRO)", category: "PRO / Binary Serialization",
+        description: "Reinterprets struct memory as raw byte array for binary socket or file serialization.",
+        prosCons: "Pros: Fast zero-copy binary serialization. Cons: Requires identical byte alignment across endpoints.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 10. Structs, Unions & Memory Alignment - Approach 10: Binary Serialization\n#include <iostream>\nusing namespace std;\n\nstruct Packet {\n    int id;\n    float val;\n};\n\nvoid serialize() {\n    Packet p{101, 3.14f};\n    const char* bytes = reinterpret_cast<const char*>(&p);\n    cout << "Serialized Byte 0 (Hex): 0x" << hex << (int)(unsigned char)bytes[0] << dec << endl;\n}\n\nint main() {\n    serialize();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `const char* bytes = reinterpret_cast<const char*>(&p);`, constructType: "Variable & Initializer", title: "Byte Array Reinterpretation", explanation: "Reinterprets struct address &p as raw byte buffer char* pointer.", keyDetails: [{ variableOrConstruct: "reinterpret_cast", role: "Byte Pointer", whyThisWay: "Exposes raw byte memory footprint." }] }]
+      }
+    ],
+    fullCode: `// 10. Structs, Unions & Memory Alignment - Approach 1: Standard Struct\n#include <iostream>\nusing namespace std;\n\nstruct Point {\n    int x;\n    int y;\n};\n\nint main() {\n    Point p = {10, 20};\n    cout << "Point: (" << p.x << ", " << p.y << ") | Size: " << sizeof(Point) << " bytes" << endl;\n    return 0;\n}`
+  };
+}
+
 function getProblem2Details(): LearnModule {
   return {
     id: "easy_vars",
@@ -864,7 +1448,239 @@ function getProblem3Details(): LearnModule {
   };
 }
 
-// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 1 ──
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 4 ──
+function getProblem4Details(): LearnModule {
+  return {
+    id: "easy_if",
+    title: "4. If-Else, Switch-Case & Ternary",
+    shortDesc: "Conditional execution using if-else, switch-case, and ternary operator.",
+    difficulty: "easy",
+    category: "Control Flow",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "4. If-Else, Switch-Case & Ternary",
+      objective: "Master conditional branching constructs (if-else, switch-case, ternary ? :), C++17 init-statements, and jump table dispatching.",
+      description: "Given an integer test score `score` (0-100) and a transaction status code `status`, evaluate letter grades (A, B, C, F) using `if-else` cascades, classify status codes via `switch-case`, and return pass/fail flags using ternary expressions.",
+      inputDesc: "score = 85, status = 200",
+      outputDesc: "Grade = 'B' | Status = 'OK 200' | Result = 'PASS'",
+      takeaways: [
+        "Master nested if-else condition cascades",
+        "Understand switch-case jump tables and break statements",
+        "Apply ternary operator (? :) for concise inline conditionals",
+        "Utilize C++17 if-with-initializer syntax for localized variable scope"
+      ],
+      examples: [
+        { id: 1, input: 'score = 85, status = 200', output: 'Grade = "B" | Status = "OK 200" | Result = "PASS"', explanation: 'score 85 matches range [80, 89] -> B; status 200 matches OK.' },
+        { id: 2, input: 'score = 42, status = 404', output: 'Grade = "F" | Status = "NOT FOUND 404" | Result = "FAIL"', explanation: 'score < 60 fails; status 404 matches NOT FOUND.' },
+        { id: 3, input: 'score = 95, status = 500', output: 'Grade = "A" | Status = "SERVER ERROR 500" | Result = "PASS"' }
+      ],
+      constraints: ["0 <= score <= 100", "100 <= status <= 599", "Branch execution must evaluate in O(1) time."],
+      companies: ["Google", "Meta", "Amazon", "Apple"],
+      acceptanceRate: "93.1%",
+      totalAccepted: "3,120,400"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Standard If-Else Cascade (FREE)", category: "FREE / If-Else",
+        description: "Sequential evaluation of score ranges using nested if-else if-else blocks.",
+        prosCons: "Pros: Intuitive and flexible. Cons: O(N) comparisons in worst case.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 1: Standard If-Else\n#include <iostream>\nusing namespace std;\n\nchar getGrade(int score) {\n    if (score >= 90) return 'A';\n    else if (score >= 80) return 'B';\n    else if (score >= 70) return 'C';\n    else return 'F';\n}\n\nint main() {\n    cout << "Score 85 Grade: " << getGrade(85) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `if (score >= 90) return 'A';`, constructType: "Condition & Branch", title: "Grade A Guard", explanation: "Evaluates if score is 90 or above.", keyDetails: [{ variableOrConstruct: "if (score >= 90)", role: "Range Check", whyThisWay: "Highest priority threshold checked first." }] }]
+      },
+      {
+        id: 2, name: "Approach 2: Inline Ternary Operator (? :) (FREE)", category: "FREE / Ternary",
+        description: "Concise conditional expression evaluating pass/fail status in a single expression.",
+        prosCons: "Pros: Single line expression. Cons: Hard to read if heavily nested.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 2: Ternary Operator\n#include <iostream>\nusing namespace std;\n\nstring checkPassFail(int score) {\n    return (score >= 60) ? "PASS" : "FAIL";\n}\n\nint main() {\n    cout << "Result: " << checkPassFail(85) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `return (score >= 60) ? "PASS" : "FAIL";`, constructType: "Return / Cleanup", title: "Ternary Expression Return", explanation: "Evaluates boolean condition and returns string literal.", keyDetails: [{ variableOrConstruct: "? :", role: "Ternary Operator", whyThisWay: "Inline expression evaluation." }] }]
+      },
+      {
+        id: 3, name: "Approach 3: Switch-Case Jump Table (PRO)", category: "PRO / Switch Jump Table",
+        description: "Evaluates discrete status codes using switch statement compiled into a O(1) jump table.",
+        prosCons: "Pros: O(1) jump table dispatch. Cons: Only works for integral or enum types.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 3: Switch-Case\n#include <iostream>\nusing namespace std;\n\nvoid printStatus(int status) {\n    switch (status) {\n        case 200: cout << "OK 200" << endl; break;\n        case 404: cout << "NOT FOUND 404" << endl; break;\n        case 500: cout << "SERVER ERROR 500" << endl; break;\n        default: cout << "UNKNOWN " << status << endl; break;\n    }\n}\n\nint main() {\n    printStatus(200);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `switch (status) {`, constructType: "Condition & Branch", title: "Switch Jump Table", explanation: "Dispatches control to matching case label.", keyDetails: [{ variableOrConstruct: "switch", role: "Jump Table", whyThisWay: "Direct branch table assembly instruction." }] }]
+      },
+      {
+        id: 4, name: "Approach 4: C++17 If With Initializer (PRO)", category: "PRO / C++17 If-Init",
+        description: "Scopes variable initialization directly inside if statement: if (init; condition).",
+        prosCons: "Pros: Keeps variable localized to branch scope. Cons: Requires C++17.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 4: C++17 If-Init\n#include <iostream>\nusing namespace std;\n\nint fetchScore() { return 85; }\n\nvoid evaluateWithInit() {\n    if (int score = fetchScore(); score >= 60) {\n        cout << "Scoped Score " << score << " Passed!" << endl;\n    }\n}\n\nint main() {\n    evaluateWithInit();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `if (int score = fetchScore(); score >= 60) {`, constructType: "Condition & Branch", title: "C++17 Localized Scope Guard", explanation: "Initializes score and evaluates condition in one statement.", keyDetails: [{ variableOrConstruct: "if (init; cond)", role: "Scoped Guard", whyThisWay: "Prevents leaking score into outer scope." }] }]
+      },
+      {
+        id: 5, name: "Approach 5: C++17 [[fallthrough]] Switch Attribute (PRO)", category: "PRO / Fallthrough",
+        description: "Explicitly documents intended case fallthrough using C++17 [[fallthrough]] attribute.",
+        prosCons: "Pros: Eliminates compiler fallthrough warnings. Cons: Requires C++17.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 5: [[fallthrough]]\n#include <iostream>\nusing namespace std;\n\nvoid categorizeHttp(int code) {\n    switch (code) {\n        case 200:\n        case 201: cout << "Success Code" << endl; break;\n        case 400: [[fallthrough]];\n        case 404: cout << "Client Error Code" << endl; break;\n        default: cout << "Other" << endl; break;\n    }\n}\n\nint main() {\n    categorizeHttp(400);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `case 400: [[fallthrough]];`, constructType: "Condition & Branch", title: "Explicit Fallthrough Attribute", explanation: "Tells compiler fallthrough to case 404 is intentional.", keyDetails: [{ variableOrConstruct: "[[fallthrough]]", role: "Attribute", whyThisWay: "Suppresses compiler warning." }] }]
+      },
+      {
+        id: 6, name: "Approach 6: Dispatch Table via std::unordered_map (PRO)", category: "PRO / Dispatch Table",
+        description: "Replaces large switch statements with a map lookup table of lambda handlers.",
+        prosCons: "Pros: Dynamic runtime handler registration. Cons: Map lookup hash overhead.",
+        timeComplexity: "O(1) Avg", spaceComplexity: "O(N)", isFree: false,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 6: Dispatch Table\n#include <iostream>\n#include <unordered_map>\n#include <functional>\nusing namespace std;\n\nvoid dispatchStatus(int code) {\n    unordered_map<int, function<void()>> handlers = {\n        {200, [](){ cout << "Handler OK 200" << endl; }},\n        {404, [](){ cout << "Handler NOT FOUND 404" << endl; }}\n    };\n    if (handlers.count(code)) handlers[code]();\n}\n\nint main() {\n    dispatchStatus(200);\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `if (handlers.count(code)) handlers[code]();`, constructType: "Condition & Branch", title: "Map Function Pointer Invocation", explanation: "Looks up lambda handler in hash map and invokes it.", keyDetails: [{ variableOrConstruct: "handlers[code]()", role: "Lambda Dispatch", whyThisWay: "Decouples branching from logic." }] }]
+      },
+      {
+        id: 7, name: "Approach 7: Polymorphic Strategy Branching (PRO)", category: "PRO / OOP Strategy",
+        description: "Replaces conditional logic with object-oriented virtual method polymorphism.",
+        prosCons: "Pros: Open/Closed Principle compliant. Cons: Virtual table lookup cost.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 7: Polymorphic Strategy\n#include <iostream>\nusing namespace std;\n\nstruct Handler { virtual void process() = 0; };\nstruct OkHandler : Handler { void process() override { cout << "OOP OK 200" << endl; } };\n\nint main() {\n    OkHandler ok;\n    Handler* h = &ok;\n    h->process();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `h->process();`, constructType: "Return / Cleanup", title: "Virtual Table Polymorphic Dispatch", explanation: "Dispatches call via vtable pointer at runtime.", keyDetails: [{ variableOrConstruct: "vtable", role: "Virtual Method", whyThisWay: "Replaces conditional branching with object hierarchy." }] }]
+      },
+      {
+        id: 8, name: "Approach 8: Compile-Time if constexpr Elimination (PRO)", category: "PRO / if constexpr",
+        description: "C++17 if constexpr evaluates branch condition during compilation, discarding false branch code.",
+        prosCons: "Pros: Zero runtime overhead, dead branch code eliminated. Cons: Requires C++17.",
+        timeComplexity: "O(1) Compile", spaceComplexity: "O(1)", isFree: false,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 8: if constexpr\n#include <iostream>\nusing namespace std;\n\ntemplate<int Score>\nvoid checkCompileBranch() {\n    if constexpr (Score >= 60) cout << "Compile Branch: PASS" << endl;\n    else cout << "Compile Branch: FAIL" << endl;\n}\n\nint main() {\n    checkCompileBranch<85>();\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `if constexpr (Score >= 60)`, constructType: "Condition & Branch", title: "C++17 Compile-Time Branch Guard", explanation: "Evaluates condition during compilation and removes unused branch from binary.", keyDetails: [{ variableOrConstruct: "if constexpr", role: "Compile Branch", whyThisWay: "Eliminates branch instructions in generated machine code." }] }]
+      },
+      {
+        id: 9, name: "Approach 9: Branchless Bitwise Conditional Masking (PRO)", category: "PRO / Branchless",
+        description: "Computes maximum score without CPU branch misprediction using bitwise arithmetic.",
+        prosCons: "Pros: Zero CPU branch misprediction penalties. Cons: Reduced code readability.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 9: Branchless Bitwise\n#include <iostream>\nusing namespace std;\n\nint branchlessMax(int a, int b) {\n    int diff = a - b;\n    int mask = diff >> 31; // 0 if a >= b, -1 if a < b\n    return a - (diff & mask);\n}\n\nint main() {\n    cout << "Branchless Max(85, 42): " << branchlessMax(85, 42) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `int mask = diff >> 31;`, constructType: "Variable & Initializer", title: "Sign Bit Extraction Mask", explanation: "Arithmetically shifts sign bit to create 0x00000000 or 0xFFFFFFFF bitmask.", keyDetails: [{ variableOrConstruct: "diff >> 31", role: "Sign Mask", whyThisWay: "Avoids CPU branch instructions." }] }]
+      },
+      {
+        id: 10, name: "Approach 10: Monadic std::optional Chaining (PRO)", category: "PRO / Monadic C++23",
+        description: "C++23 std::optional monadic chaining (and_then / transform) for error handling without if checks.",
+        prosCons: "Pros: Clean functional pipeline. Cons: Requires modern C++23.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 4. If-Else, Switch-Case & Ternary - Approach 10: Monadic Optional\n#include <iostream>\n#include <optional>\nusing namespace std;\n\noptional<int> validateScore(int score) {\n    return (score >= 0 && score <= 100) ? optional<int>(score) : nullopt;\n}\n\nint main() {\n    auto res = validateScore(85);\n    if (res) cout << "Validated Score: " << *res << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `return (score >= 0 && score <= 100) ? optional<int>(score) : nullopt;`, constructType: "Return / Cleanup", title: "Optional Monadic Value Return", explanation: "Returns std::optional wrapping valid score or nullopt.", keyDetails: [{ variableOrConstruct: "std::optional", role: "Monad", whyThisWay: "Replaces null pointer checks with type-safe wrapper." }] }]
+      }
+    ],
+    fullCode: `// 4. If-Else, Switch-Case & Ternary - Approach 1: Standard If-Else\n#include <iostream>\nusing namespace std;\n\nchar getGrade(int score) {\n    if (score >= 90) return 'A';\n    else if (score >= 80) return 'B';\n    else if (score >= 70) return 'C';\n    else return 'F';\n}\n\nint main() {\n    cout << "Score 85 Grade: " << getGrade(85) << endl;\n    return 0;\n}`
+  };
+}
+
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 5 ──
+function getProblem5Details(): LearnModule {
+  return {
+    id: "easy_loops",
+    title: "5. For, While & Do-While Loops",
+    shortDesc: "Iteration constructs (for, while, do-while) and break/continue control.",
+    difficulty: "easy",
+    category: "Control Flow",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "5. For, While & Do-While Loops",
+      objective: "Master iteration loops (for, while, do-while, range-based for), break/continue control flow, and loop unrolling optimizations.",
+      description: "Given a target count `N`, calculate the sum of numbers from `1` to `N` and process elements using classic `for` loops, condition-driven `while` loops, 1-pass `do-while` loops, and C++11 Range-based `for` constructs.",
+      inputDesc: "N = 5",
+      outputDesc: "Sum = 15 | Loop Iterations = 5",
+      takeaways: [
+        "Master index-driven for loops vs condition-driven while loops",
+        "Understand do-while loops for guaranteed 1-pass execution",
+        "Apply C++11 Range-based for (const auto& x : container) for clean container iteration",
+        "Optimize loop performance with manual loop unrolling and OpenMP pragmas"
+      ],
+      examples: [
+        { id: 1, input: 'N = 5', output: 'Sum = 15 | Loop Iterations = 5', explanation: '1 + 2 + 3 + 4 + 5 = 15 across 5 iterations.' },
+        { id: 2, input: 'N = 10', output: 'Sum = 55 | Loop Iterations = 10' },
+        { id: 3, input: 'N = 0', output: 'Sum = 0 | Loop Iterations = 0', explanation: 'Loop guard N > 0 prevents iteration.' }
+      ],
+      constraints: ["0 <= N <= 10^6", "Loop iterations must avoid infinite loops.", "Memory allocation: O(1)."],
+      companies: ["Amazon", "Microsoft", "Meta", "Google"],
+      acceptanceRate: "95.4%",
+      totalAccepted: "3,890,200"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Classic Index-Based For Loop (FREE)", category: "FREE / Standard For",
+        description: "Standard counter loop (for int i = 1; i <= N; i++) iterating N times.",
+        prosCons: "Pros: Direct, simple, precise index tracking. Cons: Manual loop index management.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 5. For, While & Do-While Loops - Approach 1: Classic For Loop\n#include <iostream>\nusing namespace std;\n\nint sumForLoop(int N) {\n    int sum = 0;\n    for (int i = 1; i <= N; i++) {\n        sum += i;\n    }\n    return sum;\n}\n\nint main() {\n    cout << "Sum(5): " << sumForLoop(5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `for (int i = 1; i <= N; i++) {`, constructType: "Loop Construct", title: "For Loop Header", explanation: "Initializes index i = 1, checks i <= N condition, and increments i++.", keyDetails: [{ variableOrConstruct: "for (init; cond; step)", role: "Loop Header", whyThisWay: "Deterministic iteration count." }] }]
+      },
+      {
+        id: 2, name: "Approach 2: Condition-Driven While Loop (FREE)", category: "FREE / While Loop",
+        description: "Condition-driven while (N > 0) loop decrementing N on each iteration.",
+        prosCons: "Pros: Ideal when iteration count is dynamic. Cons: Risk of infinite loop if condition not updated.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 5. For, While & Do-While Loops - Approach 2: While Loop\n#include <iostream>\nusing namespace std;\n\nint sumWhileLoop(int N) {\n    int sum = 0;\n    while (N > 0) {\n        sum += N;\n        N--;\n    }\n    return sum;\n}\n\nint main() {\n    cout << "Sum(5): " << sumWhileLoop(5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `while (N > 0) {`, constructType: "Loop Construct", title: "While Loop Condition", explanation: "Evaluates condition before executing body.", keyDetails: [{ variableOrConstruct: "while (cond)", role: "Pre-Condition Guard", whyThisWay: "Skips loop entirely if N starts at 0." }] }]
+      },
+      {
+        id: 3, name: "Approach 3: Post-Condition Do-While Loop (PRO)", category: "PRO / Do-While",
+        description: "Executes loop body at least once before checking post-condition do { ... } while (N > 0).",
+        prosCons: "Pros: Guaranteed minimum 1 execution pass. Cons: Must guard N=0 carefully.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 5. For, While & Do-While Loops - Approach 3: Do-While Loop\n#include <iostream>\nusing namespace std;\n\nint sumDoWhile(int N) {\n    if (N <= 0) return 0;\n    int sum = 0, i = 1;\n    do {\n        sum += i;\n        i++;\n    } while (i <= N);\n    return sum;\n}\n\nint main() {\n    cout << "Sum(5): " << sumDoWhile(5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `} while (i <= N);`, constructType: "Loop Construct", title: "Post-Condition Check", explanation: "Evaluates condition after body execution.", keyDetails: [{ variableOrConstruct: "do { ... } while()", role: "Post-Condition", whyThisWay: "Guarantees 1 execution pass." }] }]
+      },
+      {
+        id: 4, name: "Approach 4: C++11 Range-Based For Loop (PRO)", category: "PRO / Range For",
+        description: "Iterates container elements directly using for (const auto& val : vec).",
+        prosCons: "Pros: Clean, zero index error risk. Cons: No direct index counter access.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 5. For, While & Do-While Loops - Approach 4: Range-Based For\n#include <iostream>\n#include <vector>\nusing namespace std;\n\nint sumRangeFor(const vector<int>& nums) {\n    int sum = 0;\n    for (const auto& num : nums) {\n        sum += num;\n    }\n    return sum;\n}\n\nint main() {\n    cout << "Range Sum: " << sumRangeFor({1, 2, 3, 4, 5}) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `for (const auto& num : nums) {`, constructType: "Loop Construct", title: "Range-Based For Header", explanation: "Iterates elements by const reference.", keyDetails: [{ variableOrConstruct: "for (auto& item : vec)", role: "Range Iteration", whyThisWay: "Zero index bounds error risk." }] }]
+      },
+      {
+        id: 5, name: "Approach 5: Break and Continue Flow Control (PRO)", category: "PRO / Break Continue",
+        description: "Uses continue to skip even numbers and break to exit early.",
+        prosCons: "Pros: Precise control over loop flow. Cons: Can make control flow complex if overused.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 5. For, While & Do-While Loops - Approach 5: Break & Continue\n#include <iostream>\nusing namespace std;\n\nint sumOddNumbers(int N) {\n    int sum = 0;\n    for (int i = 1; i <= 100; i++) {\n        if (i > N) break;\n        if (i % 2 == 0) continue;\n        sum += i;\n    }\n    return sum;\n}\n\nint main() {\n    cout << "Odd Sum(5): " << sumOddNumbers(5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `if (i % 2 == 0) continue;`, constructType: "Condition & Branch", title: "Continue Skip Step", explanation: "Skips remaining loop body and jumps to next iteration.", keyDetails: [{ variableOrConstruct: "continue", role: "Skip Iteration", whyThisWay: "Filters out even numbers." }] }]
+      },
+      {
+        id: 6, name: "Approach 6: Manual 4x Loop Unrolling (PRO)", category: "PRO / Loop Unrolling",
+        description: "Processes 4 elements per iteration loop step to reduce branch overhead in instruction pipeline.",
+        prosCons: "Pros: Reduces CPU branch instruction overhead by 75%. Cons: Larger code binary footprint.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 5. For, While & Do-While Loops - Approach 6: Manual 4x Unrolling\n#include <iostream>\nusing namespace std;\n\nint sumUnrolled(int N) {\n    int sum = 0, i = 1;\n    for (; i <= N - 3; i += 4) {\n        sum += i + (i + 1) + (i + 2) + (i + 3);\n    }\n    for (; i <= N; i++) sum += i;\n    return sum;\n}\n\nint main() {\n    cout << "Unrolled Sum(5): " << sumUnrolled(5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `sum += i + (i + 1) + (i + 2) + (i + 3);`, constructType: "Variable & Initializer", title: "Unrolled 4-Element Pipeline Push", explanation: "Adds 4 consecutive integers in single loop iteration.", keyDetails: [{ variableOrConstruct: "Unrolled 4x", role: "Pipeline Optimizer", whyThisWay: "Reduces loop jump instruction count." }] }]
+      },
+      {
+        id: 7, name: "Approach 7: C++20 Ranges Views Pipeline (PRO)", category: "PRO / C++20 Ranges",
+        description: "Uses C++20 std::views::iota and std::accumulate to construct functional loop pipelines.",
+        prosCons: "Pros: Declarative functional pipeline. Cons: Requires C++20 ranges support.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 5. For, While & Do-While Loops - Approach 7: C++20 Ranges Views\n#include <iostream>\n#include <ranges>\n#include <numeric>\nusing namespace std;\n\nint sumRanges(int N) {\n    auto r = std::views::iota(1, N + 1);\n    return std::accumulate(r.begin(), r.end(), 0);\n}\n\nint main() {\n    cout << "Ranges Sum(5): " << sumRanges(5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `auto r = std::views::iota(1, N + 1);`, constructType: "Variable & Initializer", title: "Lazy View Range Generator", explanation: "Generates lazy sequence of integers from 1 to N without memory allocation.", keyDetails: [{ variableOrConstruct: "std::views::iota", role: "Lazy Range", whyThisWay: "C++20 functional sequence generator." }] }]
+      },
+      {
+        id: 8, name: "Approach 8: OpenMP Multi-Threaded Parallel Loop (PRO)", category: "PRO / OpenMP Parallel",
+        description: "Distributes loop iterations across CPU cores using #pragma omp parallel for reduction(+:sum).",
+        prosCons: "Pros: Multi-core CPU parallel execution. Cons: OpenMP compiler flag dependency.",
+        timeComplexity: "O(N / Cores)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 5. For, While & Do-While Loops - Approach 8: OpenMP Parallel\n#include <iostream>\nusing namespace std;\n\nint sumParallel(int N) {\n    int sum = 0;\n    #pragma omp parallel for reduction(+:sum)\n    for (int i = 1; i <= N; i++) {\n        sum += i;\n    }\n    return sum;\n}\n\nint main() {\n    cout << "Parallel OMP Sum(5): " << sumParallel(5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `#pragma omp parallel for reduction(+:sum)`, constructType: "Header / Include", title: "OpenMP Parallel Pragma", explanation: "Splits loop range across multiple thread worker pools.", keyDetails: [{ variableOrConstruct: "omp parallel for", role: "Multi-Threading", whyThisWay: "Hardware multi-core parallelization." }] }]
+      },
+      {
+        id: 9, name: "Approach 9: Tail-Recursive Loop Replacement (PRO)", category: "PRO / Tail Recursion",
+        description: "Replaces iterative loop with tail-recursive function optimized by compiler into a jump.",
+        prosCons: "Pros: Pure functional programming style. Cons: Call stack risk if not optimized.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1) Opt", isFree: false,
+        code: `// 5. For, While & Do-While Loops - Approach 9: Tail Recursion\n#include <iostream>\nusing namespace std;\n\nint sumTailRec(int n, int acc = 0) {\n    if (n <= 0) return acc;\n    return sumTailRec(n - 1, acc + n);\n}\n\nint main() {\n    cout << "Tail Rec Sum(5): " << sumTailRec(5) << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `return sumTailRec(n - 1, acc + n);`, constructType: "Return / Cleanup", title: "Tail Recursive Call", explanation: "Passes accumulator in tail call position allowing compiler loop optimization.", keyDetails: [{ variableOrConstruct: "sumTailRec", role: "Tail Call", whyThisWay: "Replaces loop with tail recursive call." }] }]
+      },
+      {
+        id: 10, name: "Approach 10: Custom Iterator Object (PRO)", category: "PRO / Custom Iterator",
+        description: "Implements custom iterator class (begin(), end(), operator++) enabling custom range for-loops.",
+        prosCons: "Pros: Full control over iteration behavior. Cons: Custom iterator boilerplate.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 5. For, While & Do-While Loops - Approach 10: Custom Iterator\n#include <iostream>\nusing namespace std;\n\nstruct Range {\n    int start, stop;\n    struct Iter {\n        int val;\n        int operator*() const { return val; }\n        Iter& operator++() { val++; return *this; }\n        bool operator!=(const Iter& o) const { return val != o.val; }\n    };\n    Iter begin() const { return Iter{start}; }\n    Iter end() const { return Iter{stop + 1}; }\n};\n\nint main() {\n    int sum = 0;\n    for (int x : Range{1, 5}) sum += x;\n    cout << "Custom Iter Sum: " << sum << endl;\n    return 0;\n}`,
+        lineBreakdown: [{ lineNum: 1, codeSnippet: `for (int x : Range{1, 5}) sum += x;`, constructType: "Loop Construct", title: "Custom Class Range For", explanation: "Uses custom begin() and end() methods for range iteration.", keyDetails: [{ variableOrConstruct: "Range{1, 5}", role: "Custom Range", whyThisWay: "Demonstrates iterator protocol." }] }]
+      }
+    ],
+    fullCode: `// 5. For, While & Do-While Loops - Approach 1: Classic For Loop\n#include <iostream>\nusing namespace std;\n\nint sumForLoop(int N) {\n    int sum = 0;\n    for (int i = 1; i <= N; i++) {\n        sum += i;\n    }\n    return sum;\n}\n\nint main() {\n    cout << "Sum(5): " << sumForLoop(5) << endl;\n    return 0;\n}`
+  };
+}
 function getProblem1Details(): LearnModule {
   return {
     id: "easy_hello",
@@ -1171,15 +1987,16 @@ function getProblem1Details(): LearnModule {
 // ── TOPIC-SPECIFIC CONTENT BUILDER ──
 // Generates unique problem objectives, input/output descriptions, takeaways, and 10 topic-tailored mental model approaches with code & line breakdowns for every module.
 export function getLearnModuleDetails(id: string): LearnModule {
-  if (id === "easy_hello") {
-    return getProblem1Details();
-  }
-  if (id === "easy_vars") {
-    return getProblem2Details();
-  }
-  if (id === "easy_ops") {
-    return getProblem3Details();
-  }
+  if (id === "easy_hello") return getProblem1Details();
+  if (id === "easy_vars") return getProblem2Details();
+  if (id === "easy_ops") return getProblem3Details();
+  if (id === "easy_if") return getProblem4Details();
+  if (id === "easy_loops") return getProblem5Details();
+  if (id === "easy_arrays") return getProblem6Details();
+  if (id === "easy_strings") return getProblem7Details();
+  if (id === "easy_funcs") return getProblem8Details();
+  if (id === "easy_pointers") return getProblem9Details();
+  if (id === "easy_structs") return getProblem10Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
