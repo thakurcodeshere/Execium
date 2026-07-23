@@ -276,6 +276,304 @@ function generateTopicExamplesAndConstraints(meta: { id: string; title: string; 
   return { examples, constraints };
 }
 
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 2 ──
+function getProblem2Details(): LearnModule {
+  return {
+    id: "easy_vars",
+    title: "2. Primitive Types & Integer Bounds",
+    shortDesc: "Primitive types (int, double, char, bool) and overflow behavior.",
+    difficulty: "easy",
+    category: "Fundamentals",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "2. Primitive Types & Integer Bounds",
+      objective: "Master C++ primitive data types (int, double, char, bool), type sizes (sizeof), numeric limits (std::numeric_limits), and integer overflow detection.",
+      description: "Given a 32-bit signed integer `val` and an increment step `delta`, calculate `val + delta` while detecting signed integer overflow (wrapping beyond `2147483647` to `-2147483648`). Inspect memory footprints (`sizeof`) and minimum/maximum numeric bounds (`std::numeric_limits`).",
+      inputDesc: "val = 2147483647, delta = 1",
+      outputDesc: "Result = -2147483648 | Overflow Detected = true",
+      takeaways: [
+        "Inspect primitive memory sizes using sizeof(T)",
+        "Query runtime type bounds with std::numeric_limits<T>",
+        "Understand 32-bit signed two's complement integer overflow wrap behavior",
+        "Prevent overflow using widening (static_cast<long long>), intrinsics (__builtin_add_overflow), and constexpr"
+      ],
+      examples: [
+        {
+          id: 1,
+          input: 'val = 2147483647 (INT_MAX), delta = 1',
+          output: 'Result = -2147483648 (INT_MIN) | Overflow Detected = true',
+          explanation: 'Adding 1 to INT_MAX causes 32-bit signed two\'s complement overflow, wrapping around to INT_MIN.'
+        },
+        {
+          id: 2,
+          input: 'val = 100, delta = 50',
+          output: 'Result = 150 | Overflow Detected = false',
+          explanation: 'Sum stays safely within 32-bit signed integer bounds.'
+        },
+        {
+          id: 3,
+          input: 'val = -2147483648 (INT_MIN), delta = -1',
+          output: 'Result = 2147483647 (INT_MAX) | Overflow Detected = true',
+          explanation: 'Underflow wrapping from INT_MIN to INT_MAX.'
+        }
+      ],
+      constraints: [
+        "-2147483648 <= val <= 2147483647",
+        "-2147483648 <= delta <= 2147483647",
+        "sizeof(char) == 1, sizeof(int) == 4, sizeof(double) == 8"
+      ],
+      companies: ["Microsoft", "Amazon", "Apple", "Google"],
+      acceptanceRate: "91.8%",
+      totalAccepted: "2,950,400"
+    },
+    approaches: [
+      {
+        id: 1,
+        name: "Approach 1: Primitive Allocation & sizeof() Inspection (FREE)",
+        category: "FREE / Primitives",
+        description: "Declares primitive variables (int, double, char, bool) and inspects byte footprints using sizeof().",
+        prosCons: "Pros: Direct understanding of RAM byte sizes. Cons: Does not guard against arithmetic overflow.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: true,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 1: Primitive Allocation & sizeof()\n#include <iostream>\nusing namespace std;\n\nvoid inspectPrimitives(int val, int delta) {\n    int sum = val + delta;\n    cout << "Int Size: " << sizeof(int) << " bytes | Sum: " << sum << endl;\n}\n\nint main() {\n    inspectPrimitives(2147483647, 1);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `void inspectPrimitives(int val, int delta) {`,
+            constructType: "Function Signature",
+            title: "Function Parameter Entry",
+            explanation: "Receives 32-bit signed integers val and delta to perform primitive arithmetic.",
+            keyDetails: [{ variableOrConstruct: "inspectPrimitives", role: "Function Entry", whyThisWay: "Passes primitives by value." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `int sum = val + delta;`,
+            constructType: "Variable & Initializer",
+            title: "Primitive Sum & Wrap Behavior",
+            explanation: "Performs 32-bit addition. When val == INT_MAX and delta == 1, two's complement wraps sum to INT_MIN.",
+            keyDetails: [{ variableOrConstruct: "val + delta", role: "Integer Addition", whyThisWay: "Triggers hardware wrapping on overflow." }]
+          },
+          {
+            lineNum: 3,
+            codeSnippet: `cout << "Int Size: " << sizeof(int) << " bytes | Sum: " << sum << endl;`,
+            constructType: "Return / Cleanup",
+            title: "sizeof Operator Query",
+            explanation: "Evaluates compile-time size of int (4 bytes on 32/64-bit systems) and outputs sum.",
+            keyDetails: [{ variableOrConstruct: "sizeof(int)", role: "Compile-Time Operator", whyThisWay: "Returns size in bytes." }]
+          }
+        ]
+      },
+      {
+        id: 2,
+        name: "Approach 2: std::numeric_limits Bounds Query (FREE)",
+        category: "FREE / Limits",
+        description: "Queries std::numeric_limits<int>::max() and min() from <limits> to detect potential overflow before addition.",
+        prosCons: "Pros: Type-safe runtime bound checking. Cons: Requires header include <limits>.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: true,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 2: std::numeric_limits Query\n#include <iostream>\n#include <limits>\nusing namespace std;\n\nvoid checkBounds(int val, int delta) {\n    int maxVal = numeric_limits<int>::max();\n    int minVal = numeric_limits<int>::min();\n    bool willOverflow = (val > 0 && delta > maxVal - val);\n    cout << "Max: " << maxVal << " | Overflow Risk: " << boolalpha << willOverflow << endl;\n}\n\nint main() {\n    checkBounds(2147483647, 1);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `int maxVal = numeric_limits<int>::max();`,
+            constructType: "Variable & Initializer",
+            title: "Numeric Limits Maximum Query",
+            explanation: "Queries the maximum representable value of 32-bit signed int (2147483647).",
+            keyDetails: [{ variableOrConstruct: "numeric_limits<int>::max()", role: "Bound Query", whyThisWay: "Standard header query for hardware limits." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `bool willOverflow = (val > 0 && delta > maxVal - val);`,
+            constructType: "Condition & Branch",
+            title: "Overflow Guard Expression",
+            explanation: "Checks if delta exceeds remaining room (maxVal - val) without triggering overflow.",
+            keyDetails: [{ variableOrConstruct: "maxVal - val", role: "Safety Margin", whyThisWay: "Subtracts to prevent arithmetic overflow." }]
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: "Approach 3: Widening static_cast<long long> (PRO)",
+        category: "PRO / Widening Cast",
+        description: "Casts 32-bit integer to 64-bit long long before addition, avoiding 32-bit overflow entirely.",
+        prosCons: "Pros: Completely prevents 32-bit overflow. Cons: Uses 64-bit register operations.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 3: Widening static_cast<long long>\n#include <iostream>\n#include <climits>\nusing namespace std;\n\nvoid safeAddWidening(int val, int delta) {\n    long long wideSum = static_cast<long long>(val) + delta;\n    bool isOverflow = (wideSum > INT_MAX || wideSum < INT_MIN);\n    cout << "64-bit Sum: " << wideSum << " | Overflow: " << isOverflow << endl;\n}\n\nint main() {\n    safeAddWidening(2147483647, 1);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `long long wideSum = static_cast<long long>(val) + delta;`,
+            constructType: "Variable & Initializer",
+            title: "Explicit Widening Typecast",
+            explanation: "Explicitly casts val to 64-bit signed long long before adding delta.",
+            keyDetails: [{ variableOrConstruct: "static_cast<long long>(val)", role: "Type Promoter", whyThisWay: "Promotes addition to 64-bit integer arithmetic." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `bool isOverflow = (wideSum > INT_MAX || wideSum < INT_MIN);`,
+            constructType: "Condition & Branch",
+            title: "32-Bit Range Validation",
+            explanation: "Compares 64-bit wideSum against 32-bit INT_MAX and INT_MIN macros from <climits>.",
+            keyDetails: [{ variableOrConstruct: "INT_MAX", role: "Macro Bound", whyThisWay: "Verifies if sum fits inside 32-bit int." }]
+          }
+        ]
+      },
+      {
+        id: 4,
+        name: "Approach 4: Compiler Built-in Checked Arithmetic (PRO)",
+        category: "PRO / Hardware Intrinsic",
+        description: "Uses compiler intrinsic __builtin_add_overflow(a, b, &res) for hardware CPU overflow flag checking.",
+        prosCons: "Pros: Single CPU instruction check, maximum performance. Cons: GCC/Clang specific intrinsic.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 4: Built-in Checked Arithmetic\n#include <iostream>\nusing namespace std;\n\nvoid checkBuiltinOverflow(int a, int b) {\n    int result = 0;\n    bool hasOverflow = __builtin_add_overflow(a, b, &result);\n    cout << "Hardware Overflow Flag: " << hasOverflow << " | Wrapped Result: " << result << endl;\n}\n\nint main() {\n    checkBuiltinOverflow(2147483647, 1);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `bool hasOverflow = __builtin_add_overflow(a, b, &result);`,
+            constructType: "Condition & Branch",
+            title: "Hardware Overflow Intrinsic Call",
+            explanation: "Invokes compiler intrinsic __builtin_add_overflow which stores sum in result and returns true if CPU overflow bit was set.",
+            keyDetails: [{ variableOrConstruct: "__builtin_add_overflow", role: "CPU Intrinsic", whyThisWay: "Inspects CPU status register directly." }]
+          }
+        ]
+      },
+      {
+        id: 5,
+        name: "Approach 5: Fixed-Width Integers (<cstdint>) (PRO)",
+        category: "PRO / Fixed-Width",
+        description: "Uses <cstdint> int32_t and int64_t for cross-platform deterministic bit-width guarantees.",
+        prosCons: "Pros: Exact portability across 32-bit and 64-bit operating systems. Cons: Verbose type names.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 5: Fixed-Width Integers (<cstdint>)\n#include <iostream>\n#include <cstdint>\nusing namespace std;\n\nvoid fixedWidthArithmetic(int32_t val, int32_t delta) {\n    int64_t exactSum = static_cast<int64_t>(val) + delta;\n    cout << "int32_t val: " << val << " | exact int64_t sum: " << exactSum << endl;\n}\n\nint main() {\n    fixedWidthArithmetic(2147483647, 1);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `void fixedWidthArithmetic(int32_t val, int32_t delta) {`,
+            constructType: "Function Signature",
+            title: "Fixed-Width Parameter Signature",
+            explanation: "Guarantees parameters are exactly 32-bit signed integers on any compiler.",
+            keyDetails: [{ variableOrConstruct: "int32_t", role: "Fixed Type", whyThisWay: "Defined in <cstdint> for cross-platform portability." }]
+          }
+        ]
+      },
+      {
+        id: 6,
+        name: "Approach 6: Floating Point Epsilon Bounds (PRO)",
+        category: "PRO / Float Epsilon",
+        description: "Compares floating point differences against std::numeric_limits<double>::epsilon().",
+        prosCons: "Pros: Accurate floating point equality checks. Cons: Float calculations incur precision rounding.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 6: Floating Point Epsilon Comparison\n#include <iostream>\n#include <cmath>\n#include <limits>\nusing namespace std;\n\nvoid compareFloatEpsilon(double a, double b) {\n    double diff = fabs(a - b);\n    bool isEqual = diff < numeric_limits<double>::epsilon();\n    cout << "Diff: " << diff << " | Equal within Epsilon: " << isEqual << endl;\n}\n\nint main() {\n    compareFloatEpsilon(0.1 + 0.2, 0.3);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `bool isEqual = diff < numeric_limits<double>::epsilon();`,
+            constructType: "Condition & Branch",
+            title: "Machine Epsilon Guard",
+            explanation: "Evaluates if difference is smaller than double machine epsilon, correctly handling IEEE 754 float rounding.",
+            keyDetails: [{ variableOrConstruct: "numeric_limits<double>::epsilon()", role: "Float Tolerance", whyThisWay: "Prevents false inequality due to IEEE 754 precision." }]
+          }
+        ]
+      },
+      {
+        id: 7,
+        name: "Approach 7: Compile-Time Bounds Validation (constexpr) (PRO)",
+        category: "PRO / Constexpr",
+        description: "Evaluates integer bound safety checks at compile time using constexpr functions.",
+        prosCons: "Pros: Zero runtime overhead, verified during build. Cons: Arguments must be compile-time constants.",
+        timeComplexity: "O(1) Compile-Time",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 7: Compile-Time constexpr Check\n#include <iostream>\n#include <climits>\nusing namespace std;\n\nconstexpr bool isSafeConstexprAdd(int a, int b) {\n    return (b > 0) ? (a <= INT_MAX - b) : (a >= INT_MIN - b);\n}\n\nint main() {\n    constexpr bool safe = isSafeConstexprAdd(2147483647, 1);\n    cout << "Compile-time Safety Guard Result: " << safe << endl;\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `constexpr bool isSafeConstexprAdd(int a, int b) {`,
+            constructType: "Function Signature",
+            title: "constexpr Function Declaration",
+            explanation: "Allows function to be executed by compiler during compilation phase.",
+            keyDetails: [{ variableOrConstruct: "constexpr", role: "Compile Evaluator", whyThisWay: "Forces compile-time computation when arguments are constant." }]
+          }
+        ]
+      },
+      {
+        id: 8,
+        name: "Approach 8: Bitwise Bit Reinterpretation (std::bit_cast) (PRO)",
+        category: "PRO / C++20 bit_cast",
+        description: "C++20 std::bit_cast<uint32_t>(floatVal) reinterprets primitive binary bits without type conversion.",
+        prosCons: "Pros: Zero-copy raw binary bit inspection. Cons: Requires C++20 <bit> header.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 8: Bitwise Reinterpretation (std::bit_cast)\n#include <iostream>\n#include <bit>\n#include <cstdint>\nusing namespace std;\n\nvoid inspectBitRepresentation(float f) {\n    uint32_t bits = std::bit_cast<uint32_t>(f);\n    cout << "Float: " << f << " | Hex IEEE-754 Bits: 0x" << hex << bits << dec << endl;\n}\n\nint main() {\n    inspectBitRepresentation(1.0f);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `uint32_t bits = std::bit_cast<uint32_t>(f);`,
+            constructType: "Variable & Initializer",
+            title: "C++20 std::bit_cast Reinterpretation",
+            explanation: "Reinterprets binary 32-bit float memory representation directly as an unsigned 32-bit integer.",
+            keyDetails: [{ variableOrConstruct: "std::bit_cast", role: "Bit Reinterpreter", whyThisWay: "Type-safe replacement for reinterpret_cast or memcpy." }]
+          }
+        ]
+      },
+      {
+        id: 9,
+        name: "Approach 9: Atomic Primitive Operations (std::atomic<int>) (PRO)",
+        category: "PRO / Atomics",
+        description: "Thread-safe primitive counter std::atomic<int> executing lock-free fetch_add operations.",
+        prosCons: "Pros: Thread-safe atomic updates. Cons: Atomic memory bus lock overhead.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 9: Atomic Primitive Operations\n#include <iostream>\n#include <atomic>\nusing namespace std;\n\nvoid atomicAdd(int initial, int delta) {\n    atomic<int> counter(initial);\n    int oldVal = counter.fetch_add(delta);\n    cout << "Old Atomic Val: " << oldVal << " | New Atomic Val: " << counter.load() << endl;\n}\n\nint main() {\n    atomicAdd(2147483647, 1);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `int oldVal = counter.fetch_add(delta);`,
+            constructType: "Variable & Initializer",
+            title: "Atomic Fetch & Add Instruction",
+            explanation: "Executes hardware atomic increment returning previous value before addition.",
+            keyDetails: [{ variableOrConstruct: "fetch_add", role: "Atomic Instruction", whyThisWay: "Performs thread-safe addition on CPU register." }]
+          }
+        ]
+      },
+      {
+        id: 10,
+        name: "Approach 10: Bounded Integer Struct Wrapper (PRO)",
+        category: "PRO / Custom Class",
+        description: "Encapsulates primitive integer in a BoundedInt struct overloading operator+ to throw exception on overflow.",
+        prosCons: "Pros: Robust OOP safety, prevents silent wrap errors. Cons: Exception throwing overhead.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 2. Primitive Types & Integer Bounds - Approach 10: Bounded Int Struct Wrapper\n#include <iostream>\n#include <climits>\n#include <stdexcept>\nusing namespace std;\n\nstruct BoundedInt {\n    int value;\n    BoundedInt(int v) : value(v) {}\n    BoundedInt operator+(int delta) const {\n        if (delta > 0 && value > INT_MAX - delta) throw overflow_error("Integer Overflow!");\n        return BoundedInt(value + delta);\n    }\n};\n\nint main() {\n    try {\n        BoundedInt b(2147483647);\n        BoundedInt result = b + 1;\n    } catch (const exception& e) {\n        cout << "Caught Exception: " << e.what() << endl;\n    }\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `if (delta > 0 && value > INT_MAX - delta) throw overflow_error("Integer Overflow!");`,
+            constructType: "Condition & Branch",
+            title: "Exception Guard Checking",
+            explanation: "Detects impending integer overflow and throws std::overflow_error exception.",
+            keyDetails: [{ variableOrConstruct: "throw overflow_error", role: "Exception Throw", whyThisWay: "Halts unsafe arithmetic execution." }]
+          }
+        ]
+      }
+    ],
+    fullCode: `// 2. Primitive Types & Integer Bounds - Approach 1: Primitive Allocation & sizeof()\n#include <iostream>\nusing namespace std;\n\nvoid inspectPrimitives(int val, int delta) {\n    int sum = val + delta;\n    cout << "Int Size: " << sizeof(int) << " bytes | Sum: " << sum << endl;\n}\n\nint main() {\n    inspectPrimitives(2147483647, 1);\n    return 0;\n}`
+  };
+}
+
 // ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 1 ──
 function getProblem1Details(): LearnModule {
   return {
@@ -585,6 +883,9 @@ function getProblem1Details(): LearnModule {
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") {
     return getProblem1Details();
+  }
+  if (id === "easy_vars") {
+    return getProblem2Details();
   }
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
