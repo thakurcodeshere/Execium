@@ -5,7 +5,7 @@ import { getLearnModuleDetails, LEARN_MODULES } from "@/lib/learn";
 import { 
   X, BookOpen, Target, Brain, Code2, Play, CheckCircle2, 
   ChevronLeft, ChevronRight, ArrowRight, Layers, HelpCircle, Copy, Sparkles, Check, Cpu, Zap, Lock, Unlock,
-  Send, FileText, UploadCloud, Clock
+  Send, FileText, UploadCloud, Clock, Tag, Briefcase, ThumbsUp, ThumbsDown
 } from "lucide-react";
 
 export interface UserSubmission {
@@ -301,56 +301,131 @@ export default function LearnPanel() {
       {/* ── MAIN CONTENT BODY WITH MOTION FADE ── */}
       <div key={activeTab} className="anim-fade" style={{ flex: 1, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 16 }}>
 
-        {/* ── TAB 1: PROBLEM OBJECTIVE & DESCRIPTION ── */}
+        {/* ── TAB 1: LEETCODE-STYLE PROBLEM DESCRIPTION VIEW ── */}
         {activeTab === 'problem' && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, fontSize: 13, color: T.uiText }}>
             
-            <div>
-              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
-                // PROBLEM OBJECTIVE
-              </div>
-              <div style={{ fontSize: 12, color: T.uiText, lineHeight: 1.6 }}>
-                {moduleInfo.problemStatement.objective}
-              </div>
+            {/* Badges Bar: Difficulty | Topics | Companies */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span style={{
+                fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "3px 8px", borderRadius: 12,
+                background: moduleInfo.difficulty === 'easy' ? "rgba(16,185,129,0.15)" : moduleInfo.difficulty === 'medium' ? "rgba(245,158,11,0.15)" : "rgba(239,68,68,0.15)",
+                color: moduleInfo.difficulty === 'easy' ? "#10b981" : moduleInfo.difficulty === 'medium' ? "#f59e0b" : "#ef4444",
+                border: `1px solid ${moduleInfo.difficulty === 'easy' ? "rgba(16,185,129,0.3)" : moduleInfo.difficulty === 'medium' ? "rgba(245,158,11,0.3)" : "rgba(239,68,68,0.3)"}`,
+                textTransform: "capitalize"
+              }}>
+                {moduleInfo.difficulty.toUpperCase()}
+              </span>
+
+              <span style={{
+                fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 700, padding: "3px 8px", borderRadius: 12,
+                background: "rgba(59,130,246,0.1)", color: "#3b82f6", border: "1px solid rgba(59,130,246,0.25)",
+                display: "flex", alignItems: "center", gap: 4
+              }}>
+                <Tag size={11} /> {moduleInfo.category}
+              </span>
+
+              <span style={{
+                fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 700, padding: "3px 8px", borderRadius: 12,
+                background: "rgba(168,85,247,0.1)", color: "#a855f7", border: "1px solid rgba(168,85,247,0.25)",
+                display: "flex", alignItems: "center", gap: 4
+              }}>
+                <Briefcase size={11} /> FAANG, Google, Meta
+              </span>
             </div>
 
-            <div>
-              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
-                // PROBLEM DESCRIPTION
-              </div>
-              <div style={{ fontSize: 12, color: T.uiText, lineHeight: 1.6, background: "rgba(0,0,0,0.18)", padding: 12, borderRadius: 8, border: `1px solid ${T.uiBorder}` }}>
-                {moduleInfo.problemStatement.description}
-              </div>
+            {/* Problem Narrative Statement */}
+            <div style={{ fontSize: 13, lineHeight: 1.6, color: T.uiText }}>
+              You are tasked with implementing <strong style={{ color: "#38bdf8" }}>{moduleInfo.title}</strong> using optimal C++ data structures and execution mechanics.
+              <br /><br />
+              {moduleInfo.problemStatement.description}
             </div>
 
-            {/* Input & Output expectations */}
-            <div style={{ background: "rgba(0,0,0,0.2)", padding: 12, borderRadius: 8, border: `1px solid ${T.uiBorder}`, display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ fontSize: 11, fontFamily: "'JetBrains Mono'" }}>
-                <span style={{ color: "#3b82f6", fontWeight: 800 }}>📥 Sample Input: </span>
-                <span style={{ color: T.uiTextMuted }}>{moduleInfo.problemStatement.inputDesc}</span>
-              </div>
-              <div style={{ fontSize: 11, fontFamily: "'JetBrains Mono'" }}>
-                <span style={{ color: "#10b981", fontWeight: 800 }}>📤 Expected Output: </span>
-                <span style={{ color: T.uiTextMuted }}>{moduleInfo.problemStatement.outputDesc}</span>
-              </div>
-            </div>
-
-            {/* Key Learning Takeaways */}
-            <div>
-              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
-                // KEY CONSTRUCTS YOU WILL MASTER
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                {moduleInfo.problemStatement.takeaways.map((t, i) => (
-                  <div key={i} style={{ fontSize: 11, color: T.uiText, display: "flex", alignItems: "center", gap: 8, background: "rgba(16,185,129,0.06)", padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(16,185,129,0.2)" }}>
-                    <CheckCircle2 size={14} color="#10b981" />
-                    <span>{t}</span>
+            {/* Formatted Examples Section */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, marginTop: 4 }}>
+              {moduleInfo.problemStatement.examples.map(ex => (
+                <div key={ex.id} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: T.uiText }}>
+                    Example {ex.id}:
                   </div>
+                  <div style={{
+                    background: "#0f172a", borderLeft: "3px solid #38bdf8", borderRadius: "0 8px 8px 0",
+                    padding: "10px 14px", fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+                    display: "flex", flexDirection: "column", gap: 4, border: `1px solid ${T.uiBorder}`, borderLeftWidth: 3
+                  }}>
+                    <div><span style={{ color: "#94a3b8", fontWeight: 700 }}>Input: </span><span style={{ color: "#f1f5f9" }}>{ex.input}</span></div>
+                    <div><span style={{ color: "#94a3b8", fontWeight: 700 }}>Output: </span><span style={{ color: "#34d399" }}>{ex.output}</span></div>
+                    {ex.explanation && (
+                      <div style={{ color: "#94a3b8", fontSize: 10, marginTop: 2, fontStyle: "italic" }}>
+                        <span style={{ fontWeight: 700 }}>Explanation: </span>{ex.explanation}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Constraints Section */}
+            <div style={{ marginTop: 8 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: T.uiText, marginBottom: 8 }}>
+                Constraints:
+              </div>
+              <ul style={{ margin: 0, paddingLeft: 18, display: "flex", flexDirection: "column", gap: 6 }}>
+                {moduleInfo.problemStatement.constraints.map((c, i) => (
+                  <li key={i} style={{ fontSize: 11, color: T.uiTextMuted, lineHeight: 1.5 }}>
+                    <code style={{
+                      background: "rgba(255,255,255,0.06)", padding: "2px 6px", borderRadius: 4,
+                      fontFamily: "'JetBrains Mono'", color: "#e2e8f0", fontSize: 10
+                    }}>
+                      {c}
+                    </code>
+                  </li>
                 ))}
+              </ul>
+            </div>
+
+            {/* Divider */}
+            <div style={{ width: "100%", height: 1, background: T.uiBorder, margin: "8px 0" }} />
+
+            {/* Interview Question Feedback Poll */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: 10, color: T.uiTextMuted }}>
+              <span>Seen this question in a real interview before?</span>
+              <div style={{ display: "flex", gap: 6 }}>
+                <button
+                  onClick={() => alert("Thanks for your feedback!")}
+                  style={{
+                    padding: "3px 8px", borderRadius: 4, border: `1px solid ${T.uiBorder}`,
+                    background: T.uiSurface, color: T.uiText, fontSize: 10, fontFamily: "'JetBrains Mono'",
+                    cursor: "pointer", display: "flex", alignItems: "center", gap: 4
+                  }}
+                >
+                  <ThumbsUp size={11} color="#10b981" /> Yes
+                </button>
+                <button
+                  onClick={() => alert("Thanks for your feedback!")}
+                  style={{
+                    padding: "3px 8px", borderRadius: 4, border: `1px solid ${T.uiBorder}`,
+                    background: T.uiSurface, color: T.uiText, fontSize: 10, fontFamily: "'JetBrains Mono'",
+                    cursor: "pointer", display: "flex", alignItems: "center", gap: 4
+                  }}
+                >
+                  <ThumbsDown size={11} color="#ef4444" /> No
+                </button>
               </div>
             </div>
 
-            {/* CTA Button */}
+            {/* Acceptance & Submissions Footer Stats */}
+            <div style={{
+              fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted,
+              display: "flex", alignItems: "center", gap: 12, background: "rgba(0,0,0,0.2)",
+              padding: "8px 12px", borderRadius: 6, border: `1px solid ${T.uiBorder}`
+            }}>
+              <span>Accepted: <strong style={{ color: "#10b981" }}>{moduleInfo.problemStatement.totalAccepted}</strong></span>
+              <span>|</span>
+              <span>Acceptance Rate: <strong style={{ color: "#38bdf8" }}>{moduleInfo.problemStatement.acceptanceRate}</strong></span>
+            </div>
+
+            {/* Step 2 CTA Button */}
             <button
               onClick={() => setActiveTab('approaches')}
               style={{
@@ -358,7 +433,7 @@ export default function LearnPanel() {
                 background: "linear-gradient(135deg, #10b981, #3b82f6)",
                 color: "#fff", fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
                 cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                marginTop: 8, transition: "transform 0.15s ease", boxShadow: "0 4px 15px rgba(16,185,129,0.3)"
+                marginTop: 4, transition: "transform 0.15s ease", boxShadow: "0 4px 15px rgba(16,185,129,0.3)"
               }}
               onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
               onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
