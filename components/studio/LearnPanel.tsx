@@ -49,11 +49,13 @@ export default function LearnPanel() {
   };
 
   const handleLoadSelectedApproachCode = () => {
-    setCode(selectedApproach.code);
-    restart();
+    // Load trace program first (for simulation steps), then override the code
+    // with the selected approach's unique C++ solution
     if (moduleInfo.traceKey) {
       loadProgram(moduleInfo.traceKey);
     }
+    // Set the approach-specific code AFTER loadProgram so it takes priority
+    setCode(selectedApproach.code);
   };
 
   const handleSimulate = () => {
