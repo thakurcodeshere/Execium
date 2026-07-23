@@ -9369,6 +9369,1998 @@ int main() {
 }
 
 
+
+export function getProblem41Details(): LearnModule {
+  return {
+    id: "med_templates_class",
+    title: "41. Class Templates",
+    category: "Templates",
+    difficulty: "medium",
+    shortDesc: "Generic data structures using template<class T> classes.",
+    fullCode: `// 41. Class Templates - Approach 1: Generic Stack Class
+#include <iostream>
+#include <vector>
+#include <stdexcept>
+using namespace std;
+
+template <typename T>
+class Stack {
+private:
+    vector<T> elems;
+public:
+    void push(const T& elem) { elems.push_back(elem); }
+    void pop() {
+        if (elems.empty()) throw out_of_range("Stack empty!");
+        elems.pop_back();
+    }
+    T top() const {
+        if (elems.empty()) throw out_of_range("Stack empty!");
+        return elems.back();
+    }
+    bool empty() const { return elems.empty(); }
+};
+
+int main() {
+    Stack<int> intStack;
+    intStack.push(10);
+    intStack.push(20);
+    cout << "Top: " << intStack.top() << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "41. Class Templates",
+      objective: "Master generic class definitions using template<class T>, out-of-line method definitions, full/partial specialization, non-type parameters, default arguments, and friend function templates.",
+      description: "Implement **Class Templates** (Templates). Generic data structures using template<class T> classes. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Generic parameter types and values passed to class template instantiations.",
+      outputDesc: "Instantiated generic container state values, specialized behavior, and method outputs.",
+      takeaways: [
+        "Class templates generate unique container types for each instantiated type argument at compile time",
+        "Out-of-line member methods must be prefixed with template <typename T> and qualified with ClassName<T>::",
+        "Template specialization enables custom optimized storage (e.g. Storage<bool> bit-packing)",
+        "Non-type template parameters (template<typename T, size_t N>) create fixed compile-time array bounds"
+      ],
+      examples: [
+        { id: 1, input: "Stack<int> s; s.push(42);", output: "Top element: 42", explanation: "Instantiates integer stack container using template<typename T>." },
+        { id: 2, input: "Storage<bool> bStore;", output: "Bit-packed storage optimization", explanation: "Uses class template specialization for boolean type." },
+        { id: 3, input: "StaticBuffer<double, 100> buf;", output: "Fixed 100 double array allocation", explanation: "Uses non-type size parameter N=100 for compile-time buffer size." }
+      ],
+      constraints: ["Template class methods must be defined in header files for compile-time instantiation."],
+      companies: ["Google", "Microsoft", "Meta", "Amazon", "Apple"],
+      acceptanceRate: "89.1%",
+      totalAccepted: "1,810,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Generic Stack Class Template (FREE)", category: "FREE / Generic Class",
+        description: "Implements generic Stack<T> class supporting push, pop, top, and empty operations.",
+        prosCons: "Pros: Reusable container logic across any type T. Cons: Instantiates separate class per type.",
+        timeComplexity: "O(1) average", spaceComplexity: "O(N)", isFree: true,
+        code: `// 41. Class Templates - Approach 1: Generic Stack
+#include <iostream>
+#include <vector>
+using namespace std;
+
+template <typename T>
+class Stack {
+private:
+    vector<T> elements;
+public:
+    void push(const T& val) { elements.push_back(val); }
+    void pop() { if (!elements.empty()) elements.pop_back(); }
+    T top() const { return elements.back(); }
+};
+
+int main() {
+    Stack<string> strStack;
+    strStack.push("Hello");
+    strStack.push("World");
+    cout << "Top string: " << strStack.top() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T> class Stack { ... };", constructType: "Header / Include", title: "Class Template Header", explanation: "Declares class template parameter T representing generic element type.", keyDetails: [{ variableOrConstruct: "template <typename T>", role: "Class Template Parameter", whyThisWay: "Defines generic class blueprint." }] },
+          { lineNum: 2, codeSnippet: "void push(const T& val) { elements.push_back(val); }", constructType: "Function Signature", title: "Generic Push Method", explanation: "Accepts const reference to generic type T value.", keyDetails: [{ variableOrConstruct: "const T& val", role: "Generic Parameter", whyThisWay: "Accepts value by const reference." }] },
+          { lineNum: 3, codeSnippet: "Stack<string> strStack;", constructType: "Variable & Initializer", title: "Instantiate Class Template", explanation: "Instantiates string stack type Stack<string>.", keyDetails: [{ variableOrConstruct: "Stack<string>", role: "Template Instantiation", whyThisWay: "Specifies string as type parameter T." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Out-of-Line Template Class Member Methods (FREE)", category: "FREE / Out-of-Line Methods",
+        description: "Defines class template member methods outside class body declaration.",
+        prosCons: "Pros: Clean interface separation in headers. Cons: Requires verbose template header syntax on every method.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 41. Class Templates - Approach 2: Out-of-Line Methods
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class Box {
+private:
+    T value;
+public:
+    Box(T v);
+    T getValue() const;
+};
+
+template <typename T>
+Box<T>::Box(T v) : value(v) {}
+
+template <typename T>
+T Box<T>::getValue() const {
+    return value;
+}
+
+int main() {
+    Box<double> b(99.9);
+    cout << "Box value: " << b.getValue() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T> Box<T>::Box(T v) : value(v) {}", constructType: "Function Signature", title: "Out-of-Line Constructor Definition", explanation: "Qualifies constructor with template header and Box<T>:: scope.", keyDetails: [{ variableOrConstruct: "Box<T>::Box", role: "Scoped Constructor", whyThisWay: "Out-of-line class template method definition." }] },
+          { lineNum: 2, codeSnippet: "template <typename T> T Box<T>::getValue() const", constructType: "Function Signature", title: "Out-of-Line Getter Method", explanation: "Defines const getter method out-of-line.", keyDetails: [{ variableOrConstruct: "Box<T>::getValue", role: "Scoped Getter", whyThisWay: "Out-of-line getter definition." }] },
+          { lineNum: 3, codeSnippet: "Box<double> b(99.9);", constructType: "Variable & Initializer", title: "Instantiate Double Box", explanation: "Instantiates Box<double> object b.", keyDetails: [{ variableOrConstruct: "Box<double>", role: "Double Instantiation", whyThisWay: "Specifies double type parameter." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Full Class Template Specialization (PRO)", category: "PRO / Full Specialization",
+        description: "Specifies complete class template specialization for bool type.",
+        prosCons: "Pros: Allows specialized memory optimizations per type. Cons: Must re-implement total class interface.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 41. Class Templates - Approach 3: Specialization
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class Storage {
+public:
+    void print() { cout << "Generic Storage" << endl; }
+};
+
+template <>
+class Storage<bool> {
+public:
+    void print() { cout << "Specialized Bool Storage (Bit-Packed)" << endl; }
+};
+
+int main() {
+    Storage<int> s1;
+    Storage<bool> s2;
+    s1.print();
+    s2.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <> class Storage<bool> { ... };", constructType: "Header / Include", title: "Full Class Specialization Header", explanation: "Declares complete specialization of Storage for bool type using template <>.", keyDetails: [{ variableOrConstruct: "template <> class Storage<bool>", role: "Class Specialization", whyThisWay: "Overrides primary class template for bool." }] },
+          { lineNum: 2, codeSnippet: "Storage<int> s1; Storage<bool> s2;", constructType: "Variable & Initializer", title: "Instantiate Generic & Specialized Classes", explanation: "s1 uses generic primary template; s2 uses specialized bool class.", keyDetails: [{ variableOrConstruct: "Storage<bool>", role: "Specialized Object", whyThisWay: "Uses bool specialization." }] },
+          { lineNum: 3, codeSnippet: "s2.print();", constructType: "Return / Cleanup", title: "Invoke Specialized Method", explanation: "Prints 'Specialized Bool Storage (Bit-Packed)'.", keyDetails: [{ variableOrConstruct: "s2.print()", role: "Specialized Call", whyThisWay: "Executes specialized bool method." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Partial Class Template Specialization for Pointers (PRO)", category: "PRO / Partial Specialization",
+        description: "Partially specializes class template for pointer types T*.",
+        prosCons: "Pros: Custom handling for all pointer type arguments. Cons: Only available for class templates (not functions).",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 41. Class Templates - Approach 4: Partial Specialization
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class Printer {
+public:
+    static void print(T val) { cout << "Value: " << val << endl; }
+};
+
+template <typename T>
+class Printer<T*> {
+public:
+    static void print(T* ptr) {
+        if (ptr) cout << "Pointer Value: " << *ptr << endl;
+        else cout << "Null Pointer" << endl;
+    }
+};
+
+int main() {
+    int x = 42;
+    Printer<int>::print(x);
+    Printer<int*>::print(&x);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T> class Printer<T*> { ... };", constructType: "Header / Include", title: "Partial Pointer Specialization Header", explanation: "Partially specializes Printer for any pointer type T*.", keyDetails: [{ variableOrConstruct: "class Printer<T*>", role: "Partial Pointer Specialization", whyThisWay: "Specializes for all pointer types." }] },
+          { lineNum: 2, codeSnippet: "static void print(T* ptr) { if (ptr) cout << *ptr; }", constructType: "Function Signature", title: "Pointer Dereference Printer", explanation: "Dereferences pointer safely inside specialized static method.", keyDetails: [{ variableOrConstruct: "*ptr", role: "Pointer Dereference", whyThisWay: "Reads value pointed to." }] },
+          { lineNum: 3, codeSnippet: "Printer<int*>::print(&x);", constructType: "Return / Cleanup", title: "Invoke Partial Specialization", explanation: "Dispatches to Printer<T*> partial specialization.", keyDetails: [{ variableOrConstruct: "Printer<int*>", role: "Partial Specialization Call", whyThisWay: "Invokes pointer specialization." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Multiple Class Template Parameters (PRO)", category: "PRO / Multi Parameter Class",
+        description: "Creates generic Key-Value Pair<K, V> container class.",
+        prosCons: "Pros: Enables heterogeneous key-value data structures. Cons: Increased template parameter syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 41. Class Templates - Approach 5: Multiple Parameters
+#include <iostream>
+#include <string>
+using namespace std;
+
+template <typename K, typename V>
+class KeyValuePair {
+public:
+    K key;
+    V value;
+    KeyValuePair(K k, V v) : key(k), value(v) {}
+    void display() const { cout << "[" << key << ": " << value << "]" << endl; }
+};
+
+int main() {
+    KeyValuePair<string, int> item("Score", 95);
+    item.display();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename K, typename V> class KeyValuePair { ... };", constructType: "Header / Include", title: "Dual Parameter Class Header", explanation: "Declares key type K and value type V template parameters.", keyDetails: [{ variableOrConstruct: "typename K, typename V", role: "Dual Type Parameters", whyThisWay: "Stores heterogeneous key-value pair." }] },
+          { lineNum: 2, codeSnippet: "KeyValuePair(K k, V v) : key(k), value(v) {}", constructType: "Function Signature", title: "Constructor Initializer List", explanation: "Initializes key and value directly from template constructor parameters.", keyDetails: [{ variableOrConstruct: ": key(k), value(v)", role: "Member Initializers", whyThisWay: "Direct member initialization." }] },
+          { lineNum: 3, codeSnippet: "KeyValuePair<string, int> item('Score', 95);", constructType: "Variable & Initializer", title: "Instantiate Key-Value Pair", explanation: "Instantiates item with K=string and V=int.", keyDetails: [{ variableOrConstruct: "KeyValuePair<string, int>", role: "Explicit Instantiation", whyThisWay: "Defines pair types." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Non-Type Class Template Parameters (PRO)", category: "PRO / Non-Type Class Parameter",
+        description: "Passes array size N as non-type template parameter to create fixed-size buffer class.",
+        prosCons: "Pros: Zero dynamic heap allocation overhead. Cons: Buffer capacity fixed at compile time.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 41. Class Templates - Approach 6: Non-Type Class Parameter
+#include <iostream>
+using namespace std;
+
+template <typename T, size_t N>
+class StaticArray {
+private:
+    T data[N];
+public:
+    size_t getSize() const { return N; }
+    T& operator[](size_t idx) { return data[idx]; }
+};
+
+int main() {
+    StaticArray<int, 5> arr;
+    cout << "Array Capacity: " << arr.getSize() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T, size_t N> class StaticArray", constructType: "Header / Include", title: "Non-Type Class Parameter Header", explanation: "Passes compile-time integer constant N as stack array bound.", keyDetails: [{ variableOrConstruct: "size_t N", role: "Non-Type Parameter", whyThisWay: "Fixes array bound at compile time." }] },
+          { lineNum: 2, codeSnippet: "T data[N];", constructType: "Variable & Initializer", title: "Declare Stack Array", explanation: "Allocates static stack array data of type T and size N.", keyDetails: [{ variableOrConstruct: "T data[N]", role: "Fixed Stack Array", whyThisWay: "Allocates array directly on stack." }] },
+          { lineNum: 3, codeSnippet: "StaticArray<int, 5> arr;", constructType: "Variable & Initializer", title: "Instantiate Fixed Array", explanation: "Instantiates 5-element integer array class.", keyDetails: [{ variableOrConstruct: "StaticArray<int, 5>", role: "Class Instantiation", whyThisWay: "Specifies size 5 at compile time." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Default Class Template Arguments (PRO)", category: "PRO / Default Class Template",
+        description: "Provides default type argument for template parameter T = int.",
+        prosCons: "Pros: Simplifies syntax when default type is commonly used. Cons: May hide explicit type choices.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 41. Class Templates - Approach 7: Default Template Arguments
+#include <iostream>
+using namespace std;
+
+template <typename T = int>
+class Counter {
+private:
+    T count;
+public:
+    Counter(T c = T()) : count(c) {}
+    void increment() { count++; }
+    T getCount() const { return count; }
+};
+
+int main() {
+    Counter<> c1;
+    c1.increment();
+    cout << "Default count: " << c1.getCount() << endl;
+    Counter<double> c2(3.5);
+    cout << "Double count: " << c2.getCount() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "template <typename T = int> class Counter { ... };", constructType: "Header / Include", title: "Default Template Parameter Header", explanation: "Specifies T=int as default parameter type if omitted in angle brackets.", keyDetails: [{ variableOrConstruct: "typename T = int", role: "Default Template Parameter", whyThisWay: "Sets int as default parameter type." }] },
+          { lineNum: 2, codeSnippet: "Counter<> c1;", constructType: "Variable & Initializer", title: "Instantiate with Default Angle Brackets", explanation: "Instantiates Counter<int> using empty angle brackets <>.", keyDetails: [{ variableOrConstruct: "Counter<>", role: "Default Instantiation", whyThisWay: "Uses default int type." }] },
+          { lineNum: 3, codeSnippet: "Counter<double> c2(3.5);", constructType: "Return / Cleanup", title: "Override Default Type", explanation: "Overrides default type parameter with double explicitly.", keyDetails: [{ variableOrConstruct: "Counter<double>", role: "Explicit Override", whyThisWay: "Overrides default type with double." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Template Class Friend Functions (operator<<) (PRO)", category: "PRO / Template Friend",
+        description: "Overloads operator<< for template class using friend template function declaration.",
+        prosCons: "Pros: Enables clean cout << obj syntax for generic classes. Cons: Requires forward template declaration.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 41. Class Templates - Approach 8: Template Friend Function
+#include <iostream>
+using namespace std;
+
+template <typename T> class Wrapper;
+template <typename T> ostream& operator<<(ostream& os, const Wrapper<T>& w);
+
+template <typename T>
+class Wrapper {
+private:
+    T val;
+public:
+    Wrapper(T v) : val(v) {}
+    friend ostream& operator<< <T>(ostream& os, const Wrapper<T>& w);
+};
+
+template <typename T>
+ostream& operator<<(ostream& os, const Wrapper<T>& w) {
+    os << "Wrapped(" << w.val << ")";
+    return os;
+}
+
+int main() {
+    Wrapper<int> w(500);
+    cout << w << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "friend ostream& operator<< <T>(ostream& os, const Wrapper<T>& w);", constructType: "Function Signature", title: "Friend Operator<< Template Declaration", explanation: "Grants friend operator<< specialization access to private val member.", keyDetails: [{ variableOrConstruct: "operator<< <T>", role: "Friend Template Operator", whyThisWay: "Binds friend function template." }] },
+          { lineNum: 2, codeSnippet: "os << 'Wrapped(' << w.val << ')';", constructType: "Condition & Branch", title: "Stream Operator Body Definition", explanation: "Formats wrapped object output into stream.", keyDetails: [{ variableOrConstruct: "w.val", role: "Private Member Access", whyThisWay: "Reads private member via friend declaration." }] },
+          { lineNum: 3, codeSnippet: "cout << w;", constructType: "Return / Cleanup", title: "Invoke Friend Operator<<", explanation: "Prints 'Wrapped(500)' directly via stream operator.", keyDetails: [{ variableOrConstruct: "cout << w", role: "Stream Output", whyThisWay: "Outputs wrapped object." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Template Class Inheritance (PRO)", category: "PRO / Template Inheritance",
+        description: "Derives template class from base template class.",
+        prosCons: "Pros: Reuses base template implementation. Cons: Must qualify base members with this-> or Base<T>::.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 41. Class Templates - Approach 9: Template Inheritance
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class BaseContainer {
+protected:
+    T data;
+public:
+    BaseContainer(T d) : data(d) {}
+};
+
+template <typename T>
+class DerivedContainer : public BaseContainer<T> {
+public:
+    DerivedContainer(T d) : BaseContainer<T>(d) {}
+    void print() const { cout << "Data: " << this->data << endl; }
+};
+
+int main() {
+    DerivedContainer<string> dc("Inherited Template");
+    dc.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "class DerivedContainer : public BaseContainer<T>", constructType: "Header / Include", title: "Derived Template Class Signature", explanation: "Inherits DerivedContainer<T> from base template BaseContainer<T>.", keyDetails: [{ variableOrConstruct: "public BaseContainer<T>", role: "Base Template Inheritance", whyThisWay: "Inherits from base class template." }] },
+          { lineNum: 2, codeSnippet: "cout << 'Data: ' << this->data;", constructType: "Condition & Branch", title: "Qualify Base Member Access", explanation: "Uses this->data to access dependent base template member.", keyDetails: [{ variableOrConstruct: "this->data", role: "Dependent Base Access", whyThisWay: "Resolves dependent name lookup." }] },
+          { lineNum: 3, codeSnippet: "dc.print();", constructType: "Return / Cleanup", title: "Invoke Derived Template Method", explanation: "Executes print() method on derived template object.", keyDetails: [{ variableOrConstruct: "dc.print()", role: "Method Call", whyThisWay: "Executes derived method." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Nested Inner Classes inside Class Templates (PRO)", category: "PRO / Nested Template Class",
+        description: "Encapsulates nested inner struct Node inside generic LinkedList<T> template class.",
+        prosCons: "Pros: Clean encapsulation of node pointers within container scope. Cons: Deep scoping rules.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 41. Class Templates - Approach 10: Nested Inner Node
+#include <iostream>
+using namespace std;
+
+template <typename T>
+class SimpleList {
+private:
+    struct Node {
+        T data;
+        Node* next;
+        Node(T d) : data(d), next(nullptr) {}
+    };
+    Node* head;
+public:
+    SimpleList() : head(nullptr) {}
+    ~SimpleList() {
+        while (head) { Node* temp = head; head = head->next; delete temp; }
+    }
+    void add(T val) {
+        Node* n = new Node(val);
+        n->next = head;
+        head = n;
+    }
+    T getHeadData() const { return head ? head->data : T(); }
+};
+
+int main() {
+    SimpleList<int> list;
+    list.add(77);
+    cout << "Head data: " << list.getHeadData() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "struct Node { T data; Node* next; Node(T d) : data(d), next(nullptr) {} };", constructType: "Header / Include", title: "Nested Node Struct Definition", explanation: "Defines inner Node struct parameterized automatically by outer class T.", keyDetails: [{ variableOrConstruct: "struct Node", role: "Nested Struct", whyThisWay: "Helper node structure encapsulation." }] },
+          { lineNum: 2, codeSnippet: "Node* n = new Node(val);", constructType: "Variable & Initializer", title: "Instantiate Nested Node", explanation: "Allocates dynamic Node on heap.", keyDetails: [{ variableOrConstruct: "new Node(val)", role: "Heap Allocation", whyThisWay: "Allocates node instance." }] },
+          { lineNum: 3, codeSnippet: "list.add(77);", constructType: "Return / Cleanup", title: "Add Element to List", explanation: "Adds element 77 to head of list.", keyDetails: [{ variableOrConstruct: "list.add(77)", role: "List Insertion", whyThisWay: "Pushes element into list." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem42Details(): LearnModule {
+  return {
+    id: "med_constructors",
+    title: "42. Special Member Functions",
+    category: "OOP Basics",
+    difficulty: "medium",
+    shortDesc: "Constructors, copy constructors, move constructors, & Rule of 5.",
+    fullCode: `// 42. Special Member Functions - Approach 1: Default & Parameterized Constructors
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Student {
+private:
+    string name;
+    int id;
+public:
+    Student() : name("Unknown"), id(0) { cout << "Default constructor." << endl; }
+    Student(string n, int i) : name(n), id(i) { cout << "Parameterized constructor." << endl; }
+    void print() const { cout << name << " (ID: " << id << ")" << endl; }
+};
+
+int main() {
+    Student s1;
+    Student s2("Alice", 101);
+    s1.print();
+    s2.print();
+    return 0;
+}`,
+    problemStatement: {
+      title: "42. Special Member Functions",
+      objective: "Master the 6 Special Member Functions: Default Constructor, Destructor, Copy Constructor, Copy Assignment, Move Constructor, Move Assignment, Rule of 3, Rule of 5, and Rule of 0.",
+      description: "Implement **Special Member Functions** (OOP Basics). Constructors, copy constructors, move constructors, & Rule of 5. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Object initialization expressions, assignment calls, and destruction events.",
+      outputDesc: "Logged constructor calls, deep-copied/moved buffer states, and automatic destructors.",
+      takeaways: [
+        "Rule of 3: If you declare custom Destructor, Copy Constructor, or Copy Assignment, you should declare all 3",
+        "Rule of 5: Modern C++ adds Move Constructor and Move Assignment for zero-copy efficiency",
+        "Rule of 0: Design classes using standard RAII members (std::string, std::vector) so compiler generates all 6 correctly",
+        "Use explicit to prevent unexpected single-argument constructor implicit conversions"
+      ],
+      examples: [
+        { id: 1, input: "Student s2('Alice', 101)", output: "Parameterized constructor -> Alice (ID: 101)", explanation: "Initializes member state directly in member initializer list." },
+        { id: 2, input: "Buffer b2 = b1 (Copy Constructor)", output: "Deep copy created on heap", explanation: "Allocates independent heap memory block during copy." },
+        { id: 3, input: "Buffer b2 = std::move(b1) (Move Constructor)", output: "O(1) pointer stolen", explanation: "Steals raw pointer without allocating new heap memory." }
+      ],
+      constraints: ["Move special member functions MUST be decorated with noexcept.", "Always guard copy and move assignment operators against self-assignment."],
+      companies: ["Google", "Meta", "Microsoft", "Amazon", "Apple"],
+      acceptanceRate: "90.1%",
+      totalAccepted: "2,110,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Default & Parameterized Constructors (FREE)", category: "FREE / Constructors",
+        description: "Initializes member variables using default and parameterized constructors.",
+        prosCons: "Pros: Fundamental object initialization mechanism. Cons: Requires writing multiple overloaded constructors.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 42. Special Member Functions - Approach 1: Basic Constructors
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Laptop {
+private:
+    string brand;
+    int ramGB;
+public:
+    Laptop() : brand("Generic"), ramGB(8) {}
+    Laptop(string b, int r) : brand(b), ramGB(r) {}
+    void display() const { cout << brand << " with " << ramGB << "GB RAM" << endl; }
+};
+
+int main() {
+    Laptop l1;
+    Laptop l2("Dell", 16);
+    l1.display(); l2.display();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Laptop() : brand('Generic'), ramGB(8) {}", constructType: "Function Signature", title: "Default Constructor Definition", explanation: "Initializes Laptop with default brand 'Generic' and 8GB RAM.", keyDetails: [{ variableOrConstruct: "Laptop()", role: "Default Constructor", whyThisWay: "Provides fallback member initialization." }] },
+          { lineNum: 2, codeSnippet: "Laptop(string b, int r) : brand(b), ramGB(r) {}", constructType: "Function Signature", title: "Parameterized Constructor Definition", explanation: "Initializes Laptop with custom brand and ramGB arguments.", keyDetails: [{ variableOrConstruct: "Laptop(string, int)", role: "Parameterized Constructor", whyThisWay: "Custom member initialization." }] },
+          { lineNum: 3, codeSnippet: "Laptop l2('Dell', 16);", constructType: "Variable & Initializer", title: "Instantiate Parameterized Object", explanation: "Constructs l2 instance passing 'Dell' and 16.", keyDetails: [{ variableOrConstruct: "Laptop l2", role: "Object Instantiation", whyThisWay: "Calls parameterized constructor." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Copy Constructor with Deep Copy (FREE)", category: "FREE / Copy Constructor",
+        description: "Performs deep copy allocation inside copy constructor to prevent shared pointer aliasing.",
+        prosCons: "Pros: Prevents double-free bugs and dangling pointers. Cons: Heap allocation performance cost.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 42. Special Member Functions - Approach 2: Copy Constructor
+#include <iostream>
+using namespace std;
+
+class ArrayBuffer {
+public:
+    int* data;
+    size_t size;
+    ArrayBuffer(size_t s) : size(s), data(new int[s]()) {}
+    ~ArrayBuffer() { delete[] data; }
+    
+    // Deep Copy Constructor
+    ArrayBuffer(const ArrayBuffer& other) : size(other.size), data(new int[other.size]) {
+        for (size_t i = 0; i < size; i++) data[i] = other.data[i];
+        cout << "Deep copy constructor executed." << endl;
+    }
+};
+
+int main() {
+    ArrayBuffer a1(5);
+    a1.data[0] = 42;
+    ArrayBuffer a2 = a1; // Copy constructor
+    cout << "a2[0]: " << a2.data[0] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "ArrayBuffer(const ArrayBuffer& other) : size(other.size), data(new int[other.size])", constructType: "Function Signature", title: "Deep Copy Constructor Header", explanation: "Allocates independent new heap array for data member.", keyDetails: [{ variableOrConstruct: "new int[other.size]", role: "Deep Heap Allocation", whyThisWay: "Allocates new memory block." }] },
+          { lineNum: 2, codeSnippet: "for (size_t i = 0; i < size; i++) data[i] = other.data[i];", constructType: "Loop Construct", title: "Copy Memory Bytes", explanation: "Copies array elements one-by-one into new heap buffer.", keyDetails: [{ variableOrConstruct: "data[i] = other.data[i]", role: "Byte Copy", whyThisWay: "Duplicates data values." }] },
+          { lineNum: 3, codeSnippet: "ArrayBuffer a2 = a1;", constructType: "Variable & Initializer", title: "Invoke Copy Constructor", explanation: "Constructs a2 by invoking deep copy constructor.", keyDetails: [{ variableOrConstruct: "a2 = a1", role: "Copy Construction", whyThisWay: "Triggers copy constructor." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Copy Assignment Operator (operator=) (PRO)", category: "PRO / Copy Assignment",
+        description: "Implements copy assignment operator with self-assignment check and resource reallocation.",
+        prosCons: "Pros: Allows re-assigning existing object instances safely. Cons: Requires deleting old memory.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 42. Special Member Functions - Approach 3: Copy Assignment
+#include <iostream>
+using namespace std;
+
+class TextHolder {
+public:
+    char* str;
+    TextHolder(const char* s) {
+        str = new char[strlen(s) + 1];
+        strcpy(str, s);
+    }
+    ~TextHolder() { delete[] str; }
+    
+    TextHolder& operator=(const TextHolder& other) {
+        if (this != &other) {
+            delete[] str; // Free old
+            str = new char[strlen(other.str) + 1];
+            strcpy(str, other.str);
+        }
+        return *this;
+    }
+};
+
+int main() {
+    TextHolder t1("First"), t2("Second");
+    t2 = t1;
+    cout << "t2 string: " << t2.str << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (this != &other) { delete[] str; ... }", constructType: "Condition & Branch", title: "Self-Assignment Guard & Existing Cleanup", explanation: "Guards against t1 = t1 self assignment and frees existing str array.", keyDetails: [{ variableOrConstruct: "this != &other", role: "Self Guard", whyThisWay: "Prevents self assignment corruption." }] },
+          { lineNum: 2, codeSnippet: "str = new char[strlen(other.str) + 1]; strcpy(str, other.str);", constructType: "Variable & Initializer", title: "Reallocate & Copy Bytes", explanation: "Reallocates new character buffer and copies C-string.", keyDetails: [{ variableOrConstruct: "strcpy", role: "String Copy", whyThisWay: "Copies string content." }] },
+          { lineNum: 3, codeSnippet: "return *this;", constructType: "Return / Cleanup", title: "Return Reference *this", explanation: "Returns reference to *this enabling chained assignment syntax.", keyDetails: [{ variableOrConstruct: "return *this", role: "Chain Reference", whyThisWay: "Enables chained operator calls." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Explicit Constructor Keyword (explicit) (PRO)", category: "PRO / explicit Keyword",
+        description: "Prevents silent implicit type conversion bugs using explicit keyword on single-argument constructor.",
+        prosCons: "Pros: Eliminates accidental type coercion bugs. Cons: Requires explicit type construction syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 42. Special Member Functions - Approach 4: Explicit Constructor
+#include <iostream>
+using namespace std;
+
+class Meter {
+public:
+    int length;
+    explicit Meter(int l) : length(l) {}
+};
+
+void printMeter(Meter m) {
+    cout << "Length: " << m.length << "m" << endl;
+}
+
+int main() {
+    printMeter(Meter(10));
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "explicit Meter(int l) : length(l) {}", constructType: "Function Signature", title: "Explicit Constructor Guard", explanation: "Prevents implicit conversion from integer to Meter (e.g. printMeter(10) causes compile error).", keyDetails: [{ variableOrConstruct: "explicit", role: "Implicit Conversion Guard", whyThisWay: "Blocks implicit single-arg conversion." }] },
+          { lineNum: 2, codeSnippet: "printMeter(Meter(10));", constructType: "Variable & Initializer", title: "Explicit Object Construction Call", explanation: "Constructs Meter object explicitly.", keyDetails: [{ variableOrConstruct: "Meter(10)", role: "Explicit Call", whyThisWay: "Passes explicit Meter object." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Delegating Constructors (C++11) (PRO)", category: "PRO / Delegating Constructors",
+        description: "Delegates common initialization logic from one constructor to another in member initializer list.",
+        prosCons: "Pros: Reduces redundant initialization code duplication. Cons: Target constructor executes first.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 42. Special Member Functions - Approach 5: Delegating Constructor
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Config {
+public:
+    string host;
+    int port;
+    Config(string h, int p) : host(h), port(p) {
+        cout << "Primary constructor initialized." << endl;
+    }
+    Config(string h) : Config(h, 8080) { // Delegates!
+        cout << "Delegating constructor finished." << endl;
+    }
+};
+
+int main() {
+    Config cfg("localhost");
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Config(string h) : Config(h, 8080)", constructType: "Function Signature", title: "Delegating Constructor Header", explanation: "Delegates initialization to primary constructor Config(string, int) with default port 8080.", keyDetails: [{ variableOrConstruct: ": Config(h, 8080)", role: "Delegating Call", whyThisWay: "Delegates initialization to primary constructor." }] },
+          { lineNum: 2, codeSnippet: "Config cfg('localhost');", constructType: "Variable & Initializer", title: "Instantiate Delegating Constructor", explanation: "Instantiates cfg invoking delegating constructor.", keyDetails: [{ variableOrConstruct: "cfg('localhost')", role: "Delegated Instantiation", whyThisWay: "Triggers constructor delegation." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Explicitly Deleted & Defaulted Functions (= delete / = default) (PRO)", category: "PRO / Default & Delete",
+        description: "Disables copy operations with = delete and requests compiler default operations with = default.",
+        prosCons: "Pros: Explicit control over compiler-generated special functions. Cons: Deleted methods cause compile-time errors when called.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 42. Special Member Functions - Approach 6: = delete & = default
+#include <iostream>
+using namespace std;
+
+class NonCopyable {
+public:
+    NonCopyable() = default; // Compiler default
+    ~NonCopyable() = default;
+    
+    // Explicitly delete copy constructor & assignment!
+    NonCopyable(const NonCopyable&) = delete;
+    NonCopyable& operator=(const NonCopyable&) = delete;
+};
+
+int main() {
+    NonCopyable n1;
+    // NonCopyable n2 = n1; // COMPILE ERROR!
+    cout << "NonCopyable instantiated safely." << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "NonCopyable() = default;", constructType: "Function Signature", title: "Compiler Default Constructor", explanation: "Explicitly requests compiler to generate standard default constructor.", keyDetails: [{ variableOrConstruct: "= default", role: "Defaulted Function", whyThisWay: "Requests compiler default generation." }] },
+          { lineNum: 2, codeSnippet: "NonCopyable(const NonCopyable&) = delete;", constructType: "Function Signature", title: "Delete Copy Constructor", explanation: "Explicitly deletes copy constructor blocking copy attempts at compile time.", keyDetails: [{ variableOrConstruct: "= delete", role: "Deleted Function", whyThisWay: "Forbids copy construction." }] },
+          { lineNum: 3, codeSnippet: "NonCopyable n1;", constructType: "Return / Cleanup", title: "Instantiate NonCopyable Instance", explanation: "Instantiates n1 safely using defaulted constructor.", keyDetails: [{ variableOrConstruct: "NonCopyable n1", role: "Object Instantiation", whyThisWay: "Instantiates object." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Move Constructor & Move Assignment Operator (PRO)", category: "PRO / Move Operations",
+        description: "Steals raw pointer resources inside move constructor and move assignment operator with noexcept.",
+        prosCons: "Pros: O(1) instantaneous resource transfer. Cons: Requires setting source pointer to nullptr.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 42. Special Member Functions - Approach 7: Move Operations
+#include <iostream>
+#include <utility>
+using namespace std;
+
+class VectorBuffer {
+public:
+    int* ptr;
+    size_t sz;
+    VectorBuffer(size_t s) : sz(s), ptr(new int[s]) {}
+    ~VectorBuffer() { delete[] ptr; }
+    
+    // Move Constructor
+    VectorBuffer(VectorBuffer&& o) noexcept : ptr(o.ptr), sz(o.sz) {
+        o.ptr = nullptr; o.sz = 0;
+    }
+    // Move Assignment
+    VectorBuffer& operator=(VectorBuffer&& o) noexcept {
+        if (this != &o) {
+            delete[] ptr;
+            ptr = o.ptr; sz = o.sz;
+            o.ptr = nullptr; o.sz = 0;
+        }
+        return *this;
+    }
+};
+
+int main() {
+    VectorBuffer v1(100);
+    VectorBuffer v2 = move(v1);
+    cout << "v2 size: " << v2.sz << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "VectorBuffer(VectorBuffer&& o) noexcept : ptr(o.ptr), sz(o.sz)", constructType: "Function Signature", title: "Move Constructor Header", explanation: "Steals ptr from source object o directly in member initializer list.", keyDetails: [{ variableOrConstruct: "VectorBuffer&& o", role: "Move Parameter", whyThisWay: "Accepts rvalue reference." }] },
+          { lineNum: 2, codeSnippet: "o.ptr = nullptr; o.sz = 0;", constructType: "Variable & Initializer", title: "Reset Source Pointer to Null", explanation: "Nullifies source pointer to prevent double free during source destruction.", keyDetails: [{ variableOrConstruct: "o.ptr = nullptr", role: "Source Reset", whyThisWay: "Prevents double free bug." }] },
+          { lineNum: 3, codeSnippet: "VectorBuffer v2 = move(v1);", constructType: "Return / Cleanup", title: "Invoke Move Special Member Function", explanation: "Triggers move constructor transferring buffer to v2.", keyDetails: [{ variableOrConstruct: "move(v1)", role: "Move Invocation", whyThisWay: "Executes move constructor." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Complete Rule of 3 Implementation (PRO)", category: "PRO / Rule of 3",
+        description: "Implements Destructor, Copy Constructor, and Copy Assignment Operator for C++98 dynamic resource class.",
+        prosCons: "Pros: Essential C++98 resource safety paradigm. Cons: Lacks modern move optimization support.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 42. Special Member Functions - Approach 8: Rule of 3
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class StringHolder {
+private:
+    char* text;
+public:
+    StringHolder(const char* t) { text = new char[strlen(t) + 1]; strcpy(text, t); }
+    // 1. Destructor
+    ~StringHolder() { delete[] text; }
+    // 2. Copy Constructor
+    StringHolder(const StringHolder& o) { text = new char[strlen(o.text) + 1]; strcpy(text, o.text); }
+    // 3. Copy Assignment Operator
+    StringHolder& operator=(const StringHolder& o) {
+        if (this != &o) { delete[] text; text = new char[strlen(o.text) + 1]; strcpy(text, o.text); }
+        return *this;
+    }
+    void print() const { cout << text << endl; }
+};
+
+int main() {
+    StringHolder s1("Rule of 3");
+    StringHolder s2 = s1;
+    s2.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "~StringHolder() { delete[] text; }", constructType: "Function Signature", title: "1. Rule of 3 Destructor", explanation: "Frees dynamic text buffer.", keyDetails: [{ variableOrConstruct: "~StringHolder()", role: "Destructor", whyThisWay: "Frees heap memory." }] },
+          { lineNum: 2, codeSnippet: "StringHolder(const StringHolder& o) { ... }", constructType: "Function Signature", title: "2. Rule of 3 Copy Constructor", explanation: "Performs deep copy during copy construction.", keyDetails: [{ variableOrConstruct: "Copy Constructor", role: "Deep Copy", whyThisWay: "Duplicates string buffer." }] },
+          { lineNum: 3, codeSnippet: "StringHolder& operator=(const StringHolder& o) { ... }", constructType: "Return / Cleanup", title: "3. Rule of 3 Copy Assignment Operator", explanation: "Performs deep copy during assignment operator call.", keyDetails: [{ variableOrConstruct: "Copy Assignment", role: "Deep Assignment", whyThisWay: "Reallocates and copies text." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Complete Rule of 5 Implementation (PRO)", category: "PRO / Rule of 5",
+        description: "Implements all 5 special member functions (Destructor, Copy Con, Copy Assign, Move Con, Move Assign).",
+        prosCons: "Pros: Full modern C++ resource management support. Cons: Requires writing 5 distinct member functions.",
+        timeComplexity: "O(N) copy, O(1) move", spaceComplexity: "O(N) copy, O(1) move", isFree: false,
+        code: `// 42. Special Member Functions - Approach 9: Rule of 5
+#include <iostream>
+#include <utility>
+using namespace std;
+
+class FullResource {
+public:
+    int* ptr;
+    FullResource(int val) : ptr(new int(val)) {}
+    ~FullResource() { delete ptr; }
+    FullResource(const FullResource& o) : ptr(new int(*o.ptr)) {}
+    FullResource& operator=(const FullResource& o) {
+        if (this != &o) { delete ptr; ptr = new int(*o.ptr); }
+        return *this;
+    }
+    FullResource(FullResource&& o) noexcept : ptr(o.ptr) { o.ptr = nullptr; }
+    FullResource& operator=(FullResource&& o) noexcept {
+        if (this != &o) { delete ptr; ptr = o.ptr; o.ptr = nullptr; }
+        return *this;
+    }
+};
+
+int main() {
+    FullResource f1(42);
+    FullResource f2 = move(f1);
+    cout << "f2 value: " << *f2.ptr << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "FullResource(FullResource&& o) noexcept : ptr(o.ptr) { o.ptr = nullptr; }", constructType: "Function Signature", title: "Rule of 5 Move Constructor", explanation: "Steals raw pointer o.ptr and sets source to nullptr.", keyDetails: [{ variableOrConstruct: "Move Constructor", role: "Pointer Steal", whyThisWay: "Transfers pointer without copy." }] },
+          { lineNum: 2, codeSnippet: "FullResource& operator=(FullResource&& o) noexcept { ... }", constructType: "Function Signature", title: "Rule of 5 Move Assignment Operator", explanation: "Releases current pointer and steals pointer from source o.", keyDetails: [{ variableOrConstruct: "Move Assignment", role: "Move Assignment", whyThisWay: "Re-assigns via pointer stealing." }] },
+          { lineNum: 3, codeSnippet: "FullResource f2 = move(f1);", constructType: "Return / Cleanup", title: "Invoke Rule of 5 Move Constructor", explanation: "Triggers move constructor stealing resource f1.", keyDetails: [{ variableOrConstruct: "f2 = move(f1)", role: "Move Invocation", whyThisWay: "Executes move constructor." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Rule of Zero RAII Class Composition (PRO)", category: "PRO / Rule of 0",
+        description: "Uses standard RAII wrapper members (std::string, std::vector) to follow Rule of 0.",
+        prosCons: "Pros: Compiler automatically generates all 6 special member functions correctly. Cons: None.",
+        timeComplexity: "O(1) / O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 42. Special Member Functions - Approach 10: Rule of 0
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+class UserProfile {
+public:
+    string name;
+    vector<string> roles;
+    UserProfile(string n, vector<string> r) : name(n), roles(r) {}
+    // Rule of 0: Zero custom destructors or copy/move functions needed!
+};
+
+int main() {
+    UserProfile p1("Alice", {"Admin", "Editor"});
+    UserProfile p2 = p1; // Auto copy!
+    UserProfile p3 = move(p1); // Auto move!
+    cout << "p2 name: " << p2.name << " | p3 roles: " << p3.roles.size() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "string name; vector<string> roles;", constructType: "Variable & Initializer", title: "RAII Member Declaration", explanation: "Declares RAII members (std::string and std::vector) that manage their own dynamic memory.", keyDetails: [{ variableOrConstruct: "string / vector", role: "RAII Members", whyThisWay: "Standard RAII containers manage memory automatically." }] },
+          { lineNum: 2, codeSnippet: "UserProfile p2 = p1;", constructType: "Variable & Initializer", title: "Automatic Copy Construction", explanation: "Compiler generates correct member-wise copy constructor.", keyDetails: [{ variableOrConstruct: "p2 = p1", role: "Auto Copy", whyThisWay: "Compiler auto-generates member-wise copy." }] },
+          { lineNum: 3, codeSnippet: "UserProfile p3 = move(p1);", constructType: "Return / Cleanup", title: "Automatic Move Construction", explanation: "Compiler generates correct member-wise move constructor.", keyDetails: [{ variableOrConstruct: "p3 = move(p1)", role: "Auto Move", whyThisWay: "Compiler auto-generates member-wise move." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem43Details(): LearnModule {
+  return {
+    id: "med_destructors",
+    title: "43. Virtual Destructors & Cleanup",
+    category: "OOP Basics",
+    difficulty: "medium",
+    shortDesc: "Preventing memory leaks during polymorphic class deletion.",
+    fullCode: `// 43. Virtual Destructors - Approach 1: Virtual Destructor Resolution
+#include <iostream>
+using namespace std;
+
+class Base {
+public:
+    Base() { cout << "Base constructed." << endl; }
+    virtual ~Base() { cout << "Base destroyed." << endl; }
+};
+
+class Derived : public Base {
+private:
+    int* buffer;
+public:
+    Derived() : buffer(new int[100]) { cout << "Derived constructed." << endl; }
+    ~Derived() override {
+        delete[] buffer;
+        cout << "Derived destroyed (buffer freed)." << endl;
+    }
+};
+
+int main() {
+    Base* ptr = new Derived();
+    delete ptr; // Virtual destructor ensures Derived::~Derived runs!
+    return 0;
+}`,
+    problemStatement: {
+      title: "43. Virtual Destructors & Cleanup",
+      objective: "Master polymorphic class destruction, virtual destructors, pure virtual destructors, construction/destruction order, noexcept destructor guarantees, and protected non-virtual destructors.",
+      description: "Implement **Virtual Destructors & Cleanup** (OOP Basics). Preventing memory leaks during polymorphic class deletion. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Polymorphic base pointers holding derived heap instances deleted via operator delete.",
+      outputDesc: "Logged destructor execution order, freed derived resources, and clean process exits.",
+      takeaways: [
+        "If a class has ANY virtual function, its destructor MUST be declared virtual",
+        "Deleting a derived object via a base pointer with a non-virtual destructor is Undefined Behavior",
+        "Construction order is Base -> Derived; Destruction order is strictly reversed Derived -> Base",
+        "Pure virtual destructors (virtual ~Base() = 0;) MUST have an out-of-line definition"
+      ],
+      examples: [
+        { id: 1, input: "Base* b = new Derived(); delete b;", output: "Derived destroyed -> Base destroyed", explanation: "Virtual destructor ensures derived destructor executes properly." },
+        { id: 2, input: "Non-virtual ~Base() with delete b", output: "Memory Leak (Derived destructor skipped)", explanation: "Undefined behavior skipping derived cleanup." },
+        { id: 3, input: "Protected ~Base()", output: "Prevents delete b on base pointer", explanation: "Blocks polymorphic deletion at compile time." }
+      ],
+      constraints: ["Destructors MUST NOT throw exceptions; destructors are implicitly noexcept in C++11."],
+      companies: ["Google", "Meta", "Microsoft", "Apple", "Amazon"],
+      acceptanceRate: "88.7%",
+      totalAccepted: "1,950,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Non-Virtual Destructor Memory Leak Bug Demonstration (FREE)", category: "FREE / Memory Leak Bug",
+        description: "Demonstrates memory leak bug when deleting derived object via base pointer with non-virtual destructor.",
+        prosCons: "Pros: Clearly illustrates undefined behavior bug. Cons: Never use non-virtual destructors in polymorphic base classes.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 43. Virtual Destructors - Approach 1: Non-Virtual Bug
+#include <iostream>
+using namespace std;
+
+class BadBase {
+public:
+    ~BadBase() { cout << "BadBase destructor." << endl; } // NOT VIRTUAL!
+};
+
+class BadDerived : public BadBase {
+public:
+    int* leak;
+    BadDerived() : leak(new int(100)) {}
+    ~BadDerived() {
+        cout << "BadDerived destructor (LEAK FREED)." << endl;
+        delete leak;
+    }
+};
+
+int main() {
+    BadBase* ptr = new BadDerived();
+    delete ptr; // SKIPS BadDerived destructor! MEMORY LEAK!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "~BadBase() { cout << 'BadBase destructor.'; }", constructType: "Function Signature", title: "Non-Virtual Base Destructor", explanation: "Declares non-virtual destructor in polymorphic base class.", keyDetails: [{ variableOrConstruct: "~BadBase()", role: "Non-Virtual Destructor", whyThisWay: "Causes undefined behavior when deleting derived object." }] },
+          { lineNum: 2, codeSnippet: "BadBase* ptr = new BadDerived();", constructType: "Variable & Initializer", title: "Polymorphic Heap Allocation", explanation: "Assigns dynamic BadDerived instance to BadBase base pointer.", keyDetails: [{ variableOrConstruct: "BadBase* ptr", role: "Base Pointer", whyThisWay: "Holds derived heap object." }] },
+          { lineNum: 3, codeSnippet: "delete ptr;", constructType: "Return / Cleanup", title: "Delete via Base Pointer", explanation: "Executes only BadBase destructor, completely skipping BadDerived destructor and leaking heap memory.", keyDetails: [{ variableOrConstruct: "delete ptr", role: "Incomplete Deletion", whyThisWay: "Skipping derived destructor causes memory leak." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Virtual Destructor Resolution (FREE)", category: "FREE / Virtual Destructor",
+        description: "Declares virtual ~Base() ensuring proper derived destructor invocation.",
+        prosCons: "Pros: Guarantees complete polymorphic destruction. Cons: Adds VTable pointer to class size.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 43. Virtual Destructors - Approach 2: Virtual Destructor Fix
+#include <iostream>
+using namespace std;
+
+class GoodBase {
+public:
+    virtual ~GoodBase() { cout << "GoodBase destructor." << endl; }
+};
+
+class GoodDerived : public GoodBase {
+public:
+    int* data;
+    GoodDerived() : data(new int(500)) {}
+    ~GoodDerived() override {
+        cout << "GoodDerived destructor (Freed data)." << endl;
+        delete data;
+    }
+};
+
+int main() {
+    GoodBase* ptr = new GoodDerived();
+    delete ptr; // Calls GoodDerived destructor FIRST, then GoodBase!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "virtual ~GoodBase() { cout << 'GoodBase destructor.'; }", constructType: "Function Signature", title: "Virtual Base Destructor Keyword", explanation: "Qualifies base destructor with virtual keyword ensuring dynamic dispatch.", keyDetails: [{ variableOrConstruct: "virtual ~GoodBase()", role: "Virtual Destructor", whyThisWay: "Enables polymorphic destructor dispatch." }] },
+          { lineNum: 2, codeSnippet: "~GoodDerived() override { delete data; }", constructType: "Function Signature", title: "Derived Override Destructor Cleanup", explanation: "Overrides base destructor and frees dynamic memory block data.", keyDetails: [{ variableOrConstruct: "~GoodDerived() override", role: "Derived Destructor", whyThisWay: "Frees derived heap resources." }] },
+          { lineNum: 3, codeSnippet: "delete ptr;", constructType: "Return / Cleanup", title: "Polymorphic Deletion", explanation: "Invokes GoodDerived::~GoodDerived first, followed by GoodBase::~GoodBase.", keyDetails: [{ variableOrConstruct: "delete ptr", role: "Polymorphic Delete", whyThisWay: "Executes total destruction chain." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Pure Virtual Destructor in Abstract Base Classes (PRO)", category: "PRO / Pure Virtual Destructor",
+        description: "Declares pure virtual destructor virtual ~AbstractBase() = 0 with out-of-line definition.",
+        prosCons: "Pros: Forces base class to be abstract while guaranteeing virtual cleanup. Cons: Out-of-line definition required.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 43. Virtual Destructors - Approach 3: Pure Virtual Destructor
+#include <iostream>
+using namespace std;
+
+class AbstractBase {
+public:
+    virtual ~AbstractBase() = 0; // Pure virtual destructor!
+};
+
+AbstractBase::~AbstractBase() {
+    cout << "AbstractBase destructor body executed." << endl;
+}
+
+class Concrete : public AbstractBase {
+public:
+    ~Concrete() override {
+        cout << "Concrete destructor executed." << endl;
+    }
+};
+
+int main() {
+    AbstractBase* obj = new Concrete();
+    delete obj;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "virtual ~AbstractBase() = 0;", constructType: "Function Signature", title: "Pure Virtual Destructor Declaration", explanation: "Makes AbstractBase abstract by declaring pure virtual destructor = 0.", keyDetails: [{ variableOrConstruct: "= 0", role: "Pure Virtual Specifier", whyThisWay: "Makes class abstract." }] },
+          { lineNum: 2, codeSnippet: "AbstractBase::~AbstractBase() { ... }", constructType: "Function Signature", title: "Mandatory Out-of-Line Definition", explanation: "Must provide out-of-line body for pure virtual destructor because derived destructors invoke it.", keyDetails: [{ variableOrConstruct: "AbstractBase::~AbstractBase()", role: "Out-of-Line Body", whyThisWay: "Required by compiler for destruction unwinding." }] },
+          { lineNum: 3, codeSnippet: "delete obj;", constructType: "Return / Cleanup", title: "Polymorphic Deletion", explanation: "Deletes Concrete instance executing both Concrete and AbstractBase destructors.", keyDetails: [{ variableOrConstruct: "delete obj", role: "Delete Execution", whyThisWay: "Executes destruction chain." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Construction vs Destruction Execution Order (PRO)", category: "PRO / Order of Execution",
+        description: "Traces exact execution order: Base Constructor -> Derived Constructor -> Derived Destructor -> Base Destructor.",
+        prosCons: "Pros: Deep understanding of C++ object lifetime semantics. Cons: Diagnostic tracing demonstration.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 43. Virtual Destructors - Approach 4: Execution Order
+#include <iostream>
+using namespace std;
+
+class Parent {
+public:
+    Parent() { cout << "1. Parent Constructor" << endl; }
+    virtual ~Parent() { cout << "4. Parent Destructor" << endl; }
+};
+
+class Child : public Parent {
+public:
+    Child() { cout << "2. Child Constructor" << endl; }
+    ~Child() override { cout << "3. Child Destructor" << endl; }
+};
+
+int main() {
+    Parent* p = new Child();
+    delete p;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Parent() { cout << '1. Parent Constructor'; }", constructType: "Function Signature", title: "1. Parent Base Constructor", explanation: "Executes first during object instantiation.", keyDetails: [{ variableOrConstruct: "Parent Constructor", role: "Base Construction", whyThisWay: "Base constructs before derived." }] },
+          { lineNum: 2, codeSnippet: "Child() { cout << '2. Child Constructor'; }", constructType: "Function Signature", title: "2. Child Derived Constructor", explanation: "Executes second after base construction completes.", keyDetails: [{ variableOrConstruct: "Child Constructor", role: "Derived Construction", whyThisWay: "Derived constructs after base." }] },
+          { lineNum: 3, codeSnippet: "~Child() override { cout << '3. Child Destructor'; }", constructType: "Return / Cleanup", title: "3. Child Destructor & 4. Parent Destructor", explanation: "Destruction runs in strictly reversed order: Child first, then Parent.", keyDetails: [{ variableOrConstruct: "~Child()", role: "Reversed Destruction", whyThisWay: "Destruction order is strictly reversed." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Virtual Destructors with Polymorphic std::unique_ptr (PRO)", category: "PRO / Smart Pointer Virtual Destructor",
+        description: "Combines std::unique_ptr<Base> with virtual destructor for automated leak-free polymorphic deletion.",
+        prosCons: "Pros: Automatic smart pointer destruction with virtual destructor safety. Cons: Requires virtual destructor in base.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 43. Virtual Destructors - Approach 5: Smart Pointers
+#include <iostream>
+#include <memory>
+using namespace std;
+
+class Component {
+public:
+    virtual void render() = 0;
+    virtual ~Component() { cout << "Component base destroyed." << endl; }
+};
+
+class Button : public Component {
+public:
+    void render() override { cout << "Rendering Button." << endl; }
+    ~Button() override { cout << "Button derived destroyed." << endl; }
+};
+
+int main() {
+    unique_ptr<Component> comp = make_unique<Button>();
+    comp->render();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "virtual ~Component() { cout << 'Component base destroyed.'; }", constructType: "Function Signature", title: "Virtual Base Destructor Signature", explanation: "Declares virtual destructor in Component interface.", keyDetails: [{ variableOrConstruct: "virtual ~Component()", role: "Virtual Destructor", whyThisWay: "Required for polymorphic unique_ptr deletion." }] },
+          { lineNum: 2, codeSnippet: "unique_ptr<Component> comp = make_unique<Button>();", constructType: "Variable & Initializer", title: "Smart Pointer Polymorphic Allocation", explanation: "Stores Button in unique_ptr<Component>.", keyDetails: [{ variableOrConstruct: "unique_ptr<Component>", role: "Smart Pointer Interface", whyThisWay: "Automates memory cleanup." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Automatic Smart Pointer Scope Cleanup", explanation: "Scope exit triggers unique_ptr destructor, invoking virtual Button destructor.", keyDetails: [{ variableOrConstruct: "Scope Exit", role: "Auto Smart Destruction", whyThisWay: "Executes virtual destructor automatically." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Destructor Exceptions & std::terminate Warning (PRO)", category: "PRO / Destructor Exceptions",
+        description: "Demonstrates why destructors are implicitly noexcept and why throwing exceptions in destructors calls std::terminate.",
+        prosCons: "Pros: Teaches crucial exception safety rule. Cons: Destructors MUST NEVER throw.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 43. Virtual Destructors - Approach 6: Exception Safety
+#include <iostream>
+using namespace std;
+
+struct SafeResource {
+    ~SafeResource() noexcept {
+        try {
+            // Internal error handling
+            cout << "Resource safely cleaned inside try-catch." << endl;
+        } catch (...) {
+            // Swallow exception inside destructor!
+        }
+    }
+};
+
+int main() {
+    SafeResource res;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "~SafeResource() noexcept { ... }", constructType: "Function Signature", title: "Implicit noexcept Destructor Signature", explanation: "Destructors in C++11 are implicitly noexcept; throwing exceptions during unwinding crashes process.", keyDetails: [{ variableOrConstruct: "noexcept", role: "Non-Throwing Guarantee", whyThisWay: "Guarantees destructor will not throw." }] },
+          { lineNum: 2, codeSnippet: "try { ... } catch (...) { }", constructType: "Condition & Branch", title: "Swallow Internal Destructor Exceptions", explanation: "Catches and swallows any internal exceptions inside destructor.", keyDetails: [{ variableOrConstruct: "try-catch inside destructor", role: "Exception Interceptor", whyThisWay: "Prevents exception escape during destruction." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Protected Non-Virtual Destructor Pattern (PRO)", category: "PRO / Protected Destructor",
+        description: "Declares base destructor protected to prevent deletion via base class pointer without virtual overhead.",
+        prosCons: "Pros: Zero virtual table function pointer overhead. Cons: Cannot delete object via base pointer.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 43. Virtual Destructors - Approach 7: Protected Destructor
+#include <iostream>
+using namespace std;
+
+class BaseInterface {
+protected:
+    ~BaseInterface() { cout << "Protected BaseInterface destructor." << endl; }
+public:
+    void doWork() { cout << "Doing work." << endl; }
+};
+
+class Implementation : public BaseInterface {
+public:
+    ~Implementation() { cout << "Implementation destructor." << endl; }
+};
+
+int main() {
+    Implementation impl;
+    impl.doWork();
+    // BaseInterface* ptr = new Implementation(); delete ptr; // COMPILE ERROR!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "protected: ~BaseInterface() { ... }", constructType: "Function Signature", title: "Protected Non-Virtual Destructor", explanation: "Restricts delete expressions through BaseInterface* pointer at compile time.", keyDetails: [{ variableOrConstruct: "protected:", role: "Access Modifier", whyThisWay: "Blocks delete via base pointer." }] },
+          { lineNum: 2, codeSnippet: "Implementation impl;", constructType: "Variable & Initializer", title: "Instantiate Derived Object on Stack", explanation: "Instantiates impl on stack.", keyDetails: [{ variableOrConstruct: "Implementation impl", role: "Stack Object", whyThisWay: "Stack allocation executes protected destructor in derived class." }] },
+          { lineNum: 3, codeSnippet: "impl.doWork();", constructType: "Return / Cleanup", title: "Invoke Base Method", explanation: "Calls doWork() method.", keyDetails: [{ variableOrConstruct: "impl.doWork()", role: "Method Call", whyThisWay: "Executes work." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Virtual Destructors in Multi-Level Inheritance (PRO)", category: "PRO / Multi-Level Inheritance",
+        description: "Traces virtual destructor invocation across 3-level hierarchy (Grandparent -> Parent -> Child).",
+        prosCons: "Pros: Understands deep inheritance chain destruction. Cons: Increased destruction call chain depth.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 43. Virtual Destructors - Approach 8: Multi-Level
+#include <iostream>
+using namespace std;
+
+class Level1 {
+public:
+    virtual ~Level1() { cout << "Level 1 Destroyed." << endl; }
+};
+
+class Level2 : public Level1 {
+public:
+    ~Level2() override { cout << "Level 2 Destroyed." << endl; }
+};
+
+class Level3 : public Level2 {
+public:
+    ~Level3() override { cout << "Level 3 Destroyed." << endl; }
+};
+
+int main() {
+    Level1* ptr = new Level3();
+    delete ptr; // Triggers Level 3 -> Level 2 -> Level 1!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "class Level3 : public Level2 { ... ~Level3() override ... };", constructType: "Header / Include", title: "Multi-Level Hierarchy Definition", explanation: "Defines 3-level inheritance chain.", keyDetails: [{ variableOrConstruct: "Level3 : public Level2", role: "Multi-Level Inheritance", whyThisWay: "3-level inheritance." }] },
+          { lineNum: 2, codeSnippet: "Level1* ptr = new Level3();", constructType: "Variable & Initializer", title: "Assign Level 3 to Level 1 Base Pointer", explanation: "Stores Level 3 instance in top-level Level 1 base pointer.", keyDetails: [{ variableOrConstruct: "Level1* ptr", role: "Top Base Pointer", whyThisWay: "Top-level base pointer." }] },
+          { lineNum: 3, codeSnippet: "delete ptr;", constructType: "Return / Cleanup", title: "Execute Total Unwinding Chain", explanation: "Deletes pointer executing Level 3 -> Level 2 -> Level 1 destructors in sequence.", keyDetails: [{ variableOrConstruct: "delete ptr", role: "Chain Deletion", whyThisWay: "Executes 3-level destruction chain." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Destructor Invocation during Exception Stack Unwinding (PRO)", category: "PRO / Unwinding Cleanup",
+        description: "Verifies automatic destructor invocation on local stack objects during exception stack unwinding.",
+        prosCons: "Pros: Guarantees resource safety during exceptions. Cons: Destructors must not throw.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 43. Virtual Destructors - Approach 9: Unwinding Cleanup
+#include <iostream>
+#include <stdexcept>
+using namespace std;
+
+struct Guard {
+    string name;
+    Guard(string n) : name(n) { cout << name << " created." << endl; }
+    ~Guard() { cout << name << " destroyed by stack unwinding." << endl; }
+};
+
+void triggerError() {
+    Guard g("LocalGuard");
+    throw runtime_error("Unhandled Exception!");
+}
+
+int main() {
+    try {
+        triggerError();
+    } catch (const exception& e) {
+        cout << "Caught: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "~Guard() { cout << name << ' destroyed by stack unwinding.'; }", constructType: "Function Signature", title: "Destructor Execution on Unwinding", explanation: "Executes automatically during stack unwinding when exception is thrown.", keyDetails: [{ variableOrConstruct: "~Guard()", role: "RAII Destructor", whyThisWay: "Executes during stack unwinding." }] },
+          { lineNum: 2, codeSnippet: "Guard g('LocalGuard'); throw runtime_error(...);", constructType: "Condition & Branch", title: "Instantiate & Throw Exception", explanation: "Instantiates stack object g then throws runtime error.", keyDetails: [{ variableOrConstruct: "throw runtime_error", role: "Exception Signal", whyThisWay: "Triggers stack unwinding." }] },
+          { lineNum: 3, codeSnippet: "catch (const exception& e)", constructType: "Return / Cleanup", title: "Catch After Unwinding Complete", explanation: "Catches exception after g object has been destroyed.", keyDetails: [{ variableOrConstruct: "catch", role: "Exception Catch", whyThisWay: "Handles exception post-unwinding." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Virtual Destructors with Custom Memory Allocators (PRO)", category: "PRO / Placement Delete",
+        description: "Uses placement new and explicit virtual destructor invocation with placement delete.",
+        prosCons: "Pros: Precise control over custom buffer memory destruction. Cons: Advanced manual memory management syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 43. Virtual Destructors - Approach 10: Placement Delete
+#include <iostream>
+#include <new>
+using namespace std;
+
+class Entity {
+public:
+    virtual ~Entity() { cout << "Entity destroyed." << endl; }
+};
+
+class Monster : public Entity {
+public:
+    ~Monster() override { cout << "Monster destroyed." << endl; }
+};
+
+int main() {
+    alignas(Monster) char buffer[sizeof(Monster)];
+    Entity* e = new (buffer) Monster();
+    
+    // Explicit virtual destructor call required for placement new!
+    e->~Entity();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Entity* e = new (buffer) Monster();", constructType: "Variable & Initializer", title: "Placement New Instantiation", explanation: "Constructs Monster instance inside pre-allocated stack byte buffer.", keyDetails: [{ variableOrConstruct: "new (buffer)", role: "Placement New", whyThisWay: "Constructs object in pre-allocated memory." }] },
+          { lineNum: 2, codeSnippet: "e->~Entity();", constructType: "Return / Cleanup", title: "Explicit Virtual Destructor Invocation", explanation: "Explicitly calls virtual destructor via base pointer without releasing raw buffer memory.", keyDetails: [{ variableOrConstruct: "e->~Entity()", role: "Explicit Virtual Destructor", whyThisWay: "Invokes destructor without freeing buffer memory." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem44Details(): LearnModule {
+  return {
+    id: "med_op_overload",
+    title: "44. Operator Overloading",
+    category: "OOP Basics",
+    difficulty: "medium",
+    shortDesc: "Overloading +, ==, <<, and [] operators for custom objects.",
+    fullCode: `// 44. Operator Overloading - Approach 1: Vector Arithmetic (operator+)
+#include <iostream>
+using namespace std;
+
+struct Vector2D {
+    double x, y;
+    Vector2D(double xVal = 0, double yVal = 0) : x(xVal), y(yVal) {}
+    Vector2D operator+(const Vector2D& other) const {
+        return Vector2D(x + other.x, y + other.y);
+    }
+};
+
+int main() {
+    Vector2D v1(3.0, 4.0), v2(1.5, 2.5);
+    Vector2D v3 = v1 + v2;
+    cout << "v3: (" << v3.x << ", " << v3.y << ")" << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "44. Operator Overloading",
+      objective: "Master custom object operator syntax: operator+, operator==, friend operator<<, operator[], operator(), operator++, operator+=, operator->, conversion operators, and C++20 <=> spaceship operator.",
+      description: "Implement **Operator Overloading** (OOP Basics). Overloading +, ==, <<, and [] operators for custom objects. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Custom objects evaluated inside mathematical, comparison, and stream expressions.",
+      outputDesc: "Computed operator values, stream output formats, and boolean predicate results.",
+      takeaways: [
+        "Member operators take left operand implicitly via *this; friend binary operators take both operands explicitly",
+        "Stream insertion operator<< MUST be overloaded as a non-member friend function to accept std::ostream on left",
+        "Distinguish prefix operator++() from postfix operator++(int) using dummy integer parameter",
+        "C++20 spaceship operator<=> automatically generates all 6 comparison operators (==, !=, <, <=, >, >=)"
+      ],
+      examples: [
+        { id: 1, input: "v1 + v2 for Vector2D(3, 4) and Vector2D(1, 2)", output: "Vector2D(4, 6)", explanation: "Overloads binary addition operator+ for custom vector math." },
+        { id: 2, input: "cout << complexNumber", output: "Formatted string output (a + bi)", explanation: "Friend operator<< formats custom object into stream." },
+        { id: 3, input: "p1 <=> p2 (C++20 Spaceship Operator)", output: "std::strong_ordering::equal", explanation: "Single defaulted <=> operator generates all comparison operators." }
+      ],
+      constraints: ["Do not alter operator precedence or arity.", "Operators like ::, ., .*, and ?: CANNOT be overloaded."],
+      companies: ["Google", "Meta", "Microsoft", "Amazon", "Apple"],
+      acceptanceRate: "91.5%",
+      totalAccepted: "2,080,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Binary Arithmetic Operator Overloading (operator+) (FREE)", category: "FREE / Arithmetic Overload",
+        description: "Overloads operator+ member function to perform vector addition.",
+        prosCons: "Pros: Clean mathematical infix expressions. Cons: Must preserve standard math semantics.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 44. Operator Overloading - Approach 1: operator+
+#include <iostream>
+using namespace std;
+
+class Point {
+public:
+    int x, y;
+    Point(int xVal = 0, int yVal = 0) : x(xVal), y(yVal) {}
+    Point operator+(const Point& other) const {
+        return Point(x + other.x, y + other.y);
+    }
+};
+
+int main() {
+    Point p1(10, 20), p2(5, 15);
+    Point p3 = p1 + p2;
+    cout << "p3: (" << p3.x << ", " << p3.y << ")" << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Point operator+(const Point& other) const { ... }", constructType: "Function Signature", title: "Operator+ Member Function Header", explanation: "Overloads + operator taking right operand as const reference.", keyDetails: [{ variableOrConstruct: "operator+", role: "Addition Overload", whyThisWay: "Enables p1 + p2 infix syntax." }] },
+          { lineNum: 2, codeSnippet: "return Point(x + other.x, y + other.y);", constructType: "Return / Cleanup", title: "Return Sum Point", explanation: "Returns new Point instance containing component-wise sums.", keyDetails: [{ variableOrConstruct: "Point(...)", role: "Sum Return", whyThisWay: "Yields new summed object." }] },
+          { lineNum: 3, codeSnippet: "Point p3 = p1 + p2;", constructType: "Variable & Initializer", title: "Infix Addition Invocation", explanation: "Invokes p1.operator+(p2) using clean infix + syntax.", keyDetails: [{ variableOrConstruct: "p1 + p2", role: "Infix Call", whyThisWay: "Infix arithmetic expression." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Stream Insertion Operator Overloading (operator<<) (FREE)", category: "FREE / Stream Overload",
+        description: "Overloads friend operator<< to output formatted object state into std::ostream.",
+        prosCons: "Pros: Direct compatibility with std::cout and stringstreams. Cons: Must be non-member friend function.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 44. Operator Overloading - Approach 2: operator<<
+#include <iostream>
+using namespace std;
+
+class Fraction {
+private:
+    int num, den;
+public:
+    Fraction(int n, int d) : num(n), den(d) {}
+    friend ostream& operator<<(ostream& os, const Fraction& f);
+};
+
+ostream& operator<<(ostream& os, const Fraction& f) {
+    os << f.num << "/" << f.den;
+    return os;
+}
+
+int main() {
+    Fraction f(3, 4);
+    cout << "Fraction: " << f << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "friend ostream& operator<<(ostream& os, const Fraction& f);", constructType: "Function Signature", title: "Friend Stream Operator Declaration", explanation: "Declares non-member friend operator<< function to access private num and den fields.", keyDetails: [{ variableOrConstruct: "friend ostream& operator<<", role: "Friend Stream Overload", whyThisWay: "Allows std::cout on left side." }] },
+          { lineNum: 2, codeSnippet: "os << f.num << '/' << f.den; return os;", constructType: "Condition & Branch", title: "Stream Formatting Definition", explanation: "Formats fraction string and returns ostream reference for chaining.", keyDetails: [{ variableOrConstruct: "return os", role: "Stream Reference Return", whyThisWay: "Enables chained stream output." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Fraction: ' << f;", constructType: "Return / Cleanup", title: "Invoke Stream Operator", explanation: "Prints 'Fraction: 3/4'.", keyDetails: [{ variableOrConstruct: "cout << f", role: "Stream Call", whyThisWay: "Outputs fraction object." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Relational & Comparison Operators (operator== & operator<) (FREE)", category: "FREE / Comparison Overload",
+        description: "Overloads operator== and operator< for custom object comparisons and STL sorting.",
+        prosCons: "Pros: Enables storing custom objects in std::set and sorting with std::sort. Cons: Must maintain consistent strict weak ordering.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 44. Operator Overloading - Approach 3: operator== & operator<
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+struct Item {
+    int id;
+    Item(int i) : id(i) {}
+    bool operator==(const Item& o) const { return id == o.id; }
+    bool operator<(const Item& o) const { return id < o.id; }
+};
+
+int main() {
+    vector<Item> items = {Item(30), Item(10), Item(20)};
+    sort(items.begin(), items.end());
+    for (const auto& item : items) cout << item.id << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "bool operator==(const Item& o) const { return id == o.id; }", constructType: "Function Signature", title: "Operator== Equality Overload", explanation: "Compares id fields for equality.", keyDetails: [{ variableOrConstruct: "operator==", role: "Equality Overload", whyThisWay: "Tests object equality." }] },
+          { lineNum: 2, codeSnippet: "bool operator<(const Item& o) const { return id < o.id; }", constructType: "Function Signature", title: "Operator< Relational Overload", explanation: "Compares id fields for strict weak ordering required by std::sort.", keyDetails: [{ variableOrConstruct: "operator<", role: "Less Than Overload", whyThisWay: "Required by std::sort." }] },
+          { lineNum: 3, codeSnippet: "sort(items.begin(), items.end());", constructType: "Return / Cleanup", title: "Invoke std::sort using operator<", explanation: "Sorts items vector using overloaded operator<.", keyDetails: [{ variableOrConstruct: "std::sort", role: "STL Sort Call", whyThisWay: "Uses custom operator< for sorting." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Subscript Operator Overloading (operator[]) (PRO)", category: "PRO / Subscript Overload",
+        description: "Overloads operator[] returning non-const reference and const value.",
+        prosCons: "Pros: Clean array-like subscript indexing. Cons: Must provide both const and non-const overloads.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 44. Operator Overloading - Approach 4: operator[]
+#include <iostream>
+using namespace std;
+
+class IntList {
+private:
+    int arr[3];
+public:
+    IntList() : arr{10, 20, 30} {}
+    int& operator[](size_t idx) { return arr[idx]; }
+    const int& operator[](size_t idx) const { return arr[idx]; }
+};
+
+int main() {
+    IntList list;
+    list[1] = 99; // Mutates element via reference
+    cout << "list[1]: " << list[1] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int& operator[](size_t idx) { return arr[idx]; }", constructType: "Function Signature", title: "Mutable Subscript Operator Overload", explanation: "Returns non-const reference allowing lvalue element assignment list[1] = 99.", keyDetails: [{ variableOrConstruct: "int& operator[]", role: "Mutable Subscript", whyThisWay: "Enables lvalue assignment." }] },
+          { lineNum: 2, codeSnippet: "const int& operator[](size_t idx) const { return arr[idx]; }", constructType: "Function Signature", title: "Const Read-Only Subscript Overload", explanation: "Returns const reference for read-only indexing on const objects.", keyDetails: [{ variableOrConstruct: "const int& operator[] const", role: "Const Subscript", whyThisWay: "Provides read-only access for const objects." }] },
+          { lineNum: 3, codeSnippet: "list[1] = 99;", constructType: "Variable & Initializer", title: "Mutate via Subscript Operator", explanation: "Mutates index 1 value to 99.", keyDetails: [{ variableOrConstruct: "list[1] = 99", role: "Subscript Mutation", whyThisWay: "Assigns value via subscript reference." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Function Call Operator Overloading (operator()) (Functor) (PRO)", category: "PRO / Functor Overload",
+        description: "Overloads operator() to transform object into stateful callable functor.",
+        prosCons: "Pros: Stateful callable objects. Cons: Distinct type signature from standard functions.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 44. Operator Overloading - Approach 5: operator()
+#include <iostream>
+using namespace std;
+
+class Multiplier {
+private:
+    int factor;
+public:
+    Multiplier(int f) : factor(f) {}
+    int operator()(int val) const {
+        return val * factor;
+    }
+};
+
+int main() {
+    Multiplier timesFive(5);
+    cout << "5 * 6 = " << timesFive(6) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "int operator()(int val) const { return val * factor; }", constructType: "Function Signature", title: "Operator() Function Call Overload", explanation: "Overloads operator() allowing object instance to be called like a function.", keyDetails: [{ variableOrConstruct: "operator()", role: "Functor Overload", whyThisWay: "Enables function call syntax on object." }] },
+          { lineNum: 2, codeSnippet: "Multiplier timesFive(5);", constructType: "Variable & Initializer", title: "Instantiate Functor with State", explanation: "Instantiates timesFive functor with internal factor 5.", keyDetails: [{ variableOrConstruct: "timesFive(5)", role: "Functor Instantiation", whyThisWay: "Stores internal state." }] },
+          { lineNum: 3, codeSnippet: "timesFive(6)", constructType: "Return / Cleanup", title: "Invoke Functor Instance", explanation: "Invokes functor with argument 6 producing 30.", keyDetails: [{ variableOrConstruct: "timesFive(6)", role: "Functor Call", whyThisWay: "Executes functor call operator." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Prefix vs Postfix Increment Operators (operator++) (PRO)", category: "PRO / Increment Overload",
+        description: "Distinguishes prefix operator++() from postfix operator++(int) using dummy integer parameter.",
+        prosCons: "Pros: Matches primitive ++ pointer increment semantics. Cons: Postfix makes temporary object copy.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 44. Operator Overloading - Approach 6: operator++
+#include <iostream>
+using namespace std;
+
+class Counter {
+public:
+    int val;
+    Counter(int v = 0) : val(v) {}
+    // Prefix ++c
+    Counter& operator++() {
+        val++;
+        return *this;
+    }
+    // Postfix c++
+    Counter operator++(int) {
+        Counter temp = *this;
+        val++;
+        return temp;
+    }
+};
+
+int main() {
+    Counter c(10);
+    ++c;
+    cout << "Prefix: " << c.val << endl;
+    Counter old = c++;
+    cout << "Postfix old: " << old.val << " | current: " << c.val << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Counter& operator++() { val++; return *this; }", constructType: "Function Signature", title: "Prefix Operator++ Header", explanation: "Increments val directly and returns reference to *this.", keyDetails: [{ variableOrConstruct: "operator++()", role: "Prefix Increment", whyThisWay: "Returns updated reference without copy." }] },
+          { lineNum: 2, codeSnippet: "Counter operator++(int) { Counter temp = *this; val++; return temp; }", constructType: "Function Signature", title: "Postfix Operator++ Header with Dummy Int", explanation: "Dummy int parameter distinguishes postfix signature; creates copy of old state before incrementing.", keyDetails: [{ variableOrConstruct: "operator++(int)", role: "Postfix Increment", whyThisWay: "Returns copy of old state." }] },
+          { lineNum: 3, codeSnippet: "Counter old = c++;", constructType: "Return / Cleanup", title: "Invoke Postfix Operator", explanation: "Saves old value 11 into old and increments c to 12.", keyDetails: [{ variableOrConstruct: "c++", role: "Postfix Call", whyThisWay: "Executes postfix increment." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Compound Assignment Operators (operator+=) (PRO)", category: "PRO / Compound Assignment",
+        description: "Overloads operator+= returning reference to *this.",
+        prosCons: "Pros: Efficient in-place modification avoiding object copies. Cons: Should be consistent with operator+.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 44. Operator Overloading - Approach 7: operator+=
+#include <iostream>
+using namespace std;
+
+class Score {
+public:
+    int points;
+    Score(int p = 0) : points(p) {}
+    Score& operator+=(const Score& o) {
+        points += o.points;
+        return *this;
+    }
+};
+
+int main() {
+    Score s1(50), s2(25);
+    s1 += s2;
+    cout << "Total score: " << s1.points << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Score& operator+=(const Score& o) { points += o.points; return *this; }", constructType: "Function Signature", title: "Operator+= Compound Overload", explanation: "Mutates points in-place and returns reference to *this.", keyDetails: [{ variableOrConstruct: "operator+=", role: "Compound Assignment Overload", whyThisWay: "In-place object mutation." }] },
+          { lineNum: 2, codeSnippet: "s1 += s2;", constructType: "Variable & Initializer", title: "Invoke Compound Addition", explanation: "Adds s2 points to s1 in-place.", keyDetails: [{ variableOrConstruct: "s1 += s2", role: "Compound Call", whyThisWay: "Executes += operator." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Total score: ' << s1.points;", constructType: "Return / Cleanup", title: "Output Score", explanation: "Prints total score 75.", keyDetails: [{ variableOrConstruct: "s1.points", role: "Output", whyThisWay: "Displays result." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Arrow Dereference Operator Overloading (operator->) (PRO)", category: "PRO / Arrow Overload",
+        description: "Overloads operator-> to build custom smart pointer wrapper.",
+        prosCons: "Pros: Enables smart pointer member access syntax. Cons: Compiler recursively applies operator-> until raw pointer is reached.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 44. Operator Overloading - Approach 8: operator->
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Target {
+    string name;
+    Target(string n) : name(n) {}
+    void ping() const { cout << "Target " << name << " pinged." << endl; }
+};
+
+class TargetPtr {
+private:
+    Target* ptr;
+public:
+    TargetPtr(Target* p) : ptr(p) {}
+    ~TargetPtr() { delete ptr; }
+    Target* operator->() const { return ptr; }
+};
+
+int main() {
+    TargetPtr t(new Target("Server-01"));
+    t->ping();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Target* operator->() const { return ptr; }", constructType: "Function Signature", title: "Operator-> Arrow Overload", explanation: "Overloads operator-> returning raw pointer to Target.", keyDetails: [{ variableOrConstruct: "operator->", role: "Arrow Dereference Overload", whyThisWay: "Enables smart pointer arrow syntax." }] },
+          { lineNum: 2, codeSnippet: "t->ping();", constructType: "Condition & Branch", title: "Invoke Member via Arrow Operator", explanation: "Calls target.ping() through smart pointer wrapper.", keyDetails: [{ variableOrConstruct: "t->ping()", role: "Arrow Call", whyThisWay: "Dereferences smart pointer." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "RAII Destructor Cleanup", explanation: "Destructor automatically frees Target pointer.", keyDetails: [{ variableOrConstruct: "~TargetPtr()", role: "Auto Cleanup", whyThisWay: "Frees heap target." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Explicit Conversion Operators (explicit operator bool()) (PRO)", category: "PRO / Conversion Operator",
+        description: "Overloads explicit operator bool() to allow object boolean validity checking.",
+        prosCons: "Pros: Safe boolean evaluation inside if (obj) without implicit integer conversions. Cons: Must use explicit keyword.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 44. Operator Overloading - Approach 9: Explicit Conversion
+#include <iostream>
+using namespace std;
+
+class Handle {
+private:
+    int id;
+public:
+    Handle(int i) : id(i) {}
+    explicit operator bool() const {
+        return id > 0;
+    }
+};
+
+int main() {
+    Handle h1(101), h2(-1);
+    if (h1) cout << "Handle 1 is valid." << endl;
+    if (!h2) cout << "Handle 2 is invalid." << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "explicit operator bool() const { return id > 0; }", constructType: "Function Signature", title: "Explicit Operator Bool Overload", explanation: "Overloads explicit boolean conversion operator returning true if id > 0.", keyDetails: [{ variableOrConstruct: "explicit operator bool", role: "Boolean Conversion Overload", whyThisWay: "Prevents implicit integer conversion." }] },
+          { lineNum: 2, codeSnippet: "if (h1) cout << 'Handle 1 is valid.';", constructType: "Condition & Branch", title: "Evaluate Object inside Condition", explanation: "Evaluates h1 inside if statement condition using operator bool().", keyDetails: [{ variableOrConstruct: "if (h1)", role: "Boolean Evaluation", whyThisWay: "Evaluates object in boolean context." }] },
+          { lineNum: 3, codeSnippet: "if (!h2) cout << 'Handle 2 is invalid.';", constructType: "Return / Cleanup", title: "Evaluate Negated Boolean", explanation: "Evaluates !h2.", keyDetails: [{ variableOrConstruct: "!h2", role: "Negated Boolean", whyThisWay: "Evaluates negated validity." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: C++20 Three-Way Comparison Operator (spaceship operator <=>) (PRO)", category: "PRO / C++20 Spaceship Operator",
+        description: "Uses C++20 operator<=> = default to generate all 6 comparison operators automatically.",
+        prosCons: "Pros: Single line code generates ==, !=, <, <=, >, >= operators. Cons: Requires C++20 compiler.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 44. Operator Overloading - Approach 10: Spaceship Operator
+#include <iostream>
+#include <compare>
+using namespace std;
+
+struct Player {
+    int score;
+    int rank;
+    auto operator<=>(const Player&) const = default;
+};
+
+int main() {
+    Player p1{100, 1}, p2{100, 2};
+    if (p1 < p2) cout << "Player 1 ranks higher than Player 2!" << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "auto operator<=>(const Player&) const = default;", constructType: "Function Signature", title: "Defaulted Spaceship Operator Header", explanation: "Generates lexicographical comparison across score and rank fields.", keyDetails: [{ variableOrConstruct: "operator<=> = default", role: "C++20 Spaceship Operator", whyThisWay: "Generates all 6 comparison operators automatically." }] },
+          { lineNum: 2, codeSnippet: "if (p1 < p2)", constructType: "Condition & Branch", title: "Invoke Auto-Generated Operator<", explanation: "Evaluates p1 < p2 using auto-generated operator< operator.", keyDetails: [{ variableOrConstruct: "p1 < p2", role: "Auto Comparison", whyThisWay: "Uses auto-generated operator<." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Player 1 ranks higher than Player 2!';", constructType: "Return / Cleanup", title: "Output Comparison Result", explanation: "Prints comparison result.", keyDetails: [{ variableOrConstruct: "Player 1 ranks higher", role: "Output", whyThisWay: "Displays result." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
+export function getProblem45Details(): LearnModule {
+  return {
+    id: "med_inheritance",
+    title: "45. Inheritance & Protected Members",
+    category: "OOP Basics",
+    difficulty: "medium",
+    shortDesc: "Base and derived classes, access levels, and base initialization.",
+    fullCode: `// 45. Inheritance - Approach 1: Public Inheritance & Protected Access
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Vehicle {
+protected:
+    string brand;
+public:
+    Vehicle(string b) : brand(b) {}
+};
+
+class Car : public Vehicle {
+private:
+    int doors;
+public:
+    Car(string b, int d) : Vehicle(b), doors(d) {}
+    void printInfo() const {
+        cout << brand << " Car with " << doors << " doors." << endl;
+    }
+};
+
+int main() {
+    Car myCar("Toyota", 4);
+    myCar.printInfo();
+    return 0;
+}`,
+    problemStatement: {
+      title: "45. Inheritance & Protected Members",
+      objective: "Master C++ OOP inheritance: public/protected/private inheritance modes, protected member access, base constructor initializer lists, method hiding/un-hiding, multiple inheritance, and virtual base classes.",
+      description: "Implement **Inheritance & Protected Members** (OOP Basics). Base and derived classes, access levels, and base initialization. Construct an efficient solution that optimizes runtime performance and respects memory bounds.",
+      inputDesc: "Derived object instantiations, base constructor parameters, and inherited member calls.",
+      outputDesc: "Inherited field values, base/derived initialization logs, and method dispatch results.",
+      takeaways: [
+        "protected members are accessible inside derived classes but hidden from external public code",
+        "Derived constructors MUST invoke base class constructors in their member initializer list",
+        "Public inheritance creates an Is-A relationship; Composition creates a Has-A relationship",
+        "Virtual inheritance (class B : virtual public A) resolves the Diamond Problem by creating a single shared base instance"
+      ],
+      examples: [
+        { id: 1, input: "Car myCar('Toyota', 4)", output: "Toyota Car with 4 doors.", explanation: "Derived Car class accesses protected brand field of base Vehicle class." },
+        { id: 2, input: "using Base::print;", output: "Un-hides overloaded base methods", explanation: "Brings base class overloaded methods into derived class scope." },
+        { id: 3, input: "class Derived : virtual public Base", output: "Single Base instance in Diamond Hierarchy", explanation: "Eliminates duplicate base class instances in multiple inheritance." }
+      ],
+      constraints: ["Private base members are NEVER directly accessible inside derived classes."],
+      companies: ["Google", "Meta", "Microsoft", "Amazon", "Apple"],
+      acceptanceRate: "92.3%",
+      totalAccepted: "2,240,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Public Inheritance & Protected Access (FREE)", category: "FREE / Public Inheritance",
+        description: "Inherits derived Car class from base Vehicle class accessing protected brand member.",
+        prosCons: "Pros: Encapsulates shared fields while allowing derived access. Cons: Protected fields increase coupling.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 45. Inheritance - Approach 1: Protected Access
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Animal {
+protected:
+    string name;
+public:
+    Animal(string n) : name(n) {}
+};
+
+class Dog : public Animal {
+public:
+    Dog(string n) : Animal(n) {}
+    void bark() const { cout << name << " says Woof!" << endl; }
+};
+
+int main() {
+    Dog d("Buddy");
+    d.bark();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "protected: string name;", constructType: "Variable & Initializer", title: "Protected Access Modifier", explanation: "Restricts direct access from external code while allowing derived class access.", keyDetails: [{ variableOrConstruct: "protected:", role: "Access Specifier", whyThisWay: "Allows derived class member access." }] },
+          { lineNum: 2, codeSnippet: "Dog(string n) : Animal(n) {}", constructType: "Function Signature", title: "Invoke Base Constructor", explanation: "Passes string n to base Animal constructor in member initializer list.", keyDetails: [{ variableOrConstruct: ": Animal(n)", role: "Base Constructor Call", whyThisWay: "Initializes base class members." }] },
+          { lineNum: 3, codeSnippet: "cout << name << ' says Woof!';", constructType: "Return / Cleanup", title: "Access Protected Field in Derived Method", explanation: "Accesses protected name field directly inside derived Dog method.", keyDetails: [{ variableOrConstruct: "name", role: "Protected Member Access", whyThisWay: "Reads inherited protected field." }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Base Class Constructor Initialization (FREE)", category: "FREE / Base Initialization",
+        description: "Initializes multi-parameter base class constructor from derived class constructor.",
+        prosCons: "Pros: Correct base initialization sequence. Cons: Derived constructor depends on base signature.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 45. Inheritance - Approach 2: Base Constructor
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Person {
+public:
+    string name;
+    int age;
+    Person(string n, int a) : name(n), age(a) {}
+};
+
+class Employee : public Person {
+public:
+    int empId;
+    Employee(string n, int a, int id) : Person(n, a), empId(id) {}
+    void display() const {
+        cout << name << " (" << age << ") - ID: " << empId << endl;
+    }
+};
+
+int main() {
+    Employee e("Bob", 30, 5001);
+    e.display();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "Employee(string n, int a, int id) : Person(n, a), empId(id) {}", constructType: "Function Signature", title: "Base Constructor Delegation Header", explanation: "Initializes base Person(n, a) first, then initializes empId member.", keyDetails: [{ variableOrConstruct: ": Person(n, a)", role: "Base Initialization", whyThisWay: "Initializes base class." }] },
+          { lineNum: 2, codeSnippet: "e.display();", constructType: "Condition & Branch", title: "Invoke Derived Display Method", explanation: "Prints inherited name, age, and empId.", keyDetails: [{ variableOrConstruct: "e.display()", role: "Method Call", whyThisWay: "Displays combined fields." }] },
+          { lineNum: 3, codeSnippet: "return 0;", constructType: "Return / Cleanup", title: "Exit", explanation: "Exits main.", keyDetails: [{ variableOrConstruct: "Return", role: "Cleanup", whyThisWay: "Exit." }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Public vs Protected vs Private Inheritance Modes (PRO)", category: "PRO / Inheritance Modes",
+        description: "Compares access level transformations under public, protected, and private inheritance.",
+        prosCons: "Pros: Understands access specifier masking. Cons: Protected/private inheritance is rare.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 45. Inheritance - Approach 3: Inheritance Modes
+#include <iostream>
+using namespace std;
+
+class Base {
+public: int pub = 1;
+protected: int prot = 2;
+private: int priv = 3;
+};
+
+class PublicDerived : public Base {
+    void test() { cout << pub << prot; /* priv inaccessible */ }
+};
+
+class PrivateDerived : private Base {
+    // pub and prot become private inside PrivateDerived!
+};
+
+int main() {
+    PublicDerived pd;
+    cout << "Public access: " << pd.pub << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "class PublicDerived : public Base { ... };", constructType: "Header / Include", title: "Public Inheritance Mode", explanation: "Preserves public members as public and protected members as protected.", keyDetails: [{ variableOrConstruct: "public Base", role: "Public Inheritance", whyThisWay: "Preserves member visibility." }] },
+          { lineNum: 2, codeSnippet: "class PrivateDerived : private Base { ... };", constructType: "Header / Include", title: "Private Inheritance Mode", explanation: "Converts public and protected base members to private in PrivateDerived.", keyDetails: [{ variableOrConstruct: "private Base", role: "Private Inheritance", whyThisWay: "Converts base members to private." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Public access: ' << pd.pub;", constructType: "Return / Cleanup", title: "Access Public Member Externally", explanation: "Accesses pd.pub externally.", keyDetails: [{ variableOrConstruct: "pd.pub", role: "Public Field Access", whyThisWay: "Reads public member." }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Method Hiding & Using Declarations (PRO)", category: "PRO / Method Hiding",
+        description: "Un-hides overloaded base class methods using using Base::method declaration in derived class.",
+        prosCons: "Pros: Restores base method overload availability in derived class. Cons: Method hiding rules can confuse developers.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 45. Inheritance - Approach 4: Method Hiding
+#include <iostream>
+using namespace std;
+
+class Parent {
+public:
+    void show(int x) { cout << "Parent int: " << x << endl; }
+    void show(double x) { cout << "Parent double: " << x << endl; }
+};
+
+class Child : public Parent {
+public:
+    using Parent::show; // Un-hides Parent::show!
+    void show(string s) { cout << "Child string: " << s << endl; }
+};
+
+int main() {
+    Child c;
+    c.show(42);
+    c.show("Hello");
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "using Parent::show;", constructType: "Header / Include", title: "Using Declaration Un-hiding", explanation: "Brings all overloaded show methods from Parent into Child scope so Child's show(string) does not hide them.", keyDetails: [{ variableOrConstruct: "using Parent::show", role: "Using Declaration", whyThisWay: "Un-hides base class overloaded methods." }] },
+          { lineNum: 2, codeSnippet: "c.show(42);", constructType: "Condition & Branch", title: "Invoke Un-hidden Base Method", explanation: "Invokes Parent::show(int) via Child instance.", keyDetails: [{ variableOrConstruct: "c.show(42)", role: "Base Overload Call", whyThisWay: "Calls un-hidden base method." }] },
+          { lineNum: 3, codeSnippet: "c.show('Hello');", constructType: "Return / Cleanup", title: "Invoke Derived Method", explanation: "Invokes Child::show(string).", keyDetails: [{ variableOrConstruct: "c.show(string)", role: "Derived Overload Call", whyThisWay: "Calls derived method." }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Multiple Inheritance (PRO)", category: "PRO / Multiple Inheritance",
+        description: "Derives single class from two independent base classes.",
+        prosCons: "Pros: Combines functionality from multiple interface hierarchies. Cons: Potential naming collisions.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 45. Inheritance - Approach 5: Multiple Inheritance
+#include <iostream>
+using namespace std;
+
+class Printer {
+public:
+    void printDoc() { cout << "Printing document..." << endl; }
+};
+
+class Scanner {
+public:
+    void scanDoc() { cout << "Scanning document..." << endl; }
+};
+
+class MultiFunctionDevice : public Printer, public Scanner {};
+
+int main() {
+    MultiFunctionDevice mfd;
+    mfd.printDoc();
+    mfd.scanDoc();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "class MultiFunctionDevice : public Printer, public Scanner {};", constructType: "Header / Include", title: "Multiple Inheritance Class Header", explanation: "Inherits public interfaces of both Printer and Scanner classes.", keyDetails: [{ variableOrConstruct: "public Printer, public Scanner", role: "Multiple Base Classes", whyThisWay: "Combines multiple base classes." }] },
+          { lineNum: 2, codeSnippet: "mfd.printDoc();", constructType: "Condition & Branch", title: "Invoke Printer Method", explanation: "Calls Printer::printDoc().", keyDetails: [{ variableOrConstruct: "mfd.printDoc()", role: "Base 1 Method Call", whyThisWay: "Calls first base method." }] },
+          { lineNum: 3, codeSnippet: "mfd.scanDoc();", constructType: "Return / Cleanup", title: "Invoke Scanner Method", explanation: "Calls Scanner::scanDoc().", keyDetails: [{ variableOrConstruct: "mfd.scanDoc()", role: "Base 2 Method Call", whyThisWay: "Calls second base method." }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Diamond Inheritance & Virtual Base Classes (PRO)", category: "PRO / Virtual Base Class",
+        description: "Resolves Diamond Problem using virtual public Base inheritance.",
+        prosCons: "Pros: Eliminates duplicate base sub-objects in memory layout. Cons: Slight pointer indirection overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 45. Inheritance - Approach 6: Diamond Problem
+#include <iostream>
+using namespace std;
+
+class PoweredDevice {
+public:
+    int powerWatts;
+    PoweredDevice(int w) : powerWatts(w) {}
+};
+
+class ScannerDev : virtual public PoweredDevice {
+public:
+    ScannerDev(int w) : PoweredDevice(w) {}
+};
+
+class PrinterDev : virtual public PoweredDevice {
+public:
+    PrinterDev(int w) : PoweredDevice(w) {}
+};
+
+class Copier : public ScannerDev, public PrinterDev {
+public:
+    Copier(int w) : PoweredDevice(w), ScannerDev(w), PrinterDev(w) {}
+};
+
+int main() {
+    Copier c(500);
+    cout << "Single Power Watts: " << c.powerWatts << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "class ScannerDev : virtual public PoweredDevice", constructType: "Header / Include", title: "Virtual Base Class Declaration", explanation: "Uses virtual public PoweredDevice to ensure single shared instance of PoweredDevice.", keyDetails: [{ variableOrConstruct: "virtual public PoweredDevice", role: "Virtual Base Class", whyThisWay: "Eliminates duplicate base instance in diamond." }] },
+          { lineNum: 2, codeSnippet: "Copier(int w) : PoweredDevice(w), ScannerDev(w), PrinterDev(w) {}", constructType: "Function Signature", title: "Direct Virtual Base Constructor Call", explanation: "Most derived class Copier MUST construct virtual base PoweredDevice directly.", keyDetails: [{ variableOrConstruct: ": PoweredDevice(w)", role: "Direct Virtual Base Init", whyThisWay: "Most derived class constructs virtual base." }] },
+          { lineNum: 3, codeSnippet: "cout << 'Single Power Watts: ' << c.powerWatts;", constructType: "Return / Cleanup", title: "Unambiguous Member Access", explanation: "Accesses powerWatts directly without ambiguity error.", keyDetails: [{ variableOrConstruct: "c.powerWatts", role: "Unambiguous Field Access", whyThisWay: "Single shared powerWatts field." }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Overriding Member Functions with override Keyword (PRO)", category: "PRO / Override Keyword",
+        description: "Decorates derived virtual method with explicit override keyword for compiler verification.",
+        prosCons: "Pros: Compiler validates exact virtual method signature match. Cons: Requires C++11.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 45. Inheritance - Approach 7: override Keyword
+#include <iostream>
+using namespace std;
+
+class BaseGraphic {
+public:
+    virtual void draw() const { cout << "Base Graphic" << endl; }
+};
+
+class CircleGraphic : public BaseGraphic {
+public:
+    void draw() const override { cout << "Circle Graphic" << endl; }
+};
+
+int main() {
+    BaseGraphic* g = new CircleGraphic();
+    g->draw();
+    delete g;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "void draw() const override { cout << 'Circle Graphic'; }", constructType: "Function Signature", title: "Explicit override Keyword", explanation: "Signals compiler to verify draw() const matches a base virtual method.", keyDetails: [{ variableOrConstruct: "override", role: "Override Specifier", whyThisWay: "Ensures signature matches base virtual method." }] },
+          { lineNum: 2, codeSnippet: "BaseGraphic* g = new CircleGraphic(); g->draw();", constructType: "Condition & Branch", title: "Dynamic Virtual Method Dispatch", explanation: "Invokes CircleGraphic::draw() via dynamic virtual table.", keyDetails: [{ variableOrConstruct: "g->draw()", role: "Virtual Method Call", whyThisWay: "Dispatches derived method." }] },
+          { lineNum: 3, codeSnippet: "delete g;", constructType: "Return / Cleanup", title: "Delete Object", explanation: "Deletes graphic object.", keyDetails: [{ variableOrConstruct: "delete g", role: "Cleanup", whyThisWay: "Frees dynamic graphic." }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Preventing Inheritance with final Keyword (PRO)", category: "PRO / final Specifier",
+        description: "Marks class or virtual method as final to block further inheritance or overriding.",
+        prosCons: "Pros: Prevents subclassing of critical classes. Cons: Prevents future extensibility.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 45. Inheritance - Approach 8: final Specifier
+#include <iostream>
+using namespace std;
+
+class SealedClass final {
+public:
+    void secret() { cout << "Sealed class secret." << endl; }
+};
+
+// class IllegalSubclass : public SealedClass {}; // COMPILE ERROR!
+
+int main() {
+    SealedClass s;
+    s.secret();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "class SealedClass final { ... };", constructType: "Header / Include", title: "Final Class Specifier", explanation: "Decorates class with final keyword blocking any subclassing attempts.", keyDetails: [{ variableOrConstruct: "final", role: "Final Specifier", whyThisWay: "Prevents class inheritance." }] },
+          { lineNum: 2, codeSnippet: "SealedClass s;", constructType: "Variable & Initializer", title: "Instantiate Final Class", explanation: "Instantiates s object of final class.", keyDetails: [{ variableOrConstruct: "SealedClass s", role: "Object Instantiation", whyThisWay: "Instantiates sealed class." }] },
+          { lineNum: 3, codeSnippet: "s.secret();", constructType: "Return / Cleanup", title: "Invoke Sealed Method", explanation: "Calls s.secret().", keyDetails: [{ variableOrConstruct: "s.secret()", role: "Method Call", whyThisWay: "Executes secret method." }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Downcasting Inheritance Hierarchies (PRO)", category: "PRO / Downcasting",
+        description: "Downcasts base pointer to derived pointer using static_cast vs dynamic_cast.",
+        prosCons: "Pros: Enables accessing derived-only methods from base reference. Cons: Safe dynamic_cast requires RTTI.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 45. Inheritance - Approach 9: Downcasting
+#include <iostream>
+using namespace std;
+
+class Media { public: virtual ~Media() {} };
+class Audio : public Media {
+public:
+    void playAudio() { cout << "Playing audio track." << endl; }
+};
+
+int main() {
+    Media* m = new Audio();
+    if (Audio* a = dynamic_cast<Audio*>(m)) {
+        a->playAudio();
+    }
+    delete m;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "if (Audio* a = dynamic_cast<Audio*>(m))", constructType: "Condition & Branch", title: "Safe RTTI dynamic_cast Downcast", explanation: "Safely casts base Media pointer to derived Audio pointer using RTTI check.", keyDetails: [{ variableOrConstruct: "dynamic_cast<Audio*>", role: "Dynamic Downcast", whyThisWay: "Safely downcasts with RTTI check." }] },
+          { lineNum: 2, codeSnippet: "a->playAudio();", constructType: "Condition & Branch", title: "Invoke Derived Method", explanation: "Invokes derived Audio::playAudio() method after successful downcast.", keyDetails: [{ variableOrConstruct: "a->playAudio()", role: "Derived Method Call", whyThisWay: "Calls derived method." }] },
+          { lineNum: 3, codeSnippet: "delete m;", constructType: "Return / Cleanup", title: "Delete Base Pointer", explanation: "Deletes Media pointer.", keyDetails: [{ variableOrConstruct: "delete m", role: "Cleanup", whyThisWay: "Frees heap memory." }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Composition vs Inheritance (Has-A vs Is-A) (PRO)", category: "PRO / Composition vs Inheritance",
+        description: "Compares inheritance (Is-A) against member component composition (Has-A).",
+        prosCons: "Pros: Composition reduces tight class coupling. Cons: Requires delegating method calls.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 45. Inheritance - Approach 10: Composition
+#include <iostream>
+using namespace std;
+
+class Engine {
+public:
+    void start() { cout << "Engine started." << endl; }
+};
+
+// Composition (Has-A Engine) instead of Inheritance!
+class VehicleComp {
+private:
+    Engine engine;
+public:
+    void startVehicle() {
+        engine.start(); // Delegates to component!
+    }
+};
+
+int main() {
+    VehicleComp v;
+    v.startVehicle();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: "private: Engine engine;", constructType: "Variable & Initializer", title: "Component Composition Field", explanation: "Embeds Engine instance as private member component (Has-A relationship).", keyDetails: [{ variableOrConstruct: "Engine engine", role: "Composition Component", whyThisWay: "Creates Has-A component relationship." }] },
+          { lineNum: 2, codeSnippet: "engine.start();", constructType: "Condition & Branch", title: "Delegate Call to Component", explanation: "Delegates start call to internal engine component.", keyDetails: [{ variableOrConstruct: "engine.start()", role: "Delegation Call", whyThisWay: "Delegates behavior to component." }] },
+          { lineNum: 3, codeSnippet: "v.startVehicle();", constructType: "Return / Cleanup", title: "Invoke Vehicle Method", explanation: "Executes startVehicle().", keyDetails: [{ variableOrConstruct: "v.startVehicle()", role: "Outer Method Call", whyThisWay: "Calls vehicle method." }] }
+        ]
+      }
+    ]
+  };
+}
+
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -9410,6 +11402,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "med_move_semantics") return getProblem38Details();
   if (id === "med_lambdas") return getProblem39Details();
   if (id === "med_templates_func") return getProblem40Details();
+  if (id === "med_templates_class") return getProblem41Details();
+  if (id === "med_constructors") return getProblem42Details();
+  if (id === "med_destructors") return getProblem43Details();
+  if (id === "med_op_overload") return getProblem44Details();
+  if (id === "med_inheritance") return getProblem45Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
