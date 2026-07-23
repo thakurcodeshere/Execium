@@ -71,6 +71,7 @@ export default function StudioPage() {
         setProjectName("Untitled Project");
         setCode(DEFAULT_UNTITLED_CODE);
         localStorage.removeItem("execium_active_popover");
+        localStorage.removeItem("execium_studio_session");
       }
     } catch {}
     setHydrated(true);
@@ -80,15 +81,19 @@ export default function StudioPage() {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      const session = {
-        activeLearnModuleId,
-        activeChallengeId,
-        projectId,
-        projectName,
-        code,
-        pid
-      };
-      localStorage.setItem("execium_studio_session", JSON.stringify(session));
+      if (activeLearnModuleId || activeChallengeId || projectId) {
+        const session = {
+          activeLearnModuleId,
+          activeChallengeId,
+          projectId,
+          projectName,
+          code,
+          pid
+        };
+        localStorage.setItem("execium_studio_session", JSON.stringify(session));
+      } else {
+        localStorage.removeItem("execium_studio_session");
+      }
 
       // Also persist per-module code if in learn or challenge view
       if (activeLearnModuleId && code) {
