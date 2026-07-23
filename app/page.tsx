@@ -41,24 +41,24 @@ function ParticleField() {
 }
 
 const TOPICS = [
-  {icon:"📦",color:"#10b981",ver:"C++11",cat:"Basics",title:"Variables & Types",desc:"int, float, auto, const, references, and type deduction with modern C++."},
-  {icon:"🔄",color:"#3b82f6",ver:"C++11",cat:"Basics",title:"Control Flow",desc:"if/else, switch, for, while, do-while, range-based loops and iterators."},
-  {icon:"⚙️",color:"#a855f7",ver:"C++11",cat:"Basics",title:"Functions & Lambdas",desc:"Function overloading, default args, inline, and C++11 lambda expressions."},
-  {icon:"🏗️",color:"#f97316",ver:"C++11",cat:"OOP",title:"Classes & Objects",desc:"Constructors, destructors, access specifiers, member functions, static members."},
-  {icon:"🧬",color:"#ec4899",ver:"C++11",cat:"OOP",title:"Inheritance & Polymorphism",desc:"Virtual functions, abstract classes, vtables, multiple inheritance, override."},
-  {icon:"📚",color:"#06b6d4",ver:"C++11",cat:"STL",title:"Containers",desc:"vector, list, map, set, unordered_map, deque — when to use which."},
-  {icon:"🔀",color:"#8b5cf6",ver:"C++11",cat:"STL",title:"Algorithms & Iterators",desc:"std::sort, std::find, std::transform, std::accumulate, begin/end iterators."},
-  {icon:"🧠",color:"#f59e0b",ver:"C++11",cat:"Memory",title:"Pointers & References",desc:"Raw pointers, pointer arithmetic, nullptr, dangling pointers, const pointers."},
-  {icon:"🔒",color:"#ef4444",ver:"C++11",cat:"Memory",title:"Smart Pointers",desc:"unique_ptr, shared_ptr, weak_ptr — RAII, move semantics, ownership model."},
-  {icon:"🚀",color:"#10b981",ver:"C++11",cat:"Modern",title:"Move Semantics",desc:"rvalue refs, std::move, move constructors, perfect forwarding, std::forward."},
-  {icon:"📐",color:"#3b82f6",ver:"C++11",cat:"Modern",title:"Templates",desc:"Function templates, class templates, template specialization, SFINAE basics."},
-  {icon:"🌊",color:"#a855f7",ver:"C++17",cat:"C++17",title:"Structured Bindings",desc:"auto [a,b]=pair; if constexpr; std::optional; std::variant; std::filesystem."},
-  {icon:"⚡",color:"#f97316",ver:"C++17",cat:"C++17",title:"Parallel Algorithms",desc:"std::execution policies, parallel sort, transform_reduce, hardware concurrency."},
-  {icon:"🧵",color:"#06b6d4",ver:"C++11",cat:"Concurrency",title:"Threads & Mutex",desc:"std::thread, mutex, lock_guard, condition_variable, atomic operations."},
-  {icon:"🔮",color:"#8b5cf6",ver:"C++20",cat:"C++20",title:"Concepts & Ranges",desc:"requires clauses, concept definitions, std::ranges, views, lazy evaluation."},
-  {icon:"🌌",color:"#ec4899",ver:"C++20",cat:"C++20",title:"Coroutines",desc:"co_await, co_yield, co_return — asynchronous generators and lazy sequences."},
-  {icon:"🔬",color:"#ef4444",ver:"C++11",cat:"Advanced",title:"Metaprogramming",desc:"constexpr, if constexpr, type traits, std::enable_if, variadic templates."},
-  {icon:"🧩",color:"#f59e0b",ver:"C++23",cat:"C++23",title:"C++23 Features",desc:"std::print, std::expected, deducing this, if consteval, std::flat_map."},
+  {id:"easy_vars",icon:"📦",color:"#10b981",ver:"C++11",cat:"Basics",title:"Variables & Types",desc:"int, float, auto, const, references, and type deduction with modern C++."},
+  {id:"easy_if",icon:"🔄",color:"#3b82f6",ver:"C++11",cat:"Basics",title:"Control Flow",desc:"if/else, switch, for, while, do-while, range-based loops and iterators."},
+  {id:"easy_funcs",icon:"⚙️",color:"#a855f7",ver:"C++11",cat:"Basics",title:"Functions & Lambdas",desc:"Function overloading, default args, inline, and C++11 lambda expressions."},
+  {id:"easy_class_basic",icon:"🏗️",color:"#f97316",ver:"C++11",cat:"OOP",title:"Classes & Objects",desc:"Constructors, destructors, access specifiers, member functions, static members."},
+  {id:"easy_class_basic",icon:"🧬",color:"#ec4899",ver:"C++11",cat:"OOP",title:"Inheritance & Polymorphism",desc:"Virtual functions, abstract classes, vtables, multiple inheritance, override."},
+  {id:"easy_vectors",icon:"📚",color:"#06b6d4",ver:"C++11",cat:"STL",title:"Containers",desc:"vector, list, map, set, unordered_map, deque — when to use which."},
+  {id:"easy_algorithms_basic",icon:"🔀",color:"#8b5cf6",ver:"C++11",cat:"STL",title:"Algorithms & Iterators",desc:"std::sort, std::find, std::transform, std::accumulate, begin/end iterators."},
+  {id:"easy_pointers",icon:"🧠",color:"#f59e0b",ver:"C++11",cat:"Memory",title:"Pointers & References",desc:"Raw pointers, pointer arithmetic, nullptr, dangling pointers, const pointers."},
+  {id:"med_raii",icon:"🔒",color:"#ef4444",ver:"C++11",cat:"Memory",title:"Smart Pointers",desc:"unique_ptr, shared_ptr, weak_ptr — RAII, move semantics, ownership model."},
+  {id:"med_move_semantics",icon:"🚀",color:"#10b981",ver:"C++11",cat:"Modern",title:"Move Semantics",desc:"rvalue refs, std::move, move constructors, perfect forwarding, std::forward."},
+  {id:"med_templates_func",icon:"📐",color:"#3b82f6",ver:"C++11",cat:"Modern",title:"Templates",desc:"Function templates, class templates, template specialization, SFINAE basics."},
+  {id:"easy_auto",icon:"🌊",color:"#a855f7",ver:"C++17",cat:"C++17",title:"Structured Bindings",desc:"auto [a,b]=pair; if constexpr; std::optional; std::variant; std::filesystem."},
+  {id:"easy_algorithms_basic",icon:"⚡",color:"#f97316",ver:"C++17",cat:"C++17",title:"Parallel Algorithms",desc:"std::execution policies, parallel sort, transform_reduce, hardware concurrency."},
+  {id:"easy_static_var",icon:"🧵",color:"#06b6d4",ver:"C++11",cat:"Concurrency",title:"Threads & Mutex",desc:"std::thread, mutex, lock_guard, condition_variable, atomic operations."},
+  {id:"easy_range_for",icon:"🔮",color:"#8b5cf6",ver:"C++20",cat:"C++20",title:"Concepts & Ranges",desc:"requires clauses, concept definitions, std::ranges, views, lazy evaluation."},
+  {id:"easy_recursion_basic",icon:"🌌",color:"#ec4899",ver:"C++20",cat:"C++20",title:"Coroutines",desc:"co_await, co_yield, co_return — asynchronous generators and lazy sequences."},
+  {id:"med_templates_func",icon:"🔬",color:"#ef4444",ver:"C++11",cat:"Advanced",title:"Metaprogramming",desc:"constexpr, if constexpr, type traits, std::enable_if, variadic templates."},
+  {id:"easy_hello",icon:"🧩",color:"#f59e0b",ver:"C++23",cat:"C++23",title:"C++23 Features",desc:"std::print, std::expected, deducing this, if consteval, std::flat_map."},
 ];
 
 const ARTICLES = [
@@ -353,7 +353,7 @@ export default function HomePage() {
           {/* Grid */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:14}}>
             {filtered.map(t=>(
-              <Link key={t.title} href={`/studio`} style={{textDecoration:"none"}}>
+              <Link key={t.title} href={`/studio?learn=${t.id}`} style={{textDecoration:"none"}}>
                 <div
                   style={{padding:22,borderRadius:14,background:"#282c34",border:"1px solid #181a1f",cursor:"pointer",transition:"all .2s",height:"100%"}}
                   onMouseEnter={e=>{const el=e.currentTarget as HTMLElement;el.style.borderColor=t.color+"50";el.style.transform="translateY(-3px)";el.style.boxShadow=`0 12px 40px ${t.color}12`;}}

@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { useStore, DEFAULT_UNTITLED_CODE } from "@/lib/store";
 import LBarVertical from "@/components/studio/LBarVertical";
@@ -13,7 +14,12 @@ import { getChallengeDetails } from "@/lib/challenges";
 
 const CodeEditor = dynamic(() => import("@/components/studio/CodeEditor"), { ssr: false });
 
-export default function StudioPage() {
+function StudioContent() {
+  const searchParams = useSearchParams();
+  const learnParam = searchParams.get("learn");
+  const challengeParam = searchParams.get("challenge");
+  const projParam = searchParams.get("proj");
+
   const { 
     theme, showAI, isCollapsed, activeChallengeId, activeLearnModuleId,
     setLearnModuleId, setChallengeId, setProjectId, setProjectName, setCode,
@@ -26,14 +32,9 @@ export default function StudioPage() {
   const [sidebarWidth, setSidebarWidth] = useState(64);
   const [isResizing, setIsResizing] = useState(false);
 
-  // 1. Initial State Restoration from URL query params or clean Untitled Project entrance
+  // 1. URL Query Parameter Driven State Synchronization (Fires on soft navigation and initial mount)
   useEffect(() => {
     try {
-      const params = new URLSearchParams(window.location.search);
-      const learnParam = params.get("learn");
-      const challengeParam = params.get("challenge");
-      const projParam = params.get("proj");
-
       if (learnParam) {
         setLearnModuleId(learnParam);
         const savedCode = localStorage.getItem(`execium_code_learn_${learnParam}`);
@@ -75,7 +76,7 @@ export default function StudioPage() {
       }
     } catch {}
     setHydrated(true);
-  }, []);
+  }, [learnParam, challengeParam, projParam]);
 
   // 2. State & URL Synchronization effect (persist active session & URL query)
   useEffect(() => {
@@ -229,5 +230,13 @@ export default function StudioPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function StudioPage() {
+  return (
+    <Suspense fallback={<div style={{ height: "100vh", background: "#03030a" }} />}>
+      <StudioContent />
+    </Suspense>
   );
 }
