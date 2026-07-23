@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { getProgramList, PROGRAMS } from "@/lib/engine";
 import { CODING_CHALLENGES, CodingChallenge, getDailyChallenge } from "@/lib/challenges";
-import { LEARN_MODULES } from "@/lib/learn";
+import { LEARN_MODULES, getLearnModuleDetails } from "@/lib/learn";
 import { 
   Plus, FolderGit2, History, User, Settings, LogOut, Sun, Moon,
   ChevronLeft, ChevronRight, LayoutTemplate, BookOpen, HelpCircle, Flame
@@ -246,6 +246,14 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   };
 
   const handleSelectLearn = (modId: string) => {
+    const mod = getLearnModuleDetails(modId);
+    // Set project name to the problem title
+    setProjectName(mod.title);
+    setProjectId(null);
+    // Pre-fill editor with C++ boilerplate scaffold for this problem
+    const boilerplate = `// ${mod.title}\n// Category: ${mod.category} | Difficulty: ${mod.difficulty.toUpperCase()}\n// ${mod.shortDesc}\n\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\n// TODO: Implement your solution for ${mod.title}\n\nint main() {\n    cout << "=== ${mod.title} ===" << endl;\n\n    // Write your code here\n\n    return 0;\n}\n`;
+    setCode(boilerplate);
+    restart();
     setLearnModuleId(modId);
     setShowLearn(false);
   };

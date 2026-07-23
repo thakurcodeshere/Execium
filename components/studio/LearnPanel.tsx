@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 
 export default function LearnPanel() {
-  const { activeLearnModuleId, setLearnModuleId, theme, setCode, loadProgram, restart, play } = useStore();
+  const { activeLearnModuleId, setLearnModuleId, theme, setCode, loadProgram, restart, play, setProjectName, setProjectId } = useStore();
   const [activeTab, setActiveTab] = useState<'problem' | 'approaches' | 'breakdown'>('problem');
   const [selectedApproachIdx, setSelectedApproachIdx] = useState(0);
   const [activeConstructIdx, setActiveConstructIdx] = useState(0);
@@ -116,8 +116,13 @@ export default function LearnPanel() {
             disabled={currentModuleIdx <= 0}
             onClick={() => {
               if (currentModuleIdx > 0) {
-                const prevId = LEARN_MODULES[currentModuleIdx - 1].id;
-                setLearnModuleId(prevId);
+                const prevMod = LEARN_MODULES[currentModuleIdx - 1];
+                const prevDetails = getLearnModuleDetails(prevMod.id);
+                setLearnModuleId(prevMod.id);
+                setProjectName(prevDetails.title);
+                setProjectId(null);
+                setCode(`// ${prevDetails.title}\n// Category: ${prevDetails.category} | Difficulty: ${prevDetails.difficulty.toUpperCase()}\n// ${prevDetails.shortDesc}\n\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\n// TODO: Implement your solution for ${prevDetails.title}\n\nint main() {\n    cout << "=== ${prevDetails.title} ===" << endl;\n\n    // Write your code here\n\n    return 0;\n}\n`);
+                restart();
                 setActiveConstructIdx(0);
                 setSelectedApproachIdx(0);
               }
@@ -141,8 +146,13 @@ export default function LearnPanel() {
             disabled={currentModuleIdx >= LEARN_MODULES.length - 1}
             onClick={() => {
               if (currentModuleIdx < LEARN_MODULES.length - 1) {
-                const nextId = LEARN_MODULES[currentModuleIdx + 1].id;
-                setLearnModuleId(nextId);
+                const nextMod = LEARN_MODULES[currentModuleIdx + 1];
+                const nextDetails = getLearnModuleDetails(nextMod.id);
+                setLearnModuleId(nextMod.id);
+                setProjectName(nextDetails.title);
+                setProjectId(null);
+                setCode(`// ${nextDetails.title}\n// Category: ${nextDetails.category} | Difficulty: ${nextDetails.difficulty.toUpperCase()}\n// ${nextDetails.shortDesc}\n\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\n// TODO: Implement your solution for ${nextDetails.title}\n\nint main() {\n    cout << "=== ${nextDetails.title} ===" << endl;\n\n    // Write your code here\n\n    return 0;\n}\n`);
+                restart();
                 setActiveConstructIdx(0);
                 setSelectedApproachIdx(0);
               }
