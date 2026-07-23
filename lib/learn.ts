@@ -174,12 +174,115 @@ function sanitizeFnName(str: string): string {
   return str.replace(/[^a-zA-Z0-9]/g, '');
 }
 
+// ── TOPIC-SPECIFIC EXAMPLES & CONSTRAINTS GENERATOR ──
+function generateTopicExamplesAndConstraints(meta: { id: string; title: string; category: string; shortDesc: string; difficulty: string }) {
+  const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
+  const id = meta.id;
+
+  let examples = [
+    {
+      id: 1,
+      input: `input = "${cleanTitle} Dataset A", size = 4`,
+      output: `[Output result for ${cleanTitle}]`,
+      explanation: `Executes standard ${meta.category} logic.`
+    },
+    {
+      id: 2,
+      input: `input = "Empty / Base Guard", size = 0`,
+      output: `0`,
+      explanation: `Handles base edge condition safely.`
+    },
+    {
+      id: 3,
+      input: `input = "Max Bounds Data", size = 100`,
+      output: `[Verified Optimal State]`
+    }
+  ];
+
+  let constraints = [
+    `Input container length is in the range [0, 10^5].`,
+    `Memory limit: 256 MB. Prevent stack memory overflow.`,
+    `Time Complexity: O(N) or O(N log N).`
+  ];
+
+  if (id === 'easy_hello') {
+    examples = [
+      { id: 1, input: `name = "Alice", age = 22`, output: `"Hello Alice! You are 22 years old."`, explanation: `Reads input via std::cin and formats output stream using std::cout.` },
+      { id: 2, input: `name = "Bob", age = 30`, output: `"Hello Bob! You are 30 years old."` },
+      { id: 3, input: `name = "Code", age = 1`, output: `"Hello Code! You are 1 years old."` }
+    ];
+    constraints = [`1 <= name.length <= 50`, `0 <= age <= 120`, `Must use std::cout and std::cin streams.`];
+  } else if (id === 'easy_vars') {
+    examples = [
+      { id: 1, input: `val = 2147483647 (INT_MAX), increment = 1`, output: `-2147483648 (INT_MIN)`, explanation: `Demonstrates 32-bit signed integer overflow wrap-around behavior.` },
+      { id: 2, input: `a = 3.14159, b = 2.71828`, output: `5.85987`, explanation: `Double-precision floating point arithmetic.` },
+      { id: 3, input: `flag = true, ch = 'A'`, output: `ASCII = 65, Bool = 1` }
+    ];
+    constraints = [`INT_MIN <= val <= INT_MAX`, `sizeof(int) == 4 bytes`, `sizeof(double) == 8 bytes`];
+  } else if (id.includes('vector') || id.includes('array')) {
+    examples = [
+      { id: 1, input: `arr = [10, 20, 30, 40, 50]`, output: `Sum = 150, Length = 5`, explanation: `Iterates vector elements in contiguous heap buffer.` },
+      { id: 2, input: `arr = []`, output: `Sum = 0, Length = 0`, explanation: `Size check prevents index out-of-bounds error.` },
+      { id: 3, input: `arr = [99]`, output: `Sum = 99, Length = 1` }
+    ];
+    constraints = [`0 <= arr.length <= 10^5`, `-10^9 <= arr[i] <= 10^9`, `Random access operator[] executes in O(1).`];
+  } else if (id.includes('string')) {
+    examples = [
+      { id: 1, input: `str = "execium_cpp", sub = "cpp"`, output: `Found at Index = 8`, explanation: `std::string::find performs substring pattern search.` },
+      { id: 2, input: `str = "hello", sub = "world"`, output: `std::string::npos (-1)`, explanation: `Returns npos when substring is absent.` },
+      { id: 3, input: `str = ""`, output: `Length = 0` }
+    ];
+    constraints = [`0 <= str.length <= 10^6`, `String contains valid ASCII characters.`, `Prefer std::string_view for zero-copy read-only operations.`];
+  } else if (id.includes('pointer') || id.includes('ptr')) {
+    examples = [
+      { id: 1, input: `var = 42, ptr = &var`, output: `Address = 0x7ffd... | Dereferenced *ptr = 42`, explanation: `& fetches memory address; * dereferences value.` },
+      { id: 2, input: `ptr = nullptr`, output: `Null check triggered safely`, explanation: `Prevents segmentation fault crash.` },
+      { id: 3, input: `arr = [1, 2, 3], ptr = arr`, output: `*(ptr + 2) = 3`, explanation: `Pointer arithmetic advances address by element size.` }
+    ];
+    constraints = [`Pointers must be checked against nullptr.`, `Heap memory allocated with new[] must be freed with delete[].`];
+  } else if (id.includes('tree') || id.includes('bst') || id.includes('avl')) {
+    examples = [
+      { id: 1, input: `root = [4, 2, 7, 1, 3]`, output: `Inorder Traversal = [1, 2, 3, 4, 7]`, explanation: `Inorder traversal of BST yields sorted element sequence.` },
+      { id: 2, input: `root = []`, output: `[]` },
+      { id: 3, input: `root = [1, null, 2, null, 3]`, output: `Tree Height = 3` }
+    ];
+    constraints = [`0 <= Number of nodes <= 10^4`, `-10^9 <= node.val <= 10^9`, `BST property: left.val < node.val < right.val.`];
+  } else if (id.includes('graph') || id.includes('dfs') || id.includes('bfs') || id.includes('dijkstra')) {
+    examples = [
+      { id: 1, input: `nodes = 5, edges = [[0,1,2],[0,2,4],[1,2,1],[1,3,7]], src = 0`, output: `Shortest Distances = [0, 2, 3, 9]`, explanation: `Priority queue Dijkstra relaxes weighted edges.` },
+      { id: 2, input: `nodes = 3, edges = [[0,1,5]], src = 0, target = 2`, output: `Unreachable (-1)` }
+    ];
+    constraints = [`1 <= nodes <= 10^4`, `0 <= edges.length <= 5 * 10^4`, `Edge weights >= 0.`];
+  } else if (id.includes('dp') || id.includes('knapsack') || id.includes('n_queens') || id.includes('sudoku')) {
+    examples = [
+      { id: 1, input: `n = 4 (4x4 Board)`, output: `2 Solutions: [[".Q..","...Q","Q...","..Q."], ["..Q.","Q...","...Q",".Q.."]]`, explanation: `Backtracking places non-attacking queens row-by-row.` },
+      { id: 2, input: `weights = [2, 3, 4], values = [3, 4, 5], capacity = 5`, output: `Max Value = 7`, explanation: `0/1 Knapsack selects optimal subset.` }
+    ];
+    constraints = [`1 <= N <= 12 for N-Queens backtracking.`, `0/1 Knapsack capacity <= 1000.`];
+  } else if (id.includes('variadic') || id.includes('template') || id.includes('sfinae') || id.includes('concepts')) {
+    examples = [
+      { id: 1, input: `args... = (1, 2, 3, 4, 5)`, output: `Sum = 15`, explanation: `C++17 Fold Expression (... + args) unpacks variadic parameter pack.` },
+      { id: 2, input: `args... = ("Hello", " ", "World")`, output: `"Hello World"`, explanation: `Variadic pack string concatenation.` }
+    ];
+    constraints = [`Parameter pack expansion evaluated at compile time.`, `Template type arguments must satisfy concepts.`];
+  } else if (id.includes('thread') || id.includes('mutex') || id.includes('async') || id.includes('lockfree')) {
+    examples = [
+      { id: 1, input: `numThreads = 4, incrementsPerThread = 10000`, output: `Counter = 40000`, explanation: `std::mutex / std::atomic prevents race conditions across threads.` },
+      { id: 2, input: `asyncTask = compute(42)`, output: `Future Result = 420` }
+    ];
+    constraints = [`1 <= numThreads <= std::thread::hardware_concurrency()`, `Data access must be synchronized.`];
+  }
+
+  return { examples, constraints };
+}
+
 // ── TOPIC-SPECIFIC CONTENT BUILDER ──
 // Generates unique problem objectives, input/output descriptions, takeaways, and 10 topic-tailored mental model approaches with code & line breakdowns for every module.
 export function getLearnModuleDetails(id: string): LearnModule {
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
+  const { examples, constraints } = generateTopicExamplesAndConstraints(meta);
 
   // 1. Topic-Specific Problem Objective & Input/Output Descriptions
   const problemStatement = {
@@ -194,31 +297,8 @@ export function getLearnModuleDetails(id: string): LearnModule {
       `Master memory lifecycle & type safety for ${meta.category}`,
       `Apply production-grade C++ patterns in ${cleanTitle}`
     ],
-    examples: [
-      {
-        id: 1,
-        input: `data = [10, 20, 30, 40], mode = "${meta.difficulty}"`,
-        output: `[Result Code 42 for ${cleanTitle}]`,
-        explanation: `Standard execution processing 4 elements through the ${cleanTitle} pipeline.`
-      },
-      {
-        id: 2,
-        input: `data = [], mode = "empty_guard"`,
-        output: `0`,
-        explanation: `Handles base edge case cleanly without memory out-of-bounds error.`
-      },
-      {
-        id: 3,
-        input: `data = [999999, -5, 42], target = "${fnTag}"`,
-        output: `[Verified Output]`
-      }
-    ],
-    constraints: [
-      `The size of the input container is in the range [0, 10^5].`,
-      `-10^9 <= element values <= 10^9`,
-      `Time Complexity should not exceed O(N log N) for general processing.`,
-      `Memory limit: 256 MB. Stack memory overflow must be prevented.`
-    ],
+    examples,
+    constraints,
     companies: ["Google", "Meta", "Amazon", "Microsoft", "Apple"],
     acceptanceRate: "72.4%",
     totalAccepted: "1,425,810"
