@@ -574,6 +574,296 @@ function getProblem2Details(): LearnModule {
   };
 }
 
+// ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 3 ──
+function getProblem3Details(): LearnModule {
+  return {
+    id: "easy_ops",
+    title: "3. Arithmetic, Logical & Bitwise Operators",
+    shortDesc: "Arithmetic, relational, logical, and bitwise manipulation operators.",
+    difficulty: "easy",
+    category: "Fundamentals",
+    traceKey: "for_loop",
+    problemStatement: {
+      title: "3. Arithmetic, Logical & Bitwise Operators",
+      objective: "Master C++ arithmetic operators (/ %), bitwise operators (& | ^ ~ << >>), short-circuit logical evaluation (&& || !), and bit masking tricks.",
+      description: "Given two 32-bit unsigned integers `a` and `b`, compute arithmetic results (quotient and remainder via `%`), bitwise combinations (AND, OR, XOR), bit shifts (`a << 2`, `b >> 1`), and evaluate short-circuit logical boolean expressions (`(a > 0) && (b != 0)`).",
+      inputDesc: "a = 29 (0b00011101), b = 6 (0b00000110)",
+      outputDesc: "Quotient = 4, Remainder = 5 | Bitwise AND = 4 | Bitwise XOR = 27",
+      takeaways: [
+        "Understand division (/) vs modulus (%) for unsigned integers",
+        "Master bitwise operators (&, |, ^, ~) and binary representations",
+        "Apply bit shifts (<<, >>) for fast multiplication and division by powers of 2",
+        "Utilize short-circuit evaluation (&&, ||) to guard against divide-by-zero crashes"
+      ],
+      examples: [
+        {
+          id: 1,
+          input: 'a = 29 (0b00011101), b = 6 (0b00000110)',
+          output: 'Quotient = 4, Remainder = 5 | Bitwise AND = 4 (0b00000100) | Bitwise XOR = 27 (0b00011011)',
+          explanation: '29 / 6 = 4 remainder 5. Bitwise AND filters matching set bits; XOR toggles non-matching bits.'
+        },
+        {
+          id: 2,
+          input: 'a = 12 (0b00001100), b = 4 (0b00000100)',
+          output: 'Quotient = 3, Remainder = 0 | Bitwise OR = 12 | Shift Left (a << 1) = 24',
+          explanation: '12 / 4 divides evenly with 0 remainder. Left shift (a << 1) multiplies integer by 2.'
+        },
+        {
+          id: 3,
+          input: 'a = 0, b = 15',
+          output: 'Quotient = 0, Remainder = 0 | Short-Circuit Evaluation = Skipped Right Operand',
+          explanation: '(a != 0) && (100 / a) short-circuits on first false condition, preventing divide-by-zero crash.'
+        }
+      ],
+      constraints: [
+        "0 <= a, b <= 10^9",
+        "Division by zero must be guarded.",
+        "Bit shifts must remain within 31-bit bounds."
+      ],
+      companies: ["Amazon", "Meta", "Google", "Apple", "Uber"],
+      acceptanceRate: "89.5%",
+      totalAccepted: "2,140,800"
+    },
+    approaches: [
+      {
+        id: 1,
+        name: "Approach 1: Direct Standard Operators (/, %, &, |, ^) (FREE)",
+        category: "FREE / Standard Ops",
+        description: "Executes standard division (/), modulo (%), bitwise AND (&), OR (|), and XOR (^) operators.",
+        prosCons: "Pros: Direct, readable, standard syntax. Cons: Requires explicit divide-by-zero check.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: true,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 1: Direct Standard Operators\n#include <iostream>\nusing namespace std;\n\nvoid evaluateBasicOperators(unsigned int a, unsigned int b) {\n    if (b == 0) return;\n    cout << "Quotient: " << (a / b) << " | Remainder: " << (a % b) << " | AND: " << (a & b) << " | XOR: " << (a ^ b) << endl;\n}\n\nint main() {\n    evaluateBasicOperators(29, 6);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `void evaluateBasicOperators(unsigned int a, unsigned int b) {`,
+            constructType: "Function Signature",
+            title: "Operator Function Signature",
+            explanation: "Receives unsigned int parameters a and b for arithmetic and bitwise evaluation.",
+            keyDetails: [{ variableOrConstruct: "evaluateBasicOperators", role: "Function Entry", whyThisWay: "Passes unsigned primitive integers." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `if (b == 0) return;`,
+            constructType: "Condition & Branch",
+            title: "Divide-by-Zero Guard",
+            explanation: "Returns early if b is zero to avoid illegal division runtime exception.",
+            keyDetails: [{ variableOrConstruct: "b == 0", role: "Zero Guard", whyThisWay: "Division by zero is undefined behavior in C++." }]
+          },
+          {
+            lineNum: 3,
+            codeSnippet: `cout << "Quotient: " << (a / b) << " | Remainder: " << (a % b) << " | AND: " << (a & b) << " | XOR: " << (a ^ b) << endl;`,
+            constructType: "Return / Cleanup",
+            title: "Arithmetic & Bitwise Evaluation",
+            explanation: "Evaluates quotient (a/b), modulo (a%b), bitwise AND (a&b), and bitwise XOR (a^b).",
+            keyDetails: [{ variableOrConstruct: "a % b", role: "Modulo Operator", whyThisWay: "Computes division remainder." }]
+          }
+        ]
+      },
+      {
+        id: 2,
+        name: "Approach 2: Short-Circuit Logical Evaluation Guards (FREE)",
+        category: "FREE / Short Circuit",
+        description: "Uses short-circuiting logical AND (&&) to evaluate left condition first and skip right operand if false.",
+        prosCons: "Pros: Prevents illegal division or null dereference safely. Cons: Order of operands matters.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: true,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 2: Short-Circuit Logical Evaluation\n#include <iostream>\nusing namespace std;\n\nbool safeDivisionCheck(unsigned int a, unsigned int b) {\n    bool isSafe = (b != 0) && ((a / b) > 0);\n    cout << "Short-Circuit Safe Check: " << boolalpha << isSafe << endl;\n    return isSafe;\n}\n\nint main() {\n    safeDivisionCheck(29, 6);\n    safeDivisionCheck(10, 0);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `bool isSafe = (b != 0) && ((a / b) > 0);`,
+            constructType: "Condition & Branch",
+            title: "Logical Short-Circuit Evaluation",
+            explanation: "If (b != 0) evaluates to false, C++ short-circuits and skips (a/b) entirely, preventing divide-by-zero crash.",
+            keyDetails: [{ variableOrConstruct: "&&", role: "Short-Circuit Operator", whyThisWay: "Guarantees right-side operand is evaluated ONLY if left-side is true." }]
+          }
+        ]
+      },
+      {
+        id: 3,
+        name: "Approach 3: Fast Bitwise Shift Arithmetic (<< and >>) (PRO)",
+        category: "PRO / Bit Shifts",
+        description: "Uses left shift (<<) for fast multiplication by 2^n and right shift (>>) for fast division by 2^n.",
+        prosCons: "Pros: Executes in 1 CPU cycle. Cons: Only works for powers of 2.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 3: Bitwise Shift Arithmetic\n#include <iostream>\nusing namespace std;\n\nvoid performShiftArithmetic(unsigned int a, unsigned int shiftCount) {\n    unsigned int multiplied = a << shiftCount;\n    unsigned int divided = a >> shiftCount;\n    cout << "Multiply (a << " << shiftCount << "): " << multiplied << " | Divide (a >> " << shiftCount << "): " << divided << endl;\n}\n\nint main() {\n    performShiftArithmetic(29, 2);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `unsigned int multiplied = a << shiftCount;`,
+            constructType: "Variable & Initializer",
+            title: "Left Bit Shift (Multiplication)",
+            explanation: "Shifts binary bits of a to the left by shiftCount positions, effectively multiplying a by 2^shiftCount.",
+            keyDetails: [{ variableOrConstruct: "a << shiftCount", role: "Left Shift", whyThisWay: "Fast hardware bit shift multiplication." }]
+          },
+          {
+            lineNum: 2,
+            codeSnippet: `unsigned int divided = a >> shiftCount;`,
+            constructType: "Variable & Initializer",
+            title: "Right Bit Shift (Division)",
+            explanation: "Shifts binary bits of a to the right by shiftCount positions, effectively dividing a by 2^shiftCount.",
+            keyDetails: [{ variableOrConstruct: "a >> shiftCount", role: "Right Shift", whyThisWay: "Fast hardware bit shift division." }]
+          }
+        ]
+      },
+      {
+        id: 4,
+        name: "Approach 4: Bitwise Masking & Bit Inspection (std::bitset) (PRO)",
+        category: "PRO / Bit Masking",
+        description: "Uses bitwise mask (1U << bitIndex) and std::bitset<8> to inspect specific bit positions.",
+        prosCons: "Pros: Precise single-bit inspection and visualization. Cons: Bitset overhead.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 4: Bit Masking & std::bitset\n#include <iostream>\n#include <bitset>\nusing namespace std;\n\nvoid inspectBitMask(unsigned int a, unsigned int bitIndex) {\n    bool isBitSet = (a & (1U << bitIndex)) != 0;\n    cout << "Value Binary: " << bitset<8>(a) << " | Bit at index " << bitIndex << ": " << isBitSet << endl;\n}\n\nint main() {\n    inspectBitMask(29, 3);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `bool isBitSet = (a & (1U << bitIndex)) != 0;`,
+            constructType: "Condition & Branch",
+            title: "Bitwise AND Masking",
+            explanation: "Creates single-bit mask (1U << bitIndex) and performs bitwise AND to test if bit at index is 1.",
+            keyDetails: [{ variableOrConstruct: "1U << bitIndex", role: "Bit Mask", whyThisWay: "Isolates target bit index." }]
+          }
+        ]
+      },
+      {
+        id: 5,
+        name: "Approach 5: C++20 Hardware Bit Intrinsics (<bit>) (PRO)",
+        category: "PRO / C++20 Bit Intrinsics",
+        description: "Modern C++20 std::popcount and std::countl_zero for single-instruction hardware bit counts.",
+        prosCons: "Pros: Single CPU instruction execution. Cons: Requires C++20 compiler.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 5: C++20 Bit Intrinsics (<bit>)\n#include <iostream>\n#include <bit>\nusing namespace std;\n\nvoid countSetBits(unsigned int a) {\n    int setBits = std::popcount(a);\n    int leadingZeros = std::countl_zero(a);\n    cout << "Set Bits (popcount): " << setBits << " | Leading Zeros: " << leadingZeros << endl;\n}\n\nint main() {\n    countSetBits(29);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `int setBits = std::popcount(a);`,
+            constructType: "Variable & Initializer",
+            title: "C++20 Population Count",
+            explanation: "Invokes std::popcount which maps to x86 POPCNT instruction returning total number of 1 bits.",
+            keyDetails: [{ variableOrConstruct: "std::popcount", role: "Bit Counter", whyThisWay: "Hardware POPCNT instruction." }]
+          }
+        ]
+      },
+      {
+        id: 6,
+        name: "Approach 6: In-Place Bitwise XOR Swap Trick (PRO)",
+        category: "PRO / XOR Swap",
+        description: "Swaps two integer variables in-place without temporary memory using 3 consecutive XOR operations.",
+        prosCons: "Pros: Zero extra memory allocation. Cons: Self-assignment (a == b) can zero out variable.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 6: Bitwise XOR Swap Trick\n#include <iostream>\nusing namespace std;\n\nvoid xorSwap(unsigned int& a, unsigned int& b) {\n    if (&a != &b) {\n        a ^= b;\n        b ^= a;\n        a ^= b;\n    }\n    cout << "After XOR Swap -> a: " << a << ", b: " << b << endl;\n}\n\nint main() {\n    unsigned int x = 29, y = 6;\n    xorSwap(x, y);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `a ^= b; b ^= a; a ^= b;`,
+            constructType: "Variable & Initializer",
+            title: "Three-Step Bitwise XOR Swap",
+            explanation: "Cancels out common bits sequentially across 3 XOR steps to swap values without temporary variable.",
+            keyDetails: [{ variableOrConstruct: "a ^= b", role: "Bitwise XOR In-Place", whyThisWay: "Bitwise property: (X ^ Y) ^ X = Y." }]
+          }
+        ]
+      },
+      {
+        id: 7,
+        name: "Approach 7: Power-of-Two Bitwise Trick (n & (n-1)) (PRO)",
+        category: "PRO / Power of 2",
+        description: "Checks if n is a power of 2 using (n > 0) && ((n & (n - 1)) == 0).",
+        prosCons: "Pros: O(1) constant time trick. Cons: Cryptic bitwise logic.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 7: Power of 2 Bitwise Trick\n#include <iostream>\nusing namespace std;\n\nbool isPowerOfTwo(unsigned int n) {\n    bool result = (n > 0) && ((n & (n - 1)) == 0);\n    cout << "Is " << n << " a Power of 2? " << boolalpha << result << endl;\n    return result;\n}\n\nint main() {\n    isPowerOfTwo(16);\n    isPowerOfTwo(29);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `bool result = (n > 0) && ((n & (n - 1)) == 0);`,
+            constructType: "Condition & Branch",
+            title: "Lowest Set Bit Clear Guard",
+            explanation: "Subtracting 1 flips all bits after rightmost 1. Bitwise ANDing n with n-1 clears rightmost 1-bit.",
+            keyDetails: [{ variableOrConstruct: "n & (n - 1)", role: "Bit Clear Trick", whyThisWay: "Evaluates to 0 if n has exactly one 1-bit (power of 2)." }]
+          }
+        ]
+      },
+      {
+        id: 8,
+        name: "Approach 8: Two's Complement Negation (~a + 1) (PRO)",
+        category: "PRO / Two's Complement",
+        description: "Implements arithmetic integer negation using bitwise NOT (~) combined with addition (~a + 1).",
+        prosCons: "Pros: Direct demonstration of hardware CPU negation. Cons: Verbose compared to unary minus -a.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 8: Bitwise Two's Complement Negation\n#include <iostream>\nusing namespace std;\n\nint negateBitwise(int val) {\n    int negated = ~val + 1;\n    cout << "Original: " << val << " | Bitwise Negated (~val + 1): " << negated << endl;\n    return negated;\n}\n\nint main() {\n    negateBitwise(29);\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `int negated = ~val + 1;`,
+            constructType: "Variable & Initializer",
+            title: "Bitwise Inversion & Increment",
+            explanation: "Inverts all binary bits using ~ operator and adds 1, matching hardware 2's complement negation.",
+            keyDetails: [{ variableOrConstruct: "~val + 1", role: "Two's Complement", whyThisWay: "Fundamental CPU arithmetic identity." }]
+          }
+        ]
+      },
+      {
+        id: 9,
+        name: "Approach 9: Custom Operator Overloading (operator^) (PRO)",
+        category: "PRO / Operator Overload",
+        description: "Overloads operator^ on a BitWrapper struct to customize bitwise XOR behavior for user-defined types.",
+        prosCons: "Pros: Clean domain-specific syntax. Cons: Operator overload overhead.",
+        timeComplexity: "O(1)",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 9: Custom Operator Overloading\n#include <iostream>\nusing namespace std;\n\nstruct BitWrapper {\n    unsigned int val;\n    BitWrapper operator^(const BitWrapper& other) const {\n        return BitWrapper{val ^ other.val};\n    }\n};\n\nint main() {\n    BitWrapper w1{29}, w2{6};\n    BitWrapper res = w1 ^ w2;\n    cout << "Overloaded XOR Result: " << res.val << endl;\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `BitWrapper operator^(const BitWrapper& other) const {`,
+            constructType: "Function Signature",
+            title: "Operator^ Member Method",
+            explanation: "Defines member operator function overloading XOR operator for BitWrapper objects.",
+            keyDetails: [{ variableOrConstruct: "operator^", role: "Member Overload", whyThisWay: "Enables w1 ^ w2 expression syntax." }]
+          }
+        ]
+      },
+      {
+        id: 10,
+        name: "Approach 10: Compile-Time Bitwise Expressions (Template) (PRO)",
+        category: "PRO / Meta Bitwise",
+        description: "Computes bitwise AND at compile time using template metaprogramming struct.",
+        prosCons: "Pros: Zero runtime computation cost. Cons: Metaprogramming template syntax.",
+        timeComplexity: "O(1) Compile-Time",
+        spaceComplexity: "O(1)",
+        isFree: false,
+        code: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 10: Compile-Time Bitwise Expressions\n#include <iostream>\nusing namespace std;\n\ntemplate<unsigned int A, unsigned int B>\nstruct BitwiseAndConst {\n    static constexpr unsigned int value = A & B;\n};\n\nint main() {\n    cout << "Compile-Time Constexpr AND (29 & 6): " << BitwiseAndConst<29, 6>::value << endl;\n    return 0;\n}`,
+        lineBreakdown: [
+          {
+            lineNum: 1,
+            codeSnippet: `static constexpr unsigned int value = A & B;`,
+            constructType: "Variable & Initializer",
+            title: "Compile-Time Bitwise Evaluation",
+            explanation: "Evaluates bitwise AND of template parameters A and B during compilation phase.",
+            keyDetails: [{ variableOrConstruct: "static constexpr", role: "Compile Constant", whyThisWay: "Embedded directly into binary constant pool." }]
+          }
+        ]
+      }
+    ],
+    fullCode: `// 3. Arithmetic, Logical & Bitwise Operators - Approach 1: Direct Standard Operators\n#include <iostream>\nusing namespace std;\n\nvoid evaluateBasicOperators(unsigned int a, unsigned int b) {\n    if (b == 0) return;\n    cout << "Quotient: " << (a / b) << " | Remainder: " << (a % b) << " | AND: " << (a & b) << " | XOR: " << (a ^ b) << endl;\n}\n\nint main() {\n    evaluateBasicOperators(29, 6);\n    return 0;\n}`
+  };
+}
+
 // ── HAND-CRAFTED BESPOKE IMPLEMENTATION FOR PROBLEM 1 ──
 function getProblem1Details(): LearnModule {
   return {
@@ -886,6 +1176,9 @@ export function getLearnModuleDetails(id: string): LearnModule {
   }
   if (id === "easy_vars") {
     return getProblem2Details();
+  }
+  if (id === "easy_ops") {
+    return getProblem3Details();
   }
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
