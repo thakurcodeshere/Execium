@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useStore } from "@/lib/store";
 import { getProgramList, PROGRAMS } from "@/lib/engine";
 import { CODING_CHALLENGES, CodingChallenge, getDailyChallenge } from "@/lib/challenges";
@@ -51,6 +51,118 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
 
   const [solvedChallenges, setSolvedChallenges] = useState<string[]>([]);
   const [activeDiff, setActiveDiff] = useState<'easy' | 'medium' | 'hard'>('easy');
+
+  // Keyboard navigation focus indices & refs
+  const [focusedLearnIdx, setFocusedLearnIdx] = useState(0);
+  const [focusedChallengeIdx, setFocusedChallengeIdx] = useState(0);
+  const learnItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const challengeItemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  useEffect(() => {
+    setFocusedLearnIdx(0);
+  }, [learnDiffTab, learnSearchQuery]);
+
+  useEffect(() => {
+    setFocusedChallengeIdx(0);
+  }, [activeDiff]);
+
+  // Global Keyboard Navigation Listener for Arrow Keys & Enter
+  useEffect(() => {
+    if (!showLearn && !showQuestions) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement as HTMLElement | null;
+      const isInputFocused = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA');
+
+      if (showLearn) {
+        const filtered = LEARN_MODULES.filter(m => {
+          const matchTab = learnDiffTab === 'all' || m.difficulty === learnDiffTab;
+          const q = learnSearchQuery.toLowerCase().trim();
+          return matchTab && (!q || m.title.toLowerCase().includes(q) || m.shortDesc.toLowerCase().includes(q) || m.category.toLowerCase().includes(q));
+        });
+
+        const tabs: ('all' | 'easy' | 'medium' | 'hard')[] = ['all', 'easy', 'medium', 'hard'];
+        const currentIdx = tabs.indexOf(learnDiffTab);
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const next = tabs[(currentIdx + 1) % tabs.length];
+          setLearnDiffTab(next);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const prev = tabs[(currentIdx - 1 + tabs.length) % tabs.length];
+          setLearnDiffTab(prev);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setFocusedLearnIdx(prev => {
+            const next = Math.min(filtered.length - 1, prev + 1);
+            if (learnItemRefs.current[next]) {
+              learnItemRefs.current[next]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+            return next;
+          });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setFocusedLearnIdx(prev => {
+            const next = Math.max(0, prev - 1);
+            if (learnItemRefs.current[next]) {
+              learnItemRefs.current[next]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+            return next;
+          });
+        } else if (e.key === 'Enter' && !isInputFocused) {
+          if (filtered.length > 0 && focusedLearnIdx >= 0 && focusedLearnIdx < filtered.length) {
+            e.preventDefault();
+            handleSelectLearn(filtered[focusedLearnIdx].id);
+          }
+        } else if (e.key === 'Escape') {
+          setShowLearn(false);
+        }
+      } else if (showQuestions) {
+        const filtered = CODING_CHALLENGES.filter(c => c.difficulty === activeDiff);
+        const tabs: ('easy' | 'medium' | 'hard')[] = ['easy', 'medium', 'hard'];
+        const currentIdx = tabs.indexOf(activeDiff);
+
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          const next = tabs[(currentIdx + 1) % tabs.length];
+          setActiveDiff(next);
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const prev = tabs[(currentIdx - 1 + tabs.length) % tabs.length];
+          setActiveDiff(prev);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          setFocusedChallengeIdx(prev => {
+            const next = Math.min(filtered.length - 1, prev + 1);
+            if (challengeItemRefs.current[next]) {
+              challengeItemRefs.current[next]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+            return next;
+          });
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          setFocusedChallengeIdx(prev => {
+            const next = Math.max(0, prev - 1);
+            if (challengeItemRefs.current[next]) {
+              challengeItemRefs.current[next]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+            return next;
+          });
+        } else if (e.key === 'Enter') {
+          if (filtered.length > 0 && focusedChallengeIdx >= 0 && focusedChallengeIdx < filtered.length) {
+            e.preventDefault();
+            handleSelectQuestion(filtered[focusedChallengeIdx]);
+          }
+        } else if (e.key === 'Escape') {
+          setShowQuestions(false);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showLearn, showQuestions, learnDiffTab, learnSearchQuery, activeDiff, focusedLearnIdx, focusedChallengeIdx]);
 
   const isExpanded = width > 120;
   const programs = getProgramList();
@@ -484,23 +596,27 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                     );
                   }
 
-                  return filtered.map(m => {
+                  return filtered.map((m, idx) => {
+                    const isFocused = idx === focusedLearnIdx;
                     const diffColor = m.difficulty === 'easy' ? '#10b981' : m.difficulty === 'medium' ? '#f59e0b' : '#ef4444';
                     return (
                       <button
                         key={m.id}
+                        ref={el => { learnItemRefs.current[idx] = el; }}
                         onClick={() => handleSelectLearn(m.id)}
+                        onMouseEnter={() => setFocusedLearnIdx(idx)}
                         style={{
                           width: "100%", padding: "10px 12px", display: "flex", flexDirection: "column",
-                          background: "transparent", border: "none", cursor: "pointer",
-                          textAlign: "left", borderBottom: `1px solid ${T.uiBorder}`, transition: "background 0.15s"
+                          background: isFocused ? `${T.uiAccent}1f` : "transparent",
+                          border: "none", cursor: "pointer",
+                          textAlign: "left", borderBottom: `1px solid ${T.uiBorder}`,
+                          transition: "all 0.12s ease", outline: "none",
+                          boxShadow: isFocused ? `inset 3px 0 0 0 ${T.uiAccent}` : "none"
                         }}
-                        onMouseEnter={e => e.currentTarget.style.background = `${T.uiAccent}0e`}
-                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                       >
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: T.uiText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                            {m.title}
+                          <span style={{ fontSize: 11, fontWeight: isFocused ? 800 : 700, color: isFocused ? T.uiAccent : T.uiText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {isFocused ? "▶ " : ""}{m.title}
                           </span>
                           <span style={{
                             fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
@@ -510,13 +626,24 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                             {m.difficulty}
                           </span>
                         </div>
-                        <div style={{ fontSize: 9, color: T.uiTextMuted, lineHeight: 1.3 }}>
+                        <div style={{ fontSize: 9, color: isFocused ? T.uiText : T.uiTextMuted, lineHeight: 1.3 }}>
                           {m.shortDesc}
                         </div>
                       </button>
                     );
                   });
                 })()}
+              </div>
+
+              {/* Keyboard Shortcuts Helper Footer */}
+              <div style={{
+                padding: "6px 10px", background: "rgba(0,0,0,0.3)", borderTop: `1px solid ${T.uiBorder}`,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted
+              }}>
+                <span><strong style={{ color: T.uiAccent }}>← →</strong> Tabs</span>
+                <span><strong style={{ color: T.uiAccent }}>↑ ↓</strong> Scroll</span>
+                <span><strong style={{ color: T.uiAccent }}>↵</strong> Select</span>
               </div>
             </div>
           )}
@@ -636,26 +763,28 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
 
               {/* Challenges list */}
               <div style={{ maxHeight: 240, overflowY: "auto" }}>
-                {CODING_CHALLENGES.filter(c => c.difficulty === activeDiff).map(c => {
+                {CODING_CHALLENGES.filter(c => c.difficulty === activeDiff).map((c, idx) => {
+                  const isFocused = idx === focusedChallengeIdx;
                   const isSolved = solvedChallenges.includes(c.id);
                   const isTodayDaily = c.id === getDailyChallenge().challenge.id;
                   return (
                     <button
                       key={c.id}
+                      ref={el => { challengeItemRefs.current[idx] = el; }}
                       onClick={() => handleSelectQuestion(c)}
+                      onMouseEnter={() => setFocusedChallengeIdx(idx)}
                       style={{
                         width: "100%", padding: "12px 14px", display: "flex", flexDirection: "column",
-                        background: activeChallengeId === c.id ? `${T.uiAccent}10` : "transparent",
+                        background: isFocused ? `${T.uiAccent}1f` : activeChallengeId === c.id ? `${T.uiAccent}10` : "transparent",
                         border: "none", cursor: "pointer", textAlign: "left",
-                        borderBottom: `1px solid ${T.uiBorder}`, transition: "background 0.15s",
-                        boxSizing: "border-box"
+                        borderBottom: `1px solid ${T.uiBorder}`, transition: "all 0.12s ease",
+                        boxSizing: "border-box", outline: "none",
+                        boxShadow: isFocused ? `inset 3px 0 0 0 ${T.uiAccent}` : "none"
                       }}
-                      onMouseEnter={e => { if (activeChallengeId !== c.id) e.currentTarget.style.background = `${T.uiAccent}05`; }}
-                      onMouseLeave={e => { if (activeChallengeId !== c.id) e.currentTarget.style.background = "transparent"; }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: T.uiText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
-                          {c.title}
+                        <div style={{ fontSize: 12, fontWeight: isFocused ? 800 : 700, color: isFocused ? T.uiAccent : T.uiText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
+                          {isFocused ? "▶ " : ""}{c.title}
                           {isTodayDaily && (
                             <span style={{ fontSize: 8, padding: "1px 4px", borderRadius: 4, background: "rgba(249,115,22,0.2)", color: "#f97316", fontFamily: "'JetBrains Mono'", fontWeight: 800 }}>🔥 DAILY</span>
                           )}
@@ -671,12 +800,23 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                           {isSolved ? "SOLVED" : "TODO"}
                         </span>
                       </div>
-                      <div style={{ fontSize: 9, color: T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>
+                      <div style={{ fontSize: 9, color: isFocused ? T.uiText : T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>
                         {c.desc}
                       </div>
                     </button>
                   );
                 })}
+              </div>
+
+              {/* Keyboard Shortcuts Helper Footer */}
+              <div style={{
+                padding: "6px 10px", background: "rgba(0,0,0,0.3)", borderTop: `1px solid ${T.uiBorder}`,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+                fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted
+              }}>
+                <span><strong style={{ color: "#f97316" }}>← →</strong> Tabs</span>
+                <span><strong style={{ color: "#f97316" }}>↑ ↓</strong> Scroll</span>
+                <span><strong style={{ color: "#f97316" }}>↵</strong> Select</span>
               </div>
             </div>
           )}
