@@ -5,6 +5,8 @@ import { useStore } from "@/lib/store";
 import { VERSION_LABELS, CppVersion, detectTrace } from "@/lib/templates";
 import { PROGRAMS } from "@/lib/engine";
 
+import { Plus, X } from "lucide-react";
+
 // Monaco C++ theme mappings
 const MONACO_THEMES: Record<string, string> = {
   'dark-plus':'vs-dark','github-dark':'vs-dark','dracula':'vs-dark',
@@ -23,7 +25,8 @@ export default function CodeEditor() {
   const { 
     code, steps, cur, theme, loadProgram, setCode, jump, restart,
     projectName, projectId, setProjectName, setProjectId,
-    activeChallengeId, recordAttempt
+    activeChallengeId, recordAttempt,
+    tabs, activeTabId, switchTab, closeTab, createNewProjectTab
   } = useStore();
   const [cppVersion, setCppVersion] = useState<CppVersion>('cpp11');
   const [traceHint, setTraceHint] = useState<string | null>(null);
@@ -276,36 +279,94 @@ export default function CodeEditor() {
 
         <div style={{ width: 1, height: 18, background: T.uiBorder }} />
 
-        {/* Project Name & Rename Trigger */}
-        <div 
-          title="Double click to rename project"
-          onDoubleClick={() => {
-            const newName = prompt("Rename Project:", projectName);
-            if (newName && newName.trim()) {
-              setProjectName(newName.trim());
-              if (projectId) {
-                try {
-                  const projs = JSON.parse(localStorage.getItem("execium_projects") ?? "[]");
-                  const updated = projs.map((p: any) => p.id === projectId ? { ...p, name: newName.trim() } : p);
-                  localStorage.setItem("execium_projects", JSON.stringify(updated));
-                } catch {}
-              }
-            }
-          }}
-          style={{ 
-            display: 'flex', alignItems: 'center', gap: 6, color: T.uiText, fontSize: 10, 
-            fontFamily: "'JetBrains Mono'", padding: '3px 8px', borderRadius: 6, 
-            background: 'rgba(255,255,255,.03)', border: `1px solid ${T.uiBorder}`, 
-            cursor: 'pointer', transition: 'all 0.15s', userSelect: 'none'
-          }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(168,85,247,.4)'; }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = T.uiBorder; }}
-        >
-          <span style={{ fontSize: 11 }}>📁</span>
-          <span style={{ fontWeight: 800 }}>{projectName}</span>
+        {/* ── MULTI-PROJECT / FILE WORKSPACE TABS BAR ── */}
+        <div style={{ 
+          display: 'flex', alignItems: 'center', gap: 5, overflowX: 'auto', 
+          flex: 1, scrollbarWidth: 'none', padding: '2px 0'
+        }}>
+          {tabs.map((t) => {
+            const isActive = t.id === activeTabId;
+            const tabIcon = t.type === 'learn' ? '📚' : t.type === 'challenge' ? '🏆' : t.type === 'snippet' ? '⚡' : '📁';
+            
+            return (
+              <div
+                key={t.id}
+                onClick={() => switchTab(t.id)}
+                onDoubleClick={() => {
+                  if (isActive) {
+                    const newName = prompt("Rename Project / Tab:", t.title);
+                    if (newName && newName.trim()) {
+                      setProjectName(newName.trim());
+                      if (projectId) {
+                        try {
+                          const projs = JSON.parse(localStorage.getItem("execium_projects") ?? "[]");
+                          const updated = projs.map((p: any) => p.id === projectId ? { ...p, name: newName.trim() } : p);
+                          localStorage.setItem("execium_projects", JSON.stringify(updated));
+                        } catch {}
+                      }
+                    }
+                  }
+                }}
+                title={t.title + (isActive ? " (Double click to rename)" : " (Click to switch tab)")}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '3px 8px 3px 10px', borderRadius: 6,
+                  background: isActive ? `${T.uiAccent}22` : 'rgba(255,255,255,.03)',
+                  border: `1px solid ${isActive ? T.uiAccent : T.uiBorder}`,
+                  color: isActive ? T.uiAccent : T.uiTextMuted,
+                  fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: isActive ? 800 : 600,
+                  cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap', userSelect: 'none',
+                  flexShrink: 0, boxShadow: isActive ? `0 2px 8px ${T.uiAccent}20` : 'none'
+                }}
+              >
+                <span style={{ fontSize: 11 }}>{tabIcon}</span>
+                <span style={{ 
+                  color: isActive ? T.uiText : T.uiTextMuted, 
+                  maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' 
+                }}>
+                  {t.title}
+                </span>
+
+                {/* Close Tab button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeTab(t.id);
+                  }}
+                  title="Close Tab"
+                  style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    color: T.uiTextMuted, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 2, borderRadius: 4, transition: 'all 0.15s', marginLeft: 2
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239,68,68,0.18)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = T.uiTextMuted; e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            );
+          })}
+
+          {/* New Tab (+) Button */}
+          <button
+            onClick={() => createNewProjectTab()}
+            title="Open New Empty Project Tab"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '4px 8px', borderRadius: 6,
+              background: 'rgba(255,255,255,0.04)', border: `1px solid ${T.uiBorder}`,
+              color: T.uiTextMuted, cursor: 'pointer', transition: 'all 0.15s', flexShrink: 0,
+              fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 700
+            }}
+            onMouseEnter={e => { e.currentTarget.style.color = T.uiAccent; e.currentTarget.style.borderColor = T.uiAccent; }}
+            onMouseLeave={e => { e.currentTarget.style.color = T.uiTextMuted; e.currentTarget.style.borderColor = T.uiBorder; }}
+          >
+            <Plus size={13} style={{ marginRight: 2 }} /> New Tab
+          </button>
         </div>
 
-        <div style={{ width: 1, height: 18, background: T.uiBorder }} />
+        <div style={{ width: 1, height: 18, background: T.uiBorder, flexShrink: 0 }} />
 
         {/* Trace hint */}
         {traceHint && traceHint !== 'custom' && PROGRAMS[traceHint] && (

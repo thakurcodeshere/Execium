@@ -17,7 +17,7 @@ export interface UserSubmission {
 }
 
 export default function LearnPanel() {
-  const { activeLearnModuleId, setLearnModuleId, theme, setCode, code, loadProgram, restart, play, setProjectName, setProjectId } = useStore();
+  const { activeLearnModuleId, setLearnModuleId, theme, setCode, code, loadProgram, restart, play, setProjectName, setProjectId, openTab } = useStore();
   const [activeTab, setActiveTab] = useState<'problem' | 'approaches' | 'breakdown' | 'submissions'>('problem');
   const [selectedApproachIdx, setSelectedApproachIdx] = useState(0);
   const [activeConstructIdx, setActiveConstructIdx] = useState(0);
@@ -179,10 +179,14 @@ export default function LearnPanel() {
               if (currentModuleIdx > 0) {
                 const prevMod = LEARN_MODULES[currentModuleIdx - 1];
                 const prevDetails = getLearnModuleDetails(prevMod.id);
-                setLearnModuleId(prevMod.id);
-                setProjectName(prevDetails.title);
-                setProjectId(null);
-                setCode(`// ${prevDetails.title}\n// Category: ${prevDetails.category} | Difficulty: ${prevDetails.difficulty.toUpperCase()}\n// ${prevDetails.shortDesc}\n\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\n// TODO: Implement your solution for ${prevDetails.title}\n\nint main() {\n    cout << "=== ${prevDetails.title} ===" << endl;\n\n    // Write your code here\n\n    return 0;\n}\n`);
+                const boilerplate = `// ${prevDetails.title}\n// Category: ${prevDetails.category} | Difficulty: ${prevDetails.difficulty.toUpperCase()}\n// ${prevDetails.shortDesc}\n\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\n// TODO: Implement your solution for ${prevDetails.title}\n\nint main() {\n    cout << "=== ${prevDetails.title} ===" << endl;\n\n    // Write your code here\n\n    return 0;\n}\n`;
+                openTab({
+                  id: `learn-${prevMod.id}`,
+                  type: 'learn',
+                  title: prevDetails.title,
+                  code: boilerplate,
+                  activeLearnModuleId: prevMod.id
+                });
                 restart();
                 setActiveConstructIdx(0);
                 setSelectedApproachIdx(0);
@@ -209,10 +213,14 @@ export default function LearnPanel() {
               if (currentModuleIdx < LEARN_MODULES.length - 1) {
                 const nextMod = LEARN_MODULES[currentModuleIdx + 1];
                 const nextDetails = getLearnModuleDetails(nextMod.id);
-                setLearnModuleId(nextMod.id);
-                setProjectName(nextDetails.title);
-                setProjectId(null);
-                setCode(`// ${nextDetails.title}\n// Category: ${nextDetails.category} | Difficulty: ${nextDetails.difficulty.toUpperCase()}\n// ${nextDetails.shortDesc}\n\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\n// TODO: Implement your solution for ${nextDetails.title}\n\nint main() {\n    cout << "=== ${nextDetails.title} ===" << endl;\n\n    // Write your code here\n\n    return 0;\n}\n`);
+                const boilerplate = `// ${nextDetails.title}\n// Category: ${nextDetails.category} | Difficulty: ${nextDetails.difficulty.toUpperCase()}\n// ${nextDetails.shortDesc}\n\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\n// TODO: Implement your solution for ${nextDetails.title}\n\nint main() {\n    cout << "=== ${nextDetails.title} ===" << endl;\n\n    // Write your code here\n\n    return 0;\n}\n`;
+                openTab({
+                  id: `learn-${nextMod.id}`,
+                  type: 'learn',
+                  title: nextDetails.title,
+                  code: boilerplate,
+                  activeLearnModuleId: nextMod.id
+                });
                 restart();
                 setActiveConstructIdx(0);
                 setSelectedApproachIdx(0);

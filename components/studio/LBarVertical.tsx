@@ -24,7 +24,8 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   const { 
     pid, code, setCode, loadProgram, restart, theme, setTheme,
     projectName, projectId, setProjectName, setProjectId,
-    activeChallengeId, activeLearnModuleId, setChallengeId, setLearnModuleId
+    activeChallengeId, activeLearnModuleId, setChallengeId, setLearnModuleId,
+    openTab, createNewProjectTab
   } = useStore();
   const [user, setUser] = useState<NavUser | null>(null);
   
@@ -275,19 +276,25 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
     setProjects(updated);
     localStorage.setItem("execium_projects", JSON.stringify(updated));
 
-    setCode(starterCode);
-    setProjectName(name);
-    setProjectId(newId);
-    setChallengeId(null);
+    openTab({
+      id: `proj-${newId}`,
+      type: 'project',
+      title: name,
+      code: starterCode,
+      projectId: newId
+    });
     restart();
     setShowNewProjModal(false);
   };
 
   const handleLoadProject = (proj: CustomProject) => {
-    setCode(proj.code);
-    setProjectName(proj.name);
-    setProjectId(proj.id);
-    setChallengeId(null);
+    openTab({
+      id: `proj-${proj.id}`,
+      type: 'project',
+      title: proj.name,
+      code: proj.code,
+      projectId: proj.id
+    });
     restart();
     setShowHistory(false);
   };
@@ -366,28 +373,29 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   };
 
   const handleNewProject = () => {
-    const defaultCode = `// Untitled Project\n#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}`;
-    setCode(defaultCode);
-    setProjectName("Untitled Project");
-    setProjectId(null);
-    setChallengeId(null);
-    setLearnModuleId(null);
+    createNewProjectTab();
     restart();
-    saveToHistory(defaultCode);
   };
 
   const handleLoadHistory = (itemCode: string) => {
-    setCode(itemCode);
-    setChallengeId(null);
+    openTab({
+      id: `snippet-${Date.now()}`,
+      type: 'snippet',
+      title: itemCode.split('\n')[0].replace("//", "").trim().slice(0, 24) || "Untitled Snippet",
+      code: itemCode
+    });
     restart();
     setShowHistory(false);
   };
 
   const handleSelectQuestion = (q: CodingChallenge) => {
-    setCode(q.code);
-    setProjectName(q.title);
-    setProjectId(null);
-    setChallengeId(q.id);
+    openTab({
+      id: `challenge-${q.id}`,
+      type: 'challenge',
+      title: q.title,
+      code: q.code,
+      activeChallengeId: q.id
+    });
     restart();
     saveToHistory(q.code);
     setShowQuestions(false);
@@ -395,14 +403,15 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
 
   const handleSelectLearn = (modId: string) => {
     const mod = getLearnModuleDetails(modId);
-    // Set project name to the problem title
-    setProjectName(mod.title);
-    setProjectId(null);
-    // Pre-fill editor with C++ boilerplate scaffold for this problem
     const boilerplate = `// ${mod.title}\n// Category: ${mod.category} | Difficulty: ${mod.difficulty.toUpperCase()}\n// ${mod.shortDesc}\n\n#include <iostream>\n#include <vector>\n#include <string>\n#include <algorithm>\nusing namespace std;\n\n// TODO: Implement your solution for ${mod.title}\n\nint main() {\n    cout << "=== ${mod.title} ===" << endl;\n\n    // Write your code here\n\n    return 0;\n}\n`;
-    setCode(boilerplate);
+    openTab({
+      id: `learn-${modId}`,
+      type: 'learn',
+      title: mod.title,
+      code: boilerplate,
+      activeLearnModuleId: modId
+    });
     restart();
-    setLearnModuleId(modId);
     setShowLearn(false);
   };
 

@@ -6,6 +6,16 @@ type Playback = 'idle'|'playing'|'paused'|'done';
 type AIMode = 'beginner'|'intermediate'|'expert';
 type Panel = 'memory'|'stack'|'vars'|'output'|'algo';
 
+export interface TabItem {
+  id: string;
+  type: 'project' | 'learn' | 'challenge' | 'snippet';
+  title: string;
+  code: string;
+  projectId?: string | null;
+  activeChallengeId?: string | null;
+  activeLearnModuleId?: string | null;
+}
+
 interface Store {
   pid: string;
   code: string;
@@ -24,6 +34,15 @@ interface Store {
   activeChallengeId: string | null;
   activeLearnModuleId: string | null;
   attemptedChallenges: string[];
+
+  // Multi-tab workspace state
+  tabs: TabItem[];
+  activeTabId: string;
+
+  openTab(tab: Partial<TabItem>): void;
+  closeTab(tabId: string): void;
+  switchTab(tabId: string): void;
+  createNewProjectTab(): void;
 
   loadProgram(id:string):void;
   setCode(code:string):void;
@@ -49,6 +68,16 @@ interface Store {
 
 export const DEFAULT_UNTITLED_CODE = `#include <iostream>\nusing namespace std;\n\n// TODO: Implement your solution\n\nint main() {\n\n    // Write your code here\n\n    return 0;\n}`;
 
+const INITIAL_TAB: TabItem = {
+  id: 'tab-default',
+  type: 'project',
+  title: 'Untitled Project',
+  code: DEFAULT_UNTITLED_CODE,
+  projectId: null,
+  activeChallengeId: null,
+  activeLearnModuleId: null
+};
+
 export const useStore = create<Store>((set,get)=>({
   pid:'untitled',
   code: DEFAULT_UNTITLED_CODE,
@@ -63,6 +92,166 @@ export const useStore = create<Store>((set,get)=>({
   activeLearnModuleId: null,
   attemptedChallenges: [],
 
+  tabs: [INITIAL_TAB],
+  activeTabId: 'tab-default',
+
+  openTab(newTab) {
+    const { tabs, activeTabId, code, projectName, projectId, activeChallengeId, activeLearnModuleId } = get();
+
+    // Determine target ID or existing match
+    const targetId = newTab.id ?? (
+      newTab.projectId ? `proj-${newTab.projectId}` :
+      newTab.activeLearnModuleId ? `learn-${newTab.activeLearnModuleId}` :
+      newTab.activeChallengeId ? `challenge-${newTab.activeChallengeId}` :
+      `tab-${Date.now()}`
+    );
+
+    // Sync current active tab before switching/creating
+    const syncedTabs = tabs.map(t => t.id === activeTabId ? {
+      ...t,
+      code,
+      title: projectName,
+      projectId,
+      activeChallengeId,
+      activeLearnModuleId
+    } : t);
+
+    const existingIdx = syncedTabs.findIndex(t => 
+      t.id === targetId || 
+      (newTab.projectId && t.projectId === newTab.projectId) || 
+      (newTab.activeLearnModuleId && t.activeLearnModuleId === newTab.activeLearnModuleId) || 
+      (newTab.activeChallengeId && t.activeChallengeId === newTab.activeChallengeId)
+    );
+
+    if (existingIdx >= 0) {
+      const existing = syncedTabs[existingIdx];
+      const updatedTab: TabItem = {
+        ...existing,
+        ...newTab,
+        code: newTab.code ?? existing.code,
+        title: newTab.title ?? existing.title
+      };
+      syncedTabs[existingIdx] = updatedTab;
+
+      set({
+        tabs: syncedTabs,
+        activeTabId: updatedTab.id,
+        code: updatedTab.code,
+        projectName: updatedTab.title,
+        projectId: updatedTab.projectId ?? null,
+        activeChallengeId: updatedTab.activeChallengeId ?? null,
+        activeLearnModuleId: updatedTab.activeLearnModuleId ?? null
+      });
+    } else {
+      const createdTab: TabItem = {
+        id: targetId,
+        type: newTab.type ?? 'project',
+        title: newTab.title ?? 'Untitled Project',
+        code: newTab.code ?? DEFAULT_UNTITLED_CODE,
+        projectId: newTab.projectId ?? null,
+        activeChallengeId: newTab.activeChallengeId ?? null,
+        activeLearnModuleId: newTab.activeLearnModuleId ?? null
+      };
+      const newTabsList = [...syncedTabs, createdTab];
+
+      set({
+        tabs: newTabsList,
+        activeTabId: createdTab.id,
+        code: createdTab.code,
+        projectName: createdTab.title,
+        projectId: createdTab.projectId ?? null,
+        activeChallengeId: createdTab.activeChallengeId ?? null,
+        activeLearnModuleId: createdTab.activeLearnModuleId ?? null
+      });
+    }
+  },
+
+  switchTab(tabId) {
+    const { tabs, activeTabId, code, projectName, projectId, activeChallengeId, activeLearnModuleId } = get();
+    if (tabId === activeTabId) return;
+
+    // Save current active tab state before switching
+    const syncedTabs = tabs.map(t => t.id === activeTabId ? {
+      ...t,
+      code,
+      title: projectName,
+      projectId,
+      activeChallengeId,
+      activeLearnModuleId
+    } : t);
+
+    const target = syncedTabs.find(t => t.id === tabId);
+    if (!target) return;
+
+    set({
+      tabs: syncedTabs,
+      activeTabId: target.id,
+      code: target.code,
+      projectName: target.title,
+      projectId: target.projectId ?? null,
+      activeChallengeId: target.activeChallengeId ?? null,
+      activeLearnModuleId: target.activeLearnModuleId ?? null
+    });
+  },
+
+  closeTab(tabId) {
+    const { tabs, activeTabId } = get();
+    if (tabs.length <= 1) {
+      // Reset single tab to clean untitled project
+      const resetTab: TabItem = {
+        id: `tab-${Date.now()}`,
+        type: 'project',
+        title: 'Untitled Project',
+        code: DEFAULT_UNTITLED_CODE,
+        projectId: null,
+        activeChallengeId: null,
+        activeLearnModuleId: null
+      };
+      set({
+        tabs: [resetTab],
+        activeTabId: resetTab.id,
+        code: resetTab.code,
+        projectName: resetTab.title,
+        projectId: null,
+        activeChallengeId: null,
+        activeLearnModuleId: null
+      });
+      return;
+    }
+
+    const remaining = tabs.filter(t => t.id !== tabId);
+    if (activeTabId === tabId) {
+      const closedIdx = tabs.findIndex(t => t.id === tabId);
+      const nextActiveIdx = Math.max(0, closedIdx - 1);
+      const nextActive = remaining[nextActiveIdx];
+
+      set({
+        tabs: remaining,
+        activeTabId: nextActive.id,
+        code: nextActive.code,
+        projectName: nextActive.title,
+        projectId: nextActive.projectId ?? null,
+        activeChallengeId: nextActive.activeChallengeId ?? null,
+        activeLearnModuleId: nextActive.activeLearnModuleId ?? null
+      });
+    } else {
+      set({ tabs: remaining });
+    }
+  },
+
+  createNewProjectTab() {
+    const newId = `proj-tab-${Date.now()}`;
+    get().openTab({
+      id: newId,
+      type: 'project',
+      title: 'Untitled Project',
+      code: DEFAULT_UNTITLED_CODE,
+      projectId: null,
+      activeChallengeId: null,
+      activeLearnModuleId: null
+    });
+  },
+
   loadProgram(id){
     const {_timer}=get();
     if(_timer)clearInterval(_timer);
@@ -72,7 +261,9 @@ export const useStore = create<Store>((set,get)=>({
   },
 
   setCode(code){
-    set({code});
+    const { tabs, activeTabId } = get();
+    const updatedTabs = tabs.map(t => t.id === activeTabId ? { ...t, code } : t);
+    set({ code, tabs: updatedTabs });
   },
 
   play(){
@@ -131,10 +322,31 @@ export const useStore = create<Store>((set,get)=>({
   setTheme(id:string){set({theme:THEMES[id]??THEMES[DEFAULT_THEME_ID]})},
   setCollapsed(collapsed){set({isCollapsed:collapsed})},
   toggleCollapsed(){set(s=>({isCollapsed:!s.isCollapsed}))},
-  setProjectName(name){set({projectName:name})},
-  setProjectId(id){set({projectId:id})},
-  setChallengeId(id){set({activeChallengeId:id, activeLearnModuleId: id ? null : null})},
-  setLearnModuleId(id){set({activeLearnModuleId:id, activeChallengeId: id ? null : null})},
+
+  setProjectName(name){
+    const { tabs, activeTabId } = get();
+    const updatedTabs = tabs.map(t => t.id === activeTabId ? { ...t, title: name } : t);
+    set({ projectName: name, tabs: updatedTabs });
+  },
+
+  setProjectId(id){
+    const { tabs, activeTabId } = get();
+    const updatedTabs = tabs.map(t => t.id === activeTabId ? { ...t, projectId: id } : t);
+    set({ projectId: id, tabs: updatedTabs });
+  },
+
+  setChallengeId(id){
+    const { tabs, activeTabId } = get();
+    const updatedTabs = tabs.map(t => t.id === activeTabId ? { ...t, activeChallengeId: id, activeLearnModuleId: id ? null : t.activeLearnModuleId } : t);
+    set({ activeChallengeId: id, activeLearnModuleId: id ? null : get().activeLearnModuleId, tabs: updatedTabs });
+  },
+
+  setLearnModuleId(id){
+    const { tabs, activeTabId } = get();
+    const updatedTabs = tabs.map(t => t.id === activeTabId ? { ...t, activeLearnModuleId: id, activeChallengeId: id ? null : t.activeChallengeId } : t);
+    set({ activeLearnModuleId: id, activeChallengeId: id ? null : get().activeChallengeId, tabs: updatedTabs });
+  },
+
   recordAttempt(id){
     if (!id) return;
     const { attemptedChallenges } = get();
