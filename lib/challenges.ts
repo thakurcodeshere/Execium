@@ -444,61 +444,130 @@ export function getChallengeDetails(id: string): ChallengeDetails {
   const problemStatementMap: Record<string, ChallengeDetails['problemStatement']> = {
     easy_twosum: {
       title: "Two Sum Indices",
-      objective: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.",
-      description: "You may assume that each input would have exactly one solution, and you may not use the same element twice. Return the indices in zero-indexed order.",
-      inputDesc: "std::vector<int>& nums, int target",
-      outputDesc: "std::vector<int> containing the 2-index pair",
+      objective: "Given an integer array nums and an integer target, find the two distinct indices i and j such that nums[i] + nums[j] == target. Return the pair [i, j].",
+      description: "Each input has exactly one valid solution. You may not use the same element twice. The returned indices must be in ascending order. Your solution should run in O(N) time.",
+      inputDesc: "Line 1: N (size of array). Line 2: N space-separated integers. Line 3: integer target.",
+      outputDesc: "Two space-separated integers: the 0-based indices i and j where nums[i] + nums[j] == target.",
       takeaways: [
-        "Single-pass Hash Map achieves O(N) time by looking up complement target - nums[i]",
-        "Space complexity is O(N) to store visited values and their indices in unordered_map",
-        "Edge Cases: Duplicates, negative target values, array size = 2"
+        "Hash Map lookup converts O(N^2) brute force into O(N) single-pass",
+        "Store complement (target - nums[i]) as key, index i as value in unordered_map",
+        "Watch for edge cases: duplicate values, negative numbers, exactly 2 elements"
       ],
       examples: [
-        { id: 1, input: "nums = [2, 7, 11, 15], target = 9", output: "[0, 1]", explanation: "nums[0] + nums[1] == 2 + 7 == 9." },
-        { id: 2, input: "nums = [3, 2, 4], target = 6", output: "[1, 2]", explanation: "nums[1] + nums[2] == 2 + 4 == 6." },
-        { id: 3, input: "nums = [3, 3], target = 6", output: "[0, 1]", explanation: "nums[0] + nums[1] == 3 + 3 == 6." }
+        { id: 1, input: "nums = [2, 7, 11, 15], target = 9", output: "[0, 1]", explanation: "nums[0] + nums[1] = 2 + 7 = 9, so return [0, 1]." },
+        { id: 2, input: "nums = [3, 2, 4], target = 6", output: "[1, 2]", explanation: "nums[1] + nums[2] = 2 + 4 = 6, so return [1, 2]." },
+        { id: 3, input: "nums = [3, 3], target = 6", output: "[0, 1]", explanation: "Both elements are 3. nums[0] + nums[1] = 6, return [0, 1]." }
       ],
-      constraints: ["2 <= nums.length <= 10^4", "-10^9 <= nums[i] <= 10^9", "-10^9 <= target <= 10^9"],
+      constraints: [
+        "2 <= nums.length <= 10^4",
+        "-10^9 <= nums[i] <= 10^9",
+        "-10^9 <= target <= 10^9",
+        "Exactly one valid answer exists"
+      ],
       companies: ["Google", "Amazon", "Apple", "Microsoft", "Meta"],
       acceptanceRate: "54.2%",
       totalAccepted: "14,500,000"
     },
     easy_revstring: {
       title: "Reverse String",
-      objective: "Write a function that reverses a string array in-place with O(1) extra memory.",
-      description: "Do not allocate another array for another string. You must modify the input array in-place with O(1) extra memory using two pointers.",
-      inputDesc: "std::vector<char>& s",
-      outputDesc: "Void function modifying vector<char>& in-place",
+      objective: "Given a character array s, reverse the entire array in-place so that the first character becomes the last and vice versa. Do NOT allocate a new array.",
+      description: "You must solve it using O(1) extra memory. Use the two-pointer technique: initialize left = 0 and right = s.size() - 1, then swap s[left] and s[right] while moving both pointers inward until they meet.",
+      inputDesc: "Line 1: N (number of characters). Line 2: N space-separated characters.",
+      outputDesc: "N space-separated characters in reversed order (printed on a single line).",
       takeaways: [
-        "Two-pointer technique (left & right pointers) swapping elements inward",
-        "Requires O(1) extra memory space",
-        "Runs in O(N/2) swaps -> O(N) time"
+        "Two-pointer swap: left pointer starts at index 0, right pointer starts at index N-1",
+        "Each iteration swaps s[left] with s[right], then left++, right--",
+        "Total swaps = N/2, giving O(N) time and O(1) space"
       ],
       examples: [
-        { id: 1, input: "s = ['h','e','l','l','o']", output: "['o','l','l','e','h']", explanation: "Swaps first and last character inward." },
-        { id: 2, input: "s = ['H','a','n','n','a','h']", output: "['h','a','n','n','a','H']", explanation: "Reverses even length character vector in-place." }
+        { id: 1, input: "s = ['h', 'e', 'l', 'l', 'o']", output: "['o', 'l', 'l', 'e', 'h']", explanation: "h swaps with o, e swaps with l. Middle l stays. Result: o l l e h." },
+        { id: 2, input: "s = ['H', 'a', 'n', 'n', 'a', 'h']", output: "['h', 'a', 'n', 'n', 'a', 'H']", explanation: "Even-length array. H swaps with h, a swaps with a, n swaps with n." },
+        { id: 3, input: "s = ['A']", output: "['A']", explanation: "Single character array is already reversed." }
       ],
-      constraints: ["1 <= s.length <= 10^5", "s[i] is a printable ascii character."],
+      constraints: [
+        "1 <= s.length <= 10^5",
+        "s[i] is a printable ASCII character",
+        "Must use O(1) extra space"
+      ],
       companies: ["Amazon", "Microsoft", "Apple", "Adobe"],
       acceptanceRate: "78.9%",
       totalAccepted: "3,100,000"
     },
-    med_binsearch: {
-      title: "Binary Search",
-      objective: "Given an array of integers nums sorted in ascending order and a target value, write a function to search target in nums.",
-      description: "If target exists, return its index. Otherwise, return -1. You must write an algorithm with O(log n) runtime complexity.",
-      inputDesc: "std::vector<int>& arr, int target",
-      outputDesc: "int index of target or -1",
+    easy_fizzbuzz: {
+      title: "FizzBuzz Solver",
+      objective: "Given a positive integer n, return a string array answer (1-indexed) where: answer[i] is \"FizzBuzz\" if i is divisible by both 3 and 5, \"Fizz\" if divisible by 3 only, \"Buzz\" if divisible by 5 only, or the string representation of i otherwise.",
+      description: "Iterate from 1 to n inclusive. For each number, check divisibility by 15 first (for FizzBuzz), then by 3 (Fizz), then by 5 (Buzz), and finally convert the number to a string. Append each result to the output vector.",
+      inputDesc: "Line 1: a single integer n (1 <= n <= 10^4).",
+      outputDesc: "N lines, each containing one string: the FizzBuzz value for that position (1-indexed).",
       takeaways: [
-        "Divide and conquer halves search space on every iteration",
-        "Middle index formula mid = lo + (hi - lo) / 2 avoids integer overflow",
-        "Requires strictly sorted input array"
+        "Order of checks matters: test divisibility by 15 before 3 or 5 individually",
+        "to_string(i) converts integer i to its string representation in C++",
+        "Classic interview warm-up testing conditional logic and modulo operations"
       ],
       examples: [
-        { id: 1, input: "nums = [-1, 0, 3, 5, 9, 12], target = 9", output: "4", explanation: "9 exists in nums and its index is 4." },
-        { id: 2, input: "nums = [-1, 0, 3, 5, 9, 12], target = 2", output: "-1", explanation: "2 does not exist in nums so return -1." }
+        { id: 1, input: "n = 3", output: "[\"1\", \"2\", \"Fizz\"]", explanation: "1 and 2 are not divisible by 3 or 5. 3 is divisible by 3, so output Fizz." },
+        { id: 2, input: "n = 5", output: "[\"1\", \"2\", \"Fizz\", \"4\", \"Buzz\"]", explanation: "5 is divisible by 5 but not 3, so output Buzz." },
+        { id: 3, input: "n = 15", output: "[\"1\", \"2\", \"Fizz\", \"4\", \"Buzz\", \"Fizz\", \"7\", \"8\", \"Fizz\", \"Buzz\", \"11\", \"Fizz\", \"13\", \"14\", \"FizzBuzz\"]", explanation: "15 is divisible by both 3 and 5, producing FizzBuzz at position 15." }
       ],
-      constraints: ["1 <= nums.length <= 10^4", "All integers in nums are unique and sorted in ascending order."],
+      constraints: [
+        "1 <= n <= 10^4",
+        "Output must be exactly n strings",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Goldman Sachs", "Bloomberg", "Cisco", "Oracle", "Infosys"],
+      acceptanceRate: "72.4%",
+      totalAccepted: "2,800,000"
+    },
+    easy_palindrome: {
+      title: "Palindrome Checker",
+      objective: "Given a string s consisting of lowercase English letters, determine whether it reads the same forwards and backwards. Return true if s is a palindrome, false otherwise.",
+      description: "Compare characters from both ends moving inward. If at any point s[left] != s[right], immediately return false. If all pairs match (or the pointers cross), return true. The check runs in O(N/2) comparisons.",
+      inputDesc: "Line 1: a single string s (lowercase a-z only, no spaces).",
+      outputDesc: "A single line: 1 if the string is a palindrome, 0 otherwise.",
+      takeaways: [
+        "Two-pointer comparison: left pointer at 0, right pointer at length - 1",
+        "Early exit: return false immediately on first mismatch for efficiency",
+        "Odd-length strings have a middle character that does not need comparison"
+      ],
+      examples: [
+        { id: 1, input: "s = \"radar\"", output: "1 (true)", explanation: "r == r, a == a, d is the middle. All pairs match, so it is a palindrome." },
+        { id: 2, input: "s = \"hello\"", output: "0 (false)", explanation: "h != o at the outermost pair. Immediately return false." },
+        { id: 3, input: "s = \"abacaba\"", output: "1 (true)", explanation: "a==a, b==b, a==a, c is middle. All pairs match." },
+        { id: 4, input: "s = \"a\"", output: "1 (true)", explanation: "Single character strings are always palindromes." }
+      ],
+      constraints: [
+        "1 <= s.length <= 10^5",
+        "s contains only lowercase English letters (a-z)",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Meta", "Apple", "Uber", "LinkedIn", "Spotify"],
+      acceptanceRate: "68.1%",
+      totalAccepted: "5,900,000"
+    },
+    med_binsearch: {
+      title: "Binary Search",
+      objective: "Given an array of integers nums sorted in ascending order and a target value, write a function to search target in nums. If target exists, return its index. Otherwise, return -1.",
+      description: "You must write an algorithm with O(log n) runtime complexity. Use the classic binary search pattern: maintain lo and hi boundaries, compute mid = lo + (hi - lo) / 2, then narrow the search window based on comparison with target.",
+      inputDesc: "Line 1: N (size of sorted array). Line 2: N space-separated integers in ascending order. Line 3: integer target.",
+      outputDesc: "A single integer: the 0-based index of target in nums, or -1 if not found.",
+      takeaways: [
+        "Divide-and-conquer halves the search space every iteration: O(log N) time",
+        "Use mid = lo + (hi - lo) / 2 instead of (lo + hi) / 2 to avoid integer overflow",
+        "Array must be sorted; does not work on unsorted input"
+      ],
+      examples: [
+        { id: 1, input: "nums = [-1, 0, 3, 5, 9, 12], target = 9", output: "4", explanation: "9 exists at index 4 in the sorted array." },
+        { id: 2, input: "nums = [-1, 0, 3, 5, 9, 12], target = 2", output: "-1", explanation: "2 does not exist in the array, return -1." },
+        { id: 3, input: "nums = [5], target = 5", output: "0", explanation: "Single-element array containing the target. Return index 0." }
+      ],
+      constraints: [
+        "1 <= nums.length <= 10^4",
+        "-10^4 < nums[i], target < 10^4",
+        "All integers in nums are unique",
+        "nums is sorted in ascending order"
+      ],
       companies: ["Google", "Amazon", "Meta", "NVIDIA"],
       acceptanceRate: "57.8%",
       totalAccepted: "4,200,000"

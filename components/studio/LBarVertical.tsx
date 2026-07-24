@@ -7,7 +7,7 @@ import { CODING_CHALLENGES, CodingChallenge, getDailyChallenge } from "@/lib/cha
 import { LEARN_MODULES, getLearnModuleDetails } from "@/lib/learn";
 import { 
   Plus, FolderGit2, History, User, Settings, LogOut, Sun, Moon,
-  ChevronLeft, ChevronRight, LayoutTemplate, BookOpen, HelpCircle, Flame
+  ChevronLeft, ChevronRight, LayoutTemplate, BookOpen, Trophy, Flame
 } from "lucide-react";
 
 interface NavUser { name: string; avatar: string; provider: string; }
@@ -676,7 +676,7 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
             style={btnStyle(showQuestions)}
             title="Practice Coding Challenges"
           >
-            <HelpCircle size={18} />
+            <Trophy size={18} />
             {isExpanded && <span>Challenges</span>}
           </button>
 
