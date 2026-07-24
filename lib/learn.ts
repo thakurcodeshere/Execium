@@ -11361,6 +11361,2776 @@ int main() {
 }
 
 
+
+export function getProblem46Details(): LearnModule {
+  return {
+    id: "med_virtual_func",
+    title: "46. Polymorphism & Virtual Functions",
+    category: "OOP Basics",
+    difficulty: "medium",
+    shortDesc: "Dynamic dispatch using virtual functions, override, and VTables.",
+    fullCode: `// 46. Polymorphism - Approach 1: Virtual Function Dispatch
+#include <iostream>
+using namespace std;
+
+class Shape {
+public:
+    virtual double area() const { return 0.0; }
+    virtual ~Shape() {}
+};
+
+class Circle : public Shape {
+    double radius;
+public:
+    Circle(double r) : radius(r) {}
+    double area() const override { return 3.14159 * radius * radius; }
+};
+
+int main() {
+    Shape* s = new Circle(5.0);
+    cout << "Area: " << s->area() << endl;
+    delete s;
+    return 0;
+}`,
+    problemStatement: {
+      title: "46. Polymorphism & Virtual Functions",
+      objective: "Master C++ runtime polymorphism: virtual function tables (VTables), dynamic dispatch via base pointers, the override specifier, covariant return types, and the cost model of virtual calls.",
+      description: "Implement **Polymorphism & Virtual Functions** (OOP Basics). Use virtual member functions to achieve dynamic dispatch, allowing derived classes to customize behavior at runtime through base-class pointers and references.",
+      inputDesc: "Base-class pointers/references bound to derived objects, virtual method invocations, and polymorphic container iterations.",
+      outputDesc: "Derived-class method results dispatched dynamically, VTable lookup confirmations, and runtime type resolution outputs.",
+      takeaways: [
+        "A virtual function creates a VTable entry; the derived override replaces the pointer at runtime",
+        "The override keyword prevents silent signature mismatches from compiling",
+        "Calling virtual functions through base pointers costs one extra indirection compared to static dispatch",
+        "Covariant return types allow a derived override to return a more-derived pointer or reference"
+      ],
+      examples: [
+        { id: 1, input: "Shape* s = new Circle(5.0); s->area()", output: "Area: 78.5398", explanation: "Dynamic dispatch calls Circle::area() through the Shape* base pointer." },
+        { id: 2, input: "Base& ref = derived; ref.speak()", output: "Derived speaking!", explanation: "Virtual dispatch also works through base references, not just pointers." },
+        { id: 3, input: "vector<Shape*> shapes; for(auto s : shapes) s->draw()", output: "Circle drawn / Rectangle drawn / Triangle drawn", explanation: "Polymorphic container iterates and dispatches draw() to each concrete type." }
+      ],
+      constraints: ["Virtual functions require pointer or reference semantics; value slicing removes derived data."],
+      companies: ["Google", "Microsoft", "Amazon", "Meta", "NVIDIA"],
+      acceptanceRate: "89.7%",
+      totalAccepted: "3,150,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Virtual Function Override (FREE)", category: "FREE / Virtual Dispatch",
+        description: "Declares a virtual method in the base class and overrides it in the derived class for runtime polymorphism.",
+        prosCons: "Pros: Simplest polymorphic pattern. Cons: Adds VTable overhead per class.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 46. Polymorphism - Approach 1: Basic Virtual Override
+#include <iostream>
+using namespace std;
+
+class Animal {
+public:
+    virtual void speak() const {
+        cout << "Animal speaks generically." << endl;
+    }
+    virtual ~Animal() {}
+};
+
+class Cat : public Animal {
+public:
+    void speak() const override {
+        cout << "Cat says Meow!" << endl;
+    }
+};
+
+int main() {
+    Animal* pet = new Cat();
+    pet->speak();
+    delete pet;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: '#include <iostream>', constructType: 'Header / Include', title: 'Standard I/O Header', explanation: 'Includes the iostream library for cout and endl output operations.', keyDetails: [{ variableOrConstruct: '#include <iostream>', role: 'I/O stream library', whyThisWay: 'Required for all console output in C++' }] },
+          { lineNum: 2, codeSnippet: 'virtual void speak() const { ... }', constructType: 'Function Signature', title: 'Virtual Base Method Declaration', explanation: 'The virtual keyword tells the compiler to create a VTable entry for speak(). Derived classes can override this method and the correct version will be called at runtime based on the actual object type.', keyDetails: [{ variableOrConstruct: 'virtual', role: 'Enables dynamic dispatch', whyThisWay: 'Without virtual, the base version would always be called through a base pointer (static binding)' }] },
+          { lineNum: 3, codeSnippet: 'void speak() const override { ... }', constructType: 'Function Signature', title: 'Derived Override with override Keyword', explanation: 'The override specifier explicitly marks this method as overriding a base virtual function. If the signature does not match any base virtual method, the compiler emits an error.', keyDetails: [{ variableOrConstruct: 'override', role: 'Compile-time override verification', whyThisWay: 'Prevents accidental hiding when signatures drift; catches typos at compile time' }] },
+          { lineNum: 4, codeSnippet: 'Animal* pet = new Cat();', constructType: 'Variable & Initializer', title: 'Base Pointer to Derived Object', explanation: 'A base-class pointer holds the address of a derived-class object. This is the fundamental setup for runtime polymorphism: the static type is Animal* but the dynamic type is Cat.', keyDetails: [{ variableOrConstruct: 'Animal* pet', role: 'Polymorphic base pointer', whyThisWay: 'Enables dynamic dispatch: pet->speak() calls Cat::speak() through VTable lookup' }] },
+          { lineNum: 5, codeSnippet: 'pet->speak();', constructType: 'Function Signature', title: 'Dynamic Dispatch Invocation', explanation: 'At runtime, the VTable of the actual object (Cat) is consulted to find the correct speak() address. This indirection is the core mechanism of polymorphism.', keyDetails: [{ variableOrConstruct: 'pet->speak()', role: 'Virtual function call', whyThisWay: 'Calls Cat::speak() even though pet is declared as Animal*' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Polymorphic Container Iteration (FREE)", category: "FREE / Container Dispatch",
+        description: "Stores different derived objects in a vector of base pointers and iterates, dispatching virtual calls polymorphically.",
+        prosCons: "Pros: Clean heterogeneous collections. Cons: Requires heap allocation and manual cleanup.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 46. Polymorphism - Approach 2: Polymorphic Container
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Instrument {
+public:
+    virtual void play() const = 0;
+    virtual ~Instrument() {}
+};
+
+class Piano : public Instrument {
+public:
+    void play() const override { cout << "Piano: melodic keys" << endl; }
+};
+
+class Drum : public Instrument {
+public:
+    void play() const override { cout << "Drum: rhythmic beats" << endl; }
+};
+
+class Guitar : public Instrument {
+public:
+    void play() const override { cout << "Guitar: strumming chords" << endl; }
+};
+
+int main() {
+    vector<Instrument*> band;
+    band.push_back(new Piano());
+    band.push_back(new Drum());
+    band.push_back(new Guitar());
+
+    for (const auto* inst : band)
+        inst->play();
+
+    for (auto* inst : band)
+        delete inst;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'virtual void play() const = 0;', constructType: 'Function Signature', title: 'Pure Virtual Function', explanation: 'The = 0 makes Instrument an abstract class that cannot be instantiated directly. Every concrete derived class must provide its own play() implementation.', keyDetails: [{ variableOrConstruct: '= 0', role: 'Pure virtual specifier', whyThisWay: 'Forces all concrete subclasses to implement play(); prevents incomplete objects from existing' }] },
+          { lineNum: 2, codeSnippet: 'vector<Instrument*> band;', constructType: 'Variable & Initializer', title: 'Heterogeneous Polymorphic Container', explanation: 'A vector of base-class pointers can hold any mix of derived types. Each pointer maintains its own VTable reference so virtual dispatch works correctly during iteration.', keyDetails: [{ variableOrConstruct: 'vector<Instrument*>', role: 'Polymorphic collection', whyThisWay: 'Stores Piano, Drum, Guitar together under a common Instrument* interface' }] },
+          { lineNum: 3, codeSnippet: 'for (const auto* inst : band) inst->play();', constructType: 'Loop Construct', title: 'Polymorphic Dispatch Loop', explanation: 'Each iteration calls play() on a different derived type through the base pointer. The VTable of each concrete object is consulted independently, producing different output per element.', keyDetails: [{ variableOrConstruct: 'inst->play()', role: 'Dynamic dispatch per element', whyThisWay: 'Demonstrates heterogeneous iteration: one loop, multiple behaviors' }] },
+          { lineNum: 4, codeSnippet: 'for (auto* inst : band) delete inst;', constructType: 'Return / Cleanup', title: 'Polymorphic Cleanup Loop', explanation: 'Each base pointer must be individually deleted. The virtual destructor ensures derived destructors run before the base destructor, preventing resource leaks.', keyDetails: [{ variableOrConstruct: 'delete inst', role: 'Invokes virtual destructor chain', whyThisWay: 'Without virtual ~Instrument(), only ~Instrument() would run, leaking derived resources' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Base Reference Polymorphism", category: "Reference Binding",
+        description: "Achieves polymorphism using base-class references instead of pointers, avoiding heap allocation entirely.",
+        prosCons: "Pros: No heap, no delete needed. Cons: Reference must bind at declaration; cannot be reseated.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 46. Polymorphism - Approach 3: Reference Binding
+#include <iostream>
+using namespace std;
+
+class Logger {
+public:
+    virtual void log(const string& msg) const {
+        cout << "[BASE] " << msg << endl;
+    }
+    virtual ~Logger() {}
+};
+
+class FileLogger : public Logger {
+public:
+    void log(const string& msg) const override {
+        cout << "[FILE] Writing: " << msg << endl;
+    }
+};
+
+void processLog(const Logger& logger, const string& message) {
+    logger.log(message);
+}
+
+int main() {
+    FileLogger fl;
+    processLog(fl, "System started");
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void processLog(const Logger& logger, const string& message)', constructType: 'Function Signature', title: 'Polymorphic Reference Parameter', explanation: 'Accepting a const reference to the base class allows any derived Logger to be passed. The virtual dispatch mechanism works identically through references as through pointers.', keyDetails: [{ variableOrConstruct: 'const Logger& logger', role: 'Base-class reference for polymorphism', whyThisWay: 'Avoids pointer syntax and heap allocation while preserving dynamic dispatch' }] },
+          { lineNum: 2, codeSnippet: 'logger.log(message);', constructType: 'Function Signature', title: 'Virtual Dispatch Through Reference', explanation: 'Even though the parameter type is Logger&, the actual FileLogger::log() override is invoked because log() is virtual. The VTable lookup works the same as with pointers.', keyDetails: [{ variableOrConstruct: 'logger.log()', role: 'Dynamic dispatch via reference', whyThisWay: 'Proves that references support polymorphism identically to pointers' }] },
+          { lineNum: 3, codeSnippet: 'FileLogger fl; processLog(fl, "System started");', constructType: 'Variable & Initializer', title: 'Stack-Allocated Derived Object Passed by Reference', explanation: 'The FileLogger object lives on the stack. No new/delete is needed. The reference parameter binds to it and dispatches virtually.', keyDetails: [{ variableOrConstruct: 'FileLogger fl', role: 'Concrete derived instance on stack', whyThisWay: 'Stack allocation is faster and automatically cleaned up; no memory management needed' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Covariant Return Types", category: "Advanced Dispatch",
+        description: "Demonstrates covariant return types where the derived override returns a more-derived pointer than the base virtual signature.",
+        prosCons: "Pros: Allows natural return types in derived classes. Cons: Only works with pointers/references, not values.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 46. Polymorphism - Approach 4: Covariant Return Types
+#include <iostream>
+using namespace std;
+
+class Base {
+public:
+    virtual Base* clone() const {
+        cout << "Cloning Base" << endl;
+        return new Base(*this);
+    }
+    virtual void identify() const { cout << "I am Base" << endl; }
+    virtual ~Base() {}
+};
+
+class Derived : public Base {
+    int value;
+public:
+    Derived(int v) : value(v) {}
+    Derived* clone() const override {
+        cout << "Cloning Derived with value=" << value << endl;
+        return new Derived(*this);
+    }
+    void identify() const override { cout << "I am Derived(" << value << ")" << endl; }
+};
+
+int main() {
+    Base* original = new Derived(42);
+    Base* copy = original->clone();
+    copy->identify();
+    delete original;
+    delete copy;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'virtual Base* clone() const', constructType: 'Function Signature', title: 'Base Clone Returning Base*', explanation: 'The base class declares a virtual clone method returning a Base pointer. This establishes the prototype pattern interface for polymorphic copying.', keyDetails: [{ variableOrConstruct: 'virtual Base* clone()', role: 'Polymorphic clone prototype', whyThisWay: 'Returns a base pointer so callers do not need to know the concrete type' }] },
+          { lineNum: 2, codeSnippet: 'Derived* clone() const override', constructType: 'Function Signature', title: 'Covariant Return Type Override', explanation: 'The derived override returns Derived* instead of Base*. This is legal because Derived* is covariant with Base* (Derived inherits from Base). Callers through Base* still receive Base*, but callers through Derived* get the more specific type.', keyDetails: [{ variableOrConstruct: 'Derived* clone()', role: 'Covariant return', whyThisWay: 'Allows derived code to work with the more-specific Derived* type without casting' }] },
+          { lineNum: 3, codeSnippet: 'Base* copy = original->clone();', constructType: 'Variable & Initializer', title: 'Polymorphic Clone Call', explanation: 'Through the base pointer, clone() dispatches to Derived::clone(). The returned Derived* is implicitly upcast to Base*. The copy is a deep clone of the derived object.', keyDetails: [{ variableOrConstruct: 'original->clone()', role: 'Virtual dispatch creates a copy', whyThisWay: 'Implements the Prototype design pattern for polymorphic deep copying' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Virtual Function with Default Arguments Pitfall", category: "Gotcha / Static Default",
+        description: "Reveals the subtle bug where virtual functions use the default argument from the static type, not the dynamic type.",
+        prosCons: "Pros: Critical knowledge for interviews. Cons: Surprising behavior can cause bugs.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 46. Polymorphism - Approach 5: Default Args Pitfall
+#include <iostream>
+using namespace std;
+
+class Widget {
+public:
+    virtual void render(int size = 10) const {
+        cout << "Widget rendered at size " << size << endl;
+    }
+    virtual ~Widget() {}
+};
+
+class Button : public Widget {
+public:
+    void render(int size = 50) const override {
+        cout << "Button rendered at size " << size << endl;
+    }
+};
+
+int main() {
+    Widget* w = new Button();
+    w->render();
+    Button b;
+    b.render();
+    delete w;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'virtual void render(int size = 10) const', constructType: 'Function Signature', title: 'Base Default Argument = 10', explanation: 'The base class sets a default argument of 10. Default arguments are resolved at compile time based on the STATIC type of the pointer/reference, not the dynamic type.', keyDetails: [{ variableOrConstruct: 'size = 10', role: 'Compile-time default from base', whyThisWay: 'Default arguments are NOT virtual; they bind at compile time to the declared type' }] },
+          { lineNum: 2, codeSnippet: 'void render(int size = 50) const override', constructType: 'Function Signature', title: 'Derived Default Argument = 50', explanation: 'Button declares its own default of 50. But when called through a Widget* pointer, the compiler uses Widget default (10), even though Button::render() body executes. This is a common polymorphism pitfall.', keyDetails: [{ variableOrConstruct: 'size = 50', role: 'Derived default (only used when called directly)', whyThisWay: 'Demonstrates that default args follow the static type, creating surprising behavior through base pointers' }] },
+          { lineNum: 3, codeSnippet: 'w->render();', constructType: 'Function Signature', title: 'Pitfall Demonstration', explanation: 'w is Widget* pointing to Button. The function body dispatched is Button::render() (virtual). But the default argument used is 10 (from Widget), not 50. Output: "Button rendered at size 10". Calling b.render() directly on a Button object uses 50.', keyDetails: [{ variableOrConstruct: 'w->render()', role: 'Shows static default + dynamic dispatch', whyThisWay: 'This split behavior (static default, dynamic body) is a major C++ interview question' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Object Slicing Demonstration", category: "Gotcha / Slicing",
+        description: "Shows how assigning a derived object by value to a base variable slices off derived data, breaking polymorphism.",
+        prosCons: "Pros: Essential debugging knowledge. Cons: Cannot be fixed; must use pointers/references instead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 46. Polymorphism - Approach 6: Object Slicing
+#include <iostream>
+using namespace std;
+
+class Vehicle {
+public:
+    virtual void describe() const {
+        cout << "Generic vehicle" << endl;
+    }
+    virtual ~Vehicle() {}
+};
+
+class Truck : public Vehicle {
+    int payload;
+public:
+    Truck(int p) : payload(p) {}
+    void describe() const override {
+        cout << "Truck carrying " << payload << " tons" << endl;
+    }
+};
+
+int main() {
+    Truck t(15);
+    Vehicle v = t;
+    v.describe();
+    Vehicle& ref = t;
+    ref.describe();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Vehicle v = t;', constructType: 'Variable & Initializer', title: 'Object Slicing by Value Assignment', explanation: 'Copying a Truck into a Vehicle by value slices away the payload field and the Truck VTable. The variable v is now a pure Vehicle object. All derived data is permanently lost.', keyDetails: [{ variableOrConstruct: 'Vehicle v = t', role: 'Value copy triggers slicing', whyThisWay: 'sizeof(Vehicle) is smaller than sizeof(Truck); only the base portion is copied' }] },
+          { lineNum: 2, codeSnippet: 'v.describe();', constructType: 'Function Signature', title: 'Sliced Call Invokes Base Method', explanation: 'After slicing, v.describe() calls Vehicle::describe(), NOT Truck::describe(). The VTable pointer inside v points to Vehicle VTable. Output: "Generic vehicle".', keyDetails: [{ variableOrConstruct: 'v.describe()', role: 'Static dispatch on sliced object', whyThisWay: 'Proves that polymorphism is destroyed by value semantics; must use pointers or references' }] },
+          { lineNum: 3, codeSnippet: 'Vehicle& ref = t; ref.describe();', constructType: 'Variable & Initializer', title: 'Reference Preserves Polymorphism', explanation: 'A reference to the original Truck object preserves the VTable. ref.describe() correctly dispatches to Truck::describe(). Output: "Truck carrying 15 tons".', keyDetails: [{ variableOrConstruct: 'Vehicle& ref = t', role: 'Reference avoids slicing', whyThisWay: 'References and pointers are the only way to achieve true runtime polymorphism in C++' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: VTable Layout Introspection", category: "Internals / VTable",
+        description: "Inspects the VTable mechanism by comparing sizeof() and typeid() across base and derived objects through pointers.",
+        prosCons: "Pros: Deep understanding of the runtime cost model. Cons: VTable layout is implementation-defined.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 46. Polymorphism - Approach 7: VTable Introspection
+#include <iostream>
+#include <typeinfo>
+using namespace std;
+
+class NonVirtual {
+    int x;
+public:
+    void greet() { cout << "NonVirtual" << endl; }
+};
+
+class WithVirtual {
+    int x;
+public:
+    virtual void greet() { cout << "WithVirtual" << endl; }
+    virtual ~WithVirtual() {}
+};
+
+class ChildVirtual : public WithVirtual {
+    int y;
+public:
+    void greet() override { cout << "ChildVirtual" << endl; }
+};
+
+int main() {
+    cout << "sizeof(NonVirtual): " << sizeof(NonVirtual) << endl;
+    cout << "sizeof(WithVirtual): " << sizeof(WithVirtual) << endl;
+    cout << "sizeof(ChildVirtual): " << sizeof(ChildVirtual) << endl;
+    WithVirtual* ptr = new ChildVirtual();
+    cout << "typeid(*ptr): " << typeid(*ptr).name() << endl;
+    ptr->greet();
+    delete ptr;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'sizeof(NonVirtual) vs sizeof(WithVirtual)', constructType: 'Variable & Initializer', title: 'VTable Pointer Overhead Measurement', explanation: 'NonVirtual contains only int x (4 bytes). WithVirtual contains int x PLUS a hidden VTable pointer (8 bytes on 64-bit). The sizeof difference reveals the hidden cost of virtual functions.', keyDetails: [{ variableOrConstruct: 'sizeof()', role: 'Measures VTable pointer overhead', whyThisWay: 'Each class with at least one virtual function gets a hidden vptr member adding 8 bytes on x64' }] },
+          { lineNum: 2, codeSnippet: 'typeid(*ptr).name()', constructType: 'Function Signature', title: 'RTTI Through Virtual Pointer', explanation: 'typeid on a dereferenced pointer to a polymorphic type (has virtual functions) returns the dynamic type. Without virtual functions, typeid returns the static type. This is RTTI (RunTime Type Information).', keyDetails: [{ variableOrConstruct: 'typeid(*ptr)', role: 'Runtime type identification', whyThisWay: 'RTTI works because the VTable stores type_info alongside virtual function pointers' }] },
+          { lineNum: 3, codeSnippet: 'ptr->greet();', constructType: 'Function Signature', title: 'VTable Dispatch Verification', explanation: 'The call dispatches through the VTable: ptr VTable -> slot 0 -> ChildVirtual::greet(). The output confirms the dynamic type method is invoked, proving VTable lookup.', keyDetails: [{ variableOrConstruct: 'ptr->greet()', role: 'Confirms VTable dispatch path', whyThisWay: 'Verifies that the hidden vptr correctly points to ChildVirtual VTable' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: final Specifier to Block Override", category: "Override Control",
+        description: "Uses the final keyword to prevent further derived classes from overriding a virtual function or inheriting from a class.",
+        prosCons: "Pros: Compiler can devirtualize final calls for performance. Cons: Reduces extensibility.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 46. Polymorphism - Approach 8: final Specifier
+#include <iostream>
+using namespace std;
+
+class Renderer {
+public:
+    virtual void draw() const {
+        cout << "Renderer::draw()" << endl;
+    }
+    virtual ~Renderer() {}
+};
+
+class OpenGLRenderer : public Renderer {
+public:
+    void draw() const override final {
+        cout << "OpenGL hardware-accelerated draw" << endl;
+    }
+};
+
+class FinalClass final : public Renderer {
+public:
+    void draw() const override {
+        cout << "FinalClass::draw() - no subclassing allowed" << endl;
+    }
+};
+
+int main() {
+    Renderer* r1 = new OpenGLRenderer();
+    r1->draw();
+    Renderer* r2 = new FinalClass();
+    r2->draw();
+    delete r1;
+    delete r2;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void draw() const override final', constructType: 'Function Signature', title: 'final on a Virtual Method', explanation: 'The final specifier after override prevents any further derived class from overriding draw(). Any attempt to override in a grandchild class produces a compile-time error.', keyDetails: [{ variableOrConstruct: 'override final', role: 'Seals the virtual method', whyThisWay: 'The compiler can devirtualize calls to final methods, eliminating VTable indirection overhead' }] },
+          { lineNum: 2, codeSnippet: 'class FinalClass final : public Renderer', constructType: 'Function Signature', title: 'final on an Entire Class', explanation: 'Marking the class itself as final prevents ANY class from inheriting from it. This is useful for leaf classes in a hierarchy that should never be extended.', keyDetails: [{ variableOrConstruct: 'class FinalClass final', role: 'Blocks all inheritance', whyThisWay: 'Enables the compiler to devirtualize all virtual calls on FinalClass objects' }] },
+          { lineNum: 3, codeSnippet: 'r1->draw(); r2->draw();', constructType: 'Function Signature', title: 'Polymorphic Calls to final Methods', explanation: 'Both calls dispatch virtually through Renderer*. At runtime, OpenGLRenderer::draw() and FinalClass::draw() execute. The compiler may optimize these to direct calls since both targets are final.', keyDetails: [{ variableOrConstruct: 'r1->draw()', role: 'Potentially devirtualized call', whyThisWay: 'Demonstrates that final enables performance optimization without changing semantics' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Virtual Dispatch in Constructors/Destructors", category: "Gotcha / Construction",
+        description: "Reveals the critical rule that virtual dispatch does NOT work during construction or destruction: the base version is called.",
+        prosCons: "Pros: Prevents a major class of bugs. Cons: Requires alternative initialization patterns.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 46. Polymorphism - Approach 9: Virtual Calls in Constructor
+#include <iostream>
+using namespace std;
+
+class Document {
+public:
+    Document() {
+        cout << "Document ctor calling format()..." << endl;
+        format();
+    }
+    virtual void format() const {
+        cout << "Document::format() - plain text" << endl;
+    }
+    virtual ~Document() {
+        cout << "Document dtor calling format()..." << endl;
+        format();
+    }
+};
+
+class PDFDocument : public Document {
+public:
+    PDFDocument() { cout << "PDFDocument ctor complete" << endl; }
+    void format() const override {
+        cout << "PDFDocument::format() - PDF layout" << endl;
+    }
+    ~PDFDocument() { cout << "PDFDocument dtor complete" << endl; }
+};
+
+int main() {
+    cout << "--- Creating PDFDocument ---" << endl;
+    Document* doc = new PDFDocument();
+    cout << "--- Normal virtual call ---" << endl;
+    doc->format();
+    cout << "--- Deleting ---" << endl;
+    delete doc;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Document() { format(); }', constructType: 'Function Signature', title: 'Virtual Call Inside Constructor', explanation: 'During Document construction, the VTable pointer still references Document VTable (PDFDocument is not yet constructed). So format() dispatches to Document::format(), NOT PDFDocument::format(). This is a critical C++ rule.', keyDetails: [{ variableOrConstruct: 'format() in ctor', role: 'Calls base version during construction', whyThisWay: 'The derived part does not exist yet; calling derived virtual methods would access uninitialized state' }] },
+          { lineNum: 2, codeSnippet: 'virtual ~Document() { format(); }', constructType: 'Function Signature', title: 'Virtual Call Inside Destructor', explanation: 'During Document destruction, PDFDocument has already been destroyed. The VTable has been reset to Document VTable. So format() calls Document::format() again, not the override.', keyDetails: [{ variableOrConstruct: 'format() in dtor', role: 'Calls base version during destruction', whyThisWay: 'The derived part is already destroyed; its VTable entries are no longer valid' }] },
+          { lineNum: 3, codeSnippet: 'doc->format();', constructType: 'Function Signature', title: 'Normal Virtual Call (After Construction)', explanation: 'Outside construction/destruction, virtual dispatch works normally. doc->format() correctly dispatches to PDFDocument::format() because both parts of the object are fully alive.', keyDetails: [{ variableOrConstruct: 'doc->format()', role: 'Normal dynamic dispatch', whyThisWay: 'Contrasts with the constructor/destructor behavior to highlight the rule' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Smart Pointer Polymorphism with unique_ptr", category: "Modern C++ / RAII",
+        description: "Uses std::unique_ptr<Base> to manage polymorphic ownership safely, eliminating manual delete and preventing leaks.",
+        prosCons: "Pros: RAII-based, exception-safe, no leaks. Cons: Cannot copy unique_ptr, only move.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 46. Polymorphism - Approach 10: unique_ptr Polymorphism
+#include <iostream>
+#include <memory>
+#include <vector>
+using namespace std;
+
+class Effect {
+public:
+    virtual void apply() const = 0;
+    virtual ~Effect() = default;
+};
+
+class Reverb : public Effect {
+public:
+    void apply() const override { cout << "Applying reverb effect" << endl; }
+};
+
+class Distortion : public Effect {
+public:
+    void apply() const override { cout << "Applying distortion effect" << endl; }
+};
+
+class Chorus : public Effect {
+public:
+    void apply() const override { cout << "Applying chorus effect" << endl; }
+};
+
+int main() {
+    vector<unique_ptr<Effect>> chain;
+    chain.push_back(make_unique<Reverb>());
+    chain.push_back(make_unique<Distortion>());
+    chain.push_back(make_unique<Chorus>());
+
+    for (const auto& fx : chain)
+        fx->apply();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<unique_ptr<Effect>> chain;', constructType: 'Variable & Initializer', title: 'Polymorphic Smart Pointer Container', explanation: 'A vector of unique_ptr<Effect> owns each derived Effect object exclusively. When the vector goes out of scope, every unique_ptr automatically deletes its managed object through the virtual destructor.', keyDetails: [{ variableOrConstruct: 'vector<unique_ptr<Effect>>', role: 'RAII polymorphic container', whyThisWay: 'Eliminates manual delete loops; exception-safe ownership' }] },
+          { lineNum: 2, codeSnippet: 'chain.push_back(make_unique<Reverb>());', constructType: 'Function Signature', title: 'Factory-Style Polymorphic Insertion', explanation: 'make_unique<Reverb>() creates a unique_ptr<Reverb> which implicitly converts to unique_ptr<Effect>. The derived object is heap-allocated and owned by the vector.', keyDetails: [{ variableOrConstruct: 'make_unique<Reverb>()', role: 'Safe heap allocation', whyThisWay: 'make_unique is exception-safe and avoids raw new expressions' }] },
+          { lineNum: 3, codeSnippet: 'for (const auto& fx : chain) fx->apply();', constructType: 'Loop Construct', title: 'Polymorphic Iteration Without Raw Pointers', explanation: 'Each fx is a const reference to a unique_ptr. The arrow operator dereferences to the base Effect* and then virtual dispatch calls the correct derived apply() method.', keyDetails: [{ variableOrConstruct: 'fx->apply()', role: 'Virtual dispatch through smart pointer', whyThisWay: 'Modern C++ replaces raw pointer polymorphism with unique_ptr for automatic cleanup' }] }
+        ]
+      }
+    ],
+    traceKey: "linked_list"
+  };
+}
+
+export function getProblem47Details(): LearnModule {
+  return {
+    id: "med_abstract_class",
+    title: "47. Pure Virtual & Abstract Interfaces",
+    category: "OOP Basics",
+    difficulty: "medium",
+    shortDesc: "Creating abstract base interfaces using pure virtual functions (= 0).",
+    fullCode: `// 47. Abstract Interfaces - Approach 1: Pure Virtual Interface
+#include <iostream>
+using namespace std;
+
+class Drawable {
+public:
+    virtual void draw() const = 0;
+    virtual string name() const = 0;
+    virtual ~Drawable() = default;
+};
+
+class Square : public Drawable {
+public:
+    void draw() const override { cout << "Drawing a square" << endl; }
+    string name() const override { return "Square"; }
+};
+
+int main() {
+    Drawable* shape = new Square();
+    shape->draw();
+    cout << "Name: " << shape->name() << endl;
+    delete shape;
+    return 0;
+}`,
+    problemStatement: {
+      title: "47. Pure Virtual & Abstract Interfaces",
+      objective: "Master C++ abstract classes and interfaces: pure virtual functions (= 0), abstract base classes that cannot be instantiated, interface contracts, and the relationship between ABCs and concrete implementations.",
+      description: "Implement **Pure Virtual & Abstract Interfaces** (OOP Basics). Create abstract classes using pure virtual functions that enforce a contract on all derived classes, requiring them to implement specific behavior.",
+      inputDesc: "Abstract interface declarations, concrete derived class implementations, and polymorphic usage through interface pointers.",
+      outputDesc: "Concrete method outputs dispatched through abstract interfaces, compilation error demonstrations for incomplete classes, and interface contract verification.",
+      takeaways: [
+        "A class with at least one pure virtual function (= 0) becomes abstract and cannot be instantiated",
+        "All pure virtual functions MUST be overridden in concrete derived classes or the derived class is also abstract",
+        "Pure virtual functions CAN have a body that derived classes invoke explicitly with Base::method()",
+        "Abstract classes define interfaces; concrete classes provide implementations"
+      ],
+      examples: [
+        { id: 1, input: "Drawable* shape = new Square(); shape->draw()", output: "Drawing a square", explanation: "Square implements the pure virtual draw() method from the Drawable interface." },
+        { id: 2, input: "Serializable* s = new JSONDoc(); s->serialize()", output: "{title: 'doc', pages: 5}", explanation: "JSONDoc fulfills the Serializable interface contract by implementing serialize()." },
+        { id: 3, input: "Drawable d; // direct instantiation", output: "COMPILE ERROR: cannot declare variable of abstract type", explanation: "Abstract classes cannot be instantiated; only concrete derived classes can." }
+      ],
+      constraints: ["A derived class that does not override ALL pure virtual functions remains abstract itself."],
+      companies: ["Google", "Microsoft", "Apple", "Amazon", "Adobe"],
+      acceptanceRate: "88.1%",
+      totalAccepted: "2,890,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Pure Virtual Interface Contract (FREE)", category: "FREE / Interface Pattern",
+        description: "Defines a pure abstract interface with multiple = 0 methods that all derived classes must implement.",
+        prosCons: "Pros: Clean separation of interface from implementation. Cons: Cannot provide shared behavior in interface.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 47. Abstract - Approach 1: Pure Virtual Interface
+#include <iostream>
+using namespace std;
+
+class Printable {
+public:
+    virtual void print() const = 0;
+    virtual int pageCount() const = 0;
+    virtual ~Printable() = default;
+};
+
+class Report : public Printable {
+    string title;
+    int pages;
+public:
+    Report(string t, int p) : title(t), pages(p) {}
+    void print() const override {
+        cout << "Printing report: " << title << endl;
+    }
+    int pageCount() const override { return pages; }
+};
+
+int main() {
+    Printable* doc = new Report("Q4 Earnings", 24);
+    doc->print();
+    cout << "Pages: " << doc->pageCount() << endl;
+    delete doc;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'virtual void print() const = 0;', constructType: 'Function Signature', title: 'Pure Virtual Function Declaration', explanation: 'The = 0 suffix makes print() a pure virtual function. Any class containing at least one pure virtual function becomes abstract and cannot be instantiated directly. Derived classes must provide a concrete implementation.', keyDetails: [{ variableOrConstruct: '= 0', role: 'Pure virtual specifier', whyThisWay: 'Forces all concrete subclasses to implement print(); creates an interface contract' }] },
+          { lineNum: 2, codeSnippet: 'virtual int pageCount() const = 0;', constructType: 'Function Signature', title: 'Second Pure Virtual Method', explanation: 'Multiple pure virtual methods can coexist in one abstract class. A derived class must override ALL of them to become concrete (instantiable). Missing even one keeps the derived class abstract.', keyDetails: [{ variableOrConstruct: 'pageCount() = 0', role: 'Second interface requirement', whyThisWay: 'Interfaces often define multiple methods that together form a complete contract' }] },
+          { lineNum: 3, codeSnippet: 'class Report : public Printable { ... }', constructType: 'Function Signature', title: 'Concrete Class Fulfilling Interface', explanation: 'Report publicly inherits from Printable and provides implementations for BOTH print() and pageCount(). This makes Report a concrete class that can be instantiated.', keyDetails: [{ variableOrConstruct: 'class Report : public Printable', role: 'Concrete implementation of interface', whyThisWay: 'Overriding all pure virtual methods transforms an abstract contract into a usable class' }] },
+          { lineNum: 4, codeSnippet: 'Printable* doc = new Report("Q4 Earnings", 24);', constructType: 'Variable & Initializer', title: 'Interface Pointer to Concrete Object', explanation: 'A pointer of the abstract interface type holds a concrete Report object. All calls through this pointer dispatch virtually to Report implementations.', keyDetails: [{ variableOrConstruct: 'Printable* doc', role: 'Abstract interface pointer', whyThisWay: 'Programs to the interface, not the implementation; enables swapping Report for any other Printable' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Pure Virtual with Default Body (FREE)", category: "FREE / Default Implementation",
+        description: "Provides a body for a pure virtual function that derived classes can optionally invoke using Base::method().",
+        prosCons: "Pros: Provides shared fallback logic. Cons: Still requires explicit override in derived classes.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 47. Abstract - Approach 2: Pure Virtual with Body
+#include <iostream>
+using namespace std;
+
+class Validator {
+public:
+    virtual bool validate(int value) const = 0;
+    virtual ~Validator() = default;
+};
+
+bool Validator::validate(int value) const {
+    cout << "Default validation: checking non-negative" << endl;
+    return value >= 0;
+}
+
+class RangeValidator : public Validator {
+    int minVal, maxVal;
+public:
+    RangeValidator(int lo, int hi) : minVal(lo), maxVal(hi) {}
+    bool validate(int value) const override {
+        if (!Validator::validate(value)) return false;
+        cout << "Range check: " << minVal << " <= " << value << " <= " << maxVal << endl;
+        return value >= minVal && value <= maxVal;
+    }
+};
+
+int main() {
+    Validator* v = new RangeValidator(1, 100);
+    cout << "Valid: " << v->validate(50) << endl;
+    cout << "Valid: " << v->validate(-5) << endl;
+    delete v;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'virtual bool validate(int value) const = 0;', constructType: 'Function Signature', title: 'Pure Virtual Declaration in Class', explanation: 'Declared as pure virtual inside the class body. The class is abstract even though we will provide a body outside the class. The = 0 means derived classes MUST still override it.', keyDetails: [{ variableOrConstruct: '= 0 with body', role: 'Abstract but with default logic', whyThisWay: 'Unique C++ feature: = 0 + body means "must override, but can call my implementation explicitly"' }] },
+          { lineNum: 2, codeSnippet: 'bool Validator::validate(int value) const { ... }', constructType: 'Function Signature', title: 'Out-of-Line Pure Virtual Body', explanation: 'The body is defined outside the class. It contains shared validation logic (checking non-negative). Derived classes can call this default via Validator::validate(value) if they choose.', keyDetails: [{ variableOrConstruct: 'Validator::validate()', role: 'Shared default implementation', whyThisWay: 'Provides reusable base logic without making the method non-pure; still enforces override' }] },
+          { lineNum: 3, codeSnippet: 'if (!Validator::validate(value)) return false;', constructType: 'Condition & Branch', title: 'Explicit Base Call from Override', explanation: 'RangeValidator explicitly calls the pure virtual body using qualified name Validator::validate(). This chains the base validation (non-negative check) before the derived range check.', keyDetails: [{ variableOrConstruct: 'Validator::validate(value)', role: 'Explicit non-virtual base call', whyThisWay: 'Using the qualified Base::method() syntax bypasses virtual dispatch and directly calls the base body' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Multiple Interface Inheritance", category: "Multi-Interface",
+        description: "A single concrete class implements multiple abstract interfaces simultaneously, fulfilling all their contracts.",
+        prosCons: "Pros: Enables role-based composition. Cons: Potential ambiguity with diamond inheritance.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 47. Abstract - Approach 3: Multiple Interface Inheritance
+#include <iostream>
+using namespace std;
+
+class Readable {
+public:
+    virtual string read() const = 0;
+    virtual ~Readable() = default;
+};
+
+class Writable {
+public:
+    virtual void write(const string& data) = 0;
+    virtual ~Writable() = default;
+};
+
+class FileStream : public Readable, public Writable {
+    string content;
+public:
+    string read() const override {
+        return content.empty() ? "(empty)" : content;
+    }
+    void write(const string& data) override {
+        content += data;
+        cout << "Wrote: " << data << endl;
+    }
+};
+
+int main() {
+    FileStream fs;
+    fs.write("Hello ");
+    fs.write("World");
+    cout << "Read: " << fs.read() << endl;
+
+    Readable* reader = &fs;
+    cout << "Via Readable: " << reader->read() << endl;
+    Writable* writer = &fs;
+    writer->write("!");
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'class Readable { virtual string read() const = 0; };', constructType: 'Function Signature', title: 'First Abstract Interface', explanation: 'Readable defines a read-only contract. Any class inheriting from Readable must implement read(). This represents one "role" or "capability" the implementing class must provide.', keyDetails: [{ variableOrConstruct: 'class Readable', role: 'Read capability interface', whyThisWay: 'Separating read and write into distinct interfaces follows Interface Segregation Principle' }] },
+          { lineNum: 2, codeSnippet: 'class FileStream : public Readable, public Writable', constructType: 'Function Signature', title: 'Implementing Multiple Interfaces', explanation: 'FileStream inherits from BOTH Readable and Writable, implementing both read() and write(). This gives FileStream dual capabilities accessible through either interface pointer.', keyDetails: [{ variableOrConstruct: 'public Readable, public Writable', role: 'Multi-interface implementation', whyThisWay: 'A single class can fulfill multiple independent contracts simultaneously' }] },
+          { lineNum: 3, codeSnippet: 'Readable* reader = &fs; Writable* writer = &fs;', constructType: 'Variable & Initializer', title: 'Interface-Specific Pointers to Same Object', explanation: 'The same FileStream object can be accessed through different interface pointers. Through Readable*, only read() is visible. Through Writable*, only write() is visible. This enforces access control.', keyDetails: [{ variableOrConstruct: 'Readable* reader', role: 'Access restricted to read operations', whyThisWay: 'Passing specific interface pointers limits what calling code can do with the object' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Abstract Class with Concrete Methods", category: "Template Method",
+        description: "Mixes pure virtual methods with concrete helper methods in an abstract class, establishing a template method pattern.",
+        prosCons: "Pros: Shares common logic while forcing specialization. Cons: Tighter coupling than pure interfaces.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 47. Abstract - Approach 4: Template Method Pattern
+#include <iostream>
+using namespace std;
+
+class DataProcessor {
+public:
+    void process() {
+        cout << "=== Starting Processing ===" << endl;
+        loadData();
+        transform();
+        saveResults();
+        cout << "=== Processing Complete ===" << endl;
+    }
+    virtual ~DataProcessor() = default;
+
+protected:
+    virtual void loadData() = 0;
+    virtual void transform() = 0;
+    virtual void saveResults() = 0;
+};
+
+class CSVProcessor : public DataProcessor {
+protected:
+    void loadData() override { cout << "Loading CSV file rows" << endl; }
+    void transform() override { cout << "Parsing comma-separated values" << endl; }
+    void saveResults() override { cout << "Writing to database table" << endl; }
+};
+
+int main() {
+    DataProcessor* proc = new CSVProcessor();
+    proc->process();
+    delete proc;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void process() { loadData(); transform(); saveResults(); }', constructType: 'Function Signature', title: 'Template Method (Non-Virtual)', explanation: 'process() is a concrete non-virtual method that defines the algorithm skeleton. It calls three pure virtual methods in sequence. Derived classes customize WHAT happens but not the ORDER.', keyDetails: [{ variableOrConstruct: 'void process()', role: 'Fixed algorithm skeleton', whyThisWay: 'The Template Method pattern lets the base class control workflow while delegating steps to subclasses' }] },
+          { lineNum: 2, codeSnippet: 'virtual void loadData() = 0; virtual void transform() = 0;', constructType: 'Function Signature', title: 'Protected Pure Virtual Steps', explanation: 'The three steps are declared protected and pure virtual. They are only callable from within the class hierarchy (not externally). Each concrete subclass provides its own implementation.', keyDetails: [{ variableOrConstruct: 'protected: virtual ... = 0', role: 'Customization hooks', whyThisWay: 'Protected access prevents external callers from invoking steps out of order' }] },
+          { lineNum: 3, codeSnippet: 'class CSVProcessor : public DataProcessor { ... }', constructType: 'Function Signature', title: 'Concrete Processor Implementation', explanation: 'CSVProcessor overrides all three pure virtual steps with CSV-specific logic. The inherited process() method orchestrates them in the correct order automatically.', keyDetails: [{ variableOrConstruct: 'CSVProcessor', role: 'Concrete template method implementation', whyThisWay: 'New data formats (XML, JSON) only need to override the three steps; the skeleton is inherited' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Partially Abstract Derived Class", category: "Chained Abstract",
+        description: "A derived class overrides only some pure virtual methods, remaining abstract itself, with a grandchild completing the contract.",
+        prosCons: "Pros: Enables incremental specialization across layers. Cons: Deeper hierarchies increase complexity.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 47. Abstract - Approach 5: Partially Abstract Derived
+#include <iostream>
+using namespace std;
+
+class Transport {
+public:
+    virtual void accelerate() = 0;
+    virtual void brake() = 0;
+    virtual int wheels() const = 0;
+    virtual ~Transport() = default;
+};
+
+class MotorVehicle : public Transport {
+public:
+    void accelerate() override {
+        cout << "Engine accelerating" << endl;
+    }
+    void brake() override {
+        cout << "Hydraulic brakes applied" << endl;
+    }
+};
+
+class Sedan : public MotorVehicle {
+public:
+    int wheels() const override { return 4; }
+};
+
+int main() {
+    Transport* car = new Sedan();
+    car->accelerate();
+    car->brake();
+    cout << "Wheels: " << car->wheels() << endl;
+    delete car;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'class Transport { virtual void accelerate() = 0; virtual void brake() = 0; virtual int wheels() const = 0; };', constructType: 'Function Signature', title: 'Three Pure Virtual Methods', explanation: 'Transport defines three pure virtual methods. All three must be implemented by some class in the hierarchy for that class to be concrete.', keyDetails: [{ variableOrConstruct: 'Transport', role: 'Fully abstract base', whyThisWay: 'Establishes a 3-method interface contract' }] },
+          { lineNum: 2, codeSnippet: 'class MotorVehicle : public Transport { void accelerate() override; void brake() override; };', constructType: 'Function Signature', title: 'Partially Concrete (Still Abstract)', explanation: 'MotorVehicle implements accelerate() and brake() but does NOT implement wheels(). Since one pure virtual remains unoverridden, MotorVehicle is still abstract and cannot be instantiated.', keyDetails: [{ variableOrConstruct: 'MotorVehicle', role: 'Partially abstract intermediate', whyThisWay: 'Shares common engine behavior without committing to a wheel count' }] },
+          { lineNum: 3, codeSnippet: 'class Sedan : public MotorVehicle { int wheels() const override { return 4; } };', constructType: 'Function Signature', title: 'Grandchild Completes the Contract', explanation: 'Sedan inherits accelerate() and brake() from MotorVehicle and provides the missing wheels() override. Now all three pure virtuals are implemented, making Sedan concrete.', keyDetails: [{ variableOrConstruct: 'Sedan', role: 'Fully concrete grandchild', whyThisWay: 'Incremental specialization: each layer adds specific knowledge (engine behavior, wheel count)' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Interface Segregation with Minimal Interfaces", category: "SOLID / ISP",
+        description: "Splits a fat interface into small, focused interfaces so classes only implement what they actually need.",
+        prosCons: "Pros: Follows Interface Segregation Principle. Cons: More interface classes to maintain.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 47. Abstract - Approach 6: Interface Segregation
+#include <iostream>
+using namespace std;
+
+class Flyable {
+public:
+    virtual void fly() const = 0;
+    virtual ~Flyable() = default;
+};
+
+class Swimmable {
+public:
+    virtual void swim() const = 0;
+    virtual ~Swimmable() = default;
+};
+
+class Walkable {
+public:
+    virtual void walk() const = 0;
+    virtual ~Walkable() = default;
+};
+
+class Duck : public Flyable, public Swimmable, public Walkable {
+public:
+    void fly() const override { cout << "Duck flying south" << endl; }
+    void swim() const override { cout << "Duck paddling on lake" << endl; }
+    void walk() const override { cout << "Duck waddling on land" << endl; }
+};
+
+class Penguin : public Swimmable, public Walkable {
+public:
+    void swim() const override { cout << "Penguin diving deep" << endl; }
+    void walk() const override { cout << "Penguin sliding on ice" << endl; }
+};
+
+int main() {
+    Duck d;
+    d.fly(); d.swim(); d.walk();
+
+    Swimmable* swimmer = new Penguin();
+    swimmer->swim();
+    delete swimmer;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'class Flyable { virtual void fly() const = 0; };', constructType: 'Function Signature', title: 'Minimal Single-Method Interface', explanation: 'Each interface declares exactly one capability. Flyable represents the ability to fly. Classes that cannot fly simply do not inherit from Flyable, avoiding empty stub implementations.', keyDetails: [{ variableOrConstruct: 'Flyable', role: 'Single-responsibility interface', whyThisWay: 'Interface Segregation: clients should not be forced to depend on methods they do not use' }] },
+          { lineNum: 2, codeSnippet: 'class Duck : public Flyable, public Swimmable, public Walkable', constructType: 'Function Signature', title: 'Multi-Interface Composition (Duck)', explanation: 'Duck implements all three interfaces because ducks can fly, swim, and walk. It provides concrete implementations for all three pure virtual methods.', keyDetails: [{ variableOrConstruct: 'Duck', role: 'Implements all three capabilities', whyThisWay: 'Duck naturally has all three abilities; multi-inheritance composes them cleanly' }] },
+          { lineNum: 3, codeSnippet: 'class Penguin : public Swimmable, public Walkable', constructType: 'Function Signature', title: 'Selective Interface Composition (Penguin)', explanation: 'Penguin only implements Swimmable and Walkable, NOT Flyable. This avoids the problem of a Penguin being forced to implement a fly() stub that throws an exception.', keyDetails: [{ variableOrConstruct: 'Penguin', role: 'Only implements relevant capabilities', whyThisWay: 'Demonstrates that segregated interfaces let each class implement only what it truly supports' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Abstract Factory Pattern", category: "Design Pattern / Factory",
+        description: "Uses an abstract factory interface to create families of related objects without specifying concrete classes.",
+        prosCons: "Pros: Decouples object creation from usage. Cons: Adds an extra layer of abstraction.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 47. Abstract - Approach 7: Abstract Factory
+#include <iostream>
+#include <memory>
+using namespace std;
+
+class Button {
+public:
+    virtual void render() const = 0;
+    virtual ~Button() = default;
+};
+
+class Checkbox {
+public:
+    virtual void toggle() const = 0;
+    virtual ~Checkbox() = default;
+};
+
+class UIFactory {
+public:
+    virtual unique_ptr<Button> createButton() const = 0;
+    virtual unique_ptr<Checkbox> createCheckbox() const = 0;
+    virtual ~UIFactory() = default;
+};
+
+class DarkButton : public Button {
+public:
+    void render() const override { cout << "[ Dark Theme Button ]" << endl; }
+};
+
+class DarkCheckbox : public Checkbox {
+public:
+    void toggle() const override { cout << "[x] Dark Theme Checkbox toggled" << endl; }
+};
+
+class DarkUIFactory : public UIFactory {
+public:
+    unique_ptr<Button> createButton() const override { return make_unique<DarkButton>(); }
+    unique_ptr<Checkbox> createCheckbox() const override { return make_unique<DarkCheckbox>(); }
+};
+
+int main() {
+    unique_ptr<UIFactory> factory = make_unique<DarkUIFactory>();
+    auto btn = factory->createButton();
+    auto chk = factory->createCheckbox();
+    btn->render();
+    chk->toggle();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'class UIFactory { virtual unique_ptr<Button> createButton() const = 0; ... };', constructType: 'Function Signature', title: 'Abstract Factory Interface', explanation: 'UIFactory defines pure virtual factory methods that return smart pointers to abstract product types. Each concrete factory (DarkUIFactory, LightUIFactory) creates a consistent family of themed widgets.', keyDetails: [{ variableOrConstruct: 'UIFactory', role: 'Abstract factory interface', whyThisWay: 'Decouples client code from concrete widget classes; swap factories to change entire themes' }] },
+          { lineNum: 2, codeSnippet: 'class DarkUIFactory : public UIFactory { ... }', constructType: 'Function Signature', title: 'Concrete Factory Implementation', explanation: 'DarkUIFactory overrides both factory methods to return Dark-themed concrete widgets. Switching to a LightUIFactory would change all widgets consistently without modifying client code.', keyDetails: [{ variableOrConstruct: 'DarkUIFactory', role: 'Creates dark theme widget family', whyThisWay: 'Abstract Factory pattern ensures consistent theming across all created widgets' }] },
+          { lineNum: 3, codeSnippet: 'auto btn = factory->createButton();', constructType: 'Variable & Initializer', title: 'Polymorphic Object Creation', explanation: 'Client code calls createButton() through the abstract factory pointer. It receives a unique_ptr<Button> without knowing the concrete type is DarkButton. This is the core factory abstraction.', keyDetails: [{ variableOrConstruct: 'factory->createButton()', role: 'Polymorphic creation', whyThisWay: 'Client code is completely decoupled from DarkButton; it only knows about Button interface' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Abstract Destructor with Out-of-Line Definition", category: "Pure Virtual Destructor",
+        description: "Declares a pure virtual destructor to make a class abstract, with the required out-of-line body definition.",
+        prosCons: "Pros: Makes a class abstract without any other pure virtual methods. Cons: Must provide body outside class.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 47. Abstract - Approach 8: Pure Virtual Destructor
+#include <iostream>
+using namespace std;
+
+class AbstractBase {
+public:
+    virtual ~AbstractBase() = 0;
+};
+
+AbstractBase::~AbstractBase() {
+    cout << "AbstractBase destructor body" << endl;
+}
+
+class ConcreteChild : public AbstractBase {
+    string label;
+public:
+    ConcreteChild(string l) : label(l) {
+        cout << "ConcreteChild(" << label << ") created" << endl;
+    }
+    ~ConcreteChild() {
+        cout << "ConcreteChild(" << label << ") destroyed" << endl;
+    }
+};
+
+int main() {
+    AbstractBase* obj = new ConcreteChild("Alpha");
+    delete obj;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'virtual ~AbstractBase() = 0;', constructType: 'Function Signature', title: 'Pure Virtual Destructor Declaration', explanation: 'Declaring the destructor as pure virtual (= 0) makes AbstractBase abstract even if it has no other pure virtual methods. This is the only way to make a class abstract without adding an interface method.', keyDetails: [{ variableOrConstruct: 'virtual ~AbstractBase() = 0', role: 'Makes class abstract via destructor', whyThisWay: 'Useful when the class has no natural interface methods but should not be instantiated directly' }] },
+          { lineNum: 2, codeSnippet: 'AbstractBase::~AbstractBase() { ... }', constructType: 'Function Signature', title: 'Required Out-of-Line Destructor Body', explanation: 'Unlike other pure virtual functions, a pure virtual DESTRUCTOR must have a body because the derived destructor chain always calls the base destructor. Without this body, linking fails.', keyDetails: [{ variableOrConstruct: 'AbstractBase::~AbstractBase()', role: 'Mandatory destructor body', whyThisWay: 'Destructor chaining requires a callable body; = 0 only prevents direct instantiation' }] },
+          { lineNum: 3, codeSnippet: 'delete obj;', constructType: 'Return / Cleanup', title: 'Destructor Chain Execution', explanation: 'Deleting through base pointer invokes: ConcreteChild::~ConcreteChild() first, then AbstractBase::~AbstractBase(). The output shows both destructors running in reverse construction order.', keyDetails: [{ variableOrConstruct: 'delete obj', role: 'Triggers full destructor chain', whyThisWay: 'Proves that the pure virtual destructor body executes as part of the normal unwinding sequence' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: NVI (Non-Virtual Interface) Idiom", category: "NVI Pattern",
+        description: "Public non-virtual methods delegate to private pure virtual methods, giving the base class control over pre/post conditions.",
+        prosCons: "Pros: Base class enforces invariants around every call. Cons: Derived classes cannot call each other directly.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 47. Abstract - Approach 9: NVI (Non-Virtual Interface)
+#include <iostream>
+using namespace std;
+
+class GameCharacter {
+public:
+    int healthValue() const {
+        cout << "[Pre] Checking buff effects..." << endl;
+        int baseHealth = doHealthCalc();
+        cout << "[Post] Applying armor bonus..." << endl;
+        return baseHealth + 10;
+    }
+    virtual ~GameCharacter() = default;
+private:
+    virtual int doHealthCalc() const = 0;
+};
+
+class Warrior : public GameCharacter {
+private:
+    int doHealthCalc() const override { return 150; }
+};
+
+class Mage : public GameCharacter {
+private:
+    int doHealthCalc() const override { return 80; }
+};
+
+int main() {
+    GameCharacter* w = new Warrior();
+    cout << "Warrior HP: " << w->healthValue() << endl;
+    GameCharacter* m = new Mage();
+    cout << "Mage HP: " << m->healthValue() << endl;
+    delete w;
+    delete m;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int healthValue() const { ... doHealthCalc(); ... }', constructType: 'Function Signature', title: 'Non-Virtual Public Interface', explanation: 'healthValue() is the public non-virtual method that clients call. It wraps the private virtual doHealthCalc() with pre-processing (buff check) and post-processing (armor bonus). Derived classes cannot bypass these steps.', keyDetails: [{ variableOrConstruct: 'healthValue()', role: 'NVI public entry point', whyThisWay: 'The base class controls the execution envelope while derived classes customize only the core logic' }] },
+          { lineNum: 2, codeSnippet: 'private: virtual int doHealthCalc() const = 0;', constructType: 'Function Signature', title: 'Private Pure Virtual Customization Point', explanation: 'The actual customization hook is private and pure virtual. Derived classes override it but external code cannot call it directly. All access goes through healthValue().', keyDetails: [{ variableOrConstruct: 'private: virtual ... = 0', role: 'Hidden customization hook', whyThisWay: 'NVI idiom: virtual functions should be private; public interface should be non-virtual' }] },
+          { lineNum: 3, codeSnippet: 'class Warrior { int doHealthCalc() const override { return 150; } };', constructType: 'Function Signature', title: 'Derived Override of Private Virtual', explanation: 'Warrior overrides the private virtual method. Even though it is private in the base, C++ allows derived classes to override it. The access specifier controls who can CALL the method, not who can OVERRIDE it.', keyDetails: [{ variableOrConstruct: 'Warrior::doHealthCalc()', role: 'Custom health calculation', whyThisWay: 'Private virtual overriding is legal in C++; access control and overriding are independent concepts' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Abstract Iterator Interface", category: "Iterator Pattern",
+        description: "Defines an abstract iterator interface with pure virtual next(), hasNext(), and current() methods for custom traversal.",
+        prosCons: "Pros: Uniform traversal interface for any collection. Cons: Requires each collection to implement its own iterator.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 47. Abstract - Approach 10: Abstract Iterator
+#include <iostream>
+using namespace std;
+
+template<typename T>
+class Iterator {
+public:
+    virtual bool hasNext() const = 0;
+    virtual T next() = 0;
+    virtual ~Iterator() = default;
+};
+
+class IntArrayIterator : public Iterator<int> {
+    int* arr;
+    int size;
+    int index;
+public:
+    IntArrayIterator(int* a, int s) : arr(a), size(s), index(0) {}
+    bool hasNext() const override { return index < size; }
+    int next() override { return arr[index++]; }
+};
+
+class ReverseArrayIterator : public Iterator<int> {
+    int* arr;
+    int index;
+public:
+    ReverseArrayIterator(int* a, int s) : arr(a), index(s - 1) {}
+    bool hasNext() const override { return index >= 0; }
+    int next() override { return arr[index--]; }
+};
+
+void printAll(Iterator<int>& it) {
+    while (it.hasNext())
+        cout << it.next() << " ";
+    cout << endl;
+}
+
+int main() {
+    int data[] = {10, 20, 30, 40, 50};
+    IntArrayIterator fwd(data, 5);
+    ReverseArrayIterator rev(data, 5);
+    cout << "Forward:  "; printAll(fwd);
+    cout << "Reversed: "; printAll(rev);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T> class Iterator { virtual bool hasNext() const = 0; virtual T next() = 0; };', constructType: 'Function Signature', title: 'Generic Abstract Iterator Interface', explanation: 'A templated abstract class defining the iterator contract: hasNext() checks if more elements exist, and next() retrieves and advances. Any collection can provide its own iterator implementing this interface.', keyDetails: [{ variableOrConstruct: 'Iterator<T>', role: 'Generic traversal contract', whyThisWay: 'Templating the interface allows iterating over int, string, or any type uniformly' }] },
+          { lineNum: 2, codeSnippet: 'class IntArrayIterator : public Iterator<int> { int next() override { return arr[index++]; } };', constructType: 'Function Signature', title: 'Forward Iterator Implementation', explanation: 'Implements forward traversal over a raw int array. index starts at 0 and increments. The post-increment index++ returns current element then advances.', keyDetails: [{ variableOrConstruct: 'IntArrayIterator', role: 'Concrete forward iterator', whyThisWay: 'Fulfills the Iterator<int> contract for left-to-right array traversal' }] },
+          { lineNum: 3, codeSnippet: 'void printAll(Iterator<int>& it) { while (it.hasNext()) cout << it.next(); }', constructType: 'Function Signature', title: 'Polymorphic Consumer Function', explanation: 'printAll accepts any Iterator<int> by reference. It works with forward, reverse, or any other iterator implementation. This demonstrates the power of programming to the abstract interface.', keyDetails: [{ variableOrConstruct: 'Iterator<int>& it', role: 'Interface-typed parameter', whyThisWay: 'One function processes any iterator type; adding new iterators requires zero changes to printAll' }] }
+        ]
+      }
+    ],
+    traceKey: "linked_list"
+  };
+}
+
+export function getProblem48Details(): LearnModule {
+  return {
+    id: "med_linked_list",
+    title: "48. Singly Linked List In-Place",
+    category: "Data Structures",
+    difficulty: "medium",
+    shortDesc: "Manual node pointer linkage, insertion, deletion, and reversal.",
+    fullCode: `// 48. Singly Linked List - Approach 1: Push Front & Print
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void pushFront(Node*& head, int val) {
+    Node* newNode = new Node(val);
+    newNode->next = head;
+    head = newNode;
+}
+
+void printList(Node* head) {
+    while (head) {
+        cout << head->data << " -> ";
+        head = head->next;
+    }
+    cout << "NULL" << endl;
+}
+
+int main() {
+    Node* head = nullptr;
+    pushFront(head, 30);
+    pushFront(head, 20);
+    pushFront(head, 10);
+    printList(head);
+    return 0;
+}`,
+    problemStatement: {
+      title: "48. Singly Linked List In-Place",
+      objective: "Master manual singly linked list operations: node creation, head/tail insertion, deletion by value, in-place reversal, cycle detection, and middle-node finding using raw pointer manipulation.",
+      description: "Implement **Singly Linked List In-Place** (Data Structures). Build a linked list from scratch using struct Node with data and next pointer fields. Perform insertion, deletion, reversal, and search operations using pointer manipulation.",
+      inputDesc: "Integer values to insert, delete, or search within the linked list, along with operation type (push_front, push_back, delete, reverse).",
+      outputDesc: "Linked list traversal showing node values connected by arrows (10 -> 20 -> 30 -> NULL), operation results, and structural state after mutations.",
+      takeaways: [
+        "Singly linked lists use O(1) insertion at head but O(N) insertion at tail without a tail pointer",
+        "Deletion requires tracking the previous node to re-link around the removed node",
+        "In-place reversal uses three pointers (prev, curr, next) to flip all links in O(N) time and O(1) space",
+        "The two-pointer (slow/fast) technique finds the middle node in a single pass"
+      ],
+      examples: [
+        { id: 1, input: "pushFront(head, 30); pushFront(head, 20); pushFront(head, 10);", output: "10 -> 20 -> 30 -> NULL", explanation: "Three push_front operations build the list in reverse order of insertion." },
+        { id: 2, input: "reverse(head) on list 1->2->3->4", output: "4 -> 3 -> 2 -> 1 -> NULL", explanation: "In-place reversal flips all next pointers using prev/curr/next triple." },
+        { id: 3, input: "findMiddle(head) on list 1->2->3->4->5", output: "Middle: 3", explanation: "Slow pointer moves 1 step, fast moves 2 steps; when fast reaches end, slow is at middle." }
+      ],
+      constraints: ["All operations must work with raw pointers; no STL containers allowed."],
+      companies: ["Amazon", "Microsoft", "Google", "Meta", "Apple"],
+      acceptanceRate: "91.4%",
+      totalAccepted: "4,560,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Push Front & Traversal (FREE)", category: "FREE / Head Insertion",
+        description: "Inserts new nodes at the head of the list in O(1) time and traverses the entire list printing each value.",
+        prosCons: "Pros: O(1) insertion at head. Cons: Elements appear in reverse insertion order.",
+        timeComplexity: "O(1) insert, O(N) print", spaceComplexity: "O(N)", isFree: true,
+        code: `// 48. Linked List - Approach 1: Push Front
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void pushFront(Node*& head, int val) {
+    Node* n = new Node(val);
+    n->next = head;
+    head = n;
+}
+
+void printList(Node* curr) {
+    while (curr) {
+        cout << curr->data;
+        if (curr->next) cout << " -> ";
+        curr = curr->next;
+    }
+    cout << " -> NULL" << endl;
+}
+
+int main() {
+    Node* head = nullptr;
+    pushFront(head, 3);
+    pushFront(head, 2);
+    pushFront(head, 1);
+    printList(head);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct Node { int data; Node* next; Node(int d) : data(d), next(nullptr) {} };', constructType: 'Variable & Initializer', title: 'Node Structure Definition', explanation: 'Each Node stores an integer data field and a pointer to the next Node. The constructor initializes data and sets next to nullptr (end of list). This is the fundamental building block of the linked list.', keyDetails: [{ variableOrConstruct: 'struct Node', role: 'Linked list element', whyThisWay: 'struct provides public access by default; each node self-contains its link to the chain' }] },
+          { lineNum: 2, codeSnippet: 'void pushFront(Node*& head, int val)', constructType: 'Function Signature', title: 'Head Insertion with Pointer Reference', explanation: 'The head parameter is a reference to a pointer (Node*&). This allows the function to modify the caller head pointer directly. The new node next points to the old head, then head is updated.', keyDetails: [{ variableOrConstruct: 'Node*& head', role: 'Reference to head pointer', whyThisWay: 'Pass-by-reference-to-pointer allows modifying the external head without returning a value' }] },
+          { lineNum: 3, codeSnippet: 'n->next = head; head = n;', constructType: 'Variable & Initializer', title: 'Link New Node to Existing Chain', explanation: 'First, the new node next pointer is set to the current head (linking to existing chain). Then head is updated to point to the new node. This two-step operation completes in O(1).', keyDetails: [{ variableOrConstruct: 'n->next = head', role: 'Links new node into chain', whyThisWay: 'Must set the link BEFORE updating head, otherwise the old chain becomes unreachable (memory leak)' }] },
+          { lineNum: 4, codeSnippet: 'while (curr) { cout << curr->data; curr = curr->next; }', constructType: 'Loop Construct', title: 'Linked List Traversal', explanation: 'Starting from head, each iteration prints the current data and advances the pointer to the next node. The loop terminates when curr becomes nullptr (end of list).', keyDetails: [{ variableOrConstruct: 'curr = curr->next', role: 'Advances traversal pointer', whyThisWay: 'Manual pointer chasing is the only way to traverse a singly linked list; no random access' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Push Back with Tail Pointer (FREE)", category: "FREE / Tail Insertion",
+        description: "Maintains a tail pointer for O(1) insertion at the end, preserving insertion order.",
+        prosCons: "Pros: O(1) append, elements in insertion order. Cons: Extra pointer to maintain.",
+        timeComplexity: "O(1) insert, O(N) print", spaceComplexity: "O(N)", isFree: true,
+        code: `// 48. Linked List - Approach 2: Push Back with Tail
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+class SinglyList {
+    Node* head;
+    Node* tail;
+public:
+    SinglyList() : head(nullptr), tail(nullptr) {}
+    void pushBack(int val) {
+        Node* n = new Node(val);
+        if (!head) { head = tail = n; }
+        else { tail->next = n; tail = n; }
+    }
+    void print() const {
+        for (Node* c = head; c; c = c->next)
+            cout << c->data << (c->next ? " -> " : " -> NULL\n");
+    }
+};
+
+int main() {
+    SinglyList list;
+    list.pushBack(10);
+    list.pushBack(20);
+    list.pushBack(30);
+    list.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Node* head; Node* tail;', constructType: 'Variable & Initializer', title: 'Head and Tail Pointer Pair', explanation: 'Maintaining both head and tail pointers allows O(1) access to both ends of the list. Head enables traversal from the front; tail enables O(1) append at the back.', keyDetails: [{ variableOrConstruct: 'Node* tail', role: 'Points to last node', whyThisWay: 'Without tail, appending requires O(N) traversal to find the last node' }] },
+          { lineNum: 2, codeSnippet: 'if (!head) { head = tail = n; } else { tail->next = n; tail = n; }', constructType: 'Condition & Branch', title: 'Push Back with Empty List Check', explanation: 'If the list is empty, both head and tail point to the new node. Otherwise, the current tail next is linked to the new node, then tail is advanced. This handles the edge case correctly.', keyDetails: [{ variableOrConstruct: 'tail->next = n; tail = n', role: 'Append and advance tail', whyThisWay: 'Two-step: link the old tail to new node, then update tail reference to new node' }] },
+          { lineNum: 3, codeSnippet: 'for (Node* c = head; c; c = c->next)', constructType: 'Loop Construct', title: 'For-Loop Style Traversal', explanation: 'A for loop is a compact alternative to while for linked list traversal. The initialization, condition, and advancement are all visible in one line.', keyDetails: [{ variableOrConstruct: 'c = c->next', role: 'Pointer chasing in for loop', whyThisWay: 'Equivalent to while loop but more concise; c automatically advances each iteration' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Delete Node by Value", category: "Deletion",
+        description: "Finds and removes the first node matching a given value, handling head deletion and mid-list deletion separately.",
+        prosCons: "Pros: Covers all deletion edge cases. Cons: O(N) search time.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 48. Linked List - Approach 3: Delete by Value
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void pushFront(Node*& head, int val) {
+    Node* n = new Node(val);
+    n->next = head;
+    head = n;
+}
+
+bool deleteNode(Node*& head, int val) {
+    if (!head) return false;
+    if (head->data == val) {
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+        return true;
+    }
+    Node* prev = head;
+    while (prev->next && prev->next->data != val)
+        prev = prev->next;
+    if (!prev->next) return false;
+    Node* target = prev->next;
+    prev->next = target->next;
+    delete target;
+    return true;
+}
+
+void printList(Node* h) {
+    while (h) { cout << h->data << " -> "; h = h->next; }
+    cout << "NULL" << endl;
+}
+
+int main() {
+    Node* head = nullptr;
+    for (int v : {50, 40, 30, 20, 10}) pushFront(head, v);
+    printList(head);
+    deleteNode(head, 30);
+    cout << "After deleting 30: "; printList(head);
+    deleteNode(head, 10);
+    cout << "After deleting 10: "; printList(head);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (head->data == val) { Node* temp = head; head = head->next; delete temp; }', constructType: 'Condition & Branch', title: 'Head Node Deletion Special Case', explanation: 'If the target value is in the head node, the head pointer must be updated to head->next before deleting. A temp pointer saves the old head for deallocation.', keyDetails: [{ variableOrConstruct: 'head = head->next', role: 'Advances head past deleted node', whyThisWay: 'Head deletion is a special case because there is no previous node to re-link' }] },
+          { lineNum: 2, codeSnippet: 'while (prev->next && prev->next->data != val) prev = prev->next;', constructType: 'Loop Construct', title: 'Search for Node Before Target', explanation: 'To delete a mid-list node, we need the PREVIOUS node (to re-link prev->next around the target). The loop stops when prev->next is the target or when the list is exhausted.', keyDetails: [{ variableOrConstruct: 'prev->next->data != val', role: 'Look-ahead search', whyThisWay: 'In singly linked lists, deletion requires the previous node; we cannot traverse backwards' }] },
+          { lineNum: 3, codeSnippet: 'prev->next = target->next; delete target;', constructType: 'Variable & Initializer', title: 'Re-Link and Deallocate', explanation: 'The previous node next pointer is set to skip over the target, pointing to the node after it. Then the target is freed. This surgically removes one node from the chain in O(1) after finding it.', keyDetails: [{ variableOrConstruct: 'prev->next = target->next', role: 'Bypass target node', whyThisWay: 'Re-linking is the core operation: the target node is excised from the chain without breaking it' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: In-Place Reversal (Three Pointers)", category: "Reversal",
+        description: "Reverses the entire list in-place using prev, curr, and next pointers in a single O(N) pass with O(1) space.",
+        prosCons: "Pros: O(1) extra space, single pass. Cons: Modifies the original list destructively.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 48. Linked List - Approach 4: In-Place Reversal
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void pushFront(Node*& head, int val) {
+    Node* n = new Node(val);
+    n->next = head;
+    head = n;
+}
+
+void reverse(Node*& head) {
+    Node* prev = nullptr;
+    Node* curr = head;
+    while (curr) {
+        Node* nxt = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = nxt;
+    }
+    head = prev;
+}
+
+void printList(Node* h) {
+    while (h) { cout << h->data << " -> "; h = h->next; }
+    cout << "NULL" << endl;
+}
+
+int main() {
+    Node* head = nullptr;
+    for (int v : {5, 4, 3, 2, 1}) pushFront(head, v);
+    cout << "Before: "; printList(head);
+    reverse(head);
+    cout << "After:  "; printList(head);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Node* prev = nullptr; Node* curr = head;', constructType: 'Variable & Initializer', title: 'Initialize Reversal Pointers', explanation: 'prev starts as nullptr (will become the new tail). curr starts at head. These two pointers track our progress through the list as we flip each link.', keyDetails: [{ variableOrConstruct: 'prev = nullptr', role: 'New tail starts as null', whyThisWay: 'The original head becomes the tail after reversal, so its next must become nullptr' }] },
+          { lineNum: 2, codeSnippet: 'Node* nxt = curr->next; curr->next = prev;', constructType: 'Variable & Initializer', title: 'Save Next and Flip Link', explanation: 'Before flipping curr->next, we must save curr->next in nxt (otherwise we lose access to the rest of the list). Then curr->next is redirected to point backwards at prev.', keyDetails: [{ variableOrConstruct: 'curr->next = prev', role: 'Reverses the link direction', whyThisWay: 'This is the core reversal operation: each node link is flipped from forward to backward' }] },
+          { lineNum: 3, codeSnippet: 'prev = curr; curr = nxt;', constructType: 'Variable & Initializer', title: 'Advance Both Pointers Forward', explanation: 'After flipping the current link, both pointers advance one position: prev takes the position of curr, and curr advances to nxt. The loop repeats until curr is nullptr.', keyDetails: [{ variableOrConstruct: 'prev = curr; curr = nxt', role: 'Slide the window forward', whyThisWay: 'The three-pointer technique processes one node per iteration in constant space' }] },
+          { lineNum: 4, codeSnippet: 'head = prev;', constructType: 'Return / Cleanup', title: 'Update Head to New Front', explanation: 'After the loop, curr is nullptr and prev points to the last node processed (the original tail). Updating head to prev completes the reversal.', keyDetails: [{ variableOrConstruct: 'head = prev', role: 'Points head to reversed front', whyThisWay: 'prev is the last non-null node, which is now the new head of the reversed list' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Find Middle Node (Slow/Fast Pointers)", category: "Two Pointers",
+        description: "Uses the tortoise-and-hare technique where slow advances 1 step and fast advances 2 steps to find the middle in one pass.",
+        prosCons: "Pros: Single pass, O(1) space. Cons: Only works for middle finding and cycle detection.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 48. Linked List - Approach 5: Find Middle
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void pushBack(Node*& head, Node*& tail, int val) {
+    Node* n = new Node(val);
+    if (!head) head = tail = n;
+    else { tail->next = n; tail = n; }
+}
+
+Node* findMiddle(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    return slow;
+}
+
+int main() {
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    for (int v : {1, 2, 3, 4, 5, 6, 7})
+        pushBack(head, tail, v);
+    Node* mid = findMiddle(head);
+    cout << "Middle element: " << mid->data << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Node* slow = head; Node* fast = head;', constructType: 'Variable & Initializer', title: 'Initialize Two Speed Pointers', explanation: 'Both pointers start at head. Slow will advance 1 node per iteration. Fast will advance 2 nodes per iteration. When fast reaches the end, slow is exactly at the middle.', keyDetails: [{ variableOrConstruct: 'slow/fast', role: 'Two-speed traversal pointers', whyThisWay: 'Fast covers twice the distance; when it finishes, slow has covered exactly half' }] },
+          { lineNum: 2, codeSnippet: 'while (fast && fast->next)', constructType: 'Loop Construct', title: 'Loop Guard for Even/Odd Length', explanation: 'The condition checks both fast and fast->next. For odd-length lists, fast reaches the last node. For even-length lists, fast->next becomes null. Both cases correctly position slow at the middle.', keyDetails: [{ variableOrConstruct: 'fast && fast->next', role: 'Prevents null dereference', whyThisWay: 'Must check both because fast advances 2 steps; either could be the stopping point' }] },
+          { lineNum: 3, codeSnippet: 'slow = slow->next; fast = fast->next->next;', constructType: 'Variable & Initializer', title: 'Differential Speed Advancement', explanation: 'Slow moves 1 step, fast moves 2 steps. After N/2 iterations, slow is at position N/2 (the middle) and fast is at position N (the end or past the end).', keyDetails: [{ variableOrConstruct: 'fast->next->next', role: 'Double-speed advancement', whyThisWay: 'The 2:1 speed ratio mathematically guarantees slow reaches the midpoint when fast reaches the end' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Detect Cycle (Floyd Cycle Detection)", category: "Cycle Detection",
+        description: "Uses Floyd tortoise-and-hare algorithm to detect whether a cycle exists in the linked list in O(N) time and O(1) space.",
+        prosCons: "Pros: O(1) space cycle detection. Cons: Only detects existence; finding cycle start needs extra step.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 48. Linked List - Approach 6: Cycle Detection
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+bool hasCycle(Node* head) {
+    Node* slow = head;
+    Node* fast = head;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) return true;
+    }
+    return false;
+}
+
+int main() {
+    Node* a = new Node(1);
+    Node* b = new Node(2);
+    Node* c = new Node(3);
+    Node* d = new Node(4);
+    a->next = b; b->next = c; c->next = d;
+
+    cout << "Has cycle: " << (hasCycle(a) ? "Yes" : "No") << endl;
+
+    d->next = b;
+    cout << "Has cycle: " << (hasCycle(a) ? "Yes" : "No") << endl;
+    d->next = nullptr;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (slow == fast) return true;', constructType: 'Condition & Branch', title: 'Cycle Detection: Pointer Collision', explanation: 'If slow and fast ever point to the same node, a cycle exists. In a cyclic list, the fast pointer will eventually lap the slow pointer and they will meet inside the cycle.', keyDetails: [{ variableOrConstruct: 'slow == fast', role: 'Detects pointer convergence', whyThisWay: 'In a cycle, fast gains 1 node per iteration on slow; they must eventually collide' }] },
+          { lineNum: 2, codeSnippet: 'while (fast && fast->next) { slow = slow->next; fast = fast->next->next; }', constructType: 'Loop Construct', title: 'Differential Speed Traversal', explanation: 'The same two-speed technique as middle finding, but here we check for collision instead of loop termination. If the loop terminates naturally (fast reaches null), no cycle exists.', keyDetails: [{ variableOrConstruct: 'fast->next->next', role: 'Double-speed for cycle detection', whyThisWay: 'Floyd algorithm: fast laps slow with 1 node per iteration inside any cycle' }] },
+          { lineNum: 3, codeSnippet: 'd->next = b;', constructType: 'Variable & Initializer', title: 'Artificially Creating a Cycle', explanation: 'Setting the last node next pointer to a previous node creates a cycle (4 -> 2 -> 3 -> 4 -> ...). The second hasCycle call now returns true, demonstrating detection.', keyDetails: [{ variableOrConstruct: 'd->next = b', role: 'Creates cycle for testing', whyThisWay: 'Demonstrates the difference between acyclic and cyclic list detection results' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Insert at Sorted Position", category: "Sorted Insertion",
+        description: "Inserts a new node into a sorted linked list at the correct position to maintain sorted order.",
+        prosCons: "Pros: Maintains sorted invariant after each insert. Cons: O(N) per insertion.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 48. Linked List - Approach 7: Sorted Insert
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void sortedInsert(Node*& head, int val) {
+    Node* n = new Node(val);
+    if (!head || val <= head->data) {
+        n->next = head;
+        head = n;
+        return;
+    }
+    Node* curr = head;
+    while (curr->next && curr->next->data < val)
+        curr = curr->next;
+    n->next = curr->next;
+    curr->next = n;
+}
+
+void printList(Node* h) {
+    while (h) { cout << h->data << " "; h = h->next; }
+    cout << endl;
+}
+
+int main() {
+    Node* head = nullptr;
+    for (int v : {30, 10, 50, 20, 40})
+        sortedInsert(head, v);
+    printList(head);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (!head || val <= head->data) { n->next = head; head = n; }', constructType: 'Condition & Branch', title: 'Insert Before Head (Smallest Value)', explanation: 'If the list is empty or the new value is smaller than head, the new node becomes the new head. This handles the edge case where insertion happens at the very beginning.', keyDetails: [{ variableOrConstruct: 'val <= head->data', role: 'Check if new node goes first', whyThisWay: 'Head insertion is a special case because the head pointer itself must be updated' }] },
+          { lineNum: 2, codeSnippet: 'while (curr->next && curr->next->data < val) curr = curr->next;', constructType: 'Loop Construct', title: 'Find Insertion Position', explanation: 'Traverse until curr->next is null or curr->next->data >= val. At that point, the new node should be inserted between curr and curr->next to maintain sorted order.', keyDetails: [{ variableOrConstruct: 'curr->next->data < val', role: 'Look-ahead comparison', whyThisWay: 'We stop at the node BEFORE the insertion point because we need to re-link curr->next' }] },
+          { lineNum: 3, codeSnippet: 'n->next = curr->next; curr->next = n;', constructType: 'Variable & Initializer', title: 'Splice New Node into Position', explanation: 'The new node links to whatever curr was pointing to next, then curr links to the new node. This two-step splice inserts the node in sorted order.', keyDetails: [{ variableOrConstruct: 'n->next = curr->next', role: 'Link new node to successor', whyThisWay: 'Must set n->next BEFORE curr->next = n, otherwise the successor becomes unreachable' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Remove Nth Node From End", category: "Two Pointers / Gap",
+        description: "Uses a two-pointer gap technique to remove the Nth node from the end in a single pass without knowing the list length.",
+        prosCons: "Pros: Single-pass O(N), no length calculation. Cons: Edge case when removing the head.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 48. Linked List - Approach 8: Remove Nth From End
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void pushBack(Node*& h, Node*& t, int v) {
+    Node* n = new Node(v);
+    if (!h) h = t = n; else { t->next = n; t = n; }
+}
+
+void removeNthFromEnd(Node*& head, int n) {
+    Node dummy(0);
+    dummy.next = head;
+    Node* fast = &dummy;
+    Node* slow = &dummy;
+    for (int i = 0; i <= n; i++) fast = fast->next;
+    while (fast) { fast = fast->next; slow = slow->next; }
+    Node* target = slow->next;
+    slow->next = target->next;
+    if (target == head) head = head->next;
+    delete target;
+}
+
+void printList(Node* h) {
+    while (h) { cout << h->data << " "; h = h->next; }
+    cout << endl;
+}
+
+int main() {
+    Node* head = nullptr; Node* tail = nullptr;
+    for (int v : {1, 2, 3, 4, 5}) pushBack(head, tail, v);
+    cout << "Before: "; printList(head);
+    removeNthFromEnd(head, 2);
+    cout << "Remove 2nd from end: "; printList(head);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Node dummy(0); dummy.next = head;', constructType: 'Variable & Initializer', title: 'Dummy Node Simplifies Edge Cases', explanation: 'A stack-allocated dummy node placed before head eliminates the special case of removing the head node. The slow pointer starts at dummy so slow->next can be head itself.', keyDetails: [{ variableOrConstruct: 'Node dummy(0)', role: 'Sentinel node before head', whyThisWay: 'Without a dummy, removing the head requires separate if-else logic' }] },
+          { lineNum: 2, codeSnippet: 'for (int i = 0; i <= n; i++) fast = fast->next;', constructType: 'Loop Construct', title: 'Advance Fast Pointer by N+1', explanation: 'Fast is advanced n+1 positions ahead of slow. This creates an exact N-node gap. When fast reaches null, slow->next will be exactly the Nth node from the end.', keyDetails: [{ variableOrConstruct: 'i <= n', role: 'Creates N+1 gap', whyThisWay: 'The gap ensures slow stops one node BEFORE the target, enabling re-linking' }] },
+          { lineNum: 3, codeSnippet: 'while (fast) { fast = fast->next; slow = slow->next; }', constructType: 'Loop Construct', title: 'Move Both Pointers Maintaining Gap', explanation: 'Both pointers advance at the same speed, maintaining the N-node gap. When fast reaches null (end of list), slow->next is the Nth node from the end.', keyDetails: [{ variableOrConstruct: 'fast/slow synchronized', role: 'Maintain fixed gap to end', whyThisWay: 'The gap technique converts "Nth from end" into a fixed-distance two-pointer problem' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Merge Two Sorted Lists", category: "Merge",
+        description: "Merges two already-sorted linked lists into one sorted list by comparing head nodes and linking in order.",
+        prosCons: "Pros: O(N+M) optimal merge. Cons: Destructive to input lists.",
+        timeComplexity: "O(N+M)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 48. Linked List - Approach 9: Merge Two Sorted
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void pushBack(Node*& h, Node*& t, int v) {
+    Node* n = new Node(v);
+    if (!h) h = t = n; else { t->next = n; t = n; }
+}
+
+Node* mergeSorted(Node* a, Node* b) {
+    Node dummy(0);
+    Node* tail = &dummy;
+    while (a && b) {
+        if (a->data <= b->data) { tail->next = a; a = a->next; }
+        else { tail->next = b; b = b->next; }
+        tail = tail->next;
+    }
+    tail->next = a ? a : b;
+    return dummy.next;
+}
+
+void printList(Node* h) {
+    while (h) { cout << h->data << " "; h = h->next; }
+    cout << endl;
+}
+
+int main() {
+    Node *h1=nullptr, *t1=nullptr;
+    for (int v : {1, 3, 5, 7}) pushBack(h1, t1, v);
+    Node *h2=nullptr, *t2=nullptr;
+    for (int v : {2, 4, 6, 8}) pushBack(h2, t2, v);
+    Node* merged = mergeSorted(h1, h2);
+    printList(merged);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Node dummy(0); Node* tail = &dummy;', constructType: 'Variable & Initializer', title: 'Dummy Head for Merged List', explanation: 'A dummy node serves as the starting point of the merged list. The tail pointer always points to the last node in the result. dummy.next will be the true head of the merged list.', keyDetails: [{ variableOrConstruct: 'Node dummy(0)', role: 'Sentinel for merged list', whyThisWay: 'Eliminates the need for special initialization logic for the first merged node' }] },
+          { lineNum: 2, codeSnippet: 'if (a->data <= b->data) { tail->next = a; a = a->next; } else { tail->next = b; b = b->next; }', constructType: 'Condition & Branch', title: 'Compare and Link Smaller Node', explanation: 'At each step, the smaller of the two front nodes is linked to the merged tail. The pointer for that list advances to its next node. This maintains sorted order in the result.', keyDetails: [{ variableOrConstruct: 'a->data <= b->data', role: 'Merge comparison', whyThisWay: 'Standard merge algorithm: always pick the smaller element to maintain sorted invariant' }] },
+          { lineNum: 3, codeSnippet: 'tail->next = a ? a : b;', constructType: 'Return / Cleanup', title: 'Attach Remaining Nodes', explanation: 'When one list is exhausted, the remaining nodes from the other list are already sorted. We simply link the rest to the merged tail in O(1) without further processing.', keyDetails: [{ variableOrConstruct: 'a ? a : b', role: 'Append leftover list', whyThisWay: 'No need to iterate through remaining nodes; they are already linked in sorted order' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Recursive Reversal", category: "Recursion",
+        description: "Reverses the singly linked list using recursion, processing each node on the call stack and re-linking on the way back.",
+        prosCons: "Pros: Elegant recursive solution. Cons: O(N) stack space; can overflow on large lists.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N) stack", isFree: false,
+        code: `// 48. Linked List - Approach 10: Recursive Reversal
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+void pushFront(Node*& h, int v) { Node* n = new Node(v); n->next = h; h = n; }
+
+Node* reverseRecursive(Node* head) {
+    if (!head || !head->next) return head;
+    Node* newHead = reverseRecursive(head->next);
+    head->next->next = head;
+    head->next = nullptr;
+    return newHead;
+}
+
+void printList(Node* h) {
+    while (h) { cout << h->data << " "; h = h->next; }
+    cout << endl;
+}
+
+int main() {
+    Node* head = nullptr;
+    for (int v : {5, 4, 3, 2, 1}) pushFront(head, v);
+    cout << "Before: "; printList(head);
+    head = reverseRecursive(head);
+    cout << "After:  "; printList(head);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (!head || !head->next) return head;', constructType: 'Condition & Branch', title: 'Recursion Base Case', explanation: 'If the list is empty or has one node, it is already reversed. This is the base case that stops recursion and returns the tail node (which becomes the new head of the reversed list).', keyDetails: [{ variableOrConstruct: '!head || !head->next', role: 'Recursion termination', whyThisWay: 'The last node in the original list becomes the head of the reversed list' }] },
+          { lineNum: 2, codeSnippet: 'Node* newHead = reverseRecursive(head->next);', constructType: 'Function Signature', title: 'Recurse on Rest of List', explanation: 'Recursively reverse everything after the current node. The returned newHead is the last node of the original list, which becomes the head of the fully reversed sublist.', keyDetails: [{ variableOrConstruct: 'reverseRecursive(head->next)', role: 'Process remaining list', whyThisWay: 'Each recursive call processes one fewer node until reaching the base case' }] },
+          { lineNum: 3, codeSnippet: 'head->next->next = head; head->next = nullptr;', constructType: 'Variable & Initializer', title: 'Flip Link on Unwinding', explanation: 'On the way back from recursion: head->next is the node that now points backward. Setting head->next->next = head makes that node point back to us. Setting head->next = nullptr prevents cycles.', keyDetails: [{ variableOrConstruct: 'head->next->next = head', role: 'Reverse the link', whyThisWay: 'Each recursive return flips one link; the full recursion flips all links in sequence' }] }
+        ]
+      }
+    ],
+    traceKey: "linked_list"
+  };
+}
+
+export function getProblem49Details(): LearnModule {
+  return {
+    id: "med_doubly_linked",
+    title: "49. Doubly Linked List Operations",
+    category: "Data Structures",
+    difficulty: "medium",
+    shortDesc: "Bi-directional node traversal using prev and next pointers.",
+    fullCode: `// 49. Doubly Linked List - Approach 1: Insert & Traverse Both Directions
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DoublyList {
+    DNode* head;
+    DNode* tail;
+public:
+    DoublyList() : head(nullptr), tail(nullptr) {}
+    void append(int val) {
+        DNode* n = new DNode(val);
+        if (!head) { head = tail = n; }
+        else { tail->next = n; n->prev = tail; tail = n; }
+    }
+    void printForward() const {
+        for (DNode* c = head; c; c = c->next)
+            cout << c->data << " ";
+        cout << endl;
+    }
+    void printBackward() const {
+        for (DNode* c = tail; c; c = c->prev)
+            cout << c->data << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    DoublyList dl;
+    dl.append(10); dl.append(20); dl.append(30);
+    cout << "Forward:  "; dl.printForward();
+    cout << "Backward: "; dl.printBackward();
+    return 0;
+}`,
+    problemStatement: {
+      title: "49. Doubly Linked List Operations",
+      objective: "Master doubly linked list operations: bi-directional traversal, insertion at head/tail/position, deletion from any position, and in-place reversal using prev and next pointer manipulation.",
+      description: "Implement **Doubly Linked List Operations** (Data Structures). Build a doubly linked list where each node has both prev and next pointers, enabling efficient forward and backward traversal and O(1) deletion when given a node reference.",
+      inputDesc: "Integer values to insert or delete, positions for insertion, and traversal direction (forward/backward).",
+      outputDesc: "Node sequences in forward and backward order, deletion confirmations, and structural state after each mutation.",
+      takeaways: [
+        "Each DNode has two pointers (prev and next), enabling O(1) deletion when given the node reference directly",
+        "Insertion requires updating up to 4 pointers: new node prev/next and adjacent nodes prev/next",
+        "Doubly linked lists use more memory per node (extra prev pointer) but enable backward traversal",
+        "The head prev and tail next are always nullptr, marking list boundaries"
+      ],
+      examples: [
+        { id: 1, input: "append(10); append(20); append(30); printForward()", output: "10 20 30", explanation: "Appending three values and traversing forward shows insertion order." },
+        { id: 2, input: "printBackward() on list [10, 20, 30]", output: "30 20 10", explanation: "Backward traversal from tail using prev pointers reverses the display order." },
+        { id: 3, input: "deleteNode(nodeWith20) from [10, 20, 30]", output: "10 30", explanation: "O(1) deletion re-links node 10 next to node 30 and node 30 prev to node 10." }
+      ],
+      constraints: ["All operations must correctly maintain both prev and next pointers at all times."],
+      companies: ["Amazon", "Google", "Microsoft", "Meta", "Bloomberg"],
+      acceptanceRate: "87.5%",
+      totalAccepted: "3,210,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Append & Bi-Directional Traversal (FREE)", category: "FREE / Basic Operations",
+        description: "Appends nodes to the tail and demonstrates both forward (head to tail) and backward (tail to head) traversal.",
+        prosCons: "Pros: O(1) append with tail pointer. Cons: More pointers to manage per node.",
+        timeComplexity: "O(1) append, O(N) traversal", spaceComplexity: "O(N)", isFree: true,
+        code: `// 49. DLL - Approach 1: Append & Traverse
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr) {}
+    void append(int val) {
+        DNode* n = new DNode(val);
+        if (!tail) { head = tail = n; }
+        else { tail->next = n; n->prev = tail; tail = n; }
+    }
+    void forward() const {
+        for (DNode* c = head; c; c = c->next)
+            cout << c->data << " ";
+        cout << endl;
+    }
+    void backward() const {
+        for (DNode* c = tail; c; c = c->prev)
+            cout << c->data << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    DLinkedList dll;
+    dll.append(1); dll.append(2); dll.append(3); dll.append(4);
+    cout << "Forward:  "; dll.forward();
+    cout << "Backward: "; dll.backward();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct DNode { int data; DNode* prev; DNode* next; };', constructType: 'Variable & Initializer', title: 'Doubly Linked Node Structure', explanation: 'Each DNode stores data plus TWO pointers: prev (backward link) and next (forward link). This extra pointer per node is the core difference from singly linked lists.', keyDetails: [{ variableOrConstruct: 'DNode* prev', role: 'Backward traversal pointer', whyThisWay: 'Enables O(1) backward movement and O(1) deletion without needing the predecessor' }] },
+          { lineNum: 2, codeSnippet: 'tail->next = n; n->prev = tail; tail = n;', constructType: 'Variable & Initializer', title: 'Append with Bi-Directional Linking', explanation: 'Three pointer updates: (1) old tail next points to new node, (2) new node prev points to old tail, (3) tail is updated to new node. Both directions are linked in one operation.', keyDetails: [{ variableOrConstruct: 'n->prev = tail', role: 'Links new node backward', whyThisWay: 'The prev pointer must be set during insertion; forgetting it breaks backward traversal' }] },
+          { lineNum: 3, codeSnippet: 'for (DNode* c = tail; c; c = c->prev)', constructType: 'Loop Construct', title: 'Backward Traversal from Tail', explanation: 'Starting at tail and following prev pointers traverses the list in reverse order. This is impossible with singly linked lists and is a key advantage of doubly linked lists.', keyDetails: [{ variableOrConstruct: 'c = c->prev', role: 'Moves backward through list', whyThisWay: 'Demonstrates the unique capability of doubly linked lists: bi-directional traversal' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Prepend (Insert at Head) (FREE)", category: "FREE / Head Insertion",
+        description: "Inserts new nodes at the head of the doubly linked list, correctly updating both head and new node pointers.",
+        prosCons: "Pros: O(1) head insertion. Cons: Elements appear in reverse insertion order.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 49. DLL - Approach 2: Prepend
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr) {}
+    void prepend(int val) {
+        DNode* n = new DNode(val);
+        if (!head) { head = tail = n; }
+        else { n->next = head; head->prev = n; head = n; }
+    }
+    void print() const {
+        for (DNode* c = head; c; c = c->next)
+            cout << c->data << (c->next ? " <-> " : "");
+        cout << endl;
+    }
+};
+
+int main() {
+    DLinkedList dll;
+    dll.prepend(30); dll.prepend(20); dll.prepend(10);
+    dll.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'n->next = head; head->prev = n; head = n;', constructType: 'Variable & Initializer', title: 'Prepend with Three Pointer Updates', explanation: 'Three steps: (1) new node next points to current head, (2) current head prev points back to new node, (3) head is updated to new node. This maintains the doubly-linked invariant.', keyDetails: [{ variableOrConstruct: 'head->prev = n', role: 'Old head links back to new node', whyThisWay: 'Both directions must be linked; forgetting head->prev breaks backward traversal from old head' }] },
+          { lineNum: 2, codeSnippet: 'if (!head) { head = tail = n; }', constructType: 'Condition & Branch', title: 'Empty List Initialization', explanation: 'When the list is empty, both head and tail must point to the single new node. Its prev and next remain nullptr, correctly representing a single-element doubly linked list.', keyDetails: [{ variableOrConstruct: 'head = tail = n', role: 'Initialize both endpoints', whyThisWay: 'A single-element list has the same node as both head and tail' }] },
+          { lineNum: 3, codeSnippet: 'c->next ? " <-> " : ""', constructType: 'Condition & Branch', title: 'Bi-Directional Arrow Display', explanation: 'The <-> separator visually represents the doubly linked nature. Each node can be reached from both its predecessor and successor.', keyDetails: [{ variableOrConstruct: '"<->"', role: 'Visual bi-directional indicator', whyThisWay: 'Distinguishes doubly linked list output from singly linked list (-> vs <->)' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Delete Node Given Reference", category: "O(1) Deletion",
+        description: "Deletes a node in O(1) time when given a direct reference to it, re-linking its prev and next neighbors.",
+        prosCons: "Pros: O(1) deletion without traversal. Cons: Must already have a pointer to the target node.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 49. DLL - Approach 3: Delete Given Node
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr) {}
+    DNode* append(int val) {
+        DNode* n = new DNode(val);
+        if (!tail) head = tail = n;
+        else { tail->next = n; n->prev = tail; tail = n; }
+        return n;
+    }
+    void deleteNode(DNode* node) {
+        if (node->prev) node->prev->next = node->next;
+        else head = node->next;
+        if (node->next) node->next->prev = node->prev;
+        else tail = node->prev;
+        delete node;
+    }
+    void print() const {
+        for (DNode* c = head; c; c = c->next)
+            cout << c->data << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    DLinkedList dll;
+    dll.append(10);
+    DNode* mid = dll.append(20);
+    dll.append(30);
+    cout << "Before: "; dll.print();
+    dll.deleteNode(mid);
+    cout << "After:  "; dll.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (node->prev) node->prev->next = node->next; else head = node->next;', constructType: 'Condition & Branch', title: 'Re-Link Previous or Update Head', explanation: 'If the node has a predecessor, that predecessor next pointer is updated to skip the deleted node. If there is no predecessor (deleting head), head is advanced to the next node.', keyDetails: [{ variableOrConstruct: 'node->prev->next = node->next', role: 'Previous node skips over deleted', whyThisWay: 'The predecessor must now point to the successor, bridging the gap left by deletion' }] },
+          { lineNum: 2, codeSnippet: 'if (node->next) node->next->prev = node->prev; else tail = node->prev;', constructType: 'Condition & Branch', title: 'Re-Link Next or Update Tail', explanation: 'If the node has a successor, that successor prev pointer is updated to skip the deleted node. If there is no successor (deleting tail), tail is moved to the previous node.', keyDetails: [{ variableOrConstruct: 'node->next->prev = node->prev', role: 'Successor skips back over deleted', whyThisWay: 'Both prev and next links of adjacent nodes must be updated for doubly linked integrity' }] },
+          { lineNum: 3, codeSnippet: 'delete node;', constructType: 'Return / Cleanup', title: 'Deallocate Deleted Node', explanation: 'After re-linking the neighboring nodes, the target node is freed. The entire deletion (re-link + free) takes O(1) time because we already have the node reference.', keyDetails: [{ variableOrConstruct: 'delete node', role: 'Free heap memory', whyThisWay: 'O(1) deletion is the key advantage of doubly linked lists over singly linked lists' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Insert After a Given Node", category: "Mid-List Insertion",
+        description: "Inserts a new node immediately after a specified existing node, updating four pointers to maintain the doubly linked structure.",
+        prosCons: "Pros: O(1) insertion at any known position. Cons: Must have a reference to the target node.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 49. DLL - Approach 4: Insert After Node
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr) {}
+    DNode* append(int v) {
+        DNode* n = new DNode(v);
+        if (!tail) head = tail = n;
+        else { tail->next = n; n->prev = tail; tail = n; }
+        return n;
+    }
+    void insertAfter(DNode* target, int val) {
+        DNode* n = new DNode(val);
+        n->next = target->next;
+        n->prev = target;
+        if (target->next) target->next->prev = n;
+        else tail = n;
+        target->next = n;
+    }
+    void print() const {
+        for (DNode* c = head; c; c = c->next)
+            cout << c->data << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    DLinkedList dll;
+    DNode* first = dll.append(10);
+    dll.append(30);
+    dll.insertAfter(first, 20);
+    dll.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'n->next = target->next; n->prev = target;', constructType: 'Variable & Initializer', title: 'Link New Node to Neighbors', explanation: 'The new node next points to whatever was after target, and its prev points to target. This sets up the new node links before modifying any existing links.', keyDetails: [{ variableOrConstruct: 'n->prev = target', role: 'New node points back to target', whyThisWay: 'Set new node links first; modifying existing links prematurely would lose references' }] },
+          { lineNum: 2, codeSnippet: 'if (target->next) target->next->prev = n; else tail = n;', constructType: 'Condition & Branch', title: 'Update Successor Backward Link', explanation: 'If target had a successor, that successor prev is updated to point to the new node. If target was the tail, the new node becomes the new tail.', keyDetails: [{ variableOrConstruct: 'target->next->prev = n', role: 'Old successor points back to new node', whyThisWay: 'The successor backward link must skip over target directly to the new node' }] },
+          { lineNum: 3, codeSnippet: 'target->next = n;', constructType: 'Variable & Initializer', title: 'Update Target Forward Link', explanation: 'Finally, target next is updated to point to the new node. This is done LAST because we needed target->next to reference the old successor for the previous steps.', keyDetails: [{ variableOrConstruct: 'target->next = n', role: 'Target now points to new node', whyThisWay: 'Done last to preserve access to old successor during the insertion process' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: In-Place Reversal (Swap prev/next)", category: "Reversal",
+        description: "Reverses a doubly linked list by swapping the prev and next pointers of every node, then swapping head and tail.",
+        prosCons: "Pros: O(N) time, O(1) space, elegant swap approach. Cons: Touches every node.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 49. DLL - Approach 5: In-Place Reversal
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr) {}
+    void append(int v) {
+        DNode* n = new DNode(v);
+        if (!tail) head = tail = n;
+        else { tail->next = n; n->prev = tail; tail = n; }
+    }
+    void reverse() {
+        DNode* curr = head;
+        while (curr) {
+            swap(curr->prev, curr->next);
+            curr = curr->prev;
+        }
+        swap(head, tail);
+    }
+    void print() const {
+        for (DNode* c = head; c; c = c->next)
+            cout << c->data << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    DLinkedList dll;
+    for (int v : {1, 2, 3, 4, 5}) dll.append(v);
+    cout << "Before: "; dll.print();
+    dll.reverse();
+    cout << "After:  "; dll.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'swap(curr->prev, curr->next);', constructType: 'Variable & Initializer', title: 'Swap Each Node Pointers', explanation: 'For each node, prev and next are swapped. What was forward (next) becomes backward (prev) and vice versa. After swapping all nodes, the entire list direction is reversed.', keyDetails: [{ variableOrConstruct: 'swap(prev, next)', role: 'Reverses individual node links', whyThisWay: 'In a DLL, reversing just means flipping the direction of every node pointer pair' }] },
+          { lineNum: 2, codeSnippet: 'curr = curr->prev;', constructType: 'Variable & Initializer', title: 'Advance Using Swapped Pointer', explanation: 'After swapping, what WAS next is now stored in prev. So to move forward through the original order, we follow prev (which holds the old next value). This is the key insight.', keyDetails: [{ variableOrConstruct: 'curr->prev', role: 'Post-swap forward direction', whyThisWay: 'After swap(prev,next), the old forward pointer is now in the prev field' }] },
+          { lineNum: 3, codeSnippet: 'swap(head, tail);', constructType: 'Variable & Initializer', title: 'Swap Head and Tail Pointers', explanation: 'After all node pointers are swapped, head and tail must also be swapped. The old tail is the new head and vice versa. This completes the reversal.', keyDetails: [{ variableOrConstruct: 'swap(head, tail)', role: 'Swaps list endpoints', whyThisWay: 'The reversal is incomplete without updating the list-level head/tail references' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Search Forward and Backward Simultaneously", category: "Bi-Directional Search",
+        description: "Searches for a value from both ends simultaneously, cutting worst-case traversal time in half.",
+        prosCons: "Pros: ~N/2 comparisons worst case. Cons: Still O(N) asymptotically.",
+        timeComplexity: "O(N/2) avg", spaceComplexity: "O(1)", isFree: false,
+        code: `// 49. DLL - Approach 6: Bi-Directional Search
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr) {}
+    void append(int v) {
+        DNode* n = new DNode(v);
+        if (!tail) head = tail = n;
+        else { tail->next = n; n->prev = tail; tail = n; }
+    }
+    bool biSearch(int val) const {
+        DNode* front = head;
+        DNode* back = tail;
+        while (front && back && front != back && front->prev != back) {
+            if (front->data == val || back->data == val) return true;
+            front = front->next;
+            back = back->prev;
+        }
+        if (front && front->data == val) return true;
+        return false;
+    }
+};
+
+int main() {
+    DLinkedList dll;
+    for (int v : {5, 10, 15, 20, 25, 30}) dll.append(v);
+    cout << "Search 25: " << (dll.biSearch(25) ? "Found" : "Not found") << endl;
+    cout << "Search 12: " << (dll.biSearch(12) ? "Found" : "Not found") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'DNode* front = head; DNode* back = tail;', constructType: 'Variable & Initializer', title: 'Two Pointers from Both Ends', explanation: 'front starts at head and moves forward. back starts at tail and moves backward. They converge toward the middle, checking two elements per iteration.', keyDetails: [{ variableOrConstruct: 'front/back', role: 'Converging search pointers', whyThisWay: 'Searching from both ends halves the average number of comparisons needed' }] },
+          { lineNum: 2, codeSnippet: 'while (front && back && front != back && front->prev != back)', constructType: 'Loop Construct', title: 'Convergence Guard Conditions', explanation: 'The loop stops when front and back meet (odd length) or cross (even length, detected by front->prev == back). This prevents checking the same node twice.', keyDetails: [{ variableOrConstruct: 'front != back && front->prev != back', role: 'Detect pointer convergence', whyThisWay: 'Two conditions handle both odd-length (meet at center) and even-length (cross at center) lists' }] },
+          { lineNum: 3, codeSnippet: 'if (front->data == val || back->data == val) return true;', constructType: 'Condition & Branch', title: 'Check Both Ends Per Iteration', explanation: 'Each loop iteration checks two nodes (one from each end). If either matches, the search succeeds immediately. This effectively searches at 2x speed.', keyDetails: [{ variableOrConstruct: 'front->data == val || back->data == val', role: 'Dual comparison per step', whyThisWay: 'Two comparisons per iteration means the loop runs at most N/2 times' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Insert at Position K", category: "Positional Insert",
+        description: "Inserts a new node at position K (0-indexed) by traversing to position K-1 and splicing the new node after it.",
+        prosCons: "Pros: Precise positional control. Cons: O(K) traversal to find position.",
+        timeComplexity: "O(K)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 49. DLL - Approach 7: Insert at Position K
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+    int size;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr), size(0) {}
+    void append(int v) {
+        DNode* n = new DNode(v);
+        if (!tail) head = tail = n;
+        else { tail->next = n; n->prev = tail; tail = n; }
+        size++;
+    }
+    void insertAt(int pos, int val) {
+        if (pos <= 0) { DNode* n = new DNode(val); n->next = head; if (head) head->prev = n; head = n; if (!tail) tail = n; size++; return; }
+        if (pos >= size) { append(val); return; }
+        DNode* curr = head;
+        for (int i = 0; i < pos - 1; i++) curr = curr->next;
+        DNode* n = new DNode(val);
+        n->next = curr->next;
+        n->prev = curr;
+        if (curr->next) curr->next->prev = n;
+        curr->next = n;
+        size++;
+    }
+    void print() const {
+        for (DNode* c = head; c; c = c->next)
+            cout << c->data << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    DLinkedList dll;
+    dll.append(10); dll.append(30); dll.append(40);
+    dll.insertAt(1, 20);
+    dll.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (pos <= 0) { ... head = n; }', constructType: 'Condition & Branch', title: 'Position 0: Head Insertion', explanation: 'If position is 0 or negative, insert at head. The new node becomes the new head, and the old head prev is updated to point to it.', keyDetails: [{ variableOrConstruct: 'pos <= 0', role: 'Head insertion edge case', whyThisWay: 'Position 0 is semantically "insert before everything," which means new head' }] },
+          { lineNum: 2, codeSnippet: 'for (int i = 0; i < pos - 1; i++) curr = curr->next;', constructType: 'Loop Construct', title: 'Traverse to Position K-1', explanation: 'To insert at position K, we need the node at position K-1 (the one before the insertion point). The loop advances curr exactly K-1 times.', keyDetails: [{ variableOrConstruct: 'pos - 1', role: 'Stop one before insertion point', whyThisWay: 'Inserting after curr means the new node ends up at position K' }] },
+          { lineNum: 3, codeSnippet: 'n->next = curr->next; n->prev = curr; curr->next->prev = n; curr->next = n;', constructType: 'Variable & Initializer', title: 'Four-Pointer Splice', explanation: 'Four pointers are updated: new node next, new node prev, old successor prev, and curr next. This fully integrates the new node into the doubly linked chain.', keyDetails: [{ variableOrConstruct: 'Four pointer updates', role: 'Complete DLL splice', whyThisWay: 'Doubly linked insertion requires 4 updates vs 2 for singly linked lists' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Delete by Value (First Occurrence)", category: "Value Deletion",
+        description: "Searches for the first node with a matching value and deletes it, handling head, tail, and mid-list cases.",
+        prosCons: "Pros: Complete deletion with all edge cases handled. Cons: O(N) search.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 49. DLL - Approach 8: Delete by Value
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr) {}
+    void append(int v) {
+        DNode* n = new DNode(v);
+        if (!tail) head = tail = n;
+        else { tail->next = n; n->prev = tail; tail = n; }
+    }
+    bool deleteByValue(int val) {
+        DNode* curr = head;
+        while (curr && curr->data != val) curr = curr->next;
+        if (!curr) return false;
+        if (curr->prev) curr->prev->next = curr->next;
+        else head = curr->next;
+        if (curr->next) curr->next->prev = curr->prev;
+        else tail = curr->prev;
+        delete curr;
+        return true;
+    }
+    void print() const {
+        for (DNode* c = head; c; c = c->next)
+            cout << c->data << " ";
+        cout << endl;
+    }
+};
+
+int main() {
+    DLinkedList dll;
+    for (int v : {10, 20, 30, 40, 50}) dll.append(v);
+    cout << "Before: "; dll.print();
+    dll.deleteByValue(30);
+    cout << "Delete 30: "; dll.print();
+    dll.deleteByValue(10);
+    cout << "Delete 10: "; dll.print();
+    dll.deleteByValue(50);
+    cout << "Delete 50: "; dll.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (curr && curr->data != val) curr = curr->next;', constructType: 'Loop Construct', title: 'Linear Search for Target Value', explanation: 'Traverses the list until finding a node with matching data or reaching the end (nullptr). After the loop, curr is either the target node or nullptr.', keyDetails: [{ variableOrConstruct: 'curr->data != val', role: 'Search condition', whyThisWay: 'Must find the node before deleting it; DLL does not support random access' }] },
+          { lineNum: 2, codeSnippet: 'if (curr->prev) curr->prev->next = curr->next; else head = curr->next;', constructType: 'Condition & Branch', title: 'Handle Head vs Mid-List Deletion', explanation: 'If curr has a predecessor, re-link it to skip curr. If curr IS the head (no predecessor), advance head to curr->next. This handles the head deletion edge case.', keyDetails: [{ variableOrConstruct: 'curr->prev', role: 'Check if deleting head', whyThisWay: 'Head has no prev; must update head pointer instead of prev->next' }] },
+          { lineNum: 3, codeSnippet: 'if (curr->next) curr->next->prev = curr->prev; else tail = curr->prev;', constructType: 'Condition & Branch', title: 'Handle Tail vs Mid-List Deletion', explanation: 'If curr has a successor, re-link it backward to skip curr. If curr IS the tail (no successor), move tail to curr->prev. This handles the tail deletion edge case.', keyDetails: [{ variableOrConstruct: 'curr->next', role: 'Check if deleting tail', whyThisWay: 'Tail has no next; must update tail pointer instead of next->prev' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: LRU Cache Node (Move to Front)", category: "LRU Pattern",
+        description: "Implements the move-to-front operation used in LRU caches: when a node is accessed, it is moved to the head in O(1) time.",
+        prosCons: "Pros: O(1) promotion for cache hits. Cons: Requires maintaining both pointers correctly.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 49. DLL - Approach 9: Move to Front (LRU)
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int key;
+    DNode* prev;
+    DNode* next;
+    DNode(int k) : key(k), prev(nullptr), next(nullptr) {}
+};
+
+class LRUList {
+    DNode* head;
+    DNode* tail;
+public:
+    LRUList() : head(nullptr), tail(nullptr) {}
+    DNode* append(int k) {
+        DNode* n = new DNode(k);
+        if (!tail) head = tail = n;
+        else { tail->next = n; n->prev = tail; tail = n; }
+        return n;
+    }
+    void moveToFront(DNode* node) {
+        if (node == head) return;
+        if (node->prev) node->prev->next = node->next;
+        if (node->next) node->next->prev = node->prev;
+        else tail = node->prev;
+        node->prev = nullptr;
+        node->next = head;
+        head->prev = node;
+        head = node;
+    }
+    void print() const {
+        cout << "MRU -> ";
+        for (DNode* c = head; c; c = c->next)
+            cout << c->key << " ";
+        cout << "<- LRU" << endl;
+    }
+};
+
+int main() {
+    LRUList lru;
+    DNode* a = lru.append(1);
+    DNode* b = lru.append(2);
+    DNode* c = lru.append(3);
+    lru.append(4);
+    lru.print();
+    lru.moveToFront(c);
+    cout << "After accessing key 3: ";
+    lru.print();
+    lru.moveToFront(b);
+    cout << "After accessing key 2: ";
+    lru.print();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (node == head) return;', constructType: 'Condition & Branch', title: 'Already at Front Guard', explanation: 'If the node is already the head, no work is needed. This guard prevents unnecessary pointer manipulation and avoids creating a self-referencing loop.', keyDetails: [{ variableOrConstruct: 'node == head', role: 'No-op optimization', whyThisWay: 'Moving the head to the front is a no-op; doing the pointer surgery would create bugs' }] },
+          { lineNum: 2, codeSnippet: 'if (node->prev) node->prev->next = node->next; if (node->next) node->next->prev = node->prev; else tail = node->prev;', constructType: 'Condition & Branch', title: 'Detach Node from Current Position', explanation: 'First, the node is surgically removed from its current position. Its predecessor and successor are re-linked to each other, bypassing the node. If the node was the tail, tail is updated.', keyDetails: [{ variableOrConstruct: 'Detach logic', role: 'Remove from current position', whyThisWay: 'The node must be fully detached before being re-inserted at the front' }] },
+          { lineNum: 3, codeSnippet: 'node->prev = nullptr; node->next = head; head->prev = node; head = node;', constructType: 'Variable & Initializer', title: 'Reattach at Head Position', explanation: 'The detached node is placed at the front: its prev becomes nullptr (new head has no predecessor), its next points to old head, old head prev points back, and head is updated.', keyDetails: [{ variableOrConstruct: 'head = node', role: 'Promotes node to head', whyThisWay: 'LRU caches move recently accessed items to the front; least recently used items drift to the tail' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Count Nodes and Check Palindrome", category: "Utility / Palindrome",
+        description: "Counts nodes by traversal and checks if the list is a palindrome by comparing values from both ends simultaneously.",
+        prosCons: "Pros: O(N/2) palindrome check exploiting bi-directional access. Cons: Still O(N) for counting.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 49. DLL - Approach 10: Count & Palindrome Check
+#include <iostream>
+using namespace std;
+
+struct DNode {
+    int data;
+    DNode* prev;
+    DNode* next;
+    DNode(int d) : data(d), prev(nullptr), next(nullptr) {}
+};
+
+class DLinkedList {
+    DNode* head;
+    DNode* tail;
+    int count;
+public:
+    DLinkedList() : head(nullptr), tail(nullptr), count(0) {}
+    void append(int v) {
+        DNode* n = new DNode(v);
+        if (!tail) head = tail = n;
+        else { tail->next = n; n->prev = tail; tail = n; }
+        count++;
+    }
+    int size() const { return count; }
+    bool isPalindrome() const {
+        DNode* front = head;
+        DNode* back = tail;
+        for (int i = 0; i < count / 2; i++) {
+            if (front->data != back->data) return false;
+            front = front->next;
+            back = back->prev;
+        }
+        return true;
+    }
+};
+
+int main() {
+    DLinkedList d1;
+    for (int v : {1, 2, 3, 2, 1}) d1.append(v);
+    cout << "Size: " << d1.size() << endl;
+    cout << "[1,2,3,2,1] palindrome: " << (d1.isPalindrome() ? "Yes" : "No") << endl;
+
+    DLinkedList d2;
+    for (int v : {1, 2, 3, 4, 5}) d2.append(v);
+    cout << "[1,2,3,4,5] palindrome: " << (d2.isPalindrome() ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'DNode* front = head; DNode* back = tail;', constructType: 'Variable & Initializer', title: 'Two Pointers from Both Ends', explanation: 'For palindrome checking, front starts at head and back starts at tail. They move toward each other, comparing values. If all pairs match, the list is a palindrome.', keyDetails: [{ variableOrConstruct: 'front/back', role: 'Converging comparison pointers', whyThisWay: 'Bi-directional access is the key DLL advantage; singly linked lists would require O(N) extra space for this' }] },
+          { lineNum: 2, codeSnippet: 'for (int i = 0; i < count / 2; i++)', constructType: 'Loop Construct', title: 'Iterate count/2 Times', explanation: 'Only half the list needs to be checked. If the first half matches the second half (in reverse), the entire list is a palindrome. The loop runs exactly N/2 iterations.', keyDetails: [{ variableOrConstruct: 'count / 2', role: 'Half-list iteration bound', whyThisWay: 'Palindromes are symmetric; checking one half against the other is sufficient' }] },
+          { lineNum: 3, codeSnippet: 'if (front->data != back->data) return false;', constructType: 'Condition & Branch', title: 'Early Exit on Mismatch', explanation: 'If any corresponding pair from the front and back does not match, the list is NOT a palindrome and we can return false immediately without checking the rest.', keyDetails: [{ variableOrConstruct: 'front->data != back->data', role: 'Symmetry violation check', whyThisWay: 'Early exit optimizes the best case to O(1) when the first and last elements differ' }] }
+        ]
+      }
+    ],
+    traceKey: "linked_list"
+  };
+}
+
+export function getProblem50Details(): LearnModule {
+  return {
+    id: "med_binary_tree",
+    title: "50. Binary Tree Traversals",
+    category: "Data Structures",
+    difficulty: "medium",
+    shortDesc: "Inorder, Preorder, Postorder, and Level-Order traversals.",
+    fullCode: `// 50. Binary Tree Traversals - Approach 1: Recursive Inorder
+#include <iostream>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void inorder(TreeNode* root) {
+    if (!root) return;
+    inorder(root->left);
+    cout << root->val << " ";
+    inorder(root->right);
+}
+
+int main() {
+    TreeNode* root = new TreeNode(4);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(6);
+    root->left->left = new TreeNode(1);
+    root->left->right = new TreeNode(3);
+    root->right->left = new TreeNode(5);
+    root->right->right = new TreeNode(7);
+    inorder(root);
+    return 0;
+}`,
+    problemStatement: {
+      title: "50. Binary Tree Traversals",
+      objective: "Master all four binary tree traversal orders: Inorder (Left-Root-Right), Preorder (Root-Left-Right), Postorder (Left-Right-Root), and Level-Order (BFS). Implement both recursive and iterative versions.",
+      description: "Implement **Binary Tree Traversals** (Data Structures). Build a binary tree using struct TreeNode with val, left, and right fields. Traverse the tree in all four standard orders using recursion and iteration.",
+      inputDesc: "TreeNode values inserted to build a binary tree structure, and the traversal order to apply (inorder, preorder, postorder, level-order).",
+      outputDesc: "Sequence of node values printed in the specified traversal order, with expected ordering verified.",
+      takeaways: [
+        "Inorder traversal of a BST produces values in sorted ascending order",
+        "Preorder traversal visits root first, useful for serializing/copying tree structure",
+        "Postorder traversal visits root last, useful for deletion and expression evaluation",
+        "Level-order (BFS) uses a queue to visit nodes level by level from top to bottom"
+      ],
+      examples: [
+        { id: 1, input: "BST with nodes [4,2,6,1,3,5,7], inorder(root)", output: "1 2 3 4 5 6 7", explanation: "Inorder (Left-Root-Right) on a BST produces sorted output." },
+        { id: 2, input: "Same BST, preorder(root)", output: "4 2 1 3 6 5 7", explanation: "Preorder (Root-Left-Right) visits root before children." },
+        { id: 3, input: "Same BST, levelOrder(root)", output: "4 2 6 1 3 5 7", explanation: "Level-order (BFS) visits nodes level by level using a queue." }
+      ],
+      constraints: ["Tree may have 0 to 10000 nodes; handle empty tree (nullptr root) gracefully."],
+      companies: ["Google", "Amazon", "Microsoft", "Meta", "Apple"],
+      acceptanceRate: "93.2%",
+      totalAccepted: "5,890,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Recursive Inorder (Left-Root-Right) (FREE)", category: "FREE / Recursion",
+        description: "Recursively traverses left subtree, visits root, then recursively traverses right subtree, producing sorted output for BSTs.",
+        prosCons: "Pros: Simplest and most intuitive. Cons: O(N) stack depth on skewed trees.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H) stack", isFree: true,
+        code: `// 50. Tree - Approach 1: Recursive Inorder
+#include <iostream>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void inorder(TreeNode* node) {
+    if (!node) return;
+    inorder(node->left);
+    cout << node->val << " ";
+    inorder(node->right);
+}
+
+int main() {
+    TreeNode* root = new TreeNode(4);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(6);
+    root->left->left = new TreeNode(1);
+    root->left->right = new TreeNode(3);
+    cout << "Inorder: ";
+    inorder(root);
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct TreeNode { int val; TreeNode* left; TreeNode* right; };', constructType: 'Variable & Initializer', title: 'Binary Tree Node Structure', explanation: 'Each TreeNode stores an integer value and two child pointers (left and right). A nullptr child means no subtree in that direction. This is the fundamental building block of all binary trees.', keyDetails: [{ variableOrConstruct: 'TreeNode* left, right', role: 'Left and right child pointers', whyThisWay: 'Binary trees have exactly two children per node; nullptr represents missing subtrees' }] },
+          { lineNum: 2, codeSnippet: 'if (!node) return;', constructType: 'Condition & Branch', title: 'Base Case: Null Node', explanation: 'When recursion reaches a nullptr (empty subtree), it returns immediately. This is the base case that prevents infinite recursion and handles leaf node children.', keyDetails: [{ variableOrConstruct: '!node', role: 'Recursion termination', whyThisWay: 'Every leaf has two nullptr children; the base case is reached 2N+1 times for N nodes' }] },
+          { lineNum: 3, codeSnippet: 'inorder(node->left); cout << node->val; inorder(node->right);', constructType: 'Function Signature', title: 'Inorder: Left, Root, Right', explanation: 'The three statements define inorder traversal: (1) recurse into left subtree, (2) process current node, (3) recurse into right subtree. For BSTs, this produces values in ascending sorted order.', keyDetails: [{ variableOrConstruct: 'left -> root -> right', role: 'Inorder traversal order', whyThisWay: 'In a BST, all left descendants < root < all right descendants, so LRR gives sorted output' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Recursive Preorder (Root-Left-Right) (FREE)", category: "FREE / Recursion",
+        description: "Visits the root node first, then recursively traverses left and right subtrees. Used for tree serialization and copying.",
+        prosCons: "Pros: Preserves tree structure for reconstruction. Cons: O(H) stack depth.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H) stack", isFree: true,
+        code: `// 50. Tree - Approach 2: Recursive Preorder
+#include <iostream>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void preorder(TreeNode* node) {
+    if (!node) return;
+    cout << node->val << " ";
+    preorder(node->left);
+    preorder(node->right);
+}
+
+int main() {
+    TreeNode* root = new TreeNode(1);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(3);
+    root->left->left = new TreeNode(4);
+    root->left->right = new TreeNode(5);
+    cout << "Preorder: ";
+    preorder(root);
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'cout << node->val << " ";', constructType: 'Function Signature', title: 'Visit Root FIRST', explanation: 'In preorder, the root is processed BEFORE its children. This means the root of any subtree appears first in the output, making it ideal for tree serialization.', keyDetails: [{ variableOrConstruct: 'root first', role: 'Preorder: process before recursion', whyThisWay: 'Visiting root first allows reconstructing the tree from the serialized output' }] },
+          { lineNum: 2, codeSnippet: 'preorder(node->left); preorder(node->right);', constructType: 'Function Signature', title: 'Recurse Left Then Right', explanation: 'After processing the root, the left subtree is fully traversed, then the right subtree is fully traversed. The complete order is: root, all left descendants, all right descendants.', keyDetails: [{ variableOrConstruct: 'left then right', role: 'DFS left-first ordering', whyThisWay: 'Standard convention: left subtree is always visited before right subtree' }] },
+          { lineNum: 3, codeSnippet: 'if (!node) return;', constructType: 'Condition & Branch', title: 'Base Case Handles Empty Subtrees', explanation: 'Same base case as inorder: return when hitting a nullptr. This applies to leaf children and empty trees.', keyDetails: [{ variableOrConstruct: '!node', role: 'Null child termination', whyThisWay: 'Universal base case for all recursive tree traversals' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Recursive Postorder (Left-Right-Root)", category: "Recursion / Postorder",
+        description: "Recursively traverses left and right subtrees before visiting the root. Used for tree deletion and expression evaluation.",
+        prosCons: "Pros: Safe for deletion (children freed before parent). Cons: Root is visited last.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H) stack", isFree: false,
+        code: `// 50. Tree - Approach 3: Recursive Postorder
+#include <iostream>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void postorder(TreeNode* node) {
+    if (!node) return;
+    postorder(node->left);
+    postorder(node->right);
+    cout << node->val << " ";
+}
+
+void deleteTree(TreeNode* node) {
+    if (!node) return;
+    deleteTree(node->left);
+    deleteTree(node->right);
+    delete node;
+}
+
+int main() {
+    TreeNode* root = new TreeNode(1);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(3);
+    root->left->left = new TreeNode(4);
+    root->left->right = new TreeNode(5);
+    cout << "Postorder: ";
+    postorder(root);
+    cout << endl;
+    deleteTree(root);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'postorder(node->left); postorder(node->right); cout << node->val;', constructType: 'Function Signature', title: 'Postorder: Left, Right, Root', explanation: 'Both subtrees are fully processed BEFORE the current node. This means every parent is visited after all its descendants, making it safe for bottom-up operations like deletion.', keyDetails: [{ variableOrConstruct: 'left -> right -> root', role: 'Postorder traversal order', whyThisWay: 'Processing children before parent ensures safe deletion (no dangling pointers)' }] },
+          { lineNum: 2, codeSnippet: 'void deleteTree(TreeNode* node) { deleteTree(left); deleteTree(right); delete node; }', constructType: 'Function Signature', title: 'Postorder Deletion Pattern', explanation: 'deleteTree uses postorder traversal: delete left subtree, delete right subtree, then delete the current node. This ensures no node is deleted while its children still reference it.', keyDetails: [{ variableOrConstruct: 'deleteTree()', role: 'Safe bottom-up deallocation', whyThisWay: 'Deleting a parent first would lose access to its children, causing memory leaks' }] },
+          { lineNum: 3, codeSnippet: 'if (!node) return;', constructType: 'Condition & Branch', title: 'Null Node Base Case', explanation: 'Same base case as all recursive traversals. Handles leaf children and empty trees uniformly.', keyDetails: [{ variableOrConstruct: '!node', role: 'Universal traversal terminator', whyThisWay: 'Every recursive traversal needs this base case to prevent dereferencing nullptr' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Level-Order (BFS with Queue)", category: "BFS / Queue",
+        description: "Uses a queue to visit nodes level by level from top to bottom, left to right. This is Breadth-First Search on a tree.",
+        prosCons: "Pros: Visits nodes in level order; finds shortest paths. Cons: O(W) space where W is max width.",
+        timeComplexity: "O(N)", spaceComplexity: "O(W) queue", isFree: false,
+        code: `// 50. Tree - Approach 4: Level-Order BFS
+#include <iostream>
+#include <queue>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void levelOrder(TreeNode* root) {
+    if (!root) return;
+    queue<TreeNode*> q;
+    q.push(root);
+    while (!q.empty()) {
+        TreeNode* curr = q.front();
+        q.pop();
+        cout << curr->val << " ";
+        if (curr->left) q.push(curr->left);
+        if (curr->right) q.push(curr->right);
+    }
+    cout << endl;
+}
+
+int main() {
+    TreeNode* root = new TreeNode(1);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(3);
+    root->left->left = new TreeNode(4);
+    root->left->right = new TreeNode(5);
+    root->right->left = new TreeNode(6);
+    root->right->right = new TreeNode(7);
+    cout << "Level-Order: ";
+    levelOrder(root);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'queue<TreeNode*> q; q.push(root);', constructType: 'Variable & Initializer', title: 'Initialize BFS Queue with Root', explanation: 'A FIFO queue is initialized with the root node. The queue ensures nodes are processed in the order they are discovered (level by level, left to right).', keyDetails: [{ variableOrConstruct: 'queue<TreeNode*>', role: 'BFS frontier', whyThisWay: 'Queues provide FIFO ordering, which naturally produces level-by-level traversal' }] },
+          { lineNum: 2, codeSnippet: 'TreeNode* curr = q.front(); q.pop(); cout << curr->val;', constructType: 'Variable & Initializer', title: 'Dequeue and Process Current Node', explanation: 'The front node is dequeued and processed. In BFS, dequeue order corresponds to the level-order sequence: all level-0 nodes before level-1, all level-1 before level-2, etc.', keyDetails: [{ variableOrConstruct: 'q.front(); q.pop()', role: 'FIFO dequeue', whyThisWay: 'Front gives the oldest enqueued node, which is always from the current or earlier level' }] },
+          { lineNum: 3, codeSnippet: 'if (curr->left) q.push(curr->left); if (curr->right) q.push(curr->right);', constructType: 'Condition & Branch', title: 'Enqueue Children for Next Level', explanation: 'After processing a node, its children are enqueued. They will be processed after all nodes at the current level, naturally creating level-order traversal.', keyDetails: [{ variableOrConstruct: 'q.push(curr->left)', role: 'Enqueue next level nodes', whyThisWay: 'Children go to the back of the queue; they will be reached only after all current-level nodes' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Iterative Inorder (Explicit Stack)", category: "Iterative / Stack",
+        description: "Replaces recursion with an explicit stack, pushing left children until reaching null, then processing and moving right.",
+        prosCons: "Pros: No stack overflow risk; same O(H) space but controlled. Cons: More complex than recursion.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 50. Tree - Approach 5: Iterative Inorder
+#include <iostream>
+#include <stack>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void iterativeInorder(TreeNode* root) {
+    stack<TreeNode*> stk;
+    TreeNode* curr = root;
+    while (curr || !stk.empty()) {
+        while (curr) {
+            stk.push(curr);
+            curr = curr->left;
+        }
+        curr = stk.top();
+        stk.pop();
+        cout << curr->val << " ";
+        curr = curr->right;
+    }
+    cout << endl;
+}
+
+int main() {
+    TreeNode* root = new TreeNode(4);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(6);
+    root->left->left = new TreeNode(1);
+    root->left->right = new TreeNode(3);
+    root->right->left = new TreeNode(5);
+    cout << "Iterative Inorder: ";
+    iterativeInorder(root);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (curr) { stk.push(curr); curr = curr->left; }', constructType: 'Loop Construct', title: 'Push All Left Children onto Stack', explanation: 'The inner while loop dives as deep left as possible, pushing every node onto the stack. When curr becomes nullptr, the stack contains the current path of ancestors waiting to be processed.', keyDetails: [{ variableOrConstruct: 'stk.push(curr)', role: 'Simulate recursion call stack', whyThisWay: 'Pushing left children mimics the recursive inorder(node->left) calls building up on the call stack' }] },
+          { lineNum: 2, codeSnippet: 'curr = stk.top(); stk.pop(); cout << curr->val;', constructType: 'Variable & Initializer', title: 'Pop and Process Leftmost Unvisited', explanation: 'After reaching null (no more left children), pop the stack to get the next node to process. This node is the leftmost unvisited node, which is correct for inorder traversal.', keyDetails: [{ variableOrConstruct: 'stk.top()', role: 'Retrieve next inorder node', whyThisWay: 'The stack contains nodes in the order they should be visited after their left subtrees' }] },
+          { lineNum: 3, codeSnippet: 'curr = curr->right;', constructType: 'Variable & Initializer', title: 'Move to Right Subtree', explanation: 'After processing a node, move to its right child. The outer loop will then push all the left descendants of this right child, continuing the inorder sequence.', keyDetails: [{ variableOrConstruct: 'curr->right', role: 'Transition to right subtree', whyThisWay: 'In inorder, after visiting root, the right subtree is processed next (Left-Root-Right)' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Level-Order with Level Separation", category: "BFS / Grouped",
+        description: "Performs BFS but separates output by level, printing each level on its own line using queue size tracking.",
+        prosCons: "Pros: Shows tree structure visually. Cons: Slightly more complex than flat BFS.",
+        timeComplexity: "O(N)", spaceComplexity: "O(W)", isFree: false,
+        code: `// 50. Tree - Approach 6: Level-Separated BFS
+#include <iostream>
+#include <queue>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void levelByLevel(TreeNode* root) {
+    if (!root) return;
+    queue<TreeNode*> q;
+    q.push(root);
+    int level = 0;
+    while (!q.empty()) {
+        int levelSize = q.size();
+        cout << "Level " << level << ": ";
+        for (int i = 0; i < levelSize; i++) {
+            TreeNode* curr = q.front(); q.pop();
+            cout << curr->val << " ";
+            if (curr->left) q.push(curr->left);
+            if (curr->right) q.push(curr->right);
+        }
+        cout << endl;
+        level++;
+    }
+}
+
+int main() {
+    TreeNode* root = new TreeNode(1);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(3);
+    root->left->left = new TreeNode(4);
+    root->left->right = new TreeNode(5);
+    root->right->right = new TreeNode(6);
+    levelByLevel(root);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int levelSize = q.size();', constructType: 'Variable & Initializer', title: 'Capture Current Level Width', explanation: 'At the start of each level, q.size() gives the exact number of nodes on this level. By processing exactly this many nodes before moving on, we separate levels cleanly.', keyDetails: [{ variableOrConstruct: 'levelSize = q.size()', role: 'Snapshot of level population', whyThisWay: 'As children are enqueued during processing, q.size() changes; the snapshot freezes the count' }] },
+          { lineNum: 2, codeSnippet: 'for (int i = 0; i < levelSize; i++) { ... }', constructType: 'Loop Construct', title: 'Process Exactly One Level', explanation: 'The inner for loop dequeues and processes exactly levelSize nodes (all nodes on the current level). Children enqueued during this loop belong to the NEXT level and are not processed here.', keyDetails: [{ variableOrConstruct: 'i < levelSize', role: 'Level boundary enforcement', whyThisWay: 'Iterating exactly levelSize times ensures we process one complete level before advancing' }] },
+          { lineNum: 3, codeSnippet: 'level++;', constructType: 'Variable & Initializer', title: 'Increment Level Counter', explanation: 'After processing all nodes on the current level, the level counter increments. This enables labeling each level in the output (Level 0, Level 1, Level 2, etc.).', keyDetails: [{ variableOrConstruct: 'level++', role: 'Track tree depth', whyThisWay: 'Provides the level number for output formatting and depth tracking' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Tree Height Calculation", category: "Recursion / Height",
+        description: "Recursively computes the height of a binary tree by taking the maximum of left and right subtree heights plus one.",
+        prosCons: "Pros: O(N) single-pass height calculation. Cons: O(H) stack depth for recursion.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 50. Tree - Approach 7: Height Calculation
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+int height(TreeNode* node) {
+    if (!node) return -1;
+    return 1 + max(height(node->left), height(node->right));
+}
+
+int main() {
+    TreeNode* root = new TreeNode(1);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(3);
+    root->left->left = new TreeNode(4);
+    root->left->left->left = new TreeNode(5);
+    cout << "Tree height: " << height(root) << endl;
+    cout << "Left subtree height: " << height(root->left) << endl;
+    cout << "Right subtree height: " << height(root->right) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (!node) return -1;', constructType: 'Condition & Branch', title: 'Base Case: Empty Tree Height', explanation: 'An empty tree (nullptr) has height -1. A single-node tree returns 1 + max(-1, -1) = 0. This convention counts edges, not nodes. Some definitions use 0 for empty and count nodes.', keyDetails: [{ variableOrConstruct: 'return -1', role: 'Height of empty tree', whyThisWay: 'Edge-counting convention: leaf has height 0, empty has height -1' }] },
+          { lineNum: 2, codeSnippet: 'return 1 + max(height(node->left), height(node->right));', constructType: 'Return / Cleanup', title: 'Recursive Height Formula', explanation: 'The height of a node is 1 (for the current edge) plus the maximum of its two subtree heights. This recursively computes the longest root-to-leaf path in the tree.', keyDetails: [{ variableOrConstruct: '1 + max(left, right)', role: 'Height = 1 + taller child', whyThisWay: 'The longest path determines the height; max() selects the deeper subtree' }] },
+          { lineNum: 3, codeSnippet: 'height(root->left)', constructType: 'Function Signature', title: 'Subtree Height Query', explanation: 'The height function works on any subtree, not just the root. This allows querying the height of specific branches for balancing or analysis purposes.', keyDetails: [{ variableOrConstruct: 'height(subtree)', role: 'Reusable subtree query', whyThisWay: 'The recursive definition naturally handles any subtree as a self-contained binary tree' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Count Nodes (Total, Leaves, Internal)", category: "Counting / Statistics",
+        description: "Recursively counts total nodes, leaf nodes (no children), and internal nodes (at least one child) in a single traversal.",
+        prosCons: "Pros: Provides comprehensive tree statistics. Cons: Three separate functions for clarity.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 50. Tree - Approach 8: Node Counting
+#include <iostream>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+int countTotal(TreeNode* node) {
+    if (!node) return 0;
+    return 1 + countTotal(node->left) + countTotal(node->right);
+}
+
+int countLeaves(TreeNode* node) {
+    if (!node) return 0;
+    if (!node->left && !node->right) return 1;
+    return countLeaves(node->left) + countLeaves(node->right);
+}
+
+int countInternal(TreeNode* node) {
+    if (!node || (!node->left && !node->right)) return 0;
+    return 1 + countInternal(node->left) + countInternal(node->right);
+}
+
+int main() {
+    TreeNode* root = new TreeNode(1);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(3);
+    root->left->left = new TreeNode(4);
+    root->left->right = new TreeNode(5);
+    root->right->right = new TreeNode(6);
+    cout << "Total nodes: " << countTotal(root) << endl;
+    cout << "Leaf nodes: " << countLeaves(root) << endl;
+    cout << "Internal nodes: " << countInternal(root) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return 1 + countTotal(node->left) + countTotal(node->right);', constructType: 'Return / Cleanup', title: 'Total Count = 1 + Left + Right', explanation: 'Each non-null node counts as 1, plus the total counts of both subtrees. This recursive formula visits every node exactly once, giving O(N) total count.', keyDetails: [{ variableOrConstruct: '1 + left + right', role: 'Recursive size formula', whyThisWay: 'Each node contributes 1 to the total; subtree counts are computed recursively' }] },
+          { lineNum: 2, codeSnippet: 'if (!node->left && !node->right) return 1;', constructType: 'Condition & Branch', title: 'Leaf Node Detection', explanation: 'A leaf is a node with NO children (both left and right are nullptr). When detected, it contributes 1 to the leaf count. Non-leaf nodes contribute 0 directly but recurse into their children.', keyDetails: [{ variableOrConstruct: '!left && !right', role: 'Leaf identification', whyThisWay: 'Leaves are the terminal nodes of the tree; they have no subtrees to recurse into' }] },
+          { lineNum: 3, codeSnippet: 'if (!node || (!node->left && !node->right)) return 0;', constructType: 'Condition & Branch', title: 'Internal Node Exclusion', explanation: 'An internal node has at least one child. Null nodes and leaves return 0. Only nodes with at least one non-null child count as 1 and recurse further.', keyDetails: [{ variableOrConstruct: 'internal = total - leaves', role: 'Internal node count', whyThisWay: 'Internal nodes are the opposite of leaves: they have at least one child subtree' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Iterative Preorder (Single Stack)", category: "Iterative / Stack",
+        description: "Performs preorder traversal iteratively using a single stack. Root is processed immediately, then right and left children are pushed.",
+        prosCons: "Pros: Simpler iterative pattern than inorder. Cons: Right child pushed first for correct order.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 50. Tree - Approach 9: Iterative Preorder
+#include <iostream>
+#include <stack>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void iterativePreorder(TreeNode* root) {
+    if (!root) return;
+    stack<TreeNode*> stk;
+    stk.push(root);
+    while (!stk.empty()) {
+        TreeNode* curr = stk.top();
+        stk.pop();
+        cout << curr->val << " ";
+        if (curr->right) stk.push(curr->right);
+        if (curr->left) stk.push(curr->left);
+    }
+    cout << endl;
+}
+
+int main() {
+    TreeNode* root = new TreeNode(1);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(3);
+    root->left->left = new TreeNode(4);
+    root->left->right = new TreeNode(5);
+    cout << "Iterative Preorder: ";
+    iterativePreorder(root);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'stk.push(root);', constructType: 'Variable & Initializer', title: 'Initialize Stack with Root', explanation: 'The stack is seeded with the root node. Each iteration pops one node for processing and pushes its children. This simulates the recursive preorder call pattern.', keyDetails: [{ variableOrConstruct: 'stk.push(root)', role: 'Starting point for DFS', whyThisWay: 'Preorder visits root first, so root is processed on the first pop' }] },
+          { lineNum: 2, codeSnippet: 'if (curr->right) stk.push(curr->right); if (curr->left) stk.push(curr->left);', constructType: 'Condition & Branch', title: 'Push Right Before Left', explanation: 'RIGHT is pushed BEFORE left. Since a stack is LIFO, the left child will be popped FIRST (before right), maintaining the correct preorder sequence: root, left subtree, right subtree.', keyDetails: [{ variableOrConstruct: 'right before left', role: 'LIFO ordering trick', whyThisWay: 'Stack reverses insertion order; pushing right first means left is processed first (LIFO)' }] },
+          { lineNum: 3, codeSnippet: 'TreeNode* curr = stk.top(); stk.pop(); cout << curr->val;', constructType: 'Variable & Initializer', title: 'Pop and Process Immediately', explanation: 'Unlike iterative inorder which delays processing, preorder processes each node immediately upon popping. This matches the "visit root first" semantics of preorder.', keyDetails: [{ variableOrConstruct: 'process on pop', role: 'Immediate node processing', whyThisWay: 'Preorder = visit root first, so process right when dequeued from the stack' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Mirror (Invert) a Binary Tree", category: "Transformation",
+        description: "Recursively swaps the left and right children of every node, producing a mirror image of the original tree.",
+        prosCons: "Pros: O(N) transformation, elegant recursion. Cons: Modifies the original tree in-place.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 50. Tree - Approach 10: Mirror/Invert Tree
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    TreeNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void mirror(TreeNode* node) {
+    if (!node) return;
+    swap(node->left, node->right);
+    mirror(node->left);
+    mirror(node->right);
+}
+
+void inorder(TreeNode* node) {
+    if (!node) return;
+    inorder(node->left);
+    cout << node->val << " ";
+    inorder(node->right);
+}
+
+int main() {
+    TreeNode* root = new TreeNode(4);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(7);
+    root->left->left = new TreeNode(1);
+    root->left->right = new TreeNode(3);
+    root->right->left = new TreeNode(6);
+    root->right->right = new TreeNode(9);
+
+    cout << "Original inorder: ";
+    inorder(root);
+    cout << endl;
+
+    mirror(root);
+
+    cout << "Mirrored inorder: ";
+    inorder(root);
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'swap(node->left, node->right);', constructType: 'Variable & Initializer', title: 'Swap Left and Right Children', explanation: 'The core operation: each node left and right child pointers are swapped. When applied recursively to every node, the entire tree becomes its mirror image.', keyDetails: [{ variableOrConstruct: 'swap(left, right)', role: 'Mirror operation per node', whyThisWay: 'Swapping children at every node recursively inverts the entire tree structure' }] },
+          { lineNum: 2, codeSnippet: 'mirror(node->left); mirror(node->right);', constructType: 'Function Signature', title: 'Recurse into Swapped Subtrees', explanation: 'After swapping, recurse into both (now-swapped) subtrees. The swap happens at the current level, then recursion handles all deeper levels. This is a preorder traversal pattern.', keyDetails: [{ variableOrConstruct: 'mirror(subtree)', role: 'Recursive inversion', whyThisWay: 'Each level of the tree needs its children swapped; recursion handles all levels automatically' }] },
+          { lineNum: 3, codeSnippet: 'if (!node) return;', constructType: 'Condition & Branch', title: 'Base Case for Mirror', explanation: 'An empty subtree (nullptr) has nothing to mirror. This base case terminates recursion at leaves and handles empty trees.', keyDetails: [{ variableOrConstruct: '!node', role: 'Empty tree base case', whyThisWay: 'Mirroring an empty tree is a no-op; the recursion must stop at null pointers' }] }
+        ]
+      }
+    ],
+    traceKey: "factorial"
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -11407,6 +14177,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "med_destructors") return getProblem43Details();
   if (id === "med_op_overload") return getProblem44Details();
   if (id === "med_inheritance") return getProblem45Details();
+  if (id === "med_virtual_func") return getProblem46Details();
+  if (id === "med_abstract_class") return getProblem47Details();
+  if (id === "med_linked_list") return getProblem48Details();
+  if (id === "med_doubly_linked") return getProblem49Details();
+  if (id === "med_binary_tree") return getProblem50Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
