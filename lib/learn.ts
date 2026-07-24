@@ -25562,6 +25562,2043 @@ int main() {
   };
 }
 
+
+export function getProblem76Details(): LearnModule {
+  return {
+    id: "hard_variadic_templates",
+    title: "76. Variadic Templates & Fold Expressions",
+    category: "Metaprogramming",
+    difficulty: "hard",
+    shortDesc: "Accepting arbitrary parameter packs (typename... Args) & C++17 fold expressions.",
+    fullCode: `// 76. Variadic - Approach 1: Unary Right Fold Expression Sum
+#include <iostream>
+using namespace std;
+
+template<typename... Args>
+auto sumAll(Args... args) {
+    return (... + args); // C++17 Unary Fold Expression!
+}
+
+int main() {
+    cout << "Sum(1, 2, 3, 4, 5): " << sumAll(1, 2, 3, 4, 5) << endl; // 15
+    cout << "Sum(1.5, 2.5, 3.0): " << sumAll(1.5, 2.5, 3.0) << endl; // 7.0
+    return 0;
+}`,
+    problemStatement: {
+      title: "76. Variadic Templates & Fold Expressions",
+      objective: "Master variadic template parameter packs (`typename... Args`) and C++17 fold expressions: unary fold `(... + args)`, binary fold `(0 + ... + args)`, parameter pack expansion, variadic printing, variadic type checking, and variadic factory functions.",
+      description: "Implement **Variadic Templates & Fold Expressions** (Metaprogramming). Write template functions and classes that accept arbitrary numbers of arguments with zero runtime overhead.",
+      inputDesc: "Arbitrary number of arguments of homogeneous or heterogeneous types.",
+      outputDesc: "Folded binary sums, concatenated strings, printed argument packs, or variadic object instantiations.",
+      takeaways: [
+        "`typename... Args` declares a variadic parameter pack capable of accepting 0 or more type arguments",
+        "C++17 Fold Expressions `(... + args)` expand fold operators across all elements in a parameter pack at compile time",
+        "`sizeof...(Args)` returns the number of elements in a parameter pack at compile time",
+        "Fold expressions can use any binary operator (`+`, `-`, `*`, `,`, `&&`, `||`, etc.)"
+      ],
+      examples: [
+        { id: 1, input: "sumAll(1, 2, 3, 4, 5)", output: "15", explanation: "Unary fold expression (... + args) expands to 1 + 2 + 3 + 4 + 5 at compile time." },
+        { id: 2, input: "printAll('Execium', 42, 3.14)", output: "[Execium] [42] [3.14]", explanation: "Comma fold expression ((cout << '[' << args << '] '), ...) expands printing across pack." },
+        { id: 3, input: "allTrue(true, true, false)", output: "false", explanation: "Logical fold (... && args) evaluates to false." }
+      ],
+      constraints: ["Requires C++17 or higher for fold expression syntax."],
+      companies: ["NVIDIA", "Google", "Microsoft", "Apple", "Bloomberg"],
+      acceptanceRate: "88.2%",
+      totalAccepted: "1,890,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: C++17 Unary Right Fold Expression Sum (FREE)", category: "FREE / Core C++17 Fold",
+        description: "Uses C++17 unary right fold expression `(... + args)` to sum an arbitrary list of numeric arguments.",
+        prosCons: "Pros: Single line variadic reduction. Cons: Requires C++17.",
+        timeComplexity: "O(0) compile-time fold", spaceComplexity: "O(1)", isFree: true,
+        code: `// 76. Variadic - Approach 1: Unary Fold Sum
+#include <iostream>
+using namespace std;
+
+template<typename... Args>
+auto sumAll(Args... args) {
+    return (... + args);
+}
+
+int main() {
+    cout << "Sum: " << sumAll(10, 20, 30, 40) << endl; // 100
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename... Args> auto sumAll(Args... args)', constructType: 'Function Signature', title: 'Variadic Parameter Pack Signature', explanation: 'Declares variadic template parameter pack `typename... Args` and function parameter pack `Args... args`.', keyDetails: [{ variableOrConstruct: 'typename... Args', role: 'Parameter pack', whyThisWay: 'Accepts arbitrary count of template arguments' }] },
+          { lineNum: 2, codeSnippet: 'return (... + args);', constructType: 'Return / Cleanup', title: 'Unary Right Fold Expression', explanation: 'Expands `args` with binary addition operator: `arg1 + (arg2 + (arg3 + arg4))`.', keyDetails: [{ variableOrConstruct: '(... + args)', role: 'Unary fold expression', whyThisWay: 'C++17 feature for folding parameter pack over operator +' }] },
+          { lineNum: 3, codeSnippet: 'sumAll(10, 20, 30, 40)', constructType: 'Function Signature', title: 'Invoke Variadic Function', explanation: 'Invokes `sumAll` with 4 integer arguments, returning sum 100.', keyDetails: [{ variableOrConstruct: 'sumAll(10, 20, 30, 40)', role: 'Variadic call', whyThisWay: 'Demonstrates multi-argument call' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Recursive Variadic Template Pack Expansion (Pre-C++17) (FREE)", category: "FREE / Pre-C++17 Recursion",
+        description: "Demonstrates classic pre-C++17 recursive variadic template expansion with base case overload.",
+        prosCons: "Pros: Compatible with C++11. Cons: Requires base case overload and recursive instantiation.",
+        timeComplexity: "O(N) template recursions", spaceComplexity: "O(N) stack depth", isFree: true,
+        code: `// 76. Variadic - Approach 2: Pre-C++17 Recursion
+#include <iostream>
+using namespace std;
+
+// Base case: single element
+template<typename T>
+void printPack(T val) {
+    cout << val << endl;
+}
+
+// Recursive case: head + tail pack
+template<typename T, typename... Args>
+void printPack(T head, Args... tail) {
+    cout << head << ", ";
+    printPack(tail...); // Recursive pack expansion!
+}
+
+int main() {
+    printPack(1, "hello", 3.14, 'A');
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T> void printPack(T val)', constructType: 'Function Signature', title: 'Recursive Base Case Overload', explanation: 'Base case overload called when parameter pack has exactly 1 element remaining.', keyDetails: [{ variableOrConstruct: 'Base case', role: 'Recursion terminator', whyThisWay: 'Terminates variadic template recursion' }] },
+          { lineNum: 2, codeSnippet: 'template<typename T, typename... Args> void printPack(T head, Args... tail)', constructType: 'Function Signature', title: 'Recursive Head/Tail Unpacking', explanation: 'Unpacks first argument as `head` and remaining arguments as `tail...` pack.', keyDetails: [{ variableOrConstruct: 'T head, Args... tail', role: 'Pack head/tail split', whyThisWay: 'Standard pre-C++17 idiom for variadic unpacking' }] },
+          { lineNum: 3, codeSnippet: 'printPack(tail...);', constructType: 'Function Signature', title: 'Recursive Pack Expansion Call', explanation: 'Recursively expands `tail...` pack until base case is reached.', keyDetails: [{ variableOrConstruct: 'tail...', role: 'Pack expansion', whyThisWay: 'Passes remaining pack arguments recursively' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Binary Fold Expression with Initial Seed Value", category: "Binary Fold",
+        description: "Uses C++17 binary fold expression `(0 + ... + args)` with explicit initial seed value.",
+        prosCons: "Pros: Supports empty parameter packs safely. Cons: Requires C++17.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 76. Variadic - Approach 3: Binary Fold
+#include <iostream>
+using namespace std;
+
+template<typename... Args>
+auto sumWithSeed(int seed, Args... args) {
+    return (seed + ... + args); // Binary Left Fold with seed!
+}
+
+int main() {
+    cout << "With Seed 100: " << sumWithSeed(100, 10, 20) << endl; // 130
+    cout << "Empty Pack with Seed: " << sumWithSeed(100) << endl;  // 100
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return (seed + ... + args);', constructType: 'Return / Cleanup', title: 'Binary Left Fold Expression', explanation: 'Binary fold expression expands `((seed + arg1) + arg2) + arg3`. Works even when `args` pack is empty.', keyDetails: [{ variableOrConstruct: '(seed + ... + args)', role: 'Binary fold', whyThisWay: 'Provides initial seed value for empty pack safety' }] },
+          { lineNum: 2, codeSnippet: 'sumWithSeed(100, 10, 20)', constructType: 'Function Signature', title: 'Non-Empty Pack Fold', explanation: 'Folds seed 100 with arguments 10 and 20 -> 130.', keyDetails: [{ variableOrConstruct: '130 result', role: 'Fold result', whyThisWay: 'Adds seed and pack elements' }] },
+          { lineNum: 3, codeSnippet: 'sumWithSeed(100)', constructType: 'Function Signature', title: 'Empty Pack Fold with Seed', explanation: 'Fold on empty pack returns initial seed value 100.', keyDetails: [{ variableOrConstruct: '100 result', role: 'Empty pack fallback', whyThisWay: 'Demonstrates empty pack handling' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Variadic Tuple Unpacking & Element Printing with Fold", category: "Comma Fold Printing",
+        description: "Uses comma fold expression `((cout << args << ' '), ...)` to print variadic arguments sequentially.",
+        prosCons: "Pros: Concise multi-argument stream printer. Cons: Order of evaluation guarantees.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 76. Variadic - Approach 4: Comma Fold Printing
+#include <iostream>
+using namespace std;
+
+template<typename... Args>
+void printLine(Args... args) {
+    ((cout << args << " "), ...); // Comma fold expression!
+    cout << "\n";
+}
+
+int main() {
+    printLine("Execium", "Engine", 2026, 99.9);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: '((cout << args << " "), ...);', constructType: 'Function Signature', title: 'Comma Fold Expression Pack Expansion', explanation: 'Uses comma operator `,` fold expression to execute `cout << args << " "` for every argument in pack sequentially.', keyDetails: [{ variableOrConstruct: '((expr), ...)', role: 'Comma fold printer', whyThisWay: 'Executes side-effect expression across every pack argument' }] },
+          { lineNum: 2, codeSnippet: 'printLine("Execium", "Engine", 2026, 99.9);', constructType: 'Function Signature', title: 'Multi-Type Variadic Print', explanation: 'Prints string, int, and double arguments separated by spaces.', keyDetails: [{ variableOrConstruct: 'printLine call', role: 'Variadic printer', whyThisWay: 'Outputs all pack elements cleanly' }] },
+          { lineNum: 3, codeSnippet: 'cout << "\\n";', constructType: 'Function Signature', title: 'Output Newline', explanation: 'Outputs newline after fold completes.', keyDetails: [{ variableOrConstruct: 'newline', role: 'Line flush', whyThisWay: 'Completes line output' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Variadic Logical AND / OR Gate Validation", category: "Logical Fold",
+        description: "Uses logical AND fold `(... && args)` and OR fold `(... || args)` to validate variadic boolean flags.",
+        prosCons: "Pros: Short-circuiting logical pack evaluation. Cons: Requires boolean-convertible arguments.",
+        timeComplexity: "O(0) compile-time fold", spaceComplexity: "O(1)", isFree: false,
+        code: `// 76. Variadic - Approach 5: Logical Fold
+#include <iostream>
+using namespace std;
+
+template<typename... Args>
+constexpr bool allTrue(Args... args) {
+    return (... && args);
+}
+
+template<typename... Args>
+constexpr bool anyTrue(Args... args) {
+    return (... || args);
+}
+
+int main() {
+    cout << boolalpha;
+    cout << "All True: " << allTrue(true, true, 1) << endl;  // true
+    cout << "All True: " << allTrue(true, false, true) << endl; // false
+    cout << "Any True: " << anyTrue(false, 0, true) << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return (... && args);', constructType: 'Return / Cleanup', title: 'Logical AND Fold Expression', explanation: 'Folds pack over `&&` operator: `arg1 && (arg2 && arg3)`. Evaluates to true only if all arguments are true.', keyDetails: [{ variableOrConstruct: '(... && args)', role: 'Logical AND fold', whyThisWay: 'Validates all conditions in pack are satisfied' }] },
+          { lineNum: 2, codeSnippet: 'return (... || args);', constructType: 'Return / Cleanup', title: 'Logical OR Fold Expression', explanation: 'Folds pack over `||` operator: `arg1 || (arg2 || arg3)`. Evaluates to true if any argument is true.', keyDetails: [{ variableOrConstruct: '(... || args)', role: 'Logical OR fold', whyThisWay: 'Validates at least one condition in pack is satisfied' }] },
+          { lineNum: 3, codeSnippet: 'allTrue(true, true, 1)', constructType: 'Function Signature', title: 'Evaluate Boolean Pack', explanation: 'Evaluates boolean pack containing true, true, 1 -> true.', keyDetails: [{ variableOrConstruct: 'allTrue', role: 'Gate evaluator', whyThisWay: 'Performs multi-condition check' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Homogeneous Type Verification (is_same_v pack folding)", category: "Type Inspection Fold",
+        description: "Validates at compile time that all arguments in a variadic pack are of the exact same type.",
+        prosCons: "Pros: Type safety for generic algorithms. Cons: Requires `is_same_v` fold logic.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 76. Variadic - Approach 6: Homogeneous Type Check
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename First, typename... Rest>
+constexpr bool areAllSameTypes() {
+    return (is_same_v<First, Rest> && ...);
+}
+
+int main() {
+    cout << boolalpha;
+    cout << "int, int, int: " << areAllSameTypes<int, int, int>() << endl;     // true
+    cout << "int, double:   " << areAllSameTypes<int, double>() << endl;       // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename First, typename... Rest>', constructType: 'Variable & Initializer', title: 'Split Pack into First and Rest', explanation: 'Extracts first type `First` to compare against remaining types in `Rest...`.', keyDetails: [{ variableOrConstruct: 'First, Rest...', role: 'Pack split', whyThisWay: 'Provides baseline type for comparison' }] },
+          { lineNum: 2, codeSnippet: 'return (is_same_v<First, Rest> && ...);', constructType: 'Return / Cleanup', title: 'Binary Fold Over Type Equality Trait', explanation: 'Expands `is_same_v<First, Rest1> && is_same_v<First, Rest2> && ...`.', keyDetails: [{ variableOrConstruct: '(is_same_v<First, Rest> && ...)', role: 'Type equality fold', whyThisWay: 'Verifies all types match First type' }] },
+          { lineNum: 3, codeSnippet: 'areAllSameTypes<int, int, int>()', constructType: 'Function Signature', title: 'Evaluate Type Homogeneity', explanation: 'Evaluates type comparison for int, int, int -> true.', keyDetails: [{ variableOrConstruct: 'areAllSameTypes', role: 'Type checker', whyThisWay: 'Validates homogeneous type pack' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Factory Object Creator (make_unique Variadic Forwarding)", category: "Perfect Forwarding",
+        description: "Uses variadic perfect forwarding (`std::forward<Args>(args)...`) to forward constructor arguments.",
+        prosCons: "Pros: Zero-copy parameter forwarding to constructor. Cons: Perfect forwarding syntax complexity.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 76. Variadic - Approach 7: Perfect Forwarding Factory
+#include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
+using namespace std;
+
+class Widget {
+public:
+    string name;
+    int width, height;
+    Widget(string n, int w, int h) : name(n), width(w), height(h) {}
+};
+
+template<typename T, typename... Args>
+unique_ptr<T> createInstance(Args&&... args) {
+    return make_unique<T>(forward<Args>(args)...); // Perfect forwarding!
+}
+
+int main() {
+    auto w = createInstance<Widget>("Execium Window", 1920, 1080);
+    cout << "Widget: " << w->name << " (" << w->width << "x" << w->height << ")" << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T, typename... Args> unique_ptr<T> createInstance(Args&&... args)', constructType: 'Function Signature', title: 'Universal Reference Parameter Pack', explanation: 'Declares rvalue reference parameter pack `Args&&... args` for perfect forwarding.', keyDetails: [{ variableOrConstruct: 'Args&&... args', role: 'Universal reference pack', whyThisWay: 'Preserves lvalue/rvalue category of every passed argument' }] },
+          { lineNum: 2, codeSnippet: 'return make_unique<T>(forward<Args>(args)...);', constructType: 'Return / Cleanup', title: 'Forward Pack to Constructor', explanation: 'Expands `forward<Args>(args)...` to forward each argument to `T` constructor without extra copies.', keyDetails: [{ variableOrConstruct: 'forward<Args>(args)...', role: 'Perfect forwarding pack expansion', whyThisWay: 'Forwards exact value category to target object constructor' }] },
+          { lineNum: 3, codeSnippet: 'createInstance<Widget>("Execium Window", 1920, 1080)', constructType: 'Function Signature', title: 'Invoke Factory Function', explanation: 'Creates Widget instance with 3 parameters.', keyDetails: [{ variableOrConstruct: 'createInstance', role: 'Factory invocation', whyThisWay: 'Constructs Widget inside unique_ptr' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Variadic Function Invoker / Delegate Dispatcher", category: "Function Dispatcher",
+        description: "Executes a callable object passing variadic arguments dynamically.",
+        prosCons: "Pros: Flexible function invocation delegate. Cons: Universal reference syntax.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 76. Variadic - Approach 8: Delegate Dispatcher
+#include <iostream>
+#include <utility>
+using namespace std;
+
+template<typename Func, typename... Args>
+decltype(auto) invokeDelegate(Func&& func, Args&&... args) {
+    cout << "[Delegate Log]: Executing function with " << sizeof...(Args) << " arguments.\n";
+    return forward<Func>(func)(forward<Args>(args)...);
+}
+
+int multiplyThree(int a, int b, int c) { return a * b * c; }
+
+int main() {
+    int res = invokeDelegate(multiplyThree, 2, 3, 4);
+    cout << "Result: " << res << endl; // 24
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'sizeof...(Args)', constructType: 'Function Signature', title: 'Query Parameter Pack Size', explanation: '`sizeof...(Args)` evaluates at compile time to number of elements in parameter pack (3).', keyDetails: [{ variableOrConstruct: 'sizeof...(Args)', role: 'Pack size operator', whyThisWay: 'Queries count of variadic arguments at compile time' }] },
+          { lineNum: 2, codeSnippet: 'return forward<Func>(func)(forward<Args>(args)...);', constructType: 'Return / Cleanup', title: 'Forward & Invoke Callable', explanation: 'Forwards function and arguments, invoking target callable.', keyDetails: [{ variableOrConstruct: 'forward<Func>(func)(...)', role: 'Delegate invoker', whyThisWay: 'Forwards exact parameters to callable' }] },
+          { lineNum: 3, codeSnippet: 'invokeDelegate(multiplyThree, 2, 3, 4)', constructType: 'Function Signature', title: 'Dispatch 3-Argument Function', explanation: 'Dispatches `multiplyThree` with arguments 2, 3, 4 -> 24.', keyDetails: [{ variableOrConstruct: 'invokeDelegate', role: 'Dispatcher call', whyThisWay: 'Executes wrapped target function' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Fold Expression Array Initialization Generator", category: "Array Generator",
+        description: "Populates a `std::array` from variadic parameter pack using fold expressions.",
+        prosCons: "Pros: Pre-fills array from variadic pack. Cons: Array size must match pack size.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(N)", isFree: false,
+        code: `// 76. Variadic - Approach 9: Array Generator
+#include <iostream>
+#include <array>
+using namespace std;
+
+template<typename T, typename... Args>
+auto makeArray(Args... args) {
+    return array<T, sizeof...(Args)>{ static_cast<T>(args)... };
+}
+
+int main() {
+    auto arr = makeArray<double>(1, 2.5, 3, 4.25);
+    cout << "Array size: " << arr.size() << endl; // 4
+    for (double val : arr) cout << val << " "; cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return array<T, sizeof...(Args)>{ static_cast<T>(args)... };', constructType: 'Return / Cleanup', title: 'Construct std::array from Pack', explanation: 'Creates `std::array<T, N>` sizing array to `sizeof...(Args)` and casting every argument `static_cast<T>(args)...`.', keyDetails: [{ variableOrConstruct: 'static_cast<T>(args)...', role: 'Pack cast expansion', whyThisWay: 'Casts every argument in pack to type T and initializes array' }] },
+          { lineNum: 2, codeSnippet: 'makeArray<double>(1, 2.5, 3, 4.25)', constructType: 'Function Signature', title: 'Generate Double Array', explanation: 'Generates std::array<double, 4> from mixed numerical arguments.', keyDetails: [{ variableOrConstruct: 'makeArray<double>', role: 'Array generator', whyThisWay: 'Initializes std::array from variadic args' }] },
+          { lineNum: 3, codeSnippet: 'for (double val : arr) cout << val;', constructType: 'Loop Construct', title: 'Iterate Generated Array', explanation: 'Iterates and prints generated array elements.', keyDetails: [{ variableOrConstruct: 'for loop', role: 'Array display', whyThisWay: 'Displays elements of std::array' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Variadic Type Index Lookup & Pack Inspection", category: "Pack Inspection",
+        description: "Queries information about variadic parameter pack elements at compile time.",
+        prosCons: "Pros: Metaprogramming pack inspection. Cons: Advanced template traits.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 76. Variadic - Approach 10: Pack Inspection
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename... Args>
+void inspectPackInfo() {
+    cout << "Total elements in pack: " << sizeof...(Args) << endl;
+    cout << "Is empty pack: " << boolalpha << (sizeof...(Args) == 0) << endl;
+}
+
+int main() {
+    inspectPackInfo<int, double, string, char>();
+    inspectPackInfo<>();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'cout << "Total elements: " << sizeof...(Args);', constructType: 'Function Signature', title: 'Query Parameter Pack Size', explanation: 'Evaluates `sizeof...(Args)` at compile time.', keyDetails: [{ variableOrConstruct: 'sizeof...(Args)', role: 'Pack size query', whyThisWay: 'Returns count of type arguments in template pack' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Is empty pack: " << (sizeof...(Args) == 0);', constructType: 'Function Signature', title: 'Check Empty Pack Condition', explanation: 'Checks if parameter pack contains 0 elements.', keyDetails: [{ variableOrConstruct: 'sizeof...(Args) == 0', role: 'Empty pack check', whyThisWay: 'Tests if template was instantiated with no arguments' }] },
+          { lineNum: 3, codeSnippet: 'inspectPackInfo<int, double, string, char>();', constructType: 'Function Signature', title: 'Instantiate 4-Type Pack', explanation: 'Instantiates for 4 types: int, double, string, char.', keyDetails: [{ variableOrConstruct: '4-type pack', role: 'Test pack', whyThisWay: 'Demonstrates pack inspection output' }] }
+        ]
+      }
+    ],
+    traceKey: "factorial"
+  };
+}
+
+export function getProblem77Details(): LearnModule {
+  return {
+    id: "hard_sfinae",
+    title: "77. SFINAE & std::enable_if",
+    category: "Metaprogramming",
+    difficulty: "hard",
+    shortDesc: "Substitution Failure Is Not An Error for template overload resolution.",
+    fullCode: `// 77. SFINAE - Approach 1: SFINAE Function Selection for Numeric Types
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+// Enabled ONLY for integral types
+template<typename T, typename = enable_if_t<is_integral_v<T>>>
+void process(T val) {
+    cout << "Processing Integral: " << val << endl;
+}
+
+// Enabled ONLY for floating point types
+template<typename T, typename = enable_if_t<is_floating_point_v<T>>, typename = void>
+void process(T val) {
+    cout << "Processing Floating Point: " << val << endl;
+}
+
+int main() {
+    process(42);      // Integral overload
+    process(3.14159); // Floating point overload
+    return 0;
+}`,
+    problemStatement: {
+      title: "77. SFINAE & std::enable_if",
+      objective: "Master Substitution Failure Is Not An Error (SFINAE) with `std::enable_if_t`: function overload resolution selection, member function existence detection via `void_t`, class template partial specialization, restricting template constructors, return type SFINAE, and stream operator detection.",
+      description: "Implement **SFINAE & std::enable_if** (Metaprogramming). Control template overload resolution by making substitution failures silently remove candidate overloads instead of triggering compilation errors.",
+      inputDesc: "Template type arguments T, target functions, or class member signatures.",
+      outputDesc: "Specialized function overload invocations, compile-time trait checks, or SFINAE error guards.",
+      takeaways: [
+        "SFINAE guarantees that an invalid template argument substitution silently discards the candidate overload without aborting compilation",
+        "`std::enable_if_t<Condition, Type>` produces `Type` if `Condition` is true; substitution fails if `Condition` is false",
+        "`std::void_t<Ts...>` maps any valid type sequence to `void`, making it ideal for detecting member existence via SFINAE",
+        "Place `enable_if_t` as a default template parameter, function parameter, or return type to control overload resolution"
+      ],
+      examples: [
+        { id: 1, input: "process(42) vs process(3.14)", output: "Processing Integral: 42 -> Processing Floating Point: 3.14", explanation: "SFINAE enables integral overload for 42 and floating point overload for 3.14." },
+        { id: 2, input: "has_serialize_v<MyClass>", output: "true if MyClass contains .serialize() method, false otherwise", explanation: "void_t SFINAE detects presence of member method at compile time." },
+        { id: 3, input: "Restricted constructor template<typename T, enable_if_t<is_same_v<T, string>>>", output: "Constructs only from string", explanation: "SFINAE restricts constructor candidates." }
+      ],
+      constraints: ["Header `<type_traits>` required."],
+      companies: ["NVIDIA", "Google", "Microsoft", "Apple", "Bloomberg"],
+      acceptanceRate: "87.5%",
+      totalAccepted: "1,750,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: SFINAE Function Selection for Numeric Types (FREE)", category: "FREE / Core SFINAE",
+        description: "Uses `std::enable_if_t` to create mutually exclusive function overloads for integral vs floating point types.",
+        prosCons: "Pros: Type-safe overload dispatch. Cons: Verbose SFINAE syntax.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: true,
+        code: `// 77. SFINAE - Approach 1: Numeric Overloads
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T, typename = enable_if_t<is_integral_v<T>>>
+void processNumber(T val) {
+    cout << "Integral Value: " << val << endl;
+}
+
+template<typename T, typename = enable_if_t<is_floating_point_v<T>>, typename = void>
+void processNumber(T val) {
+    cout << "Floating Value: " << val << endl;
+}
+
+int main() {
+    processNumber(100);   // Integral
+    processNumber(2.718); // Floating
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T, typename = enable_if_t<is_integral_v<T>>>', constructType: 'Variable & Initializer', title: 'Integral SFINAE Guard', explanation: '`enable_if_t<is_integral_v<T>>` evaluates to `void` if T is integral. Substitution fails silently if T is float.', keyDetails: [{ variableOrConstruct: 'enable_if_t<is_integral_v<T>>', role: 'SFINAE guard', whyThisWay: 'Restricts overload candidate to integral types' }] },
+          { lineNum: 2, codeSnippet: 'template<typename T, typename = enable_if_t<is_floating_point_v<T>>, typename = void>', constructType: 'Variable & Initializer', title: 'Floating Point SFINAE Guard', explanation: 'Adds extra dummy parameter `typename = void` to avoid duplicate default template argument signature collision.', keyDetails: [{ variableOrConstruct: 'typename = void', role: 'Signature differentiator', whyThisWay: 'Prevents template signature redeclaration errors' }] },
+          { lineNum: 3, codeSnippet: 'processNumber(100); processNumber(2.718);', constructType: 'Function Signature', title: 'SFINAE Overload Selection', explanation: 'Dispatches 100 to integral overload and 2.718 to floating point overload.', keyDetails: [{ variableOrConstruct: 'processNumber call', role: 'Overload dispatch', whyThisWay: 'Selects valid candidate overload' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Member Function Existence Detection via SFINAE (void_t) (FREE)", category: "FREE / Member Detection",
+        description: "Uses `std::void_t` and SFINAE to detect if a class contains a `.toString()` member function.",
+        prosCons: "Pros: Detects class member functions at compile time. Cons: Requires void_t trick.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: true,
+        code: `// 77. SFINAE - Approach 2: void_t Member Detection
+#include <iostream>
+#include <type_traits>
+#include <string>
+using namespace std;
+
+// Primary template: defaults to false
+template<typename T, typename = void>
+struct has_toString : false_type {};
+
+// Specialization: enabled if t.toString() is valid!
+template<typename T>
+struct has_toString<T, void_t<decltype(declval<T>().toString())>> : true_type {};
+
+struct Person { string toString() const { return "Person"; } };
+struct Car {};
+
+int main() {
+    cout << boolalpha;
+    cout << "Person has toString(): " << has_toString<Person>::value << endl; // true
+    cout << "Car has toString():    " << has_toString<Car>::value << endl;    // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T, typename = void> struct has_toString : false_type {};', constructType: 'Variable & Initializer', title: 'Primary Template Fallback', explanation: 'Primary template defaults to inheriting `false_type`.', keyDetails: [{ variableOrConstruct: 'false_type', role: 'Default fallback', whyThisWay: 'Default assumption is that class lacks member method' }] },
+          { lineNum: 2, codeSnippet: 'template<typename T> struct has_toString<T, void_t<decltype(declval<T>().toString())>> : true_type {};', constructType: 'Variable & Initializer', title: 'SFINAE void_t Specialization', explanation: 'Specialization uses `declval<T>().toString()`. If method exists, `void_t` produces `void`, matching specialization and inheriting `true_type`. If method is missing, substitution fails silently.', keyDetails: [{ variableOrConstruct: 'void_t + declval', role: 'SFINAE member detector', whyThisWay: 'Standard C++17 idiom for detecting member existence' }] },
+          { lineNum: 3, codeSnippet: 'has_toString<Person>::value', constructType: 'Function Signature', title: 'Evaluate Detection Trait', explanation: 'Evaluates trait for Person (true) and Car (false).', keyDetails: [{ variableOrConstruct: 'has_toString::value', role: 'Detection result', whyThisWay: 'Returns compile-time boolean result' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Class Template Partial Specialization with SFINAE", category: "Class Specialization",
+        description: "Uses SFINAE to select between class template partial specializations.",
+        prosCons: "Pros: Class-level SFINAE specialization. Cons: Verbose template header.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 77. SFINAE - Approach 3: Class Specialization
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T, typename = void>
+struct Serializer {
+    static void serialize(T val) { cout << "Generic Serialization: " << val << endl; }
+};
+
+template<typename T>
+struct Serializer<T, enable_if_t<is_pointer_v<T>>> {
+    static void serialize(T val) { cout << "Pointer Serialization: " << (val ? *val : 0) << endl; }
+};
+
+int main() {
+    int x = 42;
+    Serializer<int>::serialize(x);   // Generic
+    Serializer<int*>::serialize(&x); // Pointer specialization
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T, typename = void> struct Serializer', constructType: 'Variable & Initializer', title: 'Primary Class Template', explanation: 'Primary template defines generic serialization logic.', keyDetails: [{ variableOrConstruct: 'Serializer primary', role: 'Generic serializer', whyThisWay: 'Handles non-pointer scalar types' }] },
+          { lineNum: 2, codeSnippet: 'struct Serializer<T, enable_if_t<is_pointer_v<T>>>', constructType: 'Variable & Initializer', title: 'Pointer Specialization SFINAE', explanation: 'Partial specialization enabled ONLY when `is_pointer_v<T>` is true.', keyDetails: [{ variableOrConstruct: 'enable_if_t<is_pointer_v<T>>', role: 'Pointer SFINAE specialization', whyThisWay: 'Specializes serializer behavior for raw pointer types' }] },
+          { lineNum: 3, codeSnippet: 'Serializer<int*>::serialize(&x);', constructType: 'Function Signature', title: 'Invoke Pointer Specialization', explanation: 'Invokes pointer specialization for `int*` argument.', keyDetails: [{ variableOrConstruct: 'Pointer serialize', role: 'Specialized invocation', whyThisWay: 'Dereferences pointer during serialization' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Restricting Template Constructors with SFINAE", category: "Constructor Guard",
+        description: "Uses SFINAE to disable generic copy/move constructor overloads from shadowing specific constructors.",
+        prosCons: "Pros: Prevents constructor shadowing bugs. Cons: Complex constructor template guards.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 77. SFINAE - Approach 4: Constructor Guard
+#include <iostream>
+#include <type_traits>
+#include <string>
+using namespace std;
+
+class SmartString {
+public:
+    string data;
+    
+    // Enabled ONLY when T is convertible to string AND T is NOT SmartString!
+    template<typename T, typename = enable_if_t<is_convertible_v<T, string> && !is_same_v<decay_t<T>, SmartString>>>
+    SmartString(T&& val) : data(forward<T>(val)) {
+        cout << "Converting Constructor invoked.\n";
+    }
+};
+
+int main() {
+    SmartString s1("Hello Execium"); // Converting constructor
+    SmartString s2(s1);               // Copy constructor (not shadowed!)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'is_convertible_v<T, string> && !is_same_v<decay_t<T>, SmartString>', constructType: 'Variable & Initializer', title: 'Constructor SFINAE Condition', explanation: 'Ensures converting constructor is only enabled for string-convertible types AND is NOT called when copy constructing SmartString.', keyDetails: [{ variableOrConstruct: '!is_same_v<decay_t<T>, SmartString>', role: 'Copy constructor shadow guard', whyThisWay: 'Prevents template constructor from hijacking copy constructor calls' }] },
+          { lineNum: 2, codeSnippet: 'SmartString s1("Hello Execium");', constructType: 'Variable & Initializer', title: 'Invoke Converting Constructor', explanation: 'Instantiates `s1` via string converting constructor.', keyDetails: [{ variableOrConstruct: 's1 creation', role: 'Converting ctor', whyThisWay: 'Initializes string payload' }] },
+          { lineNum: 3, codeSnippet: 'SmartString s2(s1);', constructType: 'Variable & Initializer', title: 'Invoke Default Copy Constructor', explanation: 'Invokes standard copy constructor without triggering template constructor.', keyDetails: [{ variableOrConstruct: 's2(s1)', role: 'Copy ctor', whyThisWay: 'Copy constructs cleanly thanks to SFINAE guard' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: SFINAE Return Type Overload Resolution", category: "Return Type SFINAE",
+        description: "Places `std::enable_if_t` as the return type of a function overload.",
+        prosCons: "Pros: Clean return type SFINAE placement. Cons: Obscures return type syntax.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 77. SFINAE - Approach 5: Return Type SFINAE
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+enable_if_t<is_integral_v<T>, T>
+halfValue(T val) {
+    return val / 2;
+}
+
+template<typename T>
+enable_if_t<is_floating_point_v<T>, T>
+halfValue(T val) {
+    return val / 2.0;
+}
+
+int main() {
+    cout << "Half int 9: " << halfValue(9) << endl;     // 4 (integer division)
+    cout << "Half double 9.0: " << halfValue(9.0) << endl; // 4.5 (float division)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'enable_if_t<is_integral_v<T>, T> halfValue(T val)', constructType: 'Function Signature', title: 'Return Type SFINAE for Integral', explanation: 'Places `enable_if_t` as return type. If T is integral, return type becomes T. If not, substitution fails.', keyDetails: [{ variableOrConstruct: 'enable_if_t as return type', role: 'Return type SFINAE', whyThisWay: 'Specifies both enable condition and function return type' }] },
+          { lineNum: 2, codeSnippet: 'enable_if_t<is_floating_point_v<T>, T> halfValue(T val)', constructType: 'Function Signature', title: 'Return Type SFINAE for Double', explanation: 'Return type SFINAE for floating point types.', keyDetails: [{ variableOrConstruct: 'enable_if_t floating point', role: 'Floating point return type', whyThisWay: 'Enables double division overload' }] },
+          { lineNum: 3, codeSnippet: 'halfValue(9); halfValue(9.0);', constructType: 'Function Signature', title: 'Invoke Return SFINAE Overloads', explanation: 'Calls integer division for 9 (4) and float division for 9.0 (4.5).', keyDetails: [{ variableOrConstruct: 'halfValue', role: 'Overload call', whyThisWay: 'Demonstrates return type SFINAE selection' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Detecting Container .serialize() Method Existence", category: "Serialize Detection",
+        description: "Detects if a type defines a `.serialize()` member method using SFINAE `decltype` syntax.",
+        prosCons: "Pros: Inspects arbitrary method names. Cons: Requires `decltype(declval<T>().method())`.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 77. SFINAE - Approach 6: Method Detection
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T, typename = void>
+struct has_serialize : false_type {};
+
+template<typename T>
+struct has_serialize<T, void_t<decltype(declval<T>().serialize())>> : true_type {};
+
+struct DataPacket { void serialize() {} };
+struct RawBuffer {};
+
+int main() {
+    cout << boolalpha;
+    cout << "DataPacket can serialize: " << has_serialize<DataPacket>::value << endl; // true
+    cout << "RawBuffer can serialize:  " << has_serialize<RawBuffer>::value << endl;  // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T, typename = void> struct has_serialize : false_type {};', constructType: 'Variable & Initializer', title: 'Serialize Primary Fallback', explanation: 'Primary template defaults to false.', keyDetails: [{ variableOrConstruct: 'false_type', role: 'Fallback', whyThisWay: 'Default assumption' }] },
+          { lineNum: 2, codeSnippet: 'void_t<decltype(declval<T>().serialize())>', constructType: 'Variable & Initializer', title: 'Detect .serialize() Method', explanation: 'Inspects expression `declval<T>().serialize()`. If valid, `void_t` produces `void` and matches specialization.', keyDetails: [{ variableOrConstruct: 'void_t + serialize()', role: 'Method presence detector', whyThisWay: 'Detects .serialize() member method at compile time' }] },
+          { lineNum: 3, codeSnippet: 'has_serialize<DataPacket>::value', constructType: 'Function Signature', title: 'Evaluate Serialize Trait', explanation: 'Returns true for DataPacket, false for RawBuffer.', keyDetails: [{ variableOrConstruct: 'has_serialize', role: 'Trait query', whyThisWay: 'Queries serialize presence' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Disabling Copy/Move Special Member Functions via SFINAE", category: "Special Member Guard",
+        description: "Uses SFINAE to conditionally enable or disable move operations based on member type properties.",
+        prosCons: "Pros: Conditional move/copy semantics. Cons: Advanced trait composition.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 77. SFINAE - Approach 7: Conditional Move
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+class ConditionalMovable {
+public:
+    T data;
+    ConditionalMovable(T d) : data(d) {}
+
+    // Move constructor enabled ONLY if T is move-constructible
+    template<typename Dummy = T, typename = enable_if_t<is_move_constructible_v<Dummy>>>
+    ConditionalMovable(ConditionalMovable&& other) noexcept : data(move(other.data)) {
+        cout << "Moved ConditionalMovable.\n";
+    }
+};
+
+int main() {
+    ConditionalMovable<int> c1(10);
+    ConditionalMovable<int> c2(move(c1));
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename Dummy = T, typename = enable_if_t<is_move_constructible_v<Dummy>>>', constructType: 'Variable & Initializer', title: 'Move Constructor SFINAE Guard', explanation: 'Uses dummy template parameter `Dummy = T` so constructor is a template eligible for SFINAE check.', keyDetails: [{ variableOrConstruct: 'Dummy = T', role: 'Template constructor trick', whyThisWay: 'Allows SFINAE on class member constructor' }] },
+          { lineNum: 2, codeSnippet: 'ConditionalMovable(ConditionalMovable&& other)', constructType: 'Function Signature', title: 'Conditional Move Constructor', explanation: 'Move constructor executes if `Dummy` (T) is move constructible.', keyDetails: [{ variableOrConstruct: 'move constructor', role: 'Move executor', whyThisWay: 'Performs move operation' }] },
+          { lineNum: 3, codeSnippet: 'ConditionalMovable<int> c2(move(c1));', constructType: 'Variable & Initializer', title: 'Invoke Move Constructor', explanation: 'Moves c1 into c2.', keyDetails: [{ variableOrConstruct: 'c2 creation', role: 'Move call', whyThisWay: 'Executes move constructor' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Overloading Expression Evaluation based on Type Trait Constraints", category: "Expression Evaluation",
+        description: "Uses SFINAE to choose between optimized fast expression evaluation paths.",
+        prosCons: "Pros: High-performance expression template selection. Cons: Complex SFINAE trait branching.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 77. SFINAE - Approach 8: Optimized Evaluation
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+enable_if_t<is_trivially_copyable_v<T>, void>
+copyBuffer(T* dest, const T* src, size_t count) {
+    cout << "Optimized memcpy copy for trivially copyable type.\n";
+}
+
+template<typename T>
+enable_if_t<!is_trivially_copyable_v<T>, void>
+copyBuffer(T* dest, const T* src, size_t count) {
+    cout << "Element-by-element loop copy for complex type.\n";
+}
+
+int main() {
+    int srcBuf[5] = {1, 2, 3, 4, 5};
+    int destBuf[5];
+    copyBuffer(destBuf, srcBuf, 5); // Optimized memcpy branch!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'enable_if_t<is_trivially_copyable_v<T>, void> copyBuffer(...)', constructType: 'Function Signature', title: 'Trivially Copyable Fast Path SFINAE', explanation: 'Selects fast path branch if T can be safely copied via memcpy.', keyDetails: [{ variableOrConstruct: 'is_trivially_copyable_v', role: 'Fast path trait', whyThisWay: 'Enables memcpy optimization for primitive scalar types' }] },
+          { lineNum: 2, codeSnippet: 'enable_if_t<!is_trivially_copyable_v<T>, void> copyBuffer(...)', constructType: 'Function Signature', title: 'Complex Type Element Loop SFINAE', explanation: 'Selects element loop branch for non-trivially copyable types.', keyDetails: [{ variableOrConstruct: '!is_trivially_copyable_v', role: 'Safe path trait', whyThisWay: 'Enforces element-by-element copy for complex objects' }] },
+          { lineNum: 3, codeSnippet: 'copyBuffer(destBuf, srcBuf, 5);', constructType: 'Function Signature', title: 'Execute Fast Path Copy', explanation: 'Dispatches int array copy to optimized memcpy branch.', keyDetails: [{ variableOrConstruct: 'copyBuffer call', role: 'Optimized copy', whyThisWay: 'Demonstrates SFINAE optimization selection' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: SFINAE Detection of Stream Operator << Overload", category: "Stream Operator Detection",
+        description: "Detects if a custom type supports `std::cout << val` stream printing at compile time.",
+        prosCons: "Pros: Prevents stream printing compile errors for unprintable types. Cons: Requires stream void_t.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 77. SFINAE - Approach 9: Stream Operator Check
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T, typename = void>
+struct is_streamable : false_type {};
+
+template<typename T>
+struct is_streamable<T, void_t<decltype(declval<ostream&>() << declval<T>())>> : true_type {};
+
+struct Printable { int x = 10; };
+ostream& operator<<(ostream& os, const Printable& p) { return os << p.x; }
+struct Unprintable {};
+
+int main() {
+    cout << boolalpha;
+    cout << "Printable is streamable: " << is_streamable<Printable>::value << endl;   // true
+    cout << "Unprintable is streamable: " << is_streamable<Unprintable>::value << endl; // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void_t<decltype(declval<ostream&>() << declval<T>())>', constructType: 'Variable & Initializer', title: 'Detect Stream Operator <<', explanation: 'Inspects expression `declval<ostream&>() << declval<T>()`. If valid, `void_t` produces `void` and matches specialization.', keyDetails: [{ variableOrConstruct: 'ostream& << T', role: 'Stream operator detector', whyThisWay: 'Validates type supports cout << operator at compile time' }] },
+          { lineNum: 2, codeSnippet: 'is_streamable<Printable>::value', constructType: 'Function Signature', title: 'Evaluate Printable Trait', explanation: 'Returns true because `operator<<` overload exists for Printable.', keyDetails: [{ variableOrConstruct: 'Printable test', role: 'Printable trait check', whyThisWay: 'Confirms streamable operator' }] },
+          { lineNum: 3, codeSnippet: 'is_streamable<Unprintable>::value', constructType: 'Function Signature', title: 'Evaluate Unprintable Trait', explanation: 'Returns false because no `operator<<` exists for Unprintable.', keyDetails: [{ variableOrConstruct: 'Unprintable test', role: 'Unprintable trait check', whyThisWay: 'Confirms missing stream operator' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Custom Type Trait Builder using std::enable_if and decltype", category: "Custom Trait Builder",
+        description: "Builds a flexible custom type trait suite combining `std::enable_if` and `decltype`.",
+        prosCons: "Pros: Custom metaprogramming trait framework. Cons: Complex template boilerplate.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 77. SFINAE - Approach 10: Trait Builder
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+struct is_numeric_and_small {
+    static constexpr bool value = is_arithmetic_v<T> && (sizeof(T) <= 4);
+};
+
+template<typename T, enable_if_t<is_numeric_and_small<T>::value, int> = 0>
+void processSmallNumeric(T val) {
+    cout << "Processing small numeric type (<= 4 bytes): " << val << endl;
+}
+
+int main() {
+    processSmallNumeric(42);     // int (4 bytes) -> OK
+    processSmallNumeric(3.14f);  // float (4 bytes) -> OK
+    // processSmallNumeric(3.14); // double (8 bytes) -> SFINAE error
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'static constexpr bool value = is_arithmetic_v<T> && (sizeof(T) <= 4);', constructType: 'Variable & Initializer', title: 'Custom Trait Value Definition', explanation: 'Combines `is_arithmetic_v<T>` and `sizeof(T) <= 4` to define custom composite trait.', keyDetails: [{ variableOrConstruct: 'is_numeric_and_small', role: 'Composite trait builder', whyThisWay: 'Creates custom domain-specific type constraint' }] },
+          { lineNum: 2, codeSnippet: 'template<typename T, enable_if_t<is_numeric_and_small<T>::value, int> = 0>', constructType: 'Variable & Initializer', title: 'Integer SFINAE Parameter Guard', explanation: 'Uses `enable_if_t<..., int> = 0` non-type template parameter idiom for SFINAE guard.', keyDetails: [{ variableOrConstruct: 'enable_if_t<..., int> = 0', role: 'Non-type parameter SFINAE', whyThisWay: 'Alternative clean SFINAE placement idiom' }] },
+          { lineNum: 3, codeSnippet: 'processSmallNumeric(42);', constructType: 'Function Signature', title: 'Invoke Small Numeric Function', explanation: 'Invokes function for int (4 bytes) and float (4 bytes).', keyDetails: [{ variableOrConstruct: 'processSmallNumeric call', role: 'Constrained invocation', whyThisWay: 'Executes for types satisfying composite trait' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem78Details(): LearnModule {
+  return {
+    id: "hard_concepts",
+    title: "78. C++20 Concepts & Constraints",
+    category: "Modern C++",
+    difficulty: "hard",
+    shortDesc: "Constraining template type arguments using requires clauses & concepts.",
+    fullCode: `// 78. Concepts - Approach 1: Basic Concept & Constrained Function
+#include <iostream>
+#include <concepts>
+using namespace std;
+
+// Define a custom concept for Addable types
+template<typename T>
+concept Addable = requires(T a, T b) {
+    { a + b } -> std::same_as<T>;
+};
+
+template<Addable T>
+T add(T a, T b) {
+    return a + b;
+}
+
+int main() {
+    cout << "Int Add: " << add(10, 20) << endl;       // 30
+    cout << "Double Add: " << add(3.5, 2.5) << endl; // 6.0
+    // add("hello", "world"); // Clean compiler error explaining concept mismatch!
+    return 0;
+}`,
+    problemStatement: {
+      title: "78. C++20 Concepts & Constraints",
+      objective: "Master C++20 Concepts and `requires` clauses: defining concepts (`template<typename T> concept C = ...`), abbreviated function syntax (`auto val`), compound requirements `{ expr } -> concept`, standard concepts (`std::integral`, `std::floating_point`, `std::convertible_to`), and concept overloading.",
+      description: "Implement **C++20 Concepts & Constraints** (Modern C++). Replace verbose SFINAE template metaprogramming with clean, readable C++20 concept constraints and precise compiler error diagnostics.",
+      inputDesc: "Template type parameters, custom structural requirements, or standard concept constraints.",
+      outputDesc: "Concept-constrained function executions, clear compile-time concept validation diagnostics.",
+      takeaways: [
+        "C++20 Concepts evaluate predicate conditions on template arguments at compile time with readable error messages",
+        "`template<std::integral T>` constrains template function to accept only integral types",
+        "Abbreviated function template syntax `void print(auto x)` provides concise concept-constrained template parameters",
+        "Compound requirements `{ expr } -> std::same_as<TargetType>` validate both expression validity and return type"
+      ],
+      examples: [
+        { id: 1, input: "add(10, 20) vs add('a', 'b')", output: "Int Add: 30", explanation: "Addable concept validates type supporting + operator returning same type." },
+        { id: 2, input: "void printVal(std::integral auto val)", output: "Prints integral value", explanation: "Abbreviated concept constrained function parameter." },
+        { id: 3, input: "requires (T a, T b) { { a + b } -> std::same_as<T>; }", output: "Validates compound requirement", explanation: "Ensures expression a + b is valid and returns type T." }
+      ],
+      constraints: ["Header `<concepts>` requires C++20 compilation standard (`-std=c++20`)."],
+      companies: ["NVIDIA", "Google", "Microsoft", "Apple", "Meta"],
+      acceptanceRate: "92.1%",
+      totalAccepted: "2,450,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Concept Definition & Constrained Function (FREE)", category: "FREE / Core C++20 Concepts",
+        description: "Defines custom `Addable` concept and applies it as a template type constraint.",
+        prosCons: "Pros: Clean readable template constraints, beautiful compiler errors. Cons: Requires C++20.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: true,
+        code: `// 78. Concepts - Approach 1: Basic Concept
+#include <iostream>
+#include <concepts>
+using namespace std;
+
+template<typename T>
+concept Addable = requires(T a, T b) {
+    { a + b } -> same_as<T>;
+};
+
+template<Addable T>
+T addValues(T a, T b) {
+    return a + b;
+}
+
+int main() {
+    cout << "Add Ints: " << addValues(15, 25) << endl; // 40
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'concept Addable = requires(T a, T b) { { a + b } -> same_as<T>; };', constructType: 'Variable & Initializer', title: 'C++20 Concept Definition', explanation: 'Defines concept `Addable` checking that `a + b` is a valid expression AND returns exact type `T`.', keyDetails: [{ variableOrConstruct: 'concept Addable', role: 'C++20 concept definition', whyThisWay: 'Formalizes type requirements cleanly' }] },
+          { lineNum: 2, codeSnippet: 'template<Addable T> T addValues(T a, T b)', constructType: 'Function Signature', title: 'Constrained Template Function Header', explanation: 'Replaces generic `typename T` with concept `Addable T`, constraining function parameters.', keyDetails: [{ variableOrConstruct: 'template<Addable T>', role: 'Concept constraint', whyThisWay: 'Restricts template to types satisfying Addable concept' }] },
+          { lineNum: 3, codeSnippet: 'addValues(15, 25)', constructType: 'Function Signature', title: 'Invoke Constrained Function', explanation: 'Invokes function with integers 15 and 25 -> 40.', keyDetails: [{ variableOrConstruct: 'addValues call', role: 'Valid invocation', whyThisWay: 'Passes concept check' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Abbreviated Function Template Syntax (auto val) (FREE)", category: "FREE / Abbreviated Syntax",
+        description: "Uses C++20 abbreviated function template syntax `(auto val)` with concepts for terse function signatures.",
+        prosCons: "Pros: Extremely concise template syntax. Cons: Conceals explicit template parameters.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: true,
+        code: `// 78. Concepts - Approach 2: Abbreviated Syntax
+#include <iostream>
+#include <concepts>
+using namespace std;
+
+// Terse C++20 function template with concept constraint!
+void printIntegral(integral auto val) {
+    cout << "Integral Value: " << val << endl;
+}
+
+int main() {
+    printIntegral(42);   // Int
+    printIntegral(100L); // Long
+    // printIntegral(3.14); // Compile Error: double is not integral!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void printIntegral(integral auto val)', constructType: 'Function Signature', title: 'Abbreviated Constrained Function Signature', explanation: '`integral auto val` uses C++20 terse syntax to declare function template parameter constrained by `std::integral` concept.', keyDetails: [{ variableOrConstruct: 'integral auto val', role: 'Abbreviated constrained parameter', whyThisWay: 'Eliminates explicit template<typename T> boilerplate' }] },
+          { lineNum: 2, codeSnippet: 'printIntegral(42);', constructType: 'Function Signature', title: 'Invoke with Int Parameter', explanation: 'Calls function with integer 42.', keyDetails: [{ variableOrConstruct: '42 parameter', role: 'Valid argument', whyThisWay: 'Satisfies std::integral concept' }] },
+          { lineNum: 3, codeSnippet: 'printIntegral(100L);', constructType: 'Function Signature', title: 'Invoke with Long Parameter', explanation: 'Calls function with long integer 100L.', keyDetails: [{ variableOrConstruct: '100L parameter', role: 'Valid argument', whyThisWay: 'Satisfies std::integral concept' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Compound Requirements with Expression Trait Return Checks", category: "Compound Requirements",
+        description: "Uses compound requirements `{ expr } -> concept;` to validate both expression validity and return type constraints.",
+        prosCons: "Pros: Strict expression and type checks. Cons: Requires compound syntax.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 78. Concepts - Approach 3: Compound Requirements
+#include <iostream>
+#include <concepts>
+#include <string>
+using namespace std;
+
+template<typename T>
+concept Hashable = requires(T a) {
+    { std::hash<T>{}(a) } -> convertible_to<size_t>;
+};
+
+template<Hashable T>
+size_t computeHash(T val) {
+    return std::hash<T>{}(val);
+}
+
+int main() {
+    cout << "Hash of string: " << computeHash(string("Execium")) << endl;
+    cout << "Hash of int:    " << computeHash(42) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: '{ std::hash<T>{}(a) } -> convertible_to<size_t>;', constructType: 'Variable & Initializer', title: 'Compound Requirement Rule', explanation: 'Validates that `std::hash<T>{}(a)` is a valid expression AND its return type is `convertible_to<size_t>`.', keyDetails: [{ variableOrConstruct: '{ expr } -> concept', role: 'Compound requirement', whyThisWay: 'Validates both syntax validity and output type compatibility' }] },
+          { lineNum: 2, codeSnippet: 'template<Hashable T> size_t computeHash(T val)', constructType: 'Function Signature', title: 'Constrained Hash Function', explanation: 'Constrains `computeHash` to types satisfying `Hashable` concept.', keyDetails: [{ variableOrConstruct: 'Hashable T', role: 'Concept constraint', whyThisWay: 'Restricts function to hashable types' }] },
+          { lineNum: 3, codeSnippet: 'computeHash(string("Execium"))', constructType: 'Function Signature', title: 'Invoke Hash Function', explanation: 'Computes hash of string object.', keyDetails: [{ variableOrConstruct: 'computeHash', role: 'Hash call', whyThisWay: 'Executes hash computation for valid Hashable type' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Defining Custom Addable and Printable Concepts", category: "Custom Concepts",
+        description: "Defines a composite `Printable` concept checking stream operator `<<` support.",
+        prosCons: "Pros: User-defined concept abstractions. Cons: Concept design discipline.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 78. Concepts - Approach 4: Custom Printable Concept
+#include <iostream>
+#include <concepts>
+using namespace std;
+
+template<typename T>
+concept Printable = requires(ostream& os, T val) {
+    { os << val } -> same_as<ostream&>;
+};
+
+void printCustom(Printable auto val) {
+    cout << "Custom Print: " << val << endl;
+}
+
+int main() {
+    printCustom(100);
+    printCustom("Execium Concept");
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'concept Printable = requires(ostream& os, T val) { { os << val } -> same_as<ostream&>; };', constructType: 'Variable & Initializer', title: 'Custom Printable Concept Definition', explanation: 'Defines `Printable` concept requiring `os << val` to be valid and return `ostream&`.', keyDetails: [{ variableOrConstruct: 'concept Printable', role: 'Custom concept', whyThisWay: 'Encapsulates stream printing requirement' }] },
+          { lineNum: 2, codeSnippet: 'void printCustom(Printable auto val)', constructType: 'Function Signature', title: 'Abbreviated Printable Function', explanation: 'Accepts any type satisfying `Printable` concept.', keyDetails: [{ variableOrConstruct: 'Printable auto', role: 'Concept parameter', whyThisWay: 'Enforces printable constraint' }] },
+          { lineNum: 3, codeSnippet: 'printCustom("Execium Concept");', constructType: 'Function Signature', title: 'Invoke Printable Function', explanation: 'Prints string constant.', keyDetails: [{ variableOrConstruct: 'printCustom', role: 'Print call', whyThisWay: 'Executes for valid printable string' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Overloading Functions based on Disjunction/Conjunction Concepts", category: "Concept Overloading",
+        description: "Overloads functions using concept conjunctions (`&&`) and disjunctions (`||`).",
+        prosCons: "Pros: Multi-concept overload dispatch. Cons: Concept subsumption rules.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 78. Concepts - Approach 5: Concept Overloading
+#include <iostream>
+#include <concepts>
+using namespace std;
+
+template<typename T>
+concept Number = integral<T> || floating_point<T>;
+
+void processValue(Number auto val) {
+    cout << "Processing Number: " << val << endl;
+}
+
+void processValue(auto val) {
+    cout << "Processing Non-Number: " << val << endl;
+}
+
+int main() {
+    processValue(42);        // Number overload
+    processValue(3.14);      // Number overload
+    processValue("Execium"); // Non-Number overload
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'concept Number = integral<T> || floating_point<T>;', constructType: 'Variable & Initializer', title: 'Concept Disjunction Definition', explanation: 'Uses logical OR `||` to combine `integral` and `floating_point` concepts into composite `Number` concept.', keyDetails: [{ variableOrConstruct: 'concept Number', role: 'Concept disjunction', whyThisWay: 'Accepts either integral or floating point types' }] },
+          { lineNum: 2, codeSnippet: 'void processValue(Number auto val)', constructType: 'Function Signature', title: 'More Constrained Overload', explanation: 'Target overload for types satisfying `Number` concept.', keyDetails: [{ variableOrConstruct: 'Number auto', role: 'Constrained overload', whyThisWay: 'Subsumes unconstrained auto overload when satisfied' }] },
+          { lineNum: 3, codeSnippet: 'processValue("Execium");', constructType: 'Function Signature', title: 'Fallback Unconstrained Overload', explanation: 'Dispatches non-numeric string to unconstrained fallback overload.', keyDetails: [{ variableOrConstruct: 'unconstrained auto', role: 'Fallback overload', whyThisWay: 'Handles non-number types cleanly' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Constraining Class Template Parameters with Concepts", category: "Constrained Classes",
+        description: "Constrains class template type parameters using C++20 concepts.",
+        prosCons: "Pros: Class-level concept type enforcement. Cons: Class declaration syntax.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 78. Concepts - Approach 6: Constrained Class
+#include <iostream>
+#include <concepts>
+using namespace std;
+
+template<integral T>
+class Counter {
+    T count = 0;
+public:
+    void increment() { count++; }
+    T get() const { return count; }
+};
+
+int main() {
+    Counter<int> c;
+    c.increment();
+    cout << "Counter value: " << c.get() << endl; // 1
+    // Counter<double> err; // Compile Error: double does not satisfy integral concept!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<integral T> class Counter', constructType: 'Variable & Initializer', title: 'Constrained Class Template Header', explanation: 'Constrains class `Counter` to accept only integral template type parameters `T`.', keyDetails: [{ variableOrConstruct: 'template<integral T>', role: 'Constrained class header', whyThisWay: 'Enforces concept constraints on class instantiation' }] },
+          { lineNum: 2, codeSnippet: 'Counter<int> c;', constructType: 'Variable & Initializer', title: 'Instantiate Valid Integral Counter', explanation: 'Instantiates Counter for integer type.', keyDetails: [{ variableOrConstruct: 'Counter<int>', role: 'Class instantiation', whyThisWay: 'Passes integral concept check' }] },
+          { lineNum: 3, codeSnippet: 'c.increment(); cout << c.get();', constructType: 'Function Signature', title: 'Invoke Counter Methods', explanation: 'Increments and prints counter value 1.', keyDetails: [{ variableOrConstruct: 'c.get()', role: 'Counter output', whyThisWay: 'Displays counter result' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Standard Concepts (std::derived_from & std::convertible_to)", category: "Standard Concepts",
+        description: "Uses standard library concepts `<concepts>` like `std::derived_from` and `std::convertible_to`.",
+        prosCons: "Pros: Built-in standard library concepts. Cons: Concept inheritance hierarchy rules.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 78. Concepts - Approach 7: Standard Concepts
+#include <iostream>
+#include <concepts>
+using namespace std;
+
+class Base {};
+class Derived : public Base {};
+class Unrelated {};
+
+template<derived_from<Base> T>
+void processBasePointer(T* obj) {
+    cout << "Processing Base-derived object.\n";
+}
+
+int main() {
+    Derived d;
+    processBasePointer(&d); // OK!
+    // Unrelated u; processBasePointer(&u); // Compile Error!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<derived_from<Base> T> void processBasePointer(T* obj)', constructType: 'Function Signature', title: 'Standard derived_from Concept Guard', explanation: '`derived_from<Base>` concept checks that T inherits publicly from `Base`.', keyDetails: [{ variableOrConstruct: 'derived_from<Base>', role: 'Standard inheritance concept', whyThisWay: 'Enforces object-oriented inheritance constraints at compile time' }] },
+          { lineNum: 2, codeSnippet: 'Derived d; processBasePointer(&d);', constructType: 'Variable & Initializer', title: 'Invoke with Derived Object Pointer', explanation: 'Passes Derived object pointer, satisfying concept check.', keyDetails: [{ variableOrConstruct: '&d parameter', role: 'Valid derived pointer', whyThisWay: 'Inherits from Base' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Processing Base-derived object.";', constructType: 'Function Signature', title: 'Execute Processing', explanation: 'Prints confirmation.', keyDetails: [{ variableOrConstruct: 'Output', role: 'Output', whyThisWay: 'Displays execution log' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Concept-Constrained Smart Pointer Wrapper", category: "Smart Pointer Concepts",
+        description: "Constrains a smart pointer wrapper to accept non-nullptr valid objects.",
+        prosCons: "Pros: Safe smart pointer wrapper API. Cons: Requires requires clause.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 78. Concepts - Approach 8: Smart Pointer Constraint
+#include <iostream>
+#include <concepts>
+#include <memory>
+using namespace std;
+
+template<typename T>
+requires (!is_pointer_v<T>) // Disallow raw pointer wrapped in raw pointer
+class SafeHandle {
+    unique_ptr<T> ptr;
+public:
+    SafeHandle(T* p) : ptr(p) {}
+    T* operator->() { return ptr.get(); }
+};
+
+struct Engine { void start() { cout << "Engine Started!\n"; } };
+
+int main() {
+    SafeHandle<Engine> eng(new Engine());
+    eng->start();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'requires (!is_pointer_v<T>)', constructType: 'Variable & Initializer', title: 'Trailing requires Clause', explanation: 'Trailing `requires` clause ensures T is not a raw pointer type.', keyDetails: [{ variableOrConstruct: 'requires (!is_pointer_v<T>)', role: 'Trailing requires clause', whyThisWay: 'Disallows wrapping raw pointer in raw pointer' }] },
+          { lineNum: 2, codeSnippet: 'SafeHandle<Engine> eng(new Engine());', constructType: 'Variable & Initializer', title: 'Instantiate SafeHandle', explanation: 'Instantiates SafeHandle wrapping Engine instance.', keyDetails: [{ variableOrConstruct: 'SafeHandle<Engine>', role: 'Valid instantiation', whyThisWay: 'Engine is not a pointer type' }] },
+          { lineNum: 3, codeSnippet: 'eng->start();', constructType: 'Function Signature', title: 'Invoke Arrow Operator', explanation: 'Accesses Engine method via arrow operator.', keyDetails: [{ variableOrConstruct: 'eng->start()', role: 'Arrow dispatch', whyThisWay: 'Executes Engine method' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Concepts for Container Iteration (std::ranges::range)", category: "Range Concepts",
+        description: "Uses standard concept `std::ranges::range` to constrain function to iterable containers.",
+        prosCons: "Pros: Works with vector, array, list, etc. Cons: Requires C++20 ranges concept.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 78. Concepts - Approach 9: Range Concept
+#include <iostream>
+#include <concepts>
+#include <ranges>
+#include <vector>
+using namespace std;
+
+void printRange(ranges::range auto const& r) {
+    cout << "Range items: ";
+    for (auto const& elem : r) cout << elem << " ";
+    cout << endl;
+}
+
+int main() {
+    vector<int> nums = {1, 2, 3, 4, 5};
+    printRange(nums);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void printRange(ranges::range auto const& r)', constructType: 'Function Signature', title: 'Constrain Parameter to Range Concept', explanation: '`ranges::range auto` constrains parameter `r` to containers providing `.begin()` and `.end()` iterators.', keyDetails: [{ variableOrConstruct: 'ranges::range auto', role: 'Range concept parameter', whyThisWay: 'Restricts parameter to iterable containers' }] },
+          { lineNum: 2, codeSnippet: 'for (auto const& elem : r) cout << elem << " ";', constructType: 'Loop Construct', title: 'Iterate Range Container', explanation: 'Iterates range container element by element.', keyDetails: [{ variableOrConstruct: 'for loop', role: 'Range iteration', whyThisWay: 'Prints elements of range container' }] },
+          { lineNum: 3, codeSnippet: 'printRange(nums);', constructType: 'Function Signature', title: 'Invoke with Vector Container', explanation: 'Passes std::vector to range print function.', keyDetails: [{ variableOrConstruct: 'printRange call', role: 'Valid range invocation', whyThisWay: 'Vector satisfies range concept' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Nested requires Clauses and Type Checking", category: "Nested Requires",
+        description: "Combines nested `requires` clauses to validate nested member types and properties.",
+        prosCons: "Pros: Complex structural constraints. Cons: Advanced concept syntax.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 78. Concepts - Approach 10: Nested Requires
+#include <iostream>
+#include <concepts>
+#include <vector>
+using namespace std;
+
+template<typename T>
+concept NumericContainer = requires {
+    typename T::value_type; // Member type check
+    requires integral<typename T::value_type>; // Nested requires clause!
+};
+
+template<NumericContainer C>
+void processNumericContainer(const C& c) {
+    cout << "Numeric container with size: " << c.size() << endl;
+}
+
+int main() {
+    vector<int> vInt = {10, 20, 30};
+    processNumericContainer(vInt); // OK!
+    // vector<string> vStr; processNumericContainer(vStr); // Error: value_type string is not integral!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'typename T::value_type;', constructType: 'Variable & Initializer', title: 'Member Type Presence Requirement', explanation: 'Requires class T to define member typedef `value_type`.', keyDetails: [{ variableOrConstruct: 'typename T::value_type', role: 'Typedef requirement', whyThisWay: 'Validates container defines value_type' }] },
+          { lineNum: 2, codeSnippet: 'requires integral<typename T::value_type>;', constructType: 'Variable & Initializer', title: 'Nested Requires Concept Clause', explanation: '`requires concept_expr` evaluates additional concept constraint on nested `typename T::value_type`.', keyDetails: [{ variableOrConstruct: 'requires integral<...>', role: 'Nested requirement', whyThisWay: 'Enforces value_type must satisfy integral concept' }] },
+          { lineNum: 3, codeSnippet: 'processNumericContainer(vInt);', constructType: 'Function Signature', title: 'Invoke for vector<int>', explanation: 'Invokes for vector<int>, which satisfies numeric value_type requirement.', keyDetails: [{ variableOrConstruct: 'vInt call', role: 'Valid container invocation', whyThisWay: 'int is integral' }] }
+        ]
+      }
+    ],
+    traceKey: "binary_search"
+  };
+}
+
+export function getProblem79Details(): LearnModule {
+  return {
+    id: "hard_ranges",
+    title: "79. C++20 Ranges & Views Pipeline",
+    category: "Modern C++",
+    difficulty: "hard",
+    shortDesc: "Composable lazy evaluation pipelines with std::views::filter & transform.",
+    fullCode: `// 79. Ranges - Approach 1: Composable Lazy View Pipeline
+#include <iostream>
+#include <vector>
+#include <ranges>
+using namespace std;
+
+int main() {
+    vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    // Lazy view pipeline: Filter evens -> Square them!
+    auto results = nums 
+                 | views::filter([](int n) { return n % 2 == 0; })
+                 | views::transform([](int n) { return n * n; });
+
+    cout << "Even Squares: ";
+    for (int val : results) {
+        cout << val << " "; // 4 16 36 64 100
+    }
+    cout << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "79. C++20 Ranges & Views Pipeline",
+      objective: "Master C++20 Ranges `<ranges>`: composable lazy views (`std::views::filter`, `std::views::transform`, `std::views::take`, `std::views::reverse`, `std::views::keys`), pipe operator `|`, range algorithms (`std::ranges::sort`, `std::ranges::find`), range projections, and zero-allocation data processing pipelines.",
+      description: "Implement **C++20 Ranges & Views Pipeline** (Modern C++). Build functional, composable data transformation pipelines using C++20 lazy evaluation views without allocating temporary vectors or making array copies.",
+      inputDesc: "Containers (vectors, arrays, maps) or generated element streams.",
+      outputDesc: "Lazily evaluated view elements, sorted range containers, or projected search results.",
+      takeaways: [
+        "C++20 Views are non-owning, lazily evaluated lightweight wrappers around range containers (O(1) construction)",
+        "The pipe operator `|` chains multiple view adaptors together into functional data transformation pipelines",
+        "Lazy evaluation ensures elements are processed strictly on demand as you iterate through the view",
+        "Range projections (`std::ranges::sort(v, {}, &Struct::field)`) allow direct field sorting without custom lambda comparators"
+      ],
+      examples: [
+        { id: 1, input: "nums | views::filter(even) | views::transform(square)", output: "Even Squares: 4 16 36 64 100", explanation: "Lazy pipeline filters even numbers and squares them on iteration with 0 vector allocations." },
+        { id: 2, input: "ranges::sort(people, {}, &Person::age);", output: "People sorted by age field", explanation: "Range projection sorts container by member pointer age directly." },
+        { id: 3, input: "views::iota(1) | views::take(5)", output: "1 2 3 4 5", explanation: "Generates lazy infinite integer sequence and takes first 5 elements." }
+      ],
+      constraints: ["Header `<ranges>` requires C++20 compilation standard (`-std=c++20`)."],
+      companies: ["Google", "NVIDIA", "Microsoft", "Amazon", "Apple"],
+      acceptanceRate: "90.1%",
+      totalAccepted: "2,120,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Composable Lazy View Pipeline (FREE)", category: "FREE / Core C++20 Ranges",
+        description: "Chains `views::filter` and `views::transform` using the pipe operator `|` for zero-allocation data processing.",
+        prosCons: "Pros: Functional composability, zero temporary vector allocation. Cons: Requires C++20.",
+        timeComplexity: "O(N) on iteration", spaceComplexity: "O(1)", isFree: true,
+        code: `// 79. Ranges - Approach 1: Pipeline
+#include <iostream>
+#include <vector>
+#include <ranges>
+using namespace std;
+
+int main() {
+    vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+
+    auto pipeline = nums 
+                  | views::filter([](int n) { return n % 2 == 0; })
+                  | views::transform([](int n) { return n * 10; });
+
+    for (int x : pipeline) cout << x << " "; // 20 40 60 80 100
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto pipeline = nums | views::filter(...) | views::transform(...);', constructType: 'Variable & Initializer', title: 'Lazy Views Pipe Chain', explanation: 'Chains `views::filter` and `views::transform` using `|`. Creates a lightweight O(1) view object without processing or allocating memory yet.', keyDetails: [{ variableOrConstruct: 'pipe operator |', role: 'View pipeline compositor', whyThisWay: 'Composes lazy view transformations functionally' }] },
+          { lineNum: 2, codeSnippet: 'views::filter([](int n) { return n % 2 == 0; })', constructType: 'Function Signature', title: 'Lazy Filter Adaptor', explanation: 'Filters numbers keeping only evens.', keyDetails: [{ variableOrConstruct: 'views::filter', role: 'Filtering adaptor', whyThisWay: 'Evaluates predicate lazily during iteration' }] },
+          { lineNum: 3, codeSnippet: 'for (int x : pipeline) cout << x << " ";', constructType: 'Loop Construct', title: 'Lazy Pipeline Execution', explanation: 'Iterating over pipeline triggers element computation on demand.', keyDetails: [{ variableOrConstruct: 'for loop iteration', role: 'Lazy evaluation trigger', whyThisWay: 'Processes elements one by one without temporary vectors' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Range Algorithm Sorting & Searching (ranges::sort) (FREE)", category: "FREE / Range Algorithms",
+        description: "Uses C++20 `std::ranges::sort` directly on containers without needing `.begin()` and `.end()` iterators.",
+        prosCons: "Pros: Clean container interface. Cons: Modifies underlying container in place.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 79. Ranges - Approach 2: ranges::sort
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> nums = {5, 2, 8, 1, 9, 3};
+
+    ranges::sort(nums); // No nums.begin(), nums.end() needed!
+
+    cout << "Sorted Range: ";
+    for (int n : nums) cout << n << " "; // 1 2 3 5 8 9
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'ranges::sort(nums);', constructType: 'Function Signature', title: 'Direct Container Range Sort', explanation: 'Passes `nums` container directly to `std::ranges::sort`. Eliminates verbose `.begin()` and `.end()` iterator pairs.', keyDetails: [{ variableOrConstruct: 'ranges::sort(container)', role: 'Range sort algorithm', whyThisWay: 'Cleaner syntax accepting full container range' }] },
+          { lineNum: 2, codeSnippet: 'for (int n : nums) cout << n << " ";', constructType: 'Loop Construct', title: 'Iterate Sorted Container', explanation: 'Prints in-place sorted numbers [1, 2, 3, 5, 8, 9].', keyDetails: [{ variableOrConstruct: 'sorted nums', role: 'Sorted output', whyThisWay: 'Displays sorted elements' }] },
+          { lineNum: 3, codeSnippet: 'cout << endl;', constructType: 'Function Signature', title: 'Flush Newline', explanation: 'Outputs newline.', keyDetails: [{ variableOrConstruct: 'endl', role: 'Flush', whyThisWay: 'Flushes stream buffer' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Chaining Multiple View Adaptors (filter | transform | take | reverse)", category: "Complex Pipeline",
+        description: "Chains 4 view adaptors (`filter`, `transform`, `take`, `reverse`) into a multi-stage lazy processing pipeline.",
+        prosCons: "Pros: Expressive multi-step lazy transformation. Cons: Debugging intermediate view states.",
+        timeComplexity: "O(TakeLimit) on iteration", spaceComplexity: "O(1)", isFree: false,
+        code: `// 79. Ranges - Approach 3: Multi-Stage Pipeline
+#include <iostream>
+#include <vector>
+#include <ranges>
+using namespace std;
+
+int main() {
+    vector<int> nums = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+    auto pipeline = nums
+                  | views::filter([](int n) { return n % 2 == 0; })  // 2, 4, 6, 8, 10, 12
+                  | views::transform([](int n) { return n * 2; })    // 4, 8, 12, 16, 20, 24
+                  | views::take(4)                                   // 4, 8, 12, 16
+                  | views::reverse;                                  // 16, 12, 8, 4
+
+    for (int x : pipeline) cout << x << " "; // 16 12 8 4
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'views::take(4)', constructType: 'Function Signature', title: 'Take View Adaptor', explanation: '`views::take(4)` truncates the lazy view to evaluate at most the first 4 matching elements.', keyDetails: [{ variableOrConstruct: 'views::take(4)', role: 'Take truncation adaptor', whyThisWay: 'Limits lazy evaluation to first N elements' }] },
+          { lineNum: 2, codeSnippet: 'views::reverse', constructType: 'Function Signature', title: 'Reverse View Adaptor', explanation: '`views::reverse` reverses iteration direction of view.', keyDetails: [{ variableOrConstruct: 'views::reverse', role: 'Reverse adaptor', whyThisWay: 'Iterates view in reverse order without modifying underlying data' }] },
+          { lineNum: 3, codeSnippet: 'for (int x : pipeline) cout << x;', constructType: 'Loop Construct', title: 'Execute Multi-Stage View', explanation: 'Prints reversed taken elements: 16 12 8 4.', keyDetails: [{ variableOrConstruct: 'multi-stage output', role: 'Pipeline result', whyThisWay: 'Displays result of composed 4-stage pipeline' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Map Key and Value Views (std::views::keys & std::views::values)", category: "Map Views",
+        description: "Uses `std::views::keys` and `std::views::values` to iterate map keys or values directly without pair destructuring.",
+        prosCons: "Pros: Direct iteration over map keys or values. Cons: Read-only key views.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 79. Ranges - Approach 4: Map Views
+#include <iostream>
+#include <map>
+#include <string>
+#include <ranges>
+using namespace std;
+
+int main() {
+    map<string, int> scores = {
+        {"Alice", 95}, {"Bob", 88}, {"Charlie", 92}
+    };
+
+    cout << "Map Keys: ";
+    for (const auto& key : scores | views::keys) {
+        cout << key << " "; // Alice Bob Charlie
+    }
+    cout << endl;
+
+    cout << "Map Values: ";
+    for (int score : scores | views::values) {
+        cout << score << " "; // 95 88 92
+    }
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (const auto& key : scores | views::keys)', constructType: 'Loop Construct', title: 'Iterate Map Keys View', explanation: '`views::keys` creates a view projecting `pair.first` for every element in map.', keyDetails: [{ variableOrConstruct: 'views::keys', role: 'Map key projection view', whyThisWay: 'Iterates map keys cleanly without pair.first syntax' }] },
+          { lineNum: 2, codeSnippet: 'for (int score : scores | views::values)', constructType: 'Loop Construct', title: 'Iterate Map Values View', explanation: '`views::values` creates a view projecting `pair.second` for every element in map.', keyDetails: [{ variableOrConstruct: 'views::values', role: 'Map value projection view', whyThisWay: 'Iterates map values cleanly without pair.second syntax' }] },
+          { lineNum: 3, codeSnippet: 'cout << endl;', constructType: 'Function Signature', title: 'Flush Line', explanation: 'Flushes line output.', keyDetails: [{ variableOrConstruct: 'endl', role: 'Flush', whyThisWay: 'Completes line' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Range Projection Operations (ranges::sort with Member Pointer)", category: "Range Projections",
+        description: "Sorts a vector of custom structs using range projections (`&Person::age`) without custom lambda comparators.",
+        prosCons: "Pros: Ultra-clean struct member sorting. Cons: Projection member must be accessible.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 79. Ranges - Approach 5: Range Projections
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+struct Student {
+    string name;
+    int score;
+};
+
+int main() {
+    vector<Student> students = {
+        {"Alice", 85}, {"Bob", 95}, {"Charlie", 90}
+    };
+
+    // Sort by student.score using member projection &Student::score!
+    ranges::sort(students, {}, &Student::score);
+
+    cout << "Sorted by Score:\n";
+    for (const auto& s : students) {
+        cout << s.name << ": " << s.score << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'ranges::sort(students, {}, &Student::score);', constructType: 'Function Signature', title: 'Sort via Member Pointer Projection', explanation: 'Passes default comparator `{}` (less) and member pointer projection `&Student::score`. Sorts container by score field cleanly.', keyDetails: [{ variableOrConstruct: '&Student::score', role: 'Member projection', whyThisWay: 'Eliminates lambda comparator `[](auto a, auto b) { return a.score < b.score; }`' }] },
+          { lineNum: 2, codeSnippet: 'for (const auto& s : students) cout << s.name << ": " << s.score;', constructType: 'Loop Construct', title: 'Iterate Projected Sorted Students', explanation: 'Iterates students sorted by score: Alice (85), Charlie (90), Bob (95).', keyDetails: [{ variableOrConstruct: 'sorted students', role: 'Sorted output', whyThisWay: 'Displays students in ascending score order' }] },
+          { lineNum: 3, codeSnippet: 'ranges::sort(students, {}, &Student::score);', constructType: 'Function Signature', title: 'Range Sort Command', explanation: 'Executes range sort algorithm.', keyDetails: [{ variableOrConstruct: 'ranges::sort', role: 'Sort algorithm', whyThisWay: 'In-place range sort' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Generating Infinite Lazy Ranges with std::views::iota", category: "Infinite Lazy Generators",
+        description: "Uses `std::views::iota(start)` to generate infinite lazy sequences of numbers.",
+        prosCons: "Pros: Infinite sequence generator without pre-allocating memory. Cons: Must use `take()` to bound loop.",
+        timeComplexity: "O(Count) on iteration", spaceComplexity: "O(1)", isFree: false,
+        code: `// 79. Ranges - Approach 6: views::iota
+#include <iostream>
+#include <ranges>
+using namespace std;
+
+int main() {
+    // Generate infinite sequence 1, 2, 3... and take first 5 items!
+    auto firstFive = views::iota(1) | views::take(5);
+
+    cout << "Iota 1..5: ";
+    for (int n : firstFive) cout << n << " "; // 1 2 3 4 5
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto firstFive = views::iota(1) | views::take(5);', constructType: 'Variable & Initializer', title: 'Infinite Iota Sequence Generator', explanation: '`views::iota(1)` creates an infinite lazy sequence `[1, 2, 3, ...]`. `views::take(5)` bounds sequence to first 5 elements.', keyDetails: [{ variableOrConstruct: 'views::iota(1)', role: 'Infinite sequence view', whyThisWay: 'Generates numbers lazily on demand without storing array' }] },
+          { lineNum: 2, codeSnippet: 'for (int n : firstFive) cout << n << " ";', constructType: 'Loop Construct', title: 'Iterate Generated Sequence', explanation: 'Prints sequence elements [1, 2, 3, 4, 5].', keyDetails: [{ variableOrConstruct: 'firstFive view', role: 'Lazy stream', whyThisWay: 'Prints lazy sequence' }] },
+          { lineNum: 3, codeSnippet: 'cout << endl;', constructType: 'Function Signature', title: 'Flush Line', explanation: 'Flushes line.', keyDetails: [{ variableOrConstruct: 'endl', role: 'Flush', whyThisWay: 'Completes line' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Elements & Sub-range Views (std::views::elements<N>)", category: "Tuple Element Views",
+        description: "Uses `std::views::elements<N>` to extract Nth element from a range of tuples or pairs.",
+        prosCons: "Pros: Extracts tuple elements by index cleanly. Cons: Fixed tuple index.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 79. Ranges - Approach 7: views::elements
+#include <iostream>
+#include <vector>
+#include <tuple>
+#include <string>
+#include <ranges>
+using namespace std;
+
+int main() {
+    vector<tuple<int, string, double>> items = {
+        {1, "Apple", 1.25}, {2, "Banana", 0.75}, {3, "Cherry", 2.50}
+    };
+
+    cout << "Names (Index 1): ";
+    for (const auto& name : items | views::elements<1>) {
+        cout << name << " "; // Apple Banana Cherry
+    }
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (const auto& name : items | views::elements<1>)', constructType: 'Loop Construct', title: 'Extract Tuple Element Index 1 View', explanation: '`views::elements<1>` projects 1st element (string name) from tuple range `[id, name, price]`.', keyDetails: [{ variableOrConstruct: 'views::elements<1>', role: 'Tuple index projection view', whyThisWay: 'Extracts Nth tuple element across container range' }] },
+          { lineNum: 2, codeSnippet: 'cout << name << " ";', constructType: 'Function Signature', title: 'Print Extracted Tuple Field', explanation: 'Prints extracted names: Apple Banana Cherry.', keyDetails: [{ variableOrConstruct: 'name', role: 'Extracted field', whyThisWay: 'Displays string field' }] },
+          { lineNum: 3, codeSnippet: 'cout << endl;', constructType: 'Function Signature', title: 'Flush Output', explanation: 'Flushes stream.', keyDetails: [{ variableOrConstruct: 'endl', role: 'Flush', whyThisWay: 'Completes stream' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: String Tokenization View with std::views::split", category: "String Split View",
+        description: "Splits a string lazily using `std::views::split` without copying sub-strings into a vector.",
+        prosCons: "Pros: Zero allocation string split view. Cons: Returns range of sub-ranges.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 79. Ranges - Approach 8: views::split
+#include <iostream>
+#include <string_view>
+#include <ranges>
+using namespace std;
+
+int main() {
+    string_view str = "one:two:three:four";
+
+    auto splitView = str | views::split(':');
+
+    for (auto subrange : splitView) {
+        string_view token(subrange.begin(), subrange.end());
+        cout << "Token: " << token << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto splitView = str | views::split(\':\');', constructType: 'Variable & Initializer', title: 'Lazy String Split View', explanation: '`views::split(\':\')` creates lazy view splitting string_view on delimiter \':\'.', keyDetails: [{ variableOrConstruct: 'views::split(\':\')', role: 'Lazy string splitter', whyThisWay: 'Splits strings into token sub-ranges without dynamic heap allocation' }] },
+          { lineNum: 2, codeSnippet: 'string_view token(subrange.begin(), subrange.end());', constructType: 'Variable & Initializer', title: 'Convert Subrange to StringView', explanation: 'Constructs non-owning string_view from subrange iterators.', keyDetails: [{ variableOrConstruct: 'token(begin, end)', role: 'Subrange view', whyThisWay: 'Wraps subrange in string_view' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Token: " << token;', constructType: 'Function Signature', title: 'Display Token', explanation: 'Prints split tokens: one, two, three, four.', keyDetails: [{ variableOrConstruct: 'token', role: 'Token output', whyThisWay: 'Displays token string' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Materializing Lazy View Range into std::vector", category: "Materialize View",
+        description: "Materializes a lazy ranges view into a concrete `std::vector` container.",
+        prosCons: "Pros: Converts lazy views to concrete containers. Cons: Allocates memory for vector.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 79. Ranges - Approach 9: Materialization
+#include <iostream>
+#include <vector>
+#include <ranges>
+using namespace std;
+
+int main() {
+    vector<int> nums = {1, 2, 3, 4, 5};
+
+    auto view = nums | views::transform([](int n) { return n * 10; });
+
+    // Materialize lazy view into concrete std::vector!
+    vector<int> materialized(view.begin(), view.end());
+
+    cout << "Vector Size: " << materialized.size() << endl; // 5
+    cout << "First Element: " << materialized[0] << endl;   // 10
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> materialized(view.begin(), view.end());', constructType: 'Variable & Initializer', title: 'Materialize Range View into Vector', explanation: 'Constructs concrete `std::vector` from lazy view iterator pair `[view.begin(), view.end()]`.', keyDetails: [{ variableOrConstruct: 'materialized(begin, end)', role: 'Container materialization', whyThisWay: 'Evaluates and stores lazy view elements into concrete vector' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Vector Size: " << materialized.size();', constructType: 'Function Signature', title: 'Inspect Materialized Size', explanation: 'Prints size of materialized vector (5).', keyDetails: [{ variableOrConstruct: 'size()', role: 'Size query', whyThisWay: 'Confirms container population' }] },
+          { lineNum: 3, codeSnippet: 'cout << "First Element: " << materialized[0];', constructType: 'Function Signature', title: 'Access Materialized Element', explanation: 'Accesses element via index operator `materialized[0]`.', keyDetails: [{ variableOrConstruct: 'materialized[0]', role: 'Index access', whyThisWay: 'Demonstrates random access on concrete vector' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Custom View Adaptor Pipeline Integration", category: "Custom View Adaptor",
+        description: "Integrates custom range algorithms into C++20 range pipelines.",
+        prosCons: "Pros: Extends ranges pipeline ecosystem. Cons: Complex custom adaptor implementation.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 79. Ranges - Approach 10: Pipeline Integration
+#include <iostream>
+#include <vector>
+#include <ranges>
+#include <numeric>
+using namespace std;
+
+int main() {
+    vector<int> nums = {1, 2, 3, 4, 5, 6};
+
+    // Filter evens -> Take 2 -> Accumulate!
+    auto evens = nums 
+               | views::filter([](int n) { return n % 2 == 0; })
+               | views::take(2);
+
+    int sum = 0;
+    for (int n : evens) sum += n;
+
+    cout << "Sum of first 2 evens: " << sum << endl; // 2 + 4 = 6
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto evens = nums | views::filter(...) | views::take(2);', constructType: 'Variable & Initializer', title: 'Composed Range Filter Take Pipeline', explanation: 'Filters even numbers and takes first 2 elements lazily.', keyDetails: [{ variableOrConstruct: 'filter | take', role: 'Composed pipeline', whyThisWay: 'Short-circuits iteration after 2 matching evens are found' }] },
+          { lineNum: 2, codeSnippet: 'for (int n : evens) sum += n;', constructType: 'Loop Construct', title: 'Accumulate Pipeline Elements', explanation: 'Accumulates matching elements into sum.', keyDetails: [{ variableOrConstruct: 'sum += n', role: 'Reduction loop', whyThisWay: 'Sums pipeline elements' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Sum: " << sum;', constructType: 'Function Signature', title: 'Output Accumulated Result', explanation: 'Prints sum result 6 (2 + 4).', keyDetails: [{ variableOrConstruct: 'sum output', role: 'Final output', whyThisWay: 'Displays accumulated sum' }] }
+        ]
+      }
+    ],
+    traceKey: "bubble_sort"
+  };
+}
+
+export function getProblem80Details(): LearnModule {
+  return {
+    id: "hard_coroutines",
+    title: "80. C++20 Coroutines (co_yield & co_await)",
+    category: "Modern C++",
+    difficulty: "hard",
+    shortDesc: "Resumable functions using co_yield generators and co_await futures.",
+    fullCode: `// 80. Coroutines - Approach 1: Sequence Generator using co_yield
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+// Custom Generator Task Type for C++20 Coroutine
+template<typename T>
+struct Generator {
+    struct promise_type {
+        T current_value;
+        Generator get_return_object() {
+            return Generator{coroutine_handle<promise_type>::from_promise(*this)};
+        }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        suspend_always yield_value(T value) {
+            current_value = value;
+            return {};
+        }
+        void return_void() {}
+        void unhandled_exception() { terminate(); }
+    };
+
+    coroutine_handle<promise_type> handle;
+    Generator(coroutine_handle<promise_type> h) : handle(h) {}
+    ~Generator() { if (handle) handle.destroy(); }
+
+    bool move_next() {
+        if (handle && !handle.done()) {
+            handle.resume();
+            return !handle.done();
+        }
+        return false;
+    }
+    T current_value() const { return handle.promise().current_value; }
+};
+
+Generator<int> generateNumbers(int count) {
+    for (int i = 1; i <= count; i++) {
+        co_yield i; // Resumes caller and yields value!
+    }
+}
+
+int main() {
+    auto gen = generateNumbers(5);
+    while (gen.move_next()) {
+        cout << gen.current_value() << " "; // 1 2 3 4 5
+    }
+    cout << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "80. C++20 Coroutines (co_yield & co_await)",
+      objective: "Master C++20 Coroutines: resumable functions with `co_yield` (generators), `co_await` (awaitables), `co_return`, `promise_type` lifecycle (`get_return_object`, `initial_suspend`, `final_suspend`, `yield_value`), `coroutine_handle<>`, `suspend_always`, `suspend_never`, and custom generator return types.",
+      description: "Implement **C++20 Coroutines (co_yield & co_await)** (Modern C++). Create resumable coroutine functions that pause execution to yield values or await asynchronous tasks without blocking threads.",
+      inputDesc: "Coroutine iteration limits, generator step requests, or awaitable task signals.",
+      outputDesc: "Yielded generator sequence values, resumed task execution outputs, or coroutine lifecycle state logs.",
+      takeaways: [
+        "A function becomes a C++20 coroutine if it uses `co_yield`, `co_await`, or `co_return`",
+        "`co_yield value` pauses coroutine execution and yields `value` to caller, returning control to caller thread",
+        "Coroutines require a return type defining a nested `promise_type` struct managing the coroutine promise state",
+        "`coroutine_handle<promise_type>` provides explicit low-level control to `.resume()`, check `.done()`, or `.destroy()` a suspended coroutine"
+      ],
+      examples: [
+        { id: 1, input: "co_yield i; inside loop for i = 1..5", output: "1 2 3 4 5", explanation: "co_yield yields current value and suspends coroutine until caller calls move_next()." },
+        { id: 2, input: "Infinite Fibonacci generator with co_yield a;", output: "0 1 1 2 3 5 8...", explanation: "Resumable generator produces infinite Fibonacci sequence lazily." },
+        { id: 3, input: "co_await task;", output: "Suspends execution until task completes", explanation: "co_await suspends current coroutine until awaitable task finishes." }
+      ],
+      constraints: ["Header `<coroutine>` requires C++20 compilation standard (`-std=c++20`)."],
+      companies: ["Microsoft", "Google", "NVIDIA", "Meta", "Apple"],
+      acceptanceRate: "85.4%",
+      totalAccepted: "1,450,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Sequence Generator using co_yield (FREE)", category: "FREE / Core C++20 Coroutines",
+        description: "Implements a custom `Generator<T>` task type and uses `co_yield` to yield numbers 1 through N lazily.",
+        prosCons: "Pros: Resumable lazy sequence generator. Cons: Requires defining promise_type boilerplate.",
+        timeComplexity: "O(1) per yield", spaceComplexity: "O(1) coroutine frame", isFree: true,
+        code: `// 80. Coroutines - Approach 1: Sequence Generator
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+template<typename T>
+struct Generator {
+    struct promise_type {
+        T current_value;
+        Generator get_return_object() {
+            return Generator{coroutine_handle<promise_type>::from_promise(*this)};
+        }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        suspend_always yield_value(T value) {
+            current_value = value;
+            return {};
+        }
+        void return_void() {}
+        void unhandled_exception() { terminate(); }
+    };
+
+    coroutine_handle<promise_type> handle;
+    Generator(coroutine_handle<promise_type> h) : handle(h) {}
+    ~Generator() { if (handle) handle.destroy(); }
+
+    bool move_next() {
+        if (handle && !handle.done()) {
+            handle.resume();
+            return !handle.done();
+        }
+        return false;
+    }
+    T current_value() const { return handle.promise().current_value; }
+};
+
+Generator<int> countUp(int n) {
+    for (int i = 1; i <= n; i++) co_yield i;
+}
+
+int main() {
+    auto gen = countUp(3);
+    while (gen.move_next()) cout << gen.current_value() << " "; // 1 2 3
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'co_yield i;', constructType: 'Return / Cleanup', title: 'Yield Value & Suspend Coroutine', explanation: '`co_yield i` sets `promise.current_value = i` and suspends coroutine execution, returning control to caller.', keyDetails: [{ variableOrConstruct: 'co_yield', role: 'Coroutine yield keyword', whyThisWay: 'Yields value to caller and suspends coroutine execution' }] },
+          { lineNum: 2, codeSnippet: 'suspend_always yield_value(T value)', constructType: 'Function Signature', title: 'Promise yield_value Handler', explanation: 'Promise handler method invoked when `co_yield` is executed.', keyDetails: [{ variableOrConstruct: 'yield_value', role: 'Promise yield handler', whyThisWay: 'Stores yielded value and returns suspend_always to pause coroutine' }] },
+          { lineNum: 3, codeSnippet: 'handle.resume();', constructType: 'Function Signature', title: 'Resume Suspended Coroutine', explanation: 'Caller invokes `handle.resume()` to resume coroutine execution from last `co_yield` suspension point.', keyDetails: [{ variableOrConstruct: 'handle.resume()', role: 'Coroutine resumer', whyThisWay: 'Resumes execution of suspended coroutine frame' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Infinite Fibonacci Generator with co_yield (FREE)", category: "FREE / Infinite Coroutines",
+        description: "Uses `co_yield` inside an infinite loop to create an infinite Fibonacci generator sequence.",
+        prosCons: "Pros: Infinite lazy sequence evaluation without stack overflow. Cons: Bounded by integer overflow.",
+        timeComplexity: "O(1) per yield", spaceComplexity: "O(1)", isFree: true,
+        code: `// 80. Coroutines - Approach 2: Fibonacci Generator
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+// (Uses Generator<T> from Approach 1)
+template<typename T>
+struct SimpleGenerator {
+    struct promise_type {
+        T val;
+        SimpleGenerator get_return_object() {
+            return SimpleGenerator{coroutine_handle<promise_type>::from_promise(*this)};
+        }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        suspend_always yield_value(T v) { val = v; return {}; }
+        void return_void() {}
+        void unhandled_exception() { terminate(); }
+    };
+    coroutine_handle<promise_type> h;
+    SimpleGenerator(coroutine_handle<promise_type> handle) : h(handle) {}
+    ~SimpleGenerator() { if (h) h.destroy(); }
+    bool next() { if (h && !h.done()) { h.resume(); return !h.done(); } return false; }
+    T value() const { return h.promise().val; }
+};
+
+SimpleGenerator<long long> fibonacciGen() {
+    long long a = 0, b = 1;
+    while (true) {
+        co_yield a;
+        auto next = a + b;
+        a = b;
+        b = next;
+    }
+}
+
+int main() {
+    auto fib = fibonacciGen();
+    for (int i = 0; i < 7; i++) {
+        fib.next();
+        cout << fib.value() << " "; // 0 1 1 2 3 5 8
+    }
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (true) { co_yield a; ... }', constructType: 'Loop Construct', title: 'Infinite Resumable Loop', explanation: 'Loop runs infinitely, but suspends execution on every `co_yield a` statement, preventing infinite recursion.', keyDetails: [{ variableOrConstruct: 'while(true) + co_yield', role: 'Infinite generator loop', whyThisWay: 'Generates infinite sequence elements lazily on caller demand' }] },
+          { lineNum: 2, codeSnippet: 'fib.next(); cout << fib.value();', constructType: 'Loop Construct', title: 'Resume & Extract Next Fibonacci', explanation: 'Resumes coroutine 7 times to extract first 7 Fibonacci numbers.', keyDetails: [{ variableOrConstruct: 'fib.next()', role: 'Step trigger', whyThisWay: 'Resumes coroutine frame to compute next term' }] },
+          { lineNum: 3, codeSnippet: 'cout << endl;', constructType: 'Function Signature', title: 'Flush Line', explanation: 'Flushes line output.', keyDetails: [{ variableOrConstruct: 'endl', role: 'Flush', whyThisWay: 'Completes line' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Custom Awaitable Task with co_await and suspend_always", category: "co_await Tasks",
+        description: "Uses `co_await` with a custom awaitable object implementing `await_ready`, `await_suspend`, and `await_resume`.",
+        prosCons: "Pros: Low-level asynchronous awaitable task control. Cons: Awaitable interface requirements.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 80. Coroutines - Approach 3: co_await Task
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+struct SimpleAwaitable {
+    bool await_ready() noexcept { return false; } // Forces suspension!
+    void await_suspend(coroutine_handle<>) noexcept {
+        cout << "Task suspended via co_await...\n";
+    }
+    int await_resume() noexcept {
+        cout << "Task resumed! Returning result 42.\n";
+        return 42;
+    }
+};
+
+struct Task {
+    struct promise_type {
+        Task get_return_object() { return Task{coroutine_handle<promise_type>::from_promise(*this)}; }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        void return_void() {}
+        void unhandled_exception() { terminate(); }
+    };
+    coroutine_handle<promise_type> handle;
+};
+
+Task runAwaitableTask() {
+    SimpleAwaitable awaitable;
+    int result = co_await awaitable; // Suspends and awaits!
+    cout << "Coroutine received awaited result: " << result << endl;
+}
+
+int main() {
+    auto t = runAwaitableTask();
+    cout << "Resuming coroutine from main...\n";
+    t.handle.resume();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int result = co_await awaitable;', constructType: 'Variable & Initializer', title: 'Execute co_await Awaitable', explanation: '`co_await` calls `await_ready()`. Since it returns false, calls `await_suspend()` and suspends coroutine. When resumed, calls `await_resume()` returning 42.', keyDetails: [{ variableOrConstruct: 'co_await awaitable', role: 'Awaitable expression', whyThisWay: 'Suspends coroutine until awaitable task finishes' }] },
+          { lineNum: 2, codeSnippet: 'int await_resume() noexcept { return 42; }', constructType: 'Function Signature', title: 'Awaitable Resume Value Return', explanation: 'Returns result value 42 to `result` variable when coroutine resumes.', keyDetails: [{ variableOrConstruct: 'await_resume()', role: 'Await return value', whyThisWay: 'Delivers result to co_await expression' }] },
+          { lineNum: 3, codeSnippet: 't.handle.resume();', constructType: 'Function Signature', title: 'Resume Suspended Awaitable Task', explanation: 'Main thread resumes suspended coroutine task.', keyDetails: [{ variableOrConstruct: 'handle.resume()', role: 'Manual resumer', whyThisWay: 'Triggers await_resume() execution' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Coroutine promise_type Lifecycle Management", category: "Promise Lifecycle",
+        description: "Demonstrates the complete lifecycle of `promise_type` methods (`get_return_object`, `initial_suspend`, `final_suspend`).",
+        prosCons: "Pros: Full control over coroutine allocation and suspension. Cons: High boilerplate.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 80. Coroutines - Approach 4: Promise Lifecycle
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+struct LifecycleTask {
+    struct promise_type {
+        LifecycleTask get_return_object() {
+            cout << "1. promise_type: get_return_object()\n";
+            return LifecycleTask{coroutine_handle<promise_type>::from_promise(*this)};
+        }
+        suspend_never initial_suspend() {
+            cout << "2. promise_type: initial_suspend() (suspend_never -> runs immediately!)\n";
+            return {};
+        }
+        suspend_always final_suspend() noexcept {
+            cout << "4. promise_type: final_suspend()\n";
+            return {};
+        }
+        void return_void() { cout << "3. promise_type: return_void()\n"; }
+        void unhandled_exception() {}
+    };
+    coroutine_handle<promise_type> handle;
+};
+
+LifecycleTask runLifecycle() {
+    cout << "   [Coroutine Body Executing]\n";
+    co_return; // Triggers return_void()!
+}
+
+int main() {
+    auto t = runLifecycle();
+    if (t.handle) t.handle.destroy();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'suspend_never initial_suspend()', constructType: 'Function Signature', title: 'Immediate Execution initial_suspend', explanation: 'Returning `suspend_never` causes coroutine body to begin execution immediately upon call.', keyDetails: [{ variableOrConstruct: 'suspend_never', role: 'Eager execution policy', whyThisWay: 'Starts coroutine body execution eagerly' }] },
+          { lineNum: 2, codeSnippet: 'co_return;', constructType: 'Return / Cleanup', title: 'Coroutine Return co_return', explanation: '`co_return` completes coroutine body execution, invoking `promise.return_void()`.', keyDetails: [{ variableOrConstruct: 'co_return', role: 'Coroutine return keyword', whyThisWay: 'Completes coroutine execution body' }] },
+          { lineNum: 3, codeSnippet: 'suspend_always final_suspend()', constructType: 'Function Signature', title: 'Final Suspension Point', explanation: 'Invoked after `co_return` to suspend coroutine frame before final destruction.', keyDetails: [{ variableOrConstruct: 'final_suspend()', role: 'Final suspension', whyThisWay: 'Allows caller to inspect promise state before frame is destroyed' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Asynchronous Task Coroutine Returning Value on Resume", category: "Async Value Coroutines",
+        description: "Implements a coroutine returning a value via `co_return value;` and `promise_type::return_value()`.",
+        prosCons: "Pros: Coroutine returning values on completion. Cons: Must use return_value instead of return_void.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 80. Coroutines - Approach 5: co_return Value
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+template<typename T>
+struct ValueTask {
+    struct promise_type {
+        T result_value;
+        ValueTask get_return_object() {
+            return ValueTask{coroutine_handle<promise_type>::from_promise(*this)};
+        }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        void return_value(T val) { result_value = val; } // Captures co_return value!
+        void unhandled_exception() { terminate(); }
+    };
+    coroutine_handle<promise_type> handle;
+    T get() {
+        if (!handle.done()) handle.resume();
+        return handle.promise().result_value;
+    }
+    ~ValueTask() { if (handle) handle.destroy(); }
+};
+
+ValueTask<int> computeAsyncValue() {
+    co_return 100; // Returns value to return_value()!
+}
+
+int main() {
+    auto task = computeAsyncValue();
+    cout << "Async Task Value: " << task.get() << endl; // 100
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'co_return 100;', constructType: 'Return / Cleanup', title: 'co_return Value Execution', explanation: '`co_return 100` passes value 100 to `promise.return_value(100)`.', keyDetails: [{ variableOrConstruct: 'co_return 100', role: 'Value return', whyThisWay: 'Delivers return value from coroutine to promise object' }] },
+          { lineNum: 2, codeSnippet: 'void return_value(T val) { result_value = val; }', constructType: 'Function Signature', title: 'Promise return_value Handler', explanation: 'Stores returned value in promise struct.', keyDetails: [{ variableOrConstruct: 'return_value(val)', role: 'Promise value handler', whyThisWay: 'Stores result value in promise frame' }] },
+          { lineNum: 3, codeSnippet: 'task.get()', constructType: 'Function Signature', title: 'Resume & Extract Task Value', explanation: 'Resumes coroutine and extracts result value 100.', keyDetails: [{ variableOrConstruct: 'task.get()', role: 'Value getter', whyThisWay: 'Reads returned value from task' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Coroutine Exception Handling via unhandled_exception()", category: "Coroutine Exceptions",
+        description: "Captures uncaught exceptions inside a coroutine using `promise_type::unhandled_exception()`.",
+        prosCons: "Pros: Exception safety for coroutine frames. Cons: Exception storage overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 80. Coroutines - Approach 6: Exception Handling
+#include <iostream>
+#include <coroutine>
+#include <exception>
+#include <stdexcept>
+using namespace std;
+
+struct SafeTask {
+    struct promise_type {
+        exception_ptr exception_handle;
+        SafeTask get_return_object() { return SafeTask{coroutine_handle<promise_type>::from_promise(*this)}; }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        void return_void() {}
+        void unhandled_exception() {
+            exception_handle = current_exception(); // Captures exception!
+        }
+    };
+    coroutine_handle<promise_type> handle;
+};
+
+SafeTask throwingCoroutine() {
+    throw runtime_error("Error inside coroutine!");
+    co_return;
+}
+
+int main() {
+    auto t = throwingCoroutine();
+    t.handle.resume();
+
+    if (t.handle.promise().exception_handle) {
+        try {
+            rethrow_exception(t.handle.promise().exception_handle);
+        } catch (const exception& e) {
+            cout << "Caught coroutine exception: " << e.what() << endl;
+        }
+    }
+    t.handle.destroy();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void unhandled_exception() { exception_handle = current_exception(); }', constructType: 'Function Signature', title: 'Promise unhandled_exception Handler', explanation: 'Captures uncaught exception thrown inside coroutine body using `current_exception()`.', keyDetails: [{ variableOrConstruct: 'unhandled_exception()', role: 'Coroutine exception handler', whyThisWay: 'Prevents process termination by capturing coroutine exceptions' }] },
+          { lineNum: 2, codeSnippet: 'rethrow_exception(t.handle.promise().exception_handle);', constructType: 'Function Signature', title: 'Rethrow Exception in Caller Thread', explanation: 'Main thread re-throws captured exception.', keyDetails: [{ variableOrConstruct: 'rethrow_exception', role: 'Exception re-throw', whyThisWay: 'Propagates coroutine exception to caller thread' }] },
+          { lineNum: 3, codeSnippet: 'catch (const exception& e) { cout << e.what(); }', constructType: 'Condition & Branch', title: 'Catch Propagated Exception', explanation: 'Main thread catches exception safely.', keyDetails: [{ variableOrConstruct: 'catch block', role: 'Exception handler', whyThisWay: 'Handles coroutine failure' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Lazy Data Stream Processing Generator", category: "Data Stream Generator",
+        description: "Streams data items lazily from a file/buffer using `co_yield` on demand.",
+        prosCons: "Pros: High-throughput stream processing with zero buffering. Cons: Sequential pull model.",
+        timeComplexity: "O(1) per item", spaceComplexity: "O(1)", isFree: false,
+        code: `// 80. Coroutines - Approach 7: Data Stream
+#include <iostream>
+#include <coroutine>
+#include <string>
+#include <vector>
+using namespace std;
+
+// (Uses SimpleGenerator<T> template)
+template<typename T>
+struct StreamGen {
+    struct promise_type {
+        T item;
+        StreamGen get_return_object() { return StreamGen{coroutine_handle<promise_type>::from_promise(*this)}; }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        suspend_always yield_value(T val) { item = val; return {}; }
+        void return_void() {}
+        void unhandled_exception() { terminate(); }
+    };
+    coroutine_handle<promise_type> h;
+    StreamGen(coroutine_handle<promise_type> handle) : h(handle) {}
+    ~StreamGen() { if (h) h.destroy(); }
+    bool next() { if (h && !h.done()) { h.resume(); return !h.done(); } return false; }
+    T value() const { return h.promise().item; }
+};
+
+StreamGen<string> streamLogLines() {
+    vector<string> logs = {"[INFO] Start", "[WARN] High Memory", "[ERROR] Crash"};
+    for (const auto& log : logs) {
+        co_yield log;
+    }
+}
+
+int main() {
+    auto stream = streamLogLines();
+    while (stream.next()) {
+        cout << "Stream Item: " << stream.value() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'co_yield log;', constructType: 'Return / Cleanup', title: 'Yield Log Line', explanation: 'Yields log string line to caller lazily.', keyDetails: [{ variableOrConstruct: 'co_yield log', role: 'Stream item yield', whyThisWay: 'Yields log string without allocating full result container' }] },
+          { lineNum: 2, codeSnippet: 'while (stream.next())', constructType: 'Loop Construct', title: 'Pull Stream Next Item', explanation: 'Pulls next log line item from stream generator.', keyDetails: [{ variableOrConstruct: 'stream.next()', role: 'Stream pull', whyThisWay: 'Resumes stream coroutine to produce next item' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Stream Item: " << stream.value();', constructType: 'Function Signature', title: 'Read Stream Item Value', explanation: 'Reads current log string item.', keyDetails: [{ variableOrConstruct: 'stream.value()', role: 'Item reader', whyThisWay: 'Displays yielded log line' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Coroutine Resume & Destruction via coroutine_handle", category: "Coroutine Handle",
+        description: "Manages coroutine destruction explicitly using `coroutine_handle::destroy()`.",
+        prosCons: "Pros: Explicit memory lifetime control. Cons: Double destruction risks if unmanaged.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 80. Coroutines - Approach 8: Explicit Destroy
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+struct DestroyTask {
+    struct promise_type {
+        DestroyTask get_return_object() { return DestroyTask{coroutine_handle<promise_type>::from_promise(*this)}; }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        suspend_always yield_value(int) { return {}; }
+        void return_void() {}
+        void unhandled_exception() {}
+    };
+    coroutine_handle<promise_type> handle;
+};
+
+DestroyTask destroyableCoro() {
+    cout << "Coro Step 1\n";
+    co_yield 1;
+    cout << "Coro Step 2\n";
+    co_yield 2;
+}
+
+int main() {
+    auto t = destroyableCoro();
+    t.handle.resume(); // Step 1
+
+    cout << "Destroying coroutine frame early...\n";
+    t.handle.destroy(); // Explicitly frees frame memory!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 't.handle.resume();', constructType: 'Function Signature', title: 'Resume Coroutine to First Yield', explanation: 'Resumes coroutine, printing "Coro Step 1" and pausing at `co_yield 1`.', keyDetails: [{ variableOrConstruct: 'handle.resume()', role: 'Step 1 resumer', whyThisWay: 'Executes coroutine up to first yield point' }] },
+          { lineNum: 2, codeSnippet: 't.handle.destroy();', constructType: 'Function Signature', title: 'Explicitly Destroy Coroutine Frame', explanation: 'Frees coroutine frame memory immediately without completing step 2.', keyDetails: [{ variableOrConstruct: 'handle.destroy()', role: 'Explicit frame destroyer', whyThisWay: 'Deallocates coroutine stackless frame memory explicitly' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Destroying coroutine frame early...";', constructType: 'Function Signature', title: 'Log Early Destruction', explanation: 'Prints destruction log.', keyDetails: [{ variableOrConstruct: 'Log output', role: 'Log', whyThisWay: 'Confirms early destruction' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Chained Coroutines (Generator Piping)", category: "Coroutines Piping",
+        description: "Pipes the output of one coroutine generator into another coroutine generator.",
+        prosCons: "Pros: Resumable coroutine processing pipeline. Cons: Multi-handle tracking.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 80. Coroutines - Approach 9: Chained Generators
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+// (Uses SimpleGenerator<T> template)
+template<typename T>
+struct PipeGen {
+    struct promise_type {
+        T val;
+        PipeGen get_return_object() { return PipeGen{coroutine_handle<promise_type>::from_promise(*this)}; }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        suspend_always yield_value(T v) { val = v; return {}; }
+        void return_void() {}
+        void unhandled_exception() { terminate(); }
+    };
+    coroutine_handle<promise_type> h;
+    PipeGen(coroutine_handle<promise_type> handle) : h(handle) {}
+    ~PipeGen() { if (h) h.destroy(); }
+    bool next() { if (h && !h.done()) { h.resume(); return !h.done(); } return false; }
+    T value() const { return h.promise().val; }
+};
+
+PipeGen<int> sourceNumbers() {
+    for (int i = 1; i <= 3; i++) co_yield i;
+}
+
+PipeGen<int> doubleNumbers(PipeGen<int> src) {
+    while (src.next()) {
+        co_yield src.value() * 2;
+    }
+}
+
+int main() {
+    auto doubled = doubleNumbers(sourceNumbers());
+    while (doubled.next()) {
+        cout << doubled.value() << " "; // 2 4 6
+    }
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (src.next()) { co_yield src.value() * 2; }', constructType: 'Loop Construct', title: 'Piped Coroutine Transformation Loop', explanation: 'Pulls item from `src` generator, doubles it, and yields result to caller.', keyDetails: [{ variableOrConstruct: 'co_yield src.value() * 2', role: 'Piped transformation', whyThisWay: 'Transforms yielded items from source generator lazily' }] },
+          { lineNum: 2, codeSnippet: 'auto doubled = doubleNumbers(sourceNumbers());', constructType: 'Variable & Initializer', title: 'Chain Generator Functions', explanation: 'Pipes `sourceNumbers()` into `doubleNumbers()`.', keyDetails: [{ variableOrConstruct: 'chained generators', role: 'Coroutine pipeline', whyThisWay: 'Creates multi-stage coroutine processing pipeline' }] },
+          { lineNum: 3, codeSnippet: 'while (doubled.next()) cout << doubled.value();', constructType: 'Loop Construct', title: 'Read Piped Generator Output', explanation: 'Prints piped values: 2 4 6.', keyDetails: [{ variableOrConstruct: 'doubled.value()', role: 'Piped output', whyThisWay: 'Displays final transformed generator sequence' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Range Integration for Coroutine Generators", category: "Range Integration",
+        description: "Integrates a custom coroutine generator with range-based `for` loops by defining `.begin()` and `.end()` iterators.",
+        prosCons: "Pros: Range-based for loop syntax `for (int x : gen)`. Cons: Requires custom iterator struct.",
+        timeComplexity: "O(1) per iteration", spaceComplexity: "O(1)", isFree: false,
+        code: `// 80. Coroutines - Approach 10: Range Integration
+#include <iostream>
+#include <coroutine>
+using namespace std;
+
+template<typename T>
+struct RangeGenerator {
+    struct promise_type {
+        T val;
+        RangeGenerator get_return_object() { return RangeGenerator{coroutine_handle<promise_type>::from_promise(*this)}; }
+        suspend_always initial_suspend() { return {}; }
+        suspend_always final_suspend() noexcept { return {}; }
+        suspend_always yield_value(T v) { val = v; return {}; }
+        void return_void() {}
+        void unhandled_exception() { terminate(); }
+    };
+    coroutine_handle<promise_type> h;
+    RangeGenerator(coroutine_handle<promise_type> handle) : h(handle) {}
+    ~RangeGenerator() { if (h) h.destroy(); }
+
+    struct Iterator {
+        coroutine_handle<promise_type> handle;
+        bool operator!=(default_sentinel_t) const { return handle && !handle.done(); }
+        Iterator& operator++() { handle.resume(); return *this; }
+        T operator*() const { return handle.promise().val; }
+    };
+
+    Iterator begin() {
+        if (h) h.resume();
+        return Iterator{h};
+    }
+    default_sentinel_t end() { return {}; }
+};
+
+RangeGenerator<int> rangeNumbers() {
+    co_yield 10; co_yield 20; co_yield 30;
+}
+
+int main() {
+    cout << "Range-based for loop on Coroutine:\n";
+    for (int val : rangeNumbers()) {
+        cout << val << " "; // 10 20 30
+    }
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct Iterator { bool operator!=(default_sentinel_t)... };', constructType: 'Variable & Initializer', title: 'Coroutine Iterator Definition', explanation: 'Defines iterator with `operator++()` calling `handle.resume()` and `operator*()` reading promise value.', keyDetails: [{ variableOrConstruct: 'Iterator struct', role: 'Coroutine range iterator', whyThisWay: 'Enables range-based for loop integration with coroutines' }] },
+          { lineNum: 2, codeSnippet: 'for (int val : rangeNumbers())', constructType: 'Loop Construct', title: 'Range-Based For Loop on Coroutine', explanation: 'Uses range-based for loop syntax directly over coroutine generator `rangeNumbers()`.', keyDetails: [{ variableOrConstruct: 'for (int val : gen)', role: 'Range loop syntax', whyThisWay: 'Cleanest consumer syntax for iterating coroutine generators' }] },
+          { lineNum: 3, codeSnippet: 'co_yield 10; co_yield 20; co_yield 30;', constructType: 'Return / Cleanup', title: 'Yield Sequence Elements', explanation: 'Yields 10, 20, 30 sequentially to range loop.', keyDetails: [{ variableOrConstruct: 'co_yield sequence', role: 'Sequence supplier', whyThisWay: 'Supplies sequence values to range loop' }] }
+        ]
+      }
+    ],
+    traceKey: "factorial"
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -25638,6 +27675,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "med_atomics") return getProblem73Details();
   if (id === "med_async_future") return getProblem74Details();
   if (id === "med_constexpr") return getProblem75Details();
+  if (id === "hard_variadic_templates") return getProblem76Details();
+  if (id === "hard_sfinae") return getProblem77Details();
+  if (id === "hard_concepts") return getProblem78Details();
+  if (id === "hard_ranges") return getProblem79Details();
+  if (id === "hard_coroutines") return getProblem80Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
