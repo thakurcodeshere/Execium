@@ -21595,6 +21595,1978 @@ int main() {
   };
 }
 
+
+export function getProblem66Details(): LearnModule {
+  return {
+    id: "med_optional",
+    title: "66. Optional Values (std::optional)",
+    category: "Modern C++",
+    difficulty: "medium",
+    shortDesc: "Type-safe optional value wrapper without null pointers (C++17).",
+    fullCode: `// 66. Optional - Approach 1: Basic std::optional & nullopt
+#include <iostream>
+#include <optional>
+#include <string>
+using namespace std;
+
+optional<int> parsePositiveInt(const string& str) {
+    try {
+        int val = stoi(str);
+        if (val > 0) return val;
+    } catch (...) {}
+    return nullopt; // Represents absence of value safely
+}
+
+int main() {
+    auto res1 = parsePositiveInt("42");
+    if (res1.has_value()) {
+        cout << "Parsed value: " << res1.value() << endl;
+    }
+
+    auto res2 = parsePositiveInt("-10");
+    if (!res2) {
+        cout << "Parsing failed (nullopt)." << endl;
+    }
+    return 0;
+}`,
+    problemStatement: {
+      title: "66. Optional Values (std::optional)",
+      objective: "Master C++17 `std::optional<T>`: value presence checks `has_value()`, fallback values `value_or()`, `std::nullopt`, safe function returns, pointer-like dereferencing (`*opt`, `opt->`), emplace lifecycle management, and monadic error handling without raw null pointers.",
+      description: "Implement **Optional Values (std::optional)** (Modern C++). Express optional or nullable object return states safely in C++17 without dynamic allocation or sentinel null pointers.",
+      inputDesc: "String inputs for parsing, search queries, optional configuration settings, or container keys.",
+      outputDesc: "Wrapped std::optional values, default fallback outputs, or boolean presence indicators.",
+      takeaways: [
+        "`std::optional<T>` holds either a valid instance of `T` or `std::nullopt` without allocating heap memory",
+        "Use `opt.value_or(default_val)` to safely extract the value or provide a fallback when `nullopt`",
+        "`std::nullopt` represents the explicit state of containing no value",
+        "Dereferencing an empty optional (`*opt`) causes UNDEFINED BEHAVIOR; always check `has_value()` or `operator bool` first"
+      ],
+      examples: [
+        { id: 1, input: "parsePositiveInt('42')", output: "Parsed value: 42", explanation: "Valid positive integer string returns optional containing value 42." },
+        { id: 2, input: "parsePositiveInt('-10')", output: "Parsing failed (nullopt)", explanation: "Invalid positive integer string returns std::nullopt." },
+        { id: 3, input: "opt.value_or(100) on empty optional", output: "Fallback: 100", explanation: "value_or provides immediate safe fallback when optional is empty." }
+      ],
+      constraints: ["Header `<optional>` requires C++17 or higher compilation standard (`-std=c++17`)."],
+      companies: ["Microsoft", "Google", "Amazon", "Apple", "NVIDIA"],
+      acceptanceRate: "94.2%",
+      totalAccepted: "3,120,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic std::optional Return & Value Check (FREE)", category: "FREE / Core C++17",
+        description: "Returns std::optional<int> from a parsing function, demonstrating has_value() and std::nullopt.",
+        prosCons: "Pros: Type-safe optional returns without raw pointers. Cons: Requires C++17 compiler.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 66. Optional - Approach 1: Basic Optional Return
+#include <iostream>
+#include <optional>
+#include <string>
+using namespace std;
+
+optional<int> parsePositiveInt(const string& str) {
+    try {
+        int val = stoi(str);
+        if (val > 0) return val;
+    } catch (...) {}
+    return nullopt;
+}
+
+int main() {
+    auto res1 = parsePositiveInt("42");
+    if (res1.has_value()) cout << "Parsed: " << res1.value() << endl;
+
+    auto res2 = parsePositiveInt("abc");
+    if (!res2) cout << "Parsed: nullopt" << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'optional<int> parsePositiveInt(const string& str)', constructType: 'Function Signature', title: 'Return Type Declaration', explanation: 'Declares function returning `optional<int>`, indicating return value may or may not be present.', keyDetails: [{ variableOrConstruct: 'optional<int>', role: 'Optional return wrapper', whyThisWay: 'Replaces sentinel values (-1, nullptr) with type-safe optional' }] },
+          { lineNum: 2, codeSnippet: 'return nullopt;', constructType: 'Return / Cleanup', title: 'Return Explicit Empty State', explanation: 'Returns `std::nullopt` to signal that no valid value could be produced.', keyDetails: [{ variableOrConstruct: 'nullopt', role: 'Empty optional constant', whyThisWay: 'Explicit constant for uninitialized optional state' }] },
+          { lineNum: 3, codeSnippet: 'if (res1.has_value()) cout << res1.value();', constructType: 'Condition & Branch', title: 'Presence Check & Safe Value Access', explanation: 'Checks `has_value()` before calling `.value()` to guarantee safe value extraction.', keyDetails: [{ variableOrConstruct: 'res1.has_value() / res1.value()', role: 'Safe value retrieval', whyThisWay: '.value() throws std::bad_optional_access if called on nullopt' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Default Fallback Values with value_or() (FREE)", category: "FREE / Fallback Logic",
+        description: "Uses `opt.value_or(fallback)` to safely retrieve a contained value or a default fallback in one step.",
+        prosCons: "Pros: Concise single-line fallback handling. Cons: Evaluates fallback argument eagerly.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 66. Optional - Approach 2: value_or Fallback
+#include <iostream>
+#include <optional>
+#include <string>
+using namespace std;
+
+optional<string> getEnvVariable(const string& name) {
+    if (name == "PORT") return "8080";
+    return nullopt;
+}
+
+int main() {
+    string port = getEnvVariable("PORT").value_or("3000");
+    string host = getEnvVariable("HOST").value_or("localhost");
+
+    cout << "Port: " << port << endl; // 8080
+    cout << "Host: " << host << endl; // localhost
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'string port = getEnvVariable("PORT").value_or("3000");', constructType: 'Variable & Initializer', title: 'Extracted Value with Fallback', explanation: 'Calls `.value_or("3000")`. Since PORT exists, returns "8080".', keyDetails: [{ variableOrConstruct: 'value_or()', role: 'Fallback extractor', whyThisWay: 'Eliminates explicit if-else check statements' }] },
+          { lineNum: 2, codeSnippet: 'string host = getEnvVariable("HOST").value_or("localhost");', constructType: 'Variable & Initializer', title: 'Nullopt Fallback Trigger', explanation: 'Calls `.value_or("localhost")`. Since HOST is nullopt, returns default fallback "localhost".', keyDetails: [{ variableOrConstruct: 'value_or("localhost")', role: 'Default fallback value', whyThisWay: 'Guarantees valid string output' }] },
+          { lineNum: 3, codeSnippet: 'return nullopt;', constructType: 'Return / Cleanup', title: 'Unset Optional State', explanation: 'Signals absence of environment variable.', keyDetails: [{ variableOrConstruct: 'nullopt', role: 'Absence representation', whyThisWay: 'Standard C++17 empty optional state' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Safe String/Int Parser returning std::optional", category: "Data Parsing",
+        description: "Implements robust string-to-number parser functions returning std::optional for clean error handling.",
+        prosCons: "Pros: Eliminates exception throwing across parsing boundaries. Cons: Requires conversion logic.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 66. Optional - Approach 3: String Parser
+#include <iostream>
+#include <optional>
+#include <string>
+#include <sstream>
+using namespace std;
+
+optional<double> parseDouble(const string& str) {
+    stringstream ss(str);
+    double val;
+    if (ss >> val && ss.eof()) return val;
+    return nullopt;
+}
+
+int main() {
+    auto d1 = parseDouble("3.14159");
+    auto d2 = parseDouble("3.14abc");
+
+    cout << "d1: " << (d1 ? to_string(*d1) : "Invalid") << endl; // 3.141590
+    cout << "d2: " << (d2 ? to_string(*d2) : "Invalid") << endl; // Invalid
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (ss >> val && ss.eof()) return val;', constructType: 'Condition & Branch', title: 'Strict Stream Parsing Check', explanation: 'Validates that string converts to double AND entire string was consumed (`ss.eof()`).', keyDetails: [{ variableOrConstruct: 'ss.eof()', role: 'Complete string validation', whyThisWay: 'Ensures no trailing garbage characters like "3.14abc"' }] },
+          { lineNum: 2, codeSnippet: 'cout << (d1 ? to_string(*d1) : "Invalid");', constructType: 'Condition & Branch', title: 'Boolean Conversion & Dereference', explanation: 'Uses explicit boolean conversion `(bool)d1` and pointer dereference `*d1` to read value.', keyDetails: [{ variableOrConstruct: '*d1', role: 'Dereference operator', whyThisWay: 'Accesses underlying contained value' }] },
+          { lineNum: 3, codeSnippet: 'return nullopt;', constructType: 'Return / Cleanup', title: 'Return Parse Error Signal', explanation: 'Returns nullopt when stream parsing fails.', keyDetails: [{ variableOrConstruct: 'nullopt', role: 'Error signal', whyThisWay: 'Signals invalid input without throwing exceptions' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Pointer-like Dereference (*opt and opt->) with Safety Checks", category: "Pointer Syntax",
+        description: "Uses pointer syntax (*opt, opt->) on std::optional with explicit presence checks.",
+        prosCons: "Pros: Familiar pointer-like syntax without heap overhead. Cons: Unchecked dereference causes UB if empty.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 66. Optional - Approach 4: Dereference Operator
+#include <iostream>
+#include <optional>
+#include <string>
+using namespace std;
+
+struct User {
+    string name;
+    int age;
+};
+
+optional<User> findUser(int id) {
+    if (id == 1) return User{"Alice", 30};
+    return nullopt;
+}
+
+int main() {
+    auto userOpt = findUser(1);
+    if (userOpt) {
+        cout << "User: " << userOpt->name << ", Age: " << userOpt->age << endl;
+        cout << "Dereferenced name: " << (*userOpt).name << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (userOpt) { ... }', constructType: 'Condition & Branch', title: 'Explicit Contextual Boolean Check', explanation: 'Evaluates `(bool)userOpt` to ensure optional contains a valid User object before dereferencing.', keyDetails: [{ variableOrConstruct: 'if (userOpt)', role: 'Safety guard', whyThisWay: 'Guarantees dereference operations are safe' }] },
+          { lineNum: 2, codeSnippet: 'cout << userOpt->name;', constructType: 'Function Signature', title: 'Member Selection Arrow Operator', explanation: 'Uses `->` operator on optional to directly access struct member `name`.', keyDetails: [{ variableOrConstruct: 'userOpt->name', role: 'Arrow operator', whyThisWay: 'Syntactic sugar identical to pointer member access' }] },
+          { lineNum: 3, codeSnippet: 'cout << (*userOpt).name;', constructType: 'Function Signature', title: 'Indirection Dereference Operator', explanation: 'Uses `*` operator on optional to access object instance.', keyDetails: [{ variableOrConstruct: '*userOpt', role: 'Dereference operator', whyThisWay: 'Retrieves reference to contained User instance' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Monadic Pipeline Chaining with std::optional", category: "Monadic Processing",
+        description: "Simulates monadic transformation pipelines (and_then / transform) over optional values.",
+        prosCons: "Pros: Elegant functional processing pipeline. Cons: Manual helper functions in C++17 (standardized in C++23).",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 66. Optional - Approach 5: Monadic Pipeline
+#include <iostream>
+#include <optional>
+#include <string>
+using namespace std;
+
+optional<int> fetchNumber() { return 10; }
+optional<int> multiplyByTwo(int x) { return x * 2; }
+optional<string> stringify(int x) { return "Result: " + to_string(x); }
+
+int main() {
+    auto step1 = fetchNumber();
+    auto step2 = step1 ? multiplyByTwo(*step1) : nullopt;
+    auto step3 = step2 ? stringify(*step2) : nullopt;
+
+    if (step3) cout << *step3 << endl; // Result: 20
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto step2 = step1 ? multiplyByTwo(*step1) : nullopt;', constructType: 'Condition & Branch', title: 'Monadic Binding Step', explanation: 'Pipes result of step1 into multiplyByTwo only if step1 contains a value; otherwise propagates nullopt.', keyDetails: [{ variableOrConstruct: 'step1 ? multiply(...) : nullopt', role: 'Optional monadic bind', whyThisWay: 'Short-circuits execution if any step in pipeline yields nullopt' }] },
+          { lineNum: 2, codeSnippet: 'auto step3 = step2 ? stringify(*step2) : nullopt;', constructType: 'Condition & Branch', title: 'Monadic Mapping Step', explanation: 'Pipes step2 into stringify to format output.', keyDetails: [{ variableOrConstruct: 'step2 ? stringify(...) : nullopt', role: 'Type transformation', whyThisWay: 'Transforms optional<int> into optional<string>' }] },
+          { lineNum: 3, codeSnippet: 'if (step3) cout << *step3;', constructType: 'Condition & Branch', title: 'Pipeline Result Extraction', explanation: 'Prints final piped string result if all pipeline steps succeeded.', keyDetails: [{ variableOrConstruct: '*step3', role: 'Pipeline result', whyThisWay: 'Displays final transformed output' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Optional Struct Config Members for Flexible Options", category: "Config Structs",
+        description: "Uses std::optional struct fields to define optional configuration parameters with default fallbacks.",
+        prosCons: "Pros: Clean API design for optional parameters. Cons: Memory size includes optional flag bytes.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 66. Optional - Approach 6: Config Members
+#include <iostream>
+#include <optional>
+#include <string>
+using namespace std;
+
+struct ServerConfig {
+    string host;
+    int port;
+    optional<string> sslCertPath;
+    optional<int> timeoutMs;
+};
+
+void printServerInfo(const ServerConfig& cfg) {
+    cout << "Server: " << cfg.host << ":" << cfg.port << endl;
+    cout << "SSL: " << cfg.sslCertPath.value_or("Disabled") << endl;
+    cout << "Timeout: " << cfg.timeoutMs.value_or(5000) << " ms" << endl;
+}
+
+int main() {
+    ServerConfig cfg1 = {"localhost", 8080, nullopt, 10000};
+    ServerConfig cfg2 = {"api.execium.com", 443, "/etc/ssl/cert.pem", nullopt};
+
+    cout << "=== Config 1 ===\n"; printServerInfo(cfg1);
+    cout << "=== Config 2 ===\n"; printServerInfo(cfg2);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'optional<string> sslCertPath; optional<int> timeoutMs;', constructType: 'Variable & Initializer', title: 'Optional Config Struct Fields', explanation: 'Defines optional configuration settings that may or may not be provided by caller.', keyDetails: [{ variableOrConstruct: 'optional<T> fields', role: 'Optional config fields', whyThisWay: 'Distinguishes between unconfigured option vs empty string/zero' }] },
+          { lineNum: 2, codeSnippet: 'cout << "SSL: " << cfg.sslCertPath.value_or("Disabled");', constructType: 'Function Signature', title: 'Display Fallback for Unset Option', explanation: 'Outputs custom SSL certificate path if set, or "Disabled" if nullopt.', keyDetails: [{ variableOrConstruct: 'value_or("Disabled")', role: 'Config fallback', whyThisWay: 'Provides sensible default when setting is omitted' }] },
+          { lineNum: 3, codeSnippet: 'ServerConfig cfg1 = {"localhost", 8080, nullopt, 10000};', constructType: 'Variable & Initializer', title: 'Struct Initialization with nullopt', explanation: 'Passes `nullopt` explicitly for omitted configuration options.', keyDetails: [{ variableOrConstruct: 'nullopt parameter', role: 'Omitted option', whyThisWay: 'Explicitly declares option as unconfigured' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: std::optional with Custom Struct / Class Objects", category: "Custom Objects",
+        description: "Stores custom class instances inside std::optional, managing constructor and destructor invocations.",
+        prosCons: "Pros: Direct value semantics without heap allocation. Cons: Moves/copies custom object during assignment.",
+        timeComplexity: "O(1)", spaceComplexity: "O(sizeof(T))", isFree: false,
+        code: `// 66. Optional - Approach 7: Custom Class Optional
+#include <iostream>
+#include <optional>
+#include <string>
+using namespace std;
+
+class Connection {
+public:
+    string endpoint;
+    Connection(string ep) : endpoint(ep) { cout << "Connected to " << endpoint << endl; }
+    ~Connection() { cout << "Disconnected from " << endpoint << endl; }
+};
+
+int main() {
+    optional<Connection> conn;
+    cout << "Initializing connection...\n";
+    conn.emplace("db.local:5432"); // Constructs Connection in-place!
+
+    cout << "Closing connection...\n";
+    conn.reset(); // Destroys Connection in-place!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'conn.emplace("db.local:5432");', constructType: 'Function Signature', title: 'In-Place Object Emplace Construction', explanation: 'Constructs Connection object in-place inside optional storage buffer without temporary copy/move.', keyDetails: [{ variableOrConstruct: 'emplace(...)', role: 'In-place constructor', whyThisWay: 'Eliminates temporary object construction and copy overhead' }] },
+          { lineNum: 2, codeSnippet: 'conn.reset();', constructType: 'Function Signature', title: 'In-Place Object Reset & Destruction', explanation: 'Invokes contained object destructor and resets optional state to `nullopt`.', keyDetails: [{ variableOrConstruct: 'reset()', role: 'Destruction & reset', whyThisWay: 'Safely destroys contained object in-place' }] },
+          { lineNum: 3, codeSnippet: 'optional<Connection> conn;', constructType: 'Variable & Initializer', title: 'Uninitialized Optional Declaration', explanation: 'Declares uninitialized optional container for Connection object.', keyDetails: [{ variableOrConstruct: 'optional<Connection>', role: 'Stack buffer container', whyThisWay: 'Allocates stack buffer for Connection without calling constructor yet' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Container Lookup Returning std::optional", category: "Map Lookups",
+        description: "Wraps unordered_map lookups to return std::optional instead of iterators or throwing exceptions.",
+        prosCons: "Pros: Clean functional map lookup interface. Cons: Returns value copy.",
+        timeComplexity: "O(1) average", spaceComplexity: "O(1)", isFree: false,
+        code: `// 66. Optional - Approach 8: Container Lookup
+#include <iostream>
+#include <unordered_map>
+#include <optional>
+#include <string>
+using namespace std;
+
+optional<string> findCapital(const string& country) {
+    static const unordered_map<string, string> capitals = {
+        {"France", "Paris"}, {"Japan", "Tokyo"}, {"India", "New Delhi"}
+    };
+    auto it = capitals.find(country);
+    if (it != capitals.end()) return it->second;
+    return nullopt;
+}
+
+int main() {
+    auto cap1 = findCapital("Japan");
+    cout << "Japan: " << cap1.value_or("Unknown") << endl; // Tokyo
+
+    auto cap2 = findCapital("Brazil");
+    cout << "Brazil: " << cap2.value_or("Unknown") << endl; // Unknown
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto it = capitals.find(country); if (it != capitals.end()) return it->second;', constructType: 'Condition & Branch', title: 'Map Lookup & Optional Return', explanation: 'Searches map for key; if found, returns value wrapped in optional.', keyDetails: [{ variableOrConstruct: 'it->second', role: 'Map value return', whyThisWay: 'Wraps found string in optional' }] },
+          { lineNum: 2, codeSnippet: 'return nullopt;', constructType: 'Return / Cleanup', title: 'Key Not Found Signal', explanation: 'Returns nullopt when key is missing from map.', keyDetails: [{ variableOrConstruct: 'nullopt', role: 'Missing key signal', whyThisWay: 'Replaces iterator end() check with optional' }] },
+          { lineNum: 3, codeSnippet: 'cout << cap2.value_or("Unknown");', constructType: 'Function Signature', title: 'Fallback for Missing Map Key', explanation: 'Outputs default fallback string "Unknown" for missing key.', keyDetails: [{ variableOrConstruct: 'value_or("Unknown")', role: 'Lookup fallback', whyThisWay: 'Handles missing map key gracefully' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Emplace & Reset Lifecycle Management", category: "Lifecycle Management",
+        description: "Demonstrates managing object state inside optional using `emplace()` and `reset()`.",
+        prosCons: "Pros: Full control over object lifetime inside optional. Cons: Manual reset tracking.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 66. Optional - Approach 9: Emplace & Reset
+#include <iostream>
+#include <optional>
+#include <string>
+using namespace std;
+
+int main() {
+    optional<string> msg;
+    cout << "Initially has value: " << boolalpha << msg.has_value() << endl; // false
+
+    msg.emplace(5, 'A'); // Constructs "AAAAA" in-place!
+    cout << "Message: " << *msg << endl;
+
+    msg.reset(); // Destroys string and sets to nullopt
+    cout << "After reset has value: " << msg.has_value() << endl; // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'msg.emplace(5, \'A\');', constructType: 'Function Signature', title: 'Emplace String Constructor', explanation: 'Passes arguments (5, \'A\') directly to std::string constructor in-place.', keyDetails: [{ variableOrConstruct: 'msg.emplace(5, \'A\')', role: 'In-place constructor dispatch', whyThisWay: 'Constructs "AAAAA" string directly in optional memory' }] },
+          { lineNum: 2, codeSnippet: 'msg.reset();', constructType: 'Function Signature', title: 'Reset Optional to Empty', explanation: 'Destroys contained string and sets optional state back to nullopt.', keyDetails: [{ variableOrConstruct: 'msg.reset()', role: 'State reset', whyThisWay: 'Clears contained object' }] },
+          { lineNum: 3, codeSnippet: 'cout << msg.has_value();', constructType: 'Function Signature', title: 'Verify Empty State', explanation: 'Verifies `has_value()` returns false after reset.', keyDetails: [{ variableOrConstruct: 'has_value()', role: 'State inspection', whyThisWay: 'Confirms optional is empty' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Comparison & Ordering between std::optional Instances", category: "Optional Operators",
+        description: "Demonstrates relational operators (`==`, `<`, `>`) between optional instances and raw values.",
+        prosCons: "Pros: Nullopt is treated as smaller than any valid value. Cons: Nullopt vs value comparisons.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 66. Optional - Approach 10: Comparisons
+#include <iostream>
+#include <optional>
+using namespace std;
+
+int main() {
+    optional<int> o1 = 10;
+    optional<int> o2 = 20;
+    optional<int> oEmpty = nullopt;
+
+    cout << boolalpha;
+    cout << "o1 < o2: " << (o1 < o2) << endl;           // true (10 < 20)
+    cout << "oEmpty < o1: " << (oEmpty < o1) << endl;   // true (nullopt is less than any value!)
+    cout << "o1 == 10: " << (o1 == 10) << endl;         // true (compares with raw int)
+    cout << "oEmpty == nullopt: " << (oEmpty == nullopt) << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'cout << "oEmpty < o1: " << (oEmpty < o1);', constructType: 'Condition & Branch', title: 'Nullopt Ordering Rule', explanation: 'By C++17 standard rules, `nullopt` compares strictly LESS THAN any optional containing a valid value.', keyDetails: [{ variableOrConstruct: 'nullopt < value', role: 'Optional ordering property', whyThisWay: 'Allows std::optional to be used in sorted containers like std::set or std::map' }] },
+          { lineNum: 2, codeSnippet: 'cout << "o1 == 10: " << (o1 == 10);', constructType: 'Condition & Branch', title: 'Direct Comparison with Primitive', explanation: 'Compares optional directly against raw integer value 10.', keyDetails: [{ variableOrConstruct: 'o1 == 10', role: 'Transparent equality comparison', whyThisWay: 'Unwraps and compares automatically' }] },
+          { lineNum: 3, codeSnippet: 'cout << "oEmpty == nullopt: " << (oEmpty == nullopt);', constructType: 'Condition & Branch', title: 'Nullopt Constant Comparison', explanation: 'Compares empty optional directly against `nullopt` constant.', keyDetails: [{ variableOrConstruct: 'oEmpty == nullopt', role: 'Nullopt equality', whyThisWay: 'Tests if optional is empty' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem67Details(): LearnModule {
+  return {
+    id: "med_variant",
+    title: "67. Type-Safe Unions (std::variant)",
+    category: "Modern C++",
+    difficulty: "medium",
+    shortDesc: "Tagged unions with std::variant and std::visit pattern matching.",
+    fullCode: `// 67. Variant - Approach 1: Basic std::variant & std::holds_alternative
+#include <iostream>
+#include <variant>
+#include <string>
+using namespace std;
+
+int main() {
+    variant<int, double, string> v = 42;
+    cout << "Contains int: " << boolalpha << holds_alternative<int>(v) << endl;
+    cout << "Value: " << get<int>(v) << endl;
+
+    v = "Hello Execium!";
+    cout << "Contains string: " << holds_alternative<string>(v) << endl;
+    cout << "Value: " << get<string>(v) << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "67. Type-Safe Unions (std::variant)",
+      objective: "Master C++17 `std::variant<T1, T2, ...>` tagged unions: `std::holds_alternative<T>`, `std::get<T>`, safe pointer access `std::get_if<T>`, pattern matching using `std::visit` with overloaded lambdas, variant state machines, result types, AST nodes, and `std::monostate` empty states.",
+      description: "Implement **Type-Safe Unions (std::variant)** (Modern C++). Replace unsafe C-style unions with type-safe tagged unions that track active alternative types and support compile-time pattern matching.",
+      inputDesc: "Heterogeneous values (ints, floats, strings, custom objects), state transitions, or AST expression trees.",
+      outputDesc: "Pattern matched outputs, type-checked extraction values, or state machine transitions.",
+      takeaways: [
+        "`std::variant<T1, T2, ...>` holds exactly one value from a specified list of types at any given time",
+        "Use `std::holds_alternative<T>(v)` to check if type `T` is currently active",
+        "`std::get<T>(v)` extracts value of type `T`; throws `std::bad_variant_access` if `T` is not active",
+        "`std::get_if<T>(&v)` returns a pointer to the value if active, or `nullptr` if inactive (no exceptions thrown)",
+        "`std::visit` combined with the `overloaded` lambda struct provides type-safe pattern matching across all variants"
+      ],
+      examples: [
+        { id: 1, input: "variant<int, double, string> v = 42; get<int>(v)", output: "Contains int: true, Value: 42", explanation: "Variant initially holds integer 42; holds_alternative<int> returns true." },
+        { id: 2, input: "Pattern match on variant<Circle, Square> using std::visit", output: "Circle area calculated", explanation: "std::visit dispatches to correct overloaded lambda based on active variant type." },
+        { id: 3, input: "get_if<int>(&v) on variant holding string", output: "nullptr", explanation: "get_if returns nullptr safely without throwing exceptions." }
+      ],
+      constraints: ["Header `<variant>` requires C++17 or higher compilation standard (`-std=c++17`)."],
+      companies: ["Google", "Microsoft", "Meta", "Amazon", "Apple"],
+      acceptanceRate: "90.8%",
+      totalAccepted: "2,890,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic std::variant Initialization & holds_alternative (FREE)", category: "FREE / Core C++17",
+        description: "Demonstrates basic std::variant initialization, type mutation, holds_alternative check, and std::get.",
+        prosCons: "Pros: Type-safe tagged union. Cons: std::get throws bad_variant_access if type mismatches.",
+        timeComplexity: "O(1)", spaceComplexity: "O(max(sizeof(T)))", isFree: true,
+        code: `// 67. Variant - Approach 1: Basic Variant
+#include <iostream>
+#include <variant>
+#include <string>
+using namespace std;
+
+int main() {
+    variant<int, double, string> v = 42;
+    if (holds_alternative<int>(v)) {
+        cout << "Int value: " << get<int>(v) << endl;
+    }
+
+    v = "Modern C++17";
+    if (holds_alternative<string>(v)) {
+        cout << "String value: " << get<string>(v) << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'variant<int, double, string> v = 42;', constructType: 'Variable & Initializer', title: 'Variant Declaration & Initialization', explanation: 'Declares variant capable of holding int, double, or string, initialized with int value 42.', keyDetails: [{ variableOrConstruct: 'variant<int, double, string>', role: 'Tagged union type', whyThisWay: 'Stores one of the specified types safely' }] },
+          { lineNum: 2, codeSnippet: 'if (holds_alternative<int>(v)) cout << get<int>(v);', constructType: 'Condition & Branch', title: 'Type Check & Direct Extraction', explanation: 'Verifies int is active alternative before calling `get<int>(v)`.', keyDetails: [{ variableOrConstruct: 'holds_alternative<int>', role: 'Active type query', whyThisWay: 'Prevents throwing std::bad_variant_access exception' }] },
+          { lineNum: 3, codeSnippet: 'v = "Modern C++17";', constructType: 'Variable & Initializer', title: 'Mutate Active Variant Alternative', explanation: 'Assigns string value to variant, automatically changing active type to string.', keyDetails: [{ variableOrConstruct: 'v = string', role: 'Type mutation assignment', whyThisWay: 'Replaces active alternative safely' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Pattern Matching with std::visit and Overload Struct (FREE)", category: "FREE / Pattern Matching",
+        description: "Uses the `overloaded` pattern with `std::visit` to perform compile-time pattern matching over variants.",
+        prosCons: "Pros: Elegant pattern matching, compile-time completeness check. Cons: Requires helper template struct.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 67. Variant - Approach 2: std::visit Overload Pattern
+#include <iostream>
+#include <variant>
+#include <string>
+using namespace std;
+
+// Overload helper struct template
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+int main() {
+    variant<int, double, string> v = 3.14159;
+
+    visit(overloaded{
+        [](int i) { cout << "Integer: " << i << endl; },
+        [](double d) { cout << "Double: " << d << endl; },
+        [](const string& s) { cout << "String: " << s << endl; }
+    }, v);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };', constructType: 'Variable & Initializer', title: 'Overload Lambda Helper Template', explanation: 'Variadic template struct inheriting from all passed lambdas to combine their operator() overloads into one visitor object.', keyDetails: [{ variableOrConstruct: 'overloaded struct', role: 'Lambda overload aggregator', whyThisWay: 'Standard C++17 idiom for pattern matching' }] },
+          { lineNum: 2, codeSnippet: 'visit(overloaded{ [](int i)..., [](double d)... }, v);', constructType: 'Function Signature', title: 'Pattern Match Dispatch via std::visit', explanation: 'Calls `std::visit`, passing overloaded visitor and variant instance `v`. Dispatches to matching lambda.', keyDetails: [{ variableOrConstruct: 'visit(...)', role: 'Pattern match dispatcher', whyThisWay: 'Guarantees exhaustive compile-time handling for all variant types' }] },
+          { lineNum: 3, codeSnippet: '[](double d) { cout << "Double: " << d; }', constructType: 'Function Signature', title: 'Active Type Visitor Execution', explanation: 'Executes double lambda branch because active alternative is double 3.14159.', keyDetails: [{ variableOrConstruct: 'double lambda', role: 'Matched handler', whyThisWay: 'Handles double alternative' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Safe Value Extraction with std::get_if", category: "Safe Extraction",
+        description: "Uses `std::get_if<T>(&v)` to get pointer to active alternative or nullptr if inactive without throwing exceptions.",
+        prosCons: "Pros: Non-throwing safe pointer inspection. Cons: Requires taking address `&v`.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 67. Variant - Approach 3: std::get_if
+#include <iostream>
+#include <variant>
+#include <string>
+using namespace std;
+
+int main() {
+    variant<int, double, string> v = 100;
+
+    if (auto pVal = get_if<int>(&v)) {
+        cout << "Found int: " << *pVal << endl;
+    } else {
+        cout << "Not an int." << endl;
+    }
+
+    if (auto pStr = get_if<string>(&v)) {
+        cout << "Found string: " << *pStr << endl;
+    } else {
+        cout << "Not a string (get_if returned nullptr)." << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (auto pVal = get_if<int>(&v))', constructType: 'Condition & Branch', title: 'Non-Throwing Pointer Inspection', explanation: 'Calls `get_if<int>(&v)` passing pointer to variant. Returns `int*` pointer if active, `nullptr` otherwise.', keyDetails: [{ variableOrConstruct: 'get_if<int>(&v)', role: 'Safe pointer accessor', whyThisWay: 'Avoids try-catch exception overhead for type checking' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Found int: " << *pVal;', constructType: 'Function Signature', title: 'Dereference Extracted Pointer', explanation: 'Dereferences valid `pVal` pointer to access value.', keyDetails: [{ variableOrConstruct: '*pVal', role: 'Value access', whyThisWay: 'Reads active int value' }] },
+          { lineNum: 3, codeSnippet: 'if (auto pStr = get_if<string>(&v))', constructType: 'Condition & Branch', title: 'Nullptr Check for Inactive Type', explanation: '`get_if<string>` returns `nullptr` because active alternative is int, executing else branch cleanly.', keyDetails: [{ variableOrConstruct: 'nullptr return', role: 'Type mismatch signal', whyThisWay: 'Clean non-throwing fallback branch' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Variant as Result Type (Success vs Error Class Variant)", category: "Error Handling",
+        description: "Uses std::variant<SuccessData, ErrorData> as a type-safe Result return type.",
+        prosCons: "Pros: Type-safe error handling without exceptions. Cons: Variant size includes both types.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 67. Variant - Approach 4: Result Type
+#include <iostream>
+#include <variant>
+#include <string>
+using namespace std;
+
+struct Success { string data; };
+struct Error { string errorMessage; int code; };
+
+using Result = variant<Success, Error>;
+
+Result fetchData(bool fail) {
+    if (fail) return Error{"Connection Timeout", 408};
+    return Success{"JSON Payload: { status: ok }"};
+}
+
+int main() {
+    auto res1 = fetchData(false);
+    if (holds_alternative<Success>(res1)) {
+        cout << "OK: " << get<Success>(res1).data << endl;
+    }
+
+    auto res2 = fetchData(true);
+    if (holds_alternative<Error>(res2)) {
+        auto err = get<Error>(res2);
+        cout << "ERR (" << err.code << "): " << err.errorMessage << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using Result = variant<Success, Error>;', constructType: 'Variable & Initializer', title: 'Result Type Definition', explanation: 'Defines Result type alias holding either Success struct or Error struct.', keyDetails: [{ variableOrConstruct: 'variant<Success, Error>', role: 'Type-safe Result type', whyThisWay: 'Formalizes function returns as explicit Success or Error' }] },
+          { lineNum: 2, codeSnippet: 'if (holds_alternative<Success>(res1))', constructType: 'Condition & Branch', title: 'Success Branch Inspection', explanation: 'Checks if result contains Success payload.', keyDetails: [{ variableOrConstruct: 'holds_alternative<Success>', role: 'Success check', whyThisWay: 'Validates operation succeeded' }] },
+          { lineNum: 3, codeSnippet: 'if (holds_alternative<Error>(res2))', constructType: 'Condition & Branch', title: 'Error Branch Inspection', explanation: 'Extracts Error payload containing error message and status code.', keyDetails: [{ variableOrConstruct: 'get<Error>(res2)', role: 'Error extraction', whyThisWay: 'Reads structured error data without exceptions' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Finite State Machine Representation using Variant States", category: "State Machine",
+        description: "Models a Finite State Machine where variant active alternative represents current FSM state.",
+        prosCons: "Pros: Type-safe state machine representation. Cons: Requires pattern matching transitions.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 67. Variant - Approach 5: Finite State Machine
+#include <iostream>
+#include <variant>
+#include <string>
+using namespace std;
+
+struct Disconnected {};
+struct Connecting { string host; };
+struct Connected { string sessionToken; };
+
+using State = variant<Disconnected, Connecting, Connected>;
+
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+int main() {
+    State state = Disconnected{};
+
+    auto printState = [](const State& s) {
+        visit(overloaded{
+            [](const Disconnected&) { cout << "State: Disconnected\n"; },
+            [](const Connecting& c) { cout << "State: Connecting to " << c.host << "\n"; },
+            [](const Connected& c) { cout << "State: Connected (Token: " << c.sessionToken << ")\n"; }
+        }, s);
+    };
+
+    printState(state);
+    state = Connecting{"api.execium.com"};
+    printState(state);
+    state = Connected{"token_xyz123"};
+    printState(state);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using State = variant<Disconnected, Connecting, Connected>;', constructType: 'Variable & Initializer', title: 'FSM State Variant Definition', explanation: 'Defines FSM state as variant of 3 distinct state structs.', keyDetails: [{ variableOrConstruct: 'State variant', role: 'FSM state type', whyThisWay: 'Each state struct holds its own relevant state data' }] },
+          { lineNum: 2, codeSnippet: 'state = Connecting{"api.execium.com"};', constructType: 'Variable & Initializer', title: 'Transition to Connecting State', explanation: 'Assigns Connecting struct to transition state machine.', keyDetails: [{ variableOrConstruct: 'State transition', role: 'State change', whyThisWay: 'Switches active state and state payload' }] },
+          { lineNum: 3, codeSnippet: 'visit(overloaded{ ... }, s);', constructType: 'Function Signature', title: 'State-Based Dispatch', explanation: 'Executes state-specific handling code via `std::visit`.', keyDetails: [{ variableOrConstruct: 'std::visit dispatch', role: 'State handler', whyThisWay: 'Ensures all FSM states are explicitly handled' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: AST Expression Node Representation using Variant", category: "AST Processing",
+        description: "Models an Abstract Syntax Tree (AST) node using std::variant to evaluate mathematical expressions.",
+        prosCons: "Pros: Clean compiler/interpreter AST model. Cons: Requires recursive visitor logic.",
+        timeComplexity: "O(N) AST nodes", spaceComplexity: "O(Depth)", isFree: false,
+        code: `// 67. Variant - Approach 6: AST Expression Tree
+#include <iostream>
+#include <variant>
+#include <memory>
+using namespace std;
+
+struct NumberNode { double value; };
+struct AddNode;
+struct MultiplyNode;
+
+using ExprNode = variant<NumberNode, shared_ptr<AddNode>, shared_ptr<MultiplyNode>>;
+
+struct AddNode { ExprNode left, right; };
+struct MultiplyNode { ExprNode left, right; };
+
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+double eval(const ExprNode& expr) {
+    return visit(overloaded{
+        [](const NumberNode& n) { return n.value; },
+        [](const shared_ptr<AddNode>& a) { return eval(a->left) + eval(a->right); },
+        [](const shared_ptr<MultiplyNode>& m) { return eval(m->left) * eval(m->right); }
+    }, expr);
+}
+
+int main() {
+    // (5 + 3) * 2
+    ExprNode expr = make_shared<MultiplyNode>(MultiplyNode{
+        make_shared<AddNode>(AddNode{NumberNode{5}, NumberNode{3}}),
+        NumberNode{2}
+    });
+
+    cout << "Evaluated (5 + 3) * 2 = " << eval(expr) << endl; // 16
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using ExprNode = variant<NumberNode, shared_ptr<AddNode>, shared_ptr<MultiplyNode>>;', constructType: 'Variable & Initializer', title: 'AST Node Variant Type', explanation: 'Defines AST node capable of holding numeric leaf nodes or smart pointers to binary operator nodes.', keyDetails: [{ variableOrConstruct: 'ExprNode variant', role: 'AST node type', whyThisWay: 'Models heterogeneous syntax tree nodes safely' }] },
+          { lineNum: 2, codeSnippet: 'return visit(overloaded{ [](const NumberNode& n)... }, expr);', constructType: 'Function Signature', title: 'Recursive AST Evaluator', explanation: 'Uses `std::visit` to recursively evaluate sub-trees.', keyDetails: [{ variableOrConstruct: 'eval recursive visit', role: 'AST evaluator', whyThisWay: 'Dispatches evaluation logic based on node type' }] },
+          { lineNum: 3, codeSnippet: '[](const shared_ptr<AddNode>& a) { return eval(a->left) + eval(a->right); }', constructType: 'Function Signature', title: 'Add Node Evaluation Branch', explanation: 'Evaluates left and right sub-trees and adds results together.', keyDetails: [{ variableOrConstruct: 'eval(left) + eval(right)', role: 'Addition handler', whyThisWay: 'Recursively computes addition node result' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Heterogeneous Vector Container using std::variant", category: "Heterogeneous Collections",
+        description: "Stores a list of mixed data types (ints, doubles, strings) in a std::vector<std::variant>.",
+        prosCons: "Pros: Type-safe heterogeneous collection without raw void* or base class pointers. Cons: Unified element size.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 67. Variant - Approach 7: Heterogeneous Vector
+#include <iostream>
+#include <vector>
+#include <variant>
+#include <string>
+using namespace std;
+
+using Value = variant<int, double, string>;
+
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
+int main() {
+    vector<Value> items = {10, 3.14, string("Execium"), 42, 2.718};
+
+    cout << "Heterogeneous Vector Items:\n";
+    for (const auto& item : items) {
+        visit(overloaded{
+            [](int i) { cout << "Int: " << i << endl; },
+            [](double d) { cout << "Double: " << d << endl; },
+            [](const string& s) { cout << "String: " << s << endl; }
+        }, item);
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<Value> items = {10, 3.14, string("Execium"), 42};', constructType: 'Variable & Initializer', title: 'Heterogeneous Vector Declaration', explanation: 'Creates vector storing Value variants.', keyDetails: [{ variableOrConstruct: 'vector<Value>', role: 'Heterogeneous collection', whyThisWay: 'Stores mixed types safely in contiguous vector' }] },
+          { lineNum: 2, codeSnippet: 'for (const auto& item : items) { visit(overloaded{...}, item); }', constructType: 'Loop Construct', title: 'Iterate & Visit Heterogeneous Items', explanation: 'Iterates through vector and visits each variant element.', keyDetails: [{ variableOrConstruct: 'visit inside loop', role: 'Heterogeneous processing', whyThisWay: 'Processes each element according to its active type' }] },
+          { lineNum: 3, codeSnippet: '[](const string& s) { cout << "String: " << s; }', constructType: 'Function Signature', title: 'String Variant Visitor', explanation: 'Prints string element.', keyDetails: [{ variableOrConstruct: 'string visitor', role: 'Type handler', whyThisWay: 'Handles string variant alternative' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Empty State Management with std::monostate", category: "Monostate Empty State",
+        description: "Uses `std::monostate` as the first variant alternative to allow uninitialized/empty variant states.",
+        prosCons: "Pros: Enables default-constructible variants when first type has no default constructor. Cons: Monostate check needed.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 67. Variant - Approach 8: std::monostate
+#include <iostream>
+#include <variant>
+#include <string>
+using namespace std;
+
+class NonDefaultConstructible {
+public:
+    int val;
+    NonDefaultConstructible(int v) : val(v) {}
+};
+
+using OptionalValue = variant<monostate, NonDefaultConstructible, string>;
+
+int main() {
+    OptionalValue v; // Uses std::monostate as default first alternative!
+    cout << "Is empty (monostate): " << boolalpha << holds_alternative<monostate>(v) << endl; // true
+
+    v = NonDefaultConstructible{100};
+    cout << "Is empty after assign: " << holds_alternative<monostate>(v) << endl; // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using OptionalValue = variant<monostate, NonDefaultConstructible, string>;', constructType: 'Variable & Initializer', title: 'Monostate First Alternative', explanation: 'Puts `std::monostate` as first alternative type in variant.', keyDetails: [{ variableOrConstruct: 'std::monostate', role: 'Empty state type', whyThisWay: 'Allows default constructing variant when other types lack default constructors' }] },
+          { lineNum: 2, codeSnippet: 'OptionalValue v; // Default constructs to monostate', constructType: 'Variable & Initializer', title: 'Default Construct to Monostate', explanation: 'Default constructs `v` into `std::monostate` empty state.', keyDetails: [{ variableOrConstruct: 'default ctor', role: 'Empty state initialization', whyThisWay: 'Initializes variant cleanly without errors' }] },
+          { lineNum: 3, codeSnippet: 'holds_alternative<monostate>(v)', constructType: 'Condition & Branch', title: 'Check Empty Monostate Status', explanation: 'Checks if variant currently holds empty `monostate`.', keyDetails: [{ variableOrConstruct: 'holds_alternative<monostate>', role: 'Empty state check', whyThisWay: 'Verifies variant is in uninitialized/empty state' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Variant Index Inspection and Switching", category: "Index Inspection",
+        description: "Uses `v.index()` to query the 0-based position of the active alternative inside a variant.",
+        prosCons: "Pros: O(1) integer index inspection. Cons: Index depends on order of template parameters.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 67. Variant - Approach 9: Index Inspection
+#include <iostream>
+#include <variant>
+#include <string>
+using namespace std;
+
+int main() {
+    variant<int, double, string> v;
+
+    v = 10;
+    cout << "Active index for int: " << v.index() << endl; // 0
+
+    v = 3.14;
+    cout << "Active index for double: " << v.index() << endl; // 1
+
+    v = "Execium";
+    cout << "Active index for string: " << v.index() << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'cout << "Active index: " << v.index();', constructType: 'Function Signature', title: 'Query Active Alternative Index', explanation: '`v.index()` returns 0-indexed position of currently active alternative type.', keyDetails: [{ variableOrConstruct: 'v.index()', role: 'Active index query', whyThisWay: 'Provides integer representation of active type' }] },
+          { lineNum: 2, codeSnippet: 'v = 3.14;', constructType: 'Variable & Initializer', title: 'Change Active Alternative to Index 1', explanation: 'Assigning double changes active index to 1.', keyDetails: [{ variableOrConstruct: 'double assignment', role: 'Index change', whyThisWay: 'Updates active index' }] },
+          { lineNum: 3, codeSnippet: 'v = "Execium";', constructType: 'Variable & Initializer', title: 'Change Active Alternative to Index 2', explanation: 'Assigning string changes active index to 2.', keyDetails: [{ variableOrConstruct: 'string assignment', role: 'Index change', whyThisWay: 'Updates active index' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Recursive Variant Trees with std::variant and std::unique_ptr", category: "Recursive Variant",
+        description: "Combines std::variant with std::unique_ptr to construct recursive data structures like JSON/YAML values.",
+        prosCons: "Pros: Models complex JSON-like dynamic tree structures. Cons: Pointer dereferencing overhead.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 67. Variant - Approach 10: Recursive JSON Value Variant
+#include <iostream>
+#include <variant>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <memory>
+using namespace std;
+
+struct JsonValue;
+using JsonArray = vector<JsonValue>;
+using JsonObject = unordered_map<string, JsonValue>;
+
+struct JsonValue {
+    variant<nullptr_t, bool, double, string, shared_ptr<JsonArray>, shared_ptr<JsonObject>> data;
+};
+
+int main() {
+    JsonValue val;
+    val.data = string("Execium Engine");
+    cout << "JSON String: " << get<string>(val.data) << endl;
+
+    val.data = 100.5;
+    cout << "JSON Number: " << get<double>(val.data) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'variant<nullptr_t, bool, double, string, shared_ptr<JsonArray>...> data;', constructType: 'Variable & Initializer', title: 'JSON Value Variant Definition', explanation: 'Defines JSON value as variant holding null, bool, number, string, array, or object.', keyDetails: [{ variableOrConstruct: 'JsonValue variant', role: 'Dynamic JSON data representation', whyThisWay: 'Models type-safe dynamic JSON schema' }] },
+          { lineNum: 2, codeSnippet: 'val.data = string("Execium Engine");', constructType: 'Variable & Initializer', title: 'Set JSON String Value', explanation: 'Assigns string value to JSON variant.', keyDetails: [{ variableOrConstruct: 'string assignment', role: 'JSON string value', whyThisWay: 'Stores string payload' }] },
+          { lineNum: 3, codeSnippet: 'cout << get<double>(val.data);', constructType: 'Function Signature', title: 'Extract JSON Number Value', explanation: 'Extracts numeric double value from JSON variant.', keyDetails: [{ variableOrConstruct: 'get<double>', role: 'JSON number retrieval', whyThisWay: 'Reads double payload' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem68Details(): LearnModule {
+  return {
+    id: "med_any",
+    title: "68. Type-Agnostic Containers (std::any)",
+    category: "Modern C++",
+    difficulty: "medium",
+    shortDesc: "Holding arbitrary types safely using std::any and std::any_cast.",
+    fullCode: `// 68. Any - Approach 1: Basic std::any Storage & any_cast
+#include <iostream>
+#include <any>
+#include <string>
+using namespace std;
+
+int main() {
+    any a = 42;
+    cout << "Has value: " << boolalpha << a.has_value() << endl;
+    cout << "Contains int: " << any_cast<int>(a) << endl;
+
+    a = string("Hello std::any!");
+    cout << "Contains string: " << any_cast<string>(a) << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "68. Type-Agnostic Containers (std::any)",
+      objective: "Master C++17 `std::any` for holding arbitrary copyable types safely: `std::any_cast<T>`, type inspection with `.type()`, `.has_value()`, `.reset()`, exception handling for `std::bad_any_cast`, pointer-based `any_cast` checks, and heterogeneous key-value property maps.",
+      description: "Implement **Type-Agnostic Containers (std::any)** (Modern C++). Store and retrieve values of any copyable type dynamically without base class inheritance or raw void pointers.",
+      inputDesc: "Arbitrary objects (integers, strings, custom structs), event payloads, or dynamic configuration entries.",
+      outputDesc: "Type-extracted value outputs, non-throwing pointer inspection results, or property map queries.",
+      takeaways: [
+        "`std::any` can hold a single value of ANY copyable type dynamically",
+        "Use `std::any_cast<T>(a)` to extract the value of type `T`; throws `std::bad_any_cast` if `T` does not match contained type",
+        "Use pointer-based `std::any_cast<T>(&a)` for non-throwing type checks (returns `T*` pointer if match, `nullptr` otherwise)",
+        "Use `a.has_value()` to check if `std::any` contains an object; use `a.reset()` to clear it",
+        "`std::any` uses small object optimization (SOO) for small types, but uses dynamic heap memory for larger types"
+      ],
+      examples: [
+        { id: 1, input: "any a = 42; any_cast<int>(a)", output: "Contains int: 42", explanation: "std::any stores integer 42; any_cast<int> extracts value." },
+        { id: 2, input: "any_cast<string>(a) on any holding int", output: "Throws std::bad_any_cast", explanation: "Type mismatch throws bad_any_cast exception." },
+        { id: 3, input: "any_cast<double>(&a) on any holding int", output: "nullptr", explanation: "Pointer-based any_cast returns nullptr safely without exceptions." }
+      ],
+      constraints: ["Header `<any>` requires C++17 or higher compilation standard (`-std=c++17`)."],
+      companies: ["Microsoft", "Google", "Amazon", "Apple", "NVIDIA"],
+      acceptanceRate: "89.3%",
+      totalAccepted: "2,410,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic std::any Storage & any_cast (FREE)", category: "FREE / Core C++17",
+        description: "Stores integers and strings inside std::any and extracts values using std::any_cast<T>.",
+        prosCons: "Pros: Type-agnostic storage without void*. Cons: any_cast throws bad_any_cast on type mismatch.",
+        timeComplexity: "O(1)", spaceComplexity: "O(sizeof(T))", isFree: true,
+        code: `// 68. Any - Approach 1: Basic std::any
+#include <iostream>
+#include <any>
+#include <string>
+using namespace std;
+
+int main() {
+    any a = 100;
+    cout << "Int value: " << any_cast<int>(a) << endl;
+
+    a = string("Execium Engine");
+    cout << "String value: " << any_cast<string>(a) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'any a = 100;', constructType: 'Variable & Initializer', title: 'std::any Type-Agnostic Storage', explanation: 'Initializes std::any variable holding integer value 100.', keyDetails: [{ variableOrConstruct: 'any a = 100', role: 'Type-erased container', whyThisWay: 'Stores arbitrary copyable object safely' }] },
+          { lineNum: 2, codeSnippet: 'cout << any_cast<int>(a);', constructType: 'Function Signature', title: 'Extract Value via std::any_cast', explanation: 'Extracts integer value using `any_cast<int>(a)`.', keyDetails: [{ variableOrConstruct: 'any_cast<int>(a)', role: 'Type-safe extraction', whyThisWay: 'Verifies type matches before returning value' }] },
+          { lineNum: 3, codeSnippet: 'a = string("Execium Engine");', constructType: 'Variable & Initializer', title: 'Re-assign std::any to New Type', explanation: 'Re-assigns `a` to hold a string object, replacing previous integer.', keyDetails: [{ variableOrConstruct: 'a = string', role: 'Dynamic re-assignment', whyThisWay: 'Replaces contained object with different type dynamically' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Type Safety & bad_any_cast Exception Handling (FREE)", category: "FREE / Exception Handling",
+        description: "Demonstrates try-catch exception handling for `std::bad_any_cast` when type mismatch occurs.",
+        prosCons: "Pros: Explicit exception handling. Cons: Exception handling overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 68. Any - Approach 2: bad_any_cast Exception
+#include <iostream>
+#include <any>
+#include <string>
+using namespace std;
+
+int main() {
+    any a = 42; // Holds int
+
+    try {
+        string s = any_cast<string>(a); // Mismatch!
+        cout << "String: " << s << endl;
+    } catch (const bad_any_cast& e) {
+        cout << "Caught bad_any_cast: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'string s = any_cast<string>(a); // Mismatch!', constructType: 'Variable & Initializer', title: 'Mismatched Type Extraction', explanation: 'Attempts to cast std::any holding int to string, which fails type check.', keyDetails: [{ variableOrConstruct: 'any_cast<string>(a)', role: 'Mismatched cast', whyThisWay: 'Triggers bad_any_cast exception' }] },
+          { lineNum: 2, codeSnippet: 'catch (const bad_any_cast& e)', constructType: 'Condition & Branch', title: 'Catch bad_any_cast Exception', explanation: 'Catches `std::bad_any_cast` exception thrown by invalid `any_cast`.', keyDetails: [{ variableOrConstruct: 'bad_any_cast', role: 'Type mismatch exception', whyThisWay: 'Prevents crash by handling type cast failure' }] },
+          { lineNum: 3, codeSnippet: 'cout << e.what();', constructType: 'Function Signature', title: 'Display Exception Message', explanation: 'Prints exception error details.', keyDetails: [{ variableOrConstruct: 'e.what()', role: 'Exception details', whyThisWay: 'Reports type mismatch error message' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Heterogeneous Key-Value Property Map using std::any", category: "Property Maps",
+        description: "Implements a dynamic PropertyMap container mapping string keys to arbitrary typed values using std::any.",
+        prosCons: "Pros: Flexible property map API for configurations. Cons: Requires explicit type cast on lookup.",
+        timeComplexity: "O(1) average lookup", spaceComplexity: "O(N)", isFree: false,
+        code: `// 68. Any - Approach 3: Property Map
+#include <iostream>
+#include <unordered_map>
+#include <any>
+#include <string>
+using namespace std;
+
+class PropertyMap {
+    unordered_map<string, any> properties;
+public:
+    template<typename T>
+    void set(const string& key, T value) { properties[key] = value; }
+
+    template<typename T>
+    T get(const string& key, T defaultValue = T{}) {
+        auto it = properties.find(key);
+        if (it != properties.end()) {
+            if (auto pVal = any_cast<T>(&it->second)) return *pVal;
+        }
+        return defaultValue;
+    }
+};
+
+int main() {
+    PropertyMap props;
+    props.set("appName", string("Execium Studio"));
+    props.set("version", 2);
+    props.set("fps", 60.0);
+
+    cout << "App Name: " << props.get<string>("appName") << endl;
+    cout << "Version: " << props.get<int>("version") << endl;
+    cout << "FPS: " << props.get<double>("fps") << endl;
+    cout << "Debug Mode: " << props.get<bool>("debug", false) << endl; // Fallback
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'unordered_map<string, any> properties;', constructType: 'Variable & Initializer', title: 'Property Map Declaration', explanation: 'Declares hash map storing string keys mapped to `std::any` values.', keyDetails: [{ variableOrConstruct: 'unordered_map<string, any>', role: 'Heterogeneous map container', whyThisWay: 'Stores values of different types under string keys' }] },
+          { lineNum: 2, codeSnippet: 'if (auto pVal = any_cast<T>(&it->second)) return *pVal;', constructType: 'Condition & Branch', title: 'Non-Throwing Pointer Cast Lookup', explanation: 'Uses pointer-based `any_cast<T>(&it->second)` to extract value if types match without exception overhead.', keyDetails: [{ variableOrConstruct: 'any_cast<T>(&val)', role: 'Safe pointer cast', whyThisWay: 'Non-throwing type verification and value retrieval' }] },
+          { lineNum: 3, codeSnippet: 'return defaultValue;', constructType: 'Return / Cleanup', title: 'Return Provided Fallback Default', explanation: 'Returns provided `defaultValue` if key is missing or type mismatched.', keyDetails: [{ variableOrConstruct: 'defaultValue', role: 'Property fallback', whyThisWay: 'Ensures non-crashing default fallback' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Type Inspection using any.type() and typeid", category: "Type Inspection",
+        description: "Inspects contained object type info using `a.type()` and compares against `typeid(T)`.",
+        prosCons: "Pros: Safe type checking before casting. Cons: Uses RTTI std::type_info.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 68. Any - Approach 4: Type Inspection
+#include <iostream>
+#include <any>
+#include <string>
+#include <typeinfo>
+using namespace std;
+
+void printAnyTypeInfo(const any& a) {
+    if (!a.has_value()) {
+        cout << "Empty std::any.\n";
+        return;
+    }
+    cout << "Contained type: " << a.type().name() << endl;
+
+    if (a.type() == typeid(int)) cout << "Value is int: " << any_cast<int>(a) << endl;
+    else if (a.type() == typeid(string)) cout << "Value is string: " << any_cast<string>(a) << endl;
+}
+
+int main() {
+    any a1 = 42;
+    any a2 = string("Antigravity");
+    printAnyTypeInfo(a1);
+    printAnyTypeInfo(a2);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'cout << "Contained type: " << a.type().name();', constructType: 'Function Signature', title: 'Query Type Info Name', explanation: '`a.type()` returns `const std::type_info&` of contained object; `.name()` returns implementation-defined type string.', keyDetails: [{ variableOrConstruct: 'a.type().name()', role: 'Type RTTI query', whyThisWay: 'Inspects runtime type information' }] },
+          { lineNum: 2, codeSnippet: 'if (a.type() == typeid(int))', constructType: 'Condition & Branch', title: 'Compare Type Info Against typeid', explanation: 'Compares `a.type()` against `typeid(int)` for type equality.', keyDetails: [{ variableOrConstruct: 'a.type() == typeid(int)', role: 'RTTI comparison', whyThisWay: 'Guarantees cast safety prior to calling any_cast' }] },
+          { lineNum: 3, codeSnippet: 'printAnyTypeInfo(a1);', constructType: 'Function Signature', title: 'Execute Type Inspection', explanation: 'Inspects type and prints value safely.', keyDetails: [{ variableOrConstruct: 'printAnyTypeInfo', role: 'Inspector function', whyThisWay: 'Safe dynamic type inspection' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Dynamic Event Bus Payload Delivery with std::any", category: "Event Bus",
+        description: "Implements an Event Bus passing dynamic `std::any` payloads to subscriber callbacks.",
+        prosCons: "Pros: Decoupled event system supporting arbitrary payload types. Cons: Requires subscriber type validation.",
+        timeComplexity: "O(N) subscribers", spaceComplexity: "O(Subscribers)", isFree: false,
+        code: `// 68. Any - Approach 5: Event Bus
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <functional>
+#include <any>
+#include <string>
+using namespace std;
+
+class EventBus {
+    using Callback = function<void(const any&)>;
+    unordered_map<string, vector<Callback>> subscribers;
+public:
+    void subscribe(const string& eventName, Callback cb) {
+        subscribers[eventName].push_back(cb);
+    }
+    void publish(const string& eventName, const any& payload) {
+        auto it = subscribers.find(eventName);
+        if (it != subscribers.end()) {
+            for (auto& cb : it->second) cb(payload);
+        }
+    }
+};
+
+int main() {
+    EventBus bus;
+    bus.subscribe("LOGIN", [](const any& payload) {
+        if (auto username = any_cast<string>(&payload)) {
+            cout << "User logged in: " << *username << endl;
+        }
+    });
+
+    bus.publish("LOGIN", string("thakurcoder"));
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using Callback = function<void(const any&)>;', constructType: 'Variable & Initializer', title: 'Event Callback Type Definition', explanation: 'Defines subscriber callback taking `const std::any&` payload parameter.', keyDetails: [{ variableOrConstruct: 'function<void(const any&)>', role: 'Generic callback type', whyThisWay: 'Allows event bus to dispatch arbitrary payload structures' }] },
+          { lineNum: 2, codeSnippet: 'bus.publish("LOGIN", string("thakurcoder"));', constructType: 'Function Signature', title: 'Publish Event with Payload', explanation: 'Publishes "LOGIN" event passing string payload wrapped implicitly in `std::any`.', keyDetails: [{ variableOrConstruct: 'publish("LOGIN", string)', role: 'Event publisher', whyThisWay: 'Dispatches event and payload to all registered subscribers' }] },
+          { lineNum: 3, codeSnippet: 'if (auto username = any_cast<string>(&payload))', constructType: 'Condition & Branch', title: 'Subscriber Non-Throwing Payload Cast', explanation: 'Subscriber validates payload type using non-throwing pointer `any_cast<string>(&payload)`.', keyDetails: [{ variableOrConstruct: 'any_cast<string>(&payload)', role: 'Payload extraction', whyThisWay: 'Safely extracts payload without crashing if type mismatches' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Plugin Configuration Store holding Arbitrary Types", category: "Plugin Config",
+        description: "Stores plugin settings of varying types using std::any.",
+        prosCons: "Pros: Decoupled plugin architecture settings. Cons: Type knowledge required at extraction site.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 68. Any - Approach 6: Plugin Config Store
+#include <iostream>
+#include <unordered_map>
+#include <any>
+#include <string>
+using namespace std;
+
+struct PluginConfig {
+    unordered_map<string, any> settings;
+};
+
+int main() {
+    PluginConfig plugin;
+    plugin.settings["maxConnections"] = 100;
+    plugin.settings["apiEndpoint"] = string("https://api.execium.com/v1");
+    plugin.settings["enableLogging"] = true;
+
+    cout << "Max Conns: " << any_cast<int>(plugin.settings["maxConnections"]) << endl;
+    cout << "Endpoint: " << any_cast<string>(plugin.settings["apiEndpoint"]) << endl;
+    cout << "Logging: " << boolalpha << any_cast<bool>(plugin.settings["enableLogging"]) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'unordered_map<string, any> settings;', constructType: 'Variable & Initializer', title: 'Plugin Settings Map', explanation: 'Maps string configuration keys to `std::any` setting values.', keyDetails: [{ variableOrConstruct: 'unordered_map<string, any>', role: 'Plugin setting store', whyThisWay: 'Allows plugins to register custom typed settings' }] },
+          { lineNum: 2, codeSnippet: 'plugin.settings["maxConnections"] = 100;', constructType: 'Variable & Initializer', title: 'Store Integer Setting', explanation: 'Stores integer setting 100 inside map.', keyDetails: [{ variableOrConstruct: 'map assignment', role: 'Setting insertion', whyThisWay: 'Stores setting in type-erased std::any' }] },
+          { lineNum: 3, codeSnippet: 'cout << any_cast<int>(plugin.settings["maxConnections"]);', constructType: 'Function Signature', title: 'Extract Typed Setting', explanation: 'Extracts setting cast to integer.', keyDetails: [{ variableOrConstruct: 'any_cast<int>', role: 'Setting retrieval', whyThisWay: 'Retrieves typed setting value' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Memory Management & Reset (any.reset(), has_value())", category: "Lifecycle & Reset",
+        description: "Demonstrates managing object lifetime inside std::any using `has_value()` and `reset()`.",
+        prosCons: "Pros: Explicit memory clearing. Cons: Discards contained object.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 68. Any - Approach 7: Reset & Lifecycle
+#include <iostream>
+#include <any>
+#include <string>
+using namespace std;
+
+int main() {
+    any a = string("Heavy Memory Object Buffer");
+    cout << "Has value before reset: " << boolalpha << a.has_value() << endl; // true
+
+    a.reset(); // Destroys string and clears container!
+    cout << "Has value after reset: " << a.has_value() << endl; // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'cout << "Has value: " << a.has_value();', constructType: 'Function Signature', title: 'Check Value Presence', explanation: '`a.has_value()` returns true if std::any currently holds an object instance.', keyDetails: [{ variableOrConstruct: 'a.has_value()', role: 'Presence checker', whyThisWay: 'Verifies container is non-empty' }] },
+          { lineNum: 2, codeSnippet: 'a.reset();', constructType: 'Function Signature', title: 'Clear & Destroy Contained Object', explanation: 'Destroys contained object instance and resets std::any to uninitialized empty state.', keyDetails: [{ variableOrConstruct: 'a.reset()', role: 'Object reset & destruction', whyThisWay: 'Frees memory held by contained object' }] },
+          { lineNum: 3, codeSnippet: 'cout << a.has_value(); // false', constructType: 'Function Signature', title: 'Verify Reset State', explanation: 'Confirms container is empty after reset.', keyDetails: [{ variableOrConstruct: 'has_value() == false', role: 'Empty state confirmation', whyThisWay: 'Verifies container reset' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Pointer-Based std::any_cast for Non-Throwing Type Checking", category: "Pointer Cast",
+        description: "Uses pointer overload `std::any_cast<T>(&a)` for non-throwing type verification and value extraction.",
+        prosCons: "Pros: Zero exception overhead. Cons: Requires taking address `&a`.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 68. Any - Approach 8: Pointer any_cast
+#include <iostream>
+#include <any>
+#include <string>
+using namespace std;
+
+void inspectAnyPointer(const any& a) {
+    if (auto pInt = any_cast<int>(&a)) {
+        cout << "Contains int pointer: " << *pInt << endl;
+    } else if (auto pStr = any_cast<string>(&a)) {
+        cout << "Contains string pointer: " << *pStr << endl;
+    } else {
+        cout << "Unknown or empty type.\n";
+    }
+}
+
+int main() {
+    any a1 = 42;
+    any a2 = string("C++17 std::any");
+    inspectAnyPointer(a1);
+    inspectAnyPointer(a2);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (auto pInt = any_cast<int>(&a))', constructType: 'Condition & Branch', title: 'Pointer-Based any_cast Call', explanation: 'Passes address `&a` to `any_cast<int>`. Returns `const int*` if type matches, `nullptr` if mismatch.', keyDetails: [{ variableOrConstruct: 'any_cast<int>(&a)', role: 'Pointer-based cast', whyThisWay: 'Provides non-throwing type branch checking' }] },
+          { lineNum: 2, codeSnippet: 'cout << *pInt;', constructType: 'Function Signature', title: 'Dereference Extracted Pointer', explanation: 'Dereferences valid pointer to access value.', keyDetails: [{ variableOrConstruct: '*pInt', role: 'Pointer dereference', whyThisWay: 'Reads value without exceptions' }] },
+          { lineNum: 3, codeSnippet: 'inspectAnyPointer(a1);', constructType: 'Function Signature', title: 'Execute Pointer Inspection', explanation: 'Inspects std::any using non-throwing pointer cast.', keyDetails: [{ variableOrConstruct: 'inspectAnyPointer', role: 'Inspector function', whyThisWay: 'Demonstrates non-throwing type-safe extraction' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Command Pipeline Passing Dynamic std::any Context", category: "Command Pipeline",
+        description: "Executes a pipeline of command handlers passing a dynamic `std::any` context object.",
+        prosCons: "Pros: Flexible pipeline context passing. Cons: Manual cast per command stage.",
+        timeComplexity: "O(1) per stage", spaceComplexity: "O(1)", isFree: false,
+        code: `// 68. Any - Approach 9: Command Context Pipeline
+#include <iostream>
+#include <vector>
+#include <functional>
+#include <any>
+using namespace std;
+
+struct PipelineContext {
+    any data;
+};
+
+using Command = function<void(PipelineContext&)>;
+
+int main() {
+    vector<Command> pipeline;
+
+    pipeline.push_back([](PipelineContext& ctx) {
+        ctx.data = 10; // Stage 1: Produce int 10
+    });
+
+    pipeline.push_back([](PipelineContext& ctx) {
+        int val = any_cast<int>(ctx.data);
+        ctx.data = val * 5; // Stage 2: Multiply by 5 -> 50
+    });
+
+    PipelineContext ctx;
+    for (auto& cmd : pipeline) cmd(ctx);
+
+    cout << "Pipeline Result: " << any_cast<int>(ctx.data) << endl; // 50
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct PipelineContext { any data; };', constructType: 'Variable & Initializer', title: 'Pipeline Context Struct', explanation: 'Defines pipeline context wrapping `std::any data` payload.', keyDetails: [{ variableOrConstruct: 'PipelineContext', role: 'Pipeline context payload', whyThisWay: 'Allows commands to change payload type dynamically across stages' }] },
+          { lineNum: 2, codeSnippet: 'int val = any_cast<int>(ctx.data); ctx.data = val * 5;', constructType: 'Variable & Initializer', title: 'Command Stage Execution', explanation: 'Stage extracts integer data, multiplies by 5, and updates context data.', keyDetails: [{ variableOrConstruct: 'ctx.data = val * 5', role: 'Context mutation', whyThisWay: 'Transforms context data state for next pipeline command' }] },
+          { lineNum: 3, codeSnippet: 'cout << any_cast<int>(ctx.data);', constructType: 'Function Signature', title: 'Extract Final Pipeline Result', explanation: 'Extracts final transformed result from context after all pipeline stages run.', keyDetails: [{ variableOrConstruct: 'any_cast<int>(ctx.data)', role: 'Final result extraction', whyThisWay: 'Reads accumulated pipeline output' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Generic State Store with Type-Erased State Updates", category: "State Store",
+        description: "Implements a type-erased StateStore holding application state inside std::any.",
+        prosCons: "Pros: Generic state container. Cons: State subscriber requires type checking.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 68. Any - Approach 10: State Store
+#include <iostream>
+#include <any>
+#include <string>
+using namespace std;
+
+class StateStore {
+    any state;
+public:
+    template<typename T>
+    void setState(T newState) { state = newState; }
+
+    template<typename T>
+    optional<T> getState() const {
+        if (auto pVal = any_cast<T>(&state)) return *pVal;
+        return nullopt;
+    }
+};
+
+int main() {
+    StateStore store;
+    store.setState(string("LOGGED_IN"));
+
+    if (auto s = store.getState<string>()) {
+        cout << "Current State: " << *s << endl; // LOGGED_IN
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void setState(T newState) { state = newState; }', constructType: 'Function Signature', title: 'Set State Value', explanation: 'Stores new state value inside `std::any state`.', keyDetails: [{ variableOrConstruct: 'state = newState', role: 'State setter', whyThisWay: 'Overwrites state with new typed object' }] },
+          { lineNum: 2, codeSnippet: 'if (auto pVal = any_cast<T>(&state)) return *pVal;', constructType: 'Condition & Branch', title: 'Get State Returning Optional', explanation: 'Extracts state cast to type T, returning optional containing value if type matches, or nullopt if mismatch.', keyDetails: [{ variableOrConstruct: 'getState returning optional<T>', role: 'Safe state getter', whyThisWay: 'Combines std::any and std::optional for clean API' }] },
+          { lineNum: 3, codeSnippet: 'if (auto s = store.getState<string>()) cout << *s;', constructType: 'Condition & Branch', title: 'Read State Value Safely', explanation: 'Reads current state string if present.', keyDetails: [{ variableOrConstruct: '*s', role: 'State reader', whyThisWay: 'Safely unwraps state optional' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem69Details(): LearnModule {
+  return {
+    id: "med_string_view",
+    title: "69. Zero-Copy Strings (std::string_view)",
+    category: "Modern C++",
+    difficulty: "medium",
+    shortDesc: "Non-owning read-only string references avoiding allocations.",
+    fullCode: `// 69. StringView - Approach 1: Zero-Copy String Parameters
+#include <iostream>
+#include <string_view>
+#include <string>
+using namespace std;
+
+void printStringView(string_view sv) {
+    cout << "StringView (len " << sv.length() << "): " << sv << endl;
+}
+
+int main() {
+    string s = "Heap Allocated String";
+    const char* cstr = "Literal C-String";
+
+    printStringView(s);       // Zero allocation!
+    printStringView(cstr);    // Zero allocation!
+    printStringView("Literal");// Zero allocation!
+    return 0;
+}`,
+    problemStatement: {
+      title: "69. Zero-Copy Strings (std::string_view)",
+      objective: "Master C++17 `std::string_view`: non-owning read-only string references, zero-copy parameter passing, substring slicing `remove_prefix()` / `remove_suffix()`, zero-allocation CSV tokenization, lifetime pitfall prevention (dangling references), constexpr string_view, and C++20 heterogeneous map lookup.",
+      description: "Implement **Zero-Copy Strings (std::string_view)** (Modern C++). Pass and manipulate read-only string references without copying data or performing heap memory allocations.",
+      inputDesc: "String literals, std::string instances, char arrays, or raw memory character buffers.",
+      outputDesc: "Non-owning string slices, tokenized sub-views, or search results.",
+      takeaways: [
+        "`std::string_view` consists of a pointer `char*` and a size `size_t`; it does NOT own the underlying character buffer",
+        "Pass `string_view` by value (it is small: 16 bytes on 64-bit systems)",
+        "`remove_prefix(n)` and `remove_suffix(n)` slice string views in O(1) time without allocating memory",
+        "CRITICAL LIFETIME PITFALL: Never return a `string_view` referencing a temporary local `std::string` (causes a dangling pointer!)",
+        "`std::string_view` is NOT guaranteed to be null-terminated; do not pass `sv.data()` to functions expecting C-strings unless verified"
+      ],
+      examples: [
+        { id: 1, input: "printStringView('Literal C-String')", output: "StringView (len 16): Literal C-String", explanation: "std::string_view wraps C-string literal without dynamic allocation." },
+        { id: 2, input: "sv = 'Hello World'; sv.remove_prefix(6); sv.remove_suffix(1);", output: "Sliced View: 'Worl'", explanation: "O(1) pointer/length adjustment slices string view without heap allocation." },
+        { id: 3, input: "Zero-allocation CSV tokenizer on 'apple,banana,cherry'", output: "Tokens: [apple], [banana], [cherry]", explanation: "Splits CSV string into non-owning string_view tokens with 0 heap allocations." }
+      ],
+      constraints: ["Header `<string_view>` requires C++17 or higher compilation standard (`-std=c++17`)."],
+      companies: ["Google", "Meta", "Microsoft", "Amazon", "Apple"],
+      acceptanceRate: "93.5%",
+      totalAccepted: "4,120,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Zero-Copy String Parameter Passing (FREE)", category: "FREE / Core C++17",
+        description: "Uses std::string_view as a function parameter to accept std::string, C-string, and string literals with zero copies.",
+        prosCons: "Pros: Eliminates temporary std::string allocations. Cons: Non-owning reference requires valid backing storage.",
+        timeComplexity: "O(1) parameter pass", spaceComplexity: "O(1)", isFree: true,
+        code: `// 69. StringView - Approach 1: Zero-Copy Parameter
+#include <iostream>
+#include <string_view>
+#include <string>
+using namespace std;
+
+void logMessage(string_view sv) {
+    cout << "[LOG]: " << sv << " (Length: " << sv.length() << ")" << endl;
+}
+
+int main() {
+    string heapStr = "Dynamic String";
+    const char* rawStr = "C-String Literal";
+
+    logMessage(heapStr);
+    logMessage(rawStr);
+    logMessage("Inline String");
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void logMessage(string_view sv)', constructType: 'Function Signature', title: 'StringView Value Parameter', explanation: 'Passes `string_view` by value (16 bytes size: pointer + length).', keyDetails: [{ variableOrConstruct: 'string_view sv', role: 'Non-owning string parameter', whyThisWay: 'Replaces const string& and const char* with unified zero-copy parameter' }] },
+          { lineNum: 2, codeSnippet: 'logMessage(heapStr); logMessage(rawStr);', constructType: 'Function Signature', title: 'Zero-Allocation Universal Binding', explanation: 'Binds seamlessly to `std::string`, `const char*`, or string literal without allocating heap memory.', keyDetails: [{ variableOrConstruct: 'universal binding', role: 'Zero-copy binding', whyThisWay: 'Eliminates temporary std::string heap allocations' }] },
+          { lineNum: 3, codeSnippet: 'cout << "[LOG]: " << sv;', constructType: 'Function Signature', title: 'Print Non-Owning View', explanation: 'Outputs string view contents using stream operator `<<`.', keyDetails: [{ variableOrConstruct: 'sv stream output', role: 'Stream output', whyThisWay: 'Prints characters directly from backing buffer' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Substring Slicing with remove_prefix() & remove_suffix() (FREE)", category: "FREE / Slicing",
+        description: "Slices string views in O(1) time using `remove_prefix()` and `remove_suffix()` without allocating new strings.",
+        prosCons: "Pros: O(1) zero-copy slicing. Cons: Modifies pointer/length view only.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 69. StringView - Approach 2: Slicing
+#include <iostream>
+#include <string_view>
+using namespace std;
+
+int main() {
+    string_view sv = "   [Hello Execium!]   ";
+
+    // Trim leading spaces
+    size_t firstChar = sv.find_first_not_of(" ");
+    if (firstChar != string_view::npos) sv.remove_prefix(firstChar);
+
+    // Trim trailing spaces
+    size_t lastChar = sv.find_last_not_of(" ");
+    if (lastChar != string_view::npos) sv.remove_suffix(sv.length() - 1 - lastChar);
+
+    cout << "Trimmed View: '" << sv << "'" << endl; // '[Hello Execium!]'
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'sv.remove_prefix(firstChar);', constructType: 'Function Signature', title: 'O(1) Leading Trim (remove_prefix)', explanation: 'Advances internal pointer forward by `firstChar` bytes in O(1) time without modifying underlying character buffer.', keyDetails: [{ variableOrConstruct: 'remove_prefix()', role: 'Pointer advance', whyThisWay: 'O(1) leading string slicing' }] },
+          { lineNum: 2, codeSnippet: 'sv.remove_suffix(sv.length() - 1 - lastChar);', constructType: 'Function Signature', title: 'O(1) Trailing Trim (remove_suffix)', explanation: 'Decrements internal length by specified count in O(1) time.', keyDetails: [{ variableOrConstruct: 'remove_suffix()', role: 'Length reduction', whyThisWay: 'O(1) trailing string slicing' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Trimmed View: \'" << sv << "\'";', constructType: 'Function Signature', title: 'Display Sliced String View', explanation: 'Displays trimmed string view.', keyDetails: [{ variableOrConstruct: 'sv', role: 'Trimmed view', whyThisWay: 'Zero-copy string trim result' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Zero-Allocation CSV Tokenizer using std::string_view", category: "String Tokenizer",
+        description: "Splits a CSV string into a vector of non-owning string_view tokens with zero heap allocations.",
+        prosCons: "Pros: High-performance O(N) tokenizer without string allocation. Cons: Tokens depend on source string lifetime.",
+        timeComplexity: "O(N)", spaceComplexity: "O(Tokens) for vector pointers", isFree: false,
+        code: `// 69. StringView - Approach 3: CSV Tokenizer
+#include <iostream>
+#include <string_view>
+#include <vector>
+using namespace std;
+
+vector<string_view> tokenizeCSV(string_view input) {
+    vector<string_view> tokens;
+    size_t start = 0;
+    size_t end = input.find(',');
+
+    while (end != string_view::npos) {
+        tokens.push_back(input.substr(start, end - start));
+        start = end + 1;
+        end = input.find(',', start);
+    }
+    tokens.push_back(input.substr(start));
+    return tokens;
+}
+
+int main() {
+    string csv = "apple,banana,cherry,date,fig";
+    auto tokens = tokenizeCSV(csv);
+
+    cout << "Tokens count: " << tokens.size() << endl;
+    for (auto token : tokens) {
+        cout << "- " << token << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'tokens.push_back(input.substr(start, end - start));', constructType: 'Variable & Initializer', title: 'Zero-Copy Sub-View Extraction', explanation: '`input.substr()` on a string_view returns a new non-owning `string_view` slice in O(1) time without allocating heap memory.', keyDetails: [{ variableOrConstruct: 'string_view::substr()', role: 'Non-owning slice', whyThisWay: 'Returns string_view slice in O(1) time' }] },
+          { lineNum: 2, codeSnippet: 'end = input.find(\',\', start);', constructType: 'Function Signature', title: 'Find Next Delimiter', explanation: 'Finds next comma delimiter position in string_view.', keyDetails: [{ variableOrConstruct: 'find(\',\', start)', role: 'Delimiter search', whyThisWay: 'Scans for delimiter in O(N)' }] },
+          { lineNum: 3, codeSnippet: 'for (auto token : tokens) cout << token;', constructType: 'Loop Construct', title: 'Iterate Token Sub-views', explanation: 'Iterates and prints non-owning token views.', keyDetails: [{ variableOrConstruct: 'token views', role: 'Token output', whyThisWay: 'Prints tokens without string copies' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Danger of Dangling String View References (Lifetime Pitfalls)", category: "Lifetime Hazards",
+        description: "Demonstrates dangling reference hazards when returning string_view referencing temporary strings.",
+        prosCons: "Pros: Critical hazard education. Cons: Causes undefined behavior if uncorrected.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 69. StringView - Approach 4: Lifetime Hazards
+#include <iostream>
+#include <string_view>
+#include <string>
+using namespace std;
+
+// DANGEROUS BAD PRACTICE: Returns view of temporary string!
+string_view createDanglingViewBad() {
+    string temp = "Temporary Local String";
+    return temp; // HAZARD: temp is destroyed at end of function!
+}
+
+// SAFE PRACTICE: Return std::string or take string_view parameter!
+string createSafeString() {
+    return "Safe Owned String";
+}
+
+int main() {
+    // string_view bad = createDanglingViewBad(); // UNDEFINED BEHAVIOR if accessed!
+
+    string safe = createSafeString();
+    string_view safeView = safe; // Safe: backing string 'safe' is alive!
+    cout << "Safe View: " << safeView << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return temp; // HAZARD: temp is destroyed at end of function!', constructType: 'Return / Cleanup', title: 'Dangling Reference Hazard', explanation: 'Local string `temp` is destroyed when function returns, leaving returned string_view pointing to deallocated memory.', keyDetails: [{ variableOrConstruct: 'dangling string_view', role: 'Undefined behavior hazard', whyThisWay: 'Never return string_view pointing to local temporary objects' }] },
+          { lineNum: 2, codeSnippet: 'string_view safeView = safe;', constructType: 'Variable & Initializer', title: 'Valid Lifetime Binding', explanation: 'Binds string_view to backing `safe` string whose scope outlives the string_view reference.', keyDetails: [{ variableOrConstruct: 'safeView', role: 'Valid string_view binding', whyThisWay: 'Backing string object outlives string_view reference' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Safe View: " << safeView;', constructType: 'Function Signature', title: 'Display Safe String View', explanation: 'Prints valid non-dangling string view.', keyDetails: [{ variableOrConstruct: 'safeView', role: 'Safe output', whyThisWay: 'Valid string_view access' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Fast Prefix & Suffix Checking (starts_with & ends_with)", category: "Prefix/Suffix Checks",
+        description: "Uses `starts_with()` and `ends_with()` for fast prefix and suffix checking.",
+        prosCons: "Pros: Clean readable API. Cons: Requires C++20 for starts_with/ends_with on string_view.",
+        timeComplexity: "O(K) where K = prefix length", spaceComplexity: "O(1)", isFree: false,
+        code: `// 69. StringView - Approach 5: Prefix & Suffix
+#include <iostream>
+#include <string_view>
+using namespace std;
+
+bool hasPrefix(string_view sv, string_view prefix) {
+    if (sv.length() < prefix.length()) return false;
+    return sv.substr(0, prefix.length()) == prefix;
+}
+
+bool hasSuffix(string_view sv, string_view suffix) {
+    if (sv.length() < suffix.length()) return false;
+    return sv.substr(sv.length() - suffix.length()) == suffix;
+}
+
+int main() {
+    string_view url = "https://execium.com/index.html";
+
+    cout << "Is HTTPS: " << (hasPrefix(url, "https://") ? "Yes" : "No") << endl; // Yes
+    cout << "Is HTML: " << (hasSuffix(url, ".html") ? "Yes" : "No") << endl;    // Yes
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return sv.substr(0, prefix.length()) == prefix;', constructType: 'Condition & Branch', title: 'Zero-Copy Prefix Check', explanation: 'Creates sub-view of prefix length and compares against prefix string.', keyDetails: [{ variableOrConstruct: 'sv.substr(0, len) == prefix', role: 'Prefix check', whyThisWay: 'Zero-copy string prefix comparison' }] },
+          { lineNum: 2, codeSnippet: 'return sv.substr(sv.length() - suffix.length()) == suffix;', constructType: 'Condition & Branch', title: 'Zero-Copy Suffix Check', explanation: 'Creates sub-view of suffix length at end and compares against suffix string.', keyDetails: [{ variableOrConstruct: 'sv.substr(end) == suffix', role: 'Suffix check', whyThisWay: 'Zero-copy string suffix comparison' }] },
+          { lineNum: 3, codeSnippet: 'hasPrefix(url, "https://")', constructType: 'Function Signature', title: 'URL Scheme Inspection', explanation: 'Inspects URL protocol scheme.', keyDetails: [{ variableOrConstruct: 'hasPrefix', role: 'Scheme inspector', whyThisWay: 'Validates HTTPS protocol' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Constexpr String View Operations at Compile Time", category: "Constexpr StringView",
+        description: "Uses `constexpr std::string_view` for compile-time string evaluation and length calculations.",
+        prosCons: "Pros: Zero runtime execution cost. Cons: Requires compile-time constant expressions.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 69. StringView - Approach 6: Constexpr Operations
+#include <iostream>
+#include <string_view>
+using namespace std;
+
+constexpr size_t countChars(string_view sv, char c) {
+    size_t count = 0;
+    for (char ch : sv) {
+        if (ch == c) count++;
+    }
+    return count;
+}
+
+int main() {
+    constexpr string_view code = "int main() { return 0; }";
+    constexpr size_t openParens = countChars(code, '(');
+
+    cout << "Compile-time '(' count: " << openParens << endl; // 1
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr size_t countChars(string_view sv, char c)', constructType: 'Function Signature', title: 'Constexpr Function Declaration', explanation: 'Declares function taking `string_view` executable at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr', role: 'Compile-time evaluator', whyThisWay: 'Executes string counting during compilation' }] },
+          { lineNum: 2, codeSnippet: 'constexpr string_view code = "int main() { return 0; }";', constructType: 'Variable & Initializer', title: 'Constexpr StringView Literal', explanation: 'Defines string_view constant evaluated at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr string_view', role: 'Compile-time string constant', whyThisWay: 'Zero runtime allocation or initialization cost' }] },
+          { lineNum: 3, codeSnippet: 'constexpr size_t openParens = countChars(code, \'(\');', constructType: 'Variable & Initializer', title: 'Compile-Time Result Calculation', explanation: 'Calculates character count at compile time; value 1 is embedded directly into executable binary.', keyDetails: [{ variableOrConstruct: 'constexpr openParens', role: 'Compile-time constant', whyThisWay: 'Zero runtime computation' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Zero-Copy Lexer for Programming Languages", category: "Lexer Tokens",
+        description: "Implements a programming language lexer that emits non-owning `string_view` tokens.",
+        prosCons: "Pros: High-speed compiler lexer phase. Cons: Source code buffer must remain in memory.",
+        timeComplexity: "O(N)", spaceComplexity: "O(Tokens)", isFree: false,
+        code: `// 69. StringView - Approach 7: Compiler Lexer
+#include <iostream>
+#include <string_view>
+#include <vector>
+#include <cctype>
+using namespace std;
+
+struct Token {
+    string_view lexeme;
+    string type;
+};
+
+vector<Token> lex(string_view code) {
+    vector<Token> tokens;
+    size_t i = 0, n = code.length();
+
+    while (i < n) {
+        while (i < n && isspace(code[i])) i++;
+        if (i >= n) break;
+
+        if (isalpha(code[i])) {
+            size_t start = i;
+            while (i < n && isalnum(code[i])) i++;
+            tokens.push_back({code.substr(start, i - start), "IDENTIFIER"});
+        } else if (isdigit(code[i])) {
+            size_t start = i;
+            while (i < n && isdigit(code[i])) i++;
+            tokens.push_back({code.substr(start, i - start), "NUMBER"});
+        } else {
+            tokens.push_back({code.substr(i, 1), "SYMBOL"});
+            i++;
+        }
+    }
+    return tokens;
+}
+
+int main() {
+    string_view source = "int x = 42;";
+    auto tokens = lex(source);
+
+    for (const auto& tok : tokens) {
+        cout << tok.type << ": " << tok.lexeme << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'tokens.push_back({code.substr(start, i - start), "IDENTIFIER"});', constructType: 'Variable & Initializer', title: 'Zero-Copy Identifier Token', explanation: 'Creates token wrapping non-owning `string_view` lexeme slice in O(1) time.', keyDetails: [{ variableOrConstruct: 'code.substr(start, len)', role: 'Lexeme view slice', whyThisWay: 'Emits lexeme tokens without heap allocation copies' }] },
+          { lineNum: 2, codeSnippet: 'while (i < n && isalpha(code[i])) i++;', constructType: 'Loop Construct', title: 'Identifier Character Scan', explanation: 'Scans contiguous alphanumeric identifier characters.', keyDetails: [{ variableOrConstruct: 'isalnum scan', role: 'Lexer scanning', whyThisWay: 'Finds token boundaries' }] },
+          { lineNum: 3, codeSnippet: 'cout << tok.type << ": " << tok.lexeme;', constructType: 'Loop Construct', title: 'Display Lexed Tokens', explanation: 'Prints lexed token types and string view lexemes.', keyDetails: [{ variableOrConstruct: 'tok.lexeme', role: 'Token display', whyThisWay: 'Displays zero-copy token lexemes' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Heterogeneous Unordered Map Lookup with string_view", category: "Heterogeneous Lookup",
+        description: "Uses C++20 heterogeneous map lookup `unordered_map<string, T>` with `string_view` keys to avoid temporary std::string allocations.",
+        prosCons: "Pros: Avoids allocating temporary std::string during map find. Cons: Requires transparent hash & equality.",
+        timeComplexity: "O(1) avg", spaceComplexity: "O(N)", isFree: false,
+        code: `// 69. StringView - Approach 8: Heterogeneous Map Lookup
+#include <iostream>
+#include <unordered_map>
+#include <string>
+#include <string_view>
+using namespace std;
+
+// Custom transparent hasher & key equality for C++20 heterogeneous lookup
+struct StringHash {
+    using is_transparent = void;
+    size_t operator()(string_view sv) const { return hash<string_view>{}(sv); }
+};
+
+int main() {
+    unordered_map<string, int, StringHash, equal_to<>> map = {
+        {"alpha", 1}, {"beta", 2}, {"gamma", 3}
+    };
+
+    string_view query = "beta";
+    auto it = map.find(query); // Zero allocation lookup!
+    if (it != map.end()) {
+        cout << "Found beta: " << it->second << endl; // 2
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct StringHash { using is_transparent = void; ... };', constructType: 'Variable & Initializer', title: 'Transparent Hasher Definition', explanation: 'Defines transparent hasher struct with `using is_transparent = void` to enable heterogeneous lookup.', keyDetails: [{ variableOrConstruct: 'is_transparent', role: 'Transparent lookup tag', whyThisWay: 'Instructs std::unordered_map to accept string_view queries without converting to std::string' }] },
+          { lineNum: 2, codeSnippet: 'unordered_map<string, int, StringHash, equal_to<>> map;', constructType: 'Variable & Initializer', title: 'Transparent Map Declaration', explanation: 'Declares map using transparent hasher and `equal_to<>` comparator.', keyDetails: [{ variableOrConstruct: 'equal_to<>', role: 'Transparent equality', whyThisWay: 'Allows comparing std::string key with std::string_view query' }] },
+          { lineNum: 3, codeSnippet: 'auto it = map.find(query);', constructType: 'Function Signature', title: 'Zero-Allocation Map Find', explanation: 'Finds key using string_view query without constructing temporary std::string object.', keyDetails: [{ variableOrConstruct: 'map.find(query)', role: 'Zero-allocation lookup', whyThisWay: 'Performs map search in O(1) time without dynamic heap allocation' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Parsing Key-Value Headers (HTTP Headers)", category: "Header Parsing",
+        description: "Parses HTTP header lines into (key, value) `string_view` pairs with zero string copies.",
+        prosCons: "Pros: High-throughput HTTP header parsing. Cons: Non-owning views.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1) extra", isFree: false,
+        code: `// 69. StringView - Approach 9: HTTP Header Parser
+#include <iostream>
+#include <string_view>
+using namespace std;
+
+pair<string_view, string_view> parseHeaderLine(string_view line) {
+    size_t colon = line.find(':');
+    if (colon == string_view::npos) return {line, ""};
+
+    string_view key = line.substr(0, colon);
+    string_view val = line.substr(colon + 1);
+
+    // Trim leading spaces from value
+    size_t first = val.find_first_not_of(" ");
+    if (first != string_view::npos) val.remove_prefix(first);
+
+    return {key, val};
+}
+
+int main() {
+    string_view header = "Content-Type: application/json";
+    auto [key, val] = parseHeaderLine(header);
+
+    cout << "Header Key:   '" << key << "'\n";
+    cout << "Header Value: '" << val << "'\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'size_t colon = line.find(\':\');', constructType: 'Function Signature', title: 'Locate Colon Separator', explanation: 'Finds position of colon delimiter in header line.', keyDetails: [{ variableOrConstruct: 'line.find(\':\')', role: 'Delimiter position', whyThisWay: 'Splits header key from header value' }] },
+          { lineNum: 2, codeSnippet: 'string_view key = line.substr(0, colon); string_view val = line.substr(colon + 1);', constructType: 'Variable & Initializer', title: 'Zero-Copy Substring Slices', explanation: 'Creates key and value sub-views in O(1) time.', keyDetails: [{ variableOrConstruct: 'substr', role: 'Zero-copy sub-view', whyThisWay: 'Slices key and value without allocating strings' }] },
+          { lineNum: 3, codeSnippet: 'val.remove_prefix(first);', constructType: 'Function Signature', title: 'Trim Header Value Spaces', explanation: 'Trims leading spaces from header value in O(1) time.', keyDetails: [{ variableOrConstruct: 'remove_prefix()', role: 'Zero-copy trim', whyThisWay: 'Trims value whitespace without string copies' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Custom String View Search Algorithms", category: "Search Algorithms",
+        description: "Uses built-in search methods (`find`, `rfind`, `find_first_of`) on std::string_view.",
+        prosCons: "Pros: Full suite of string search functions. Cons: Read-only search.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 69. StringView - Approach 10: Search Methods
+#include <iostream>
+#include <string_view>
+using namespace std;
+
+int main() {
+    string_view path = "/usr/local/bin/execium";
+
+    size_t lastSlash = path.rfind('/');
+    if (lastSlash != string_view::npos) {
+        string_view filename = path.substr(lastSlash + 1);
+        string_view dir = path.substr(0, lastSlash);
+
+        cout << "Directory: " << dir << endl;       // /usr/local/bin
+        cout << "Filename:  " << filename << endl;  // execium
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'size_t lastSlash = path.rfind(\'/\');', constructType: 'Function Signature', title: 'Reverse Find Last Slash', explanation: 'Searches backward from end of string_view to find last slash character.', keyDetails: [{ variableOrConstruct: 'rfind(\'/\')', role: 'Reverse search', whyThisWay: 'Locates path filename boundary' }] },
+          { lineNum: 2, codeSnippet: 'string_view filename = path.substr(lastSlash + 1);', constructType: 'Variable & Initializer', title: 'Extract Filename Sub-view', explanation: 'Creates sub-view of filename after last slash.', keyDetails: [{ variableOrConstruct: 'path.substr(lastSlash + 1)', role: 'Filename slice', whyThisWay: 'Extracts filename in O(1) zero-copy time' }] },
+          { lineNum: 3, codeSnippet: 'string_view dir = path.substr(0, lastSlash);', constructType: 'Variable & Initializer', title: 'Extract Directory Sub-view', explanation: 'Creates sub-view of directory path before last slash.', keyDetails: [{ variableOrConstruct: 'path.substr(0, lastSlash)', role: 'Directory slice', whyThisWay: 'Extracts directory in O(1) zero-copy time' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem70Details(): LearnModule {
+  return {
+    id: "med_type_traits",
+    title: "70. Type Traits (std::is_same)",
+    category: "Metaprogramming",
+    difficulty: "medium",
+    shortDesc: "Compile-time type inspection with <type_traits>.",
+    fullCode: `// 70. Type Traits - Approach 1: Basic Type Comparison (std::is_same_v)
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+void inspectType(T val) {
+    if constexpr (is_same_v<T, int>) {
+        cout << "Value is an integer: " << val << endl;
+    } else if constexpr (is_same_v<T, double>) {
+        cout << "Value is a double: " << val << endl;
+    } else {
+        cout << "Value is another type." << endl;
+    }
+}
+
+int main() {
+    inspectType(42);       // Integer branch
+    inspectType(3.14159);  // Double branch
+    inspectType("Execium"); // Other branch
+    return 0;
+}`,
+    problemStatement: {
+      title: "70. Type Traits (std::is_same)",
+      objective: "Master compile-time metaprogramming with `<type_traits>`: `std::is_same_v`, `std::is_integral_v`, `std::is_floating_point_v`, SFINAE method enable with `std::enable_if_t`, `static_assert` compile-time assertions, `std::conditional_t`, `std::remove_reference_t`, and `std::decay_t`.",
+      description: "Implement **Type Traits (std::is_same)** (Metaprogramming). Inspect, validate, and transform type properties at compile time to write template metaprogramming code.",
+      inputDesc: "Template type arguments T, function parameters, or compile-time type expressions.",
+      outputDesc: "Compile-time boolean evaluations, SFINAE template overloads, or type transformations.",
+      takeaways: [
+        "`std::is_same_v<T, U>` evaluates to `true` at compile time if type `T` is identical to type `U`",
+        "`if constexpr` evaluates branch conditions at compile time, discarding non-matching branches before code generation",
+        "`std::enable_if_t<Condition, T>` enables or disables template overloads based on compile-time conditions (SFINAE)",
+        "`std::decay_t<T>` applies standard type conversions (removes const/volatile, converts arrays to pointers)"
+      ],
+      examples: [
+        { id: 1, input: "is_same_v<int, int>", output: "true", explanation: "Types are identical at compile time." },
+        { id: 2, input: "is_same_v<int, double>", output: "false", explanation: "Types differ at compile time." },
+        { id: 3, input: "SFINAE add(T a, T b) enabled only when is_arithmetic_v<T>", output: "Compiles for int/double; rejects string", explanation: "std::enable_if_t restricts template instantiation to numeric types at compile time." }
+      ],
+      constraints: ["Header `<type_traits>` requires C++17 or higher for `_v` and `_t` variable/type helper aliases."],
+      companies: ["NVIDIA", "Google", "Microsoft", "Apple", "Bloomberg"],
+      acceptanceRate: "95.1%",
+      totalAccepted: "2,150,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Type Comparison with std::is_same_v (FREE)", category: "FREE / Core Metaprogramming",
+        description: "Uses `std::is_same_v<T, U>` with `if constexpr` to inspect template types at compile time.",
+        prosCons: "Pros: Zero runtime cost, compile-time branch selection. Cons: Requires C++17 for if constexpr.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: true,
+        code: `// 70. Type Traits - Approach 1: std::is_same_v
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+void printTypeName(T val) {
+    if constexpr (is_same_v<T, int>) {
+        cout << "Integer: " << val << endl;
+    } else if constexpr (is_same_v<T, const char*>) {
+        cout << "C-String: " << val << endl;
+    } else {
+        cout << "Unknown type.\n";
+    }
+}
+
+int main() {
+    printTypeName(100);
+    printTypeName("Hello Traits");
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if constexpr (is_same_v<T, int>)', constructType: 'Condition & Branch', title: 'Compile-Time Type Comparison', explanation: '`is_same_v<T, int>` evaluates at compile time. `if constexpr` discards the false branch during compilation.', keyDetails: [{ variableOrConstruct: 'is_same_v<T, int>', role: 'Compile-time type equality check', whyThisWay: 'Determines type identity at compile time' }] },
+          { lineNum: 2, codeSnippet: 'printTypeName(100);', constructType: 'Function Signature', title: 'Instantiate Int Branch', explanation: 'Instantiates template function for `T = int`.', keyDetails: [{ variableOrConstruct: 'int instantiation', role: 'Template instance', whyThisWay: 'Generates specialized integer print code' }] },
+          { lineNum: 3, codeSnippet: 'printTypeName("Hello Traits");', constructType: 'Function Signature', title: 'Instantiate C-String Branch', explanation: 'Instantiates template function for `T = const char*`.', keyDetails: [{ variableOrConstruct: 'const char* instantiation', role: 'Template instance', whyThisWay: 'Generates specialized string print code' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: SFINAE Function Selection using std::enable_if_t (FREE)", category: "FREE / SFINAE",
+        description: "Uses SFINAE (`std::enable_if_t`) to restrict template function instantiation to numeric types.",
+        prosCons: "Pros: Restricts template overloads cleanly. Cons: SFINAE template syntax complexity.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: true,
+        code: `// 70. Type Traits - Approach 2: SFINAE enable_if
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T, typename = enable_if_t<is_arithmetic_v<T>>>
+T addNumbers(T a, T b) {
+    return a + b;
+}
+
+int main() {
+    cout << "Int Add: " << addNumbers(10, 20) << endl;     // 30
+    cout << "Double Add: " << addNumbers(3.5, 2.5) << endl; // 6.0
+    // addNumbers("a", "b"); // Compile Error: SFINAE disables non-numeric types!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T, typename = enable_if_t<is_arithmetic_v<T>>>', constructType: 'Variable & Initializer', title: 'SFINAE Template Restriction', explanation: 'Uses `std::enable_if_t<is_arithmetic_v<T>>` to allow compilation only if `T` is an arithmetic type (int, float, etc.).', keyDetails: [{ variableOrConstruct: 'enable_if_t<is_arithmetic_v<T>>', role: 'SFINAE guard', whyThisWay: 'Substitutes template parameter only when condition is true' }] },
+          { lineNum: 2, codeSnippet: 'T addNumbers(T a, T b) { return a + b; }', constructType: 'Function Signature', title: 'Numeric Addition Template', explanation: 'Performs addition on validated numeric types.', keyDetails: [{ variableOrConstruct: 'a + b', role: 'Numeric addition', whyThisWay: 'Safe arithmetic operation guaranteed by type trait' }] },
+          { lineNum: 3, codeSnippet: 'addNumbers(10, 20)', constructType: 'Function Signature', title: 'Execute Arithmetic Add', explanation: 'Compiles for integer arguments 10 and 20.', keyDetails: [{ variableOrConstruct: 'int call', role: 'Valid instantiation', whyThisWay: 'Passes SFINAE type check' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Compile-Time Conditional Types using std::conditional_t", category: "Conditional Types",
+        description: "Uses `std::conditional_t<B, T, F>` to select between two types at compile time based on a boolean condition.",
+        prosCons: "Pros: Selects optimal data types at compile time. Cons: Metaprogramming syntax.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 70. Type Traits - Approach 3: std::conditional_t
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+// Choose 64-bit int for large precision, 32-bit int otherwise
+template<bool LargePrecision>
+using FastInt = conditional_t<LargePrecision, long long, int>;
+
+int main() {
+    FastInt<true> bigNum = 9000000000000000000LL;
+    FastInt<false> smallNum = 42;
+
+    cout << "BigNum bytes: " << sizeof(bigNum) << endl;     // 8 bytes
+    cout << "SmallNum bytes: " << sizeof(smallNum) << endl; // 4 bytes
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using FastInt = conditional_t<LargePrecision, long long, int>;', constructType: 'Variable & Initializer', title: 'Compile-Time Type Selector', explanation: 'Selects `long long` if `LargePrecision` is true, or `int` if false at compile time.', keyDetails: [{ variableOrConstruct: 'conditional_t<B, T, F>', role: 'Compile-time type ternary', whyThisWay: 'Selects data representation at compile time' }] },
+          { lineNum: 2, codeSnippet: 'FastInt<true> bigNum = 9000000000000000000LL;', constructType: 'Variable & Initializer', title: 'Instantiate 64-bit Integer Type', explanation: 'Instantiates `bigNum` as `long long` (8 bytes).', keyDetails: [{ variableOrConstruct: 'FastInt<true>', role: '64-bit type alias', whyThisWay: 'Allocates 8-bit precision integer' }] },
+          { lineNum: 3, codeSnippet: 'FastInt<false> smallNum = 42;', constructType: 'Variable & Initializer', title: 'Instantiate 32-bit Integer Type', explanation: 'Instantiates `smallNum` as `int` (4 bytes).', keyDetails: [{ variableOrConstruct: 'FastInt<false>', role: '32-bit type alias', whyThisWay: 'Allocates 4-bit integer' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Type Inspection Categories (is_integral & is_floating_point)", category: "Category Traits",
+        description: "Categorizes template parameters into integral, floating-point, or pointer categories at compile time.",
+        prosCons: "Pros: Detailed type classification. Cons: Compile-time specialization overhead.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 70. Type Traits - Approach 4: Category Traits
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+void classifyType() {
+    if constexpr (is_integral_v<T>) {
+        cout << "Integral type." << endl;
+    } else if constexpr (is_floating_point_v<T>) {
+        cout << "Floating point type." << endl;
+    } else if constexpr (is_pointer_v<T>) {
+        cout << "Pointer type." << endl;
+    } else {
+        cout << "Other object type." << endl;
+    }
+}
+
+int main() {
+    classifyType<int>();     // Integral
+    classifyType<float>();   // Floating point
+    classifyType<int*>();    // Pointer
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if constexpr (is_integral_v<T>)', constructType: 'Condition & Branch', title: 'Integral Trait Check', explanation: 'Checks if type T is an integral type (int, long, char, bool, etc.).', keyDetails: [{ variableOrConstruct: 'is_integral_v<T>', role: 'Integral trait checker', whyThisWay: 'Validates integral type category' }] },
+          { lineNum: 2, codeSnippet: 'else if constexpr (is_floating_point_v<T>)', constructType: 'Condition & Branch', title: 'Floating Point Trait Check', explanation: 'Checks if type T is float, double, or long double.', keyDetails: [{ variableOrConstruct: 'is_floating_point_v<T>', role: 'Floating point checker', whyThisWay: 'Validates floating point category' }] },
+          { lineNum: 3, codeSnippet: 'else if constexpr (is_pointer_v<T>)', constructType: 'Condition & Branch', title: 'Pointer Trait Check', explanation: 'Checks if type T is a pointer type.', keyDetails: [{ variableOrConstruct: 'is_pointer_v<T>', role: 'Pointer checker', whyThisWay: 'Validates raw pointer category' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Pointer & Reference Trait Transformations", category: "Trait Transformations",
+        description: "Uses `std::remove_pointer_t` and `std::remove_reference_t` to strip pointer and reference qualifiers.",
+        prosCons: "Pros: Strips qualifiers for generic template processing. Cons: Multiple transformation traits.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 70. Type Traits - Approach 5: Trait Transformations
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+void printUnderlyingType() {
+    using RawType = remove_pointer_t<remove_reference_t<T>>;
+    cout << "Raw type matches int: " << boolalpha << is_same_v<RawType, int> << endl;
+}
+
+int main() {
+    printUnderlyingType<int*>();   // True (strips pointer)
+    printUnderlyingType<int&>();   // True (strips reference)
+    printUnderlyingType<int>();    // True
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using RawType = remove_pointer_t<remove_reference_t<T>>;', constructType: 'Variable & Initializer', title: 'Strip Reference & Pointer Qualifiers', explanation: 'Applies `remove_reference_t` and `remove_pointer_t` to extract underlying raw scalar type.', keyDetails: [{ variableOrConstruct: 'remove_pointer_t', role: 'Type modifier stripper', whyThisWay: 'Unwraps raw underlying type' }] },
+          { lineNum: 2, codeSnippet: 'is_same_v<RawType, int>', constructType: 'Condition & Branch', title: 'Compare Stripped Raw Type', explanation: 'Compares stripped type against `int`.', keyDetails: [{ variableOrConstruct: 'is_same_v', role: 'Raw type equality check', whyThisWay: 'Verifies underlying type is int' }] },
+          { lineNum: 3, codeSnippet: 'printUnderlyingType<int*>();', constructType: 'Function Signature', title: 'Instantiate for Pointer Type', explanation: 'Instantiates for `int*`; successfully strips `*` pointer qualifier.', keyDetails: [{ variableOrConstruct: 'int* instantiation', role: 'Pointer test', whyThisWay: 'Demonstrates pointer modifier removal' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Type Decay Trait Transformation (std::decay_t)", category: "Decay Trait",
+        description: "Uses `std::decay_t<T>` to simulate pass-by-value type decay (converts array to pointer, removes const/ref).",
+        prosCons: "Pros: Standard decay rule simulation. Cons: Converts arrays to raw pointers.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 70. Type Traits - Approach 6: std::decay_t
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+void checkDecay() {
+    using Decayed = decay_t<T>;
+    cout << "Is int*: " << boolalpha << is_same_v<Decayed, int*> << endl;
+}
+
+int main() {
+    checkDecay<int[10]>();       // True (array decays to int*)
+    checkDecay<const int&>();    // False (const int& decays to int, not int*)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using Decayed = decay_t<T>;', constructType: 'Variable & Initializer', title: 'Apply Pass-by-Value Type Decay', explanation: '`decay_t<T>` applies pass-by-value conversions (converts array `int[10]` to `int*`, removes const/reference).', keyDetails: [{ variableOrConstruct: 'decay_t<T>', role: 'Type decay transformer', whyThisWay: 'Simulates exact C++ type decay rules' }] },
+          { lineNum: 2, codeSnippet: 'checkDecay<int[10]>();', constructType: 'Function Signature', title: 'Array Decay Instantiation', explanation: 'Instantiates for `int[10]`, which decays into `int*`.', keyDetails: [{ variableOrConstruct: 'int[10] decay', role: 'Array decay test', whyThisWay: 'Demonstrates array-to-pointer decay' }] },
+          { lineNum: 3, codeSnippet: 'is_same_v<Decayed, int*>', constructType: 'Condition & Branch', title: 'Verify Decayed Pointer Type', explanation: 'Verifies decayed type matches `int*`.', keyDetails: [{ variableOrConstruct: 'is_same_v', role: 'Decayed type equality check', whyThisWay: 'Confirms type decay' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Custom Type Trait Definition (is_container)", category: "Custom Traits",
+        description: "Defines a custom compile-time type trait `is_container<T>` using SFINAE / void_t.",
+        prosCons: "Pros: Extends type traits to custom container detection. Cons: Advanced void_t metaprogramming.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 70. Type Traits - Approach 7: Custom Trait
+#include <iostream>
+#include <vector>
+#include <type_traits>
+using namespace std;
+
+template<typename T, typename = void>
+struct is_container : false_type {};
+
+template<typename T>
+struct is_container<T, void_t<typename T::iterator, typename T::value_type>> : true_type {};
+
+template<typename T>
+constexpr bool is_container_v = is_container<T>::value;
+
+int main() {
+    cout << "vector<int> is container: " << boolalpha << is_container_v<vector<int>> << endl; // true
+    cout << "int is container: " << is_container_v<int> << endl;                               // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'template<typename T, typename = void> struct is_container : false_type {};', constructType: 'Variable & Initializer', title: 'Custom Trait Primary Template', explanation: 'Defines primary template defaulting to `false_type`.', keyDetails: [{ variableOrConstruct: 'false_type', role: 'Default fallback', whyThisWay: 'Default assumption is that T is not a container' }] },
+          { lineNum: 2, codeSnippet: 'struct is_container<T, void_t<typename T::iterator, typename T::value_type>> : true_type {};', constructType: 'Variable & Initializer', title: 'Specialization for Types with iterator & value_type', explanation: 'Specialization using `void_t`. If `T::iterator` and `T::value_type` exist, specialization succeeds and inherits `true_type`.', keyDetails: [{ variableOrConstruct: 'void_t SFINAE', role: 'Member type existence detector', whyThisWay: 'Detects presence of container member typedefs' }] },
+          { lineNum: 3, codeSnippet: 'constexpr bool is_container_v = is_container<T>::value;', constructType: 'Variable & Initializer', title: 'Helper Variable Template Alias', explanation: 'Defines `_v` variable template alias.', keyDetails: [{ variableOrConstruct: 'is_container_v', role: 'Variable template alias', whyThisWay: 'Clean syntax helper for custom trait value' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Const & Volatile Trait Modifiers", category: "CV Modifiers",
+        description: "Uses `std::add_const_t`, `std::remove_const_t`, and `std::is_const_v` to manipulate const qualifiers.",
+        prosCons: "Pros: Precise const modifier control. Cons: Const reference interaction rules.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 70. Type Traits - Approach 8: CV Modifiers
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+void inspectConst() {
+    using ConstT = add_const_t<T>;
+    using NonConstT = remove_const_t<T>;
+
+    cout << "Original is const: " << boolalpha << is_const_v<T> << endl;
+    cout << "ConstT is const:   " << is_const_v<ConstT> << endl;
+    cout << "NonConstT is const: " << is_const_v<NonConstT> << endl;
+}
+
+int main() {
+    inspectConst<const int>();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using ConstT = add_const_t<T>;', constructType: 'Variable & Initializer', title: 'Add Const Qualifier', explanation: 'Applies `const` qualifier to type T.', keyDetails: [{ variableOrConstruct: 'add_const_t', role: 'Const adder', whyThisWay: 'Adds const modifier at compile time' }] },
+          { lineNum: 2, codeSnippet: 'using NonConstT = remove_const_t<T>;', constructType: 'Variable & Initializer', title: 'Remove Const Qualifier', explanation: 'Removes `const` qualifier from type T.', keyDetails: [{ variableOrConstruct: 'remove_const_t', role: 'Const remover', whyThisWay: 'Strips const modifier at compile time' }] },
+          { lineNum: 3, codeSnippet: 'is_const_v<T>', constructType: 'Condition & Branch', title: 'Check Const Trait Status', explanation: 'Evaluates whether type T is const-qualified.', keyDetails: [{ variableOrConstruct: 'is_const_v', role: 'Const checker', whyThisWay: 'Tests if type contains const modifier' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Function Return Type Deduction Traits (std::invoke_result_t)", category: "Return Type Traits",
+        description: "Deduces return type of a callable function or lambda using `std::invoke_result_t`.",
+        prosCons: "Pros: Deduce exact return type of callable objects. Cons: Requires C++17 invoke_result_t.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 70. Type Traits - Approach 9: invoke_result_t
+#include <iostream>
+#include <type_traits>
+#include <string>
+using namespace std;
+
+string computeString(int x) { return to_string(x * 2); }
+
+template<typename Func, typename Arg>
+void printReturnType(Func f, Arg arg) {
+    using RetType = invoke_result_t<Func, Arg>;
+    cout << "Return type matches string: " << boolalpha << is_same_v<RetType, string> << endl;
+}
+
+int main() {
+    printReturnType(computeString, 21);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using RetType = invoke_result_t<Func, Arg>;', constructType: 'Variable & Initializer', title: 'Deduce Callable Return Type', explanation: 'Deduces return type of callable `Func` when invoked with argument `Arg`.', keyDetails: [{ variableOrConstruct: 'invoke_result_t', role: 'Return type deductor', whyThisWay: 'Inspects return type of arbitrary callable at compile time' }] },
+          { lineNum: 2, codeSnippet: 'is_same_v<RetType, string>', constructType: 'Condition & Branch', title: 'Compare Deducted Return Type', explanation: 'Compares deduced return type against `std::string`.', keyDetails: [{ variableOrConstruct: 'is_same_v', role: 'Return type equality check', whyThisWay: 'Validates deduced return type' }] },
+          { lineNum: 3, codeSnippet: 'printReturnType(computeString, 21);', constructType: 'Function Signature', title: 'Execute Return Type Inspection', explanation: 'Inspects return type of `computeString(int)`.', keyDetails: [{ variableOrConstruct: 'printReturnType', role: 'Deduction test', whyThisWay: 'Demonstrates invoke_result_t deduction' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Compile-Time Metaprogramming Assertion Suite", category: "Compile Assertions",
+        description: "Builds a compile-time type validation suite using `static_assert` and `<type_traits>`.",
+        prosCons: "Pros: Prevents invalid template instantiations at compile time. Cons: Produces build error if assertion fails.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 70. Type Traits - Approach 10: Static Assert Suite
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+template<typename T>
+class SafeBuffer {
+    static_assert(is_trivially_copyable_v<T>, "SafeBuffer requires T to be trivially copyable!");
+    static_assert(sizeof(T) <= 64, "SafeBuffer element size cannot exceed 64 bytes!");
+    T data[10];
+public:
+    void set(int idx, T val) { data[idx] = val; }
+    T get(int idx) const { return data[idx]; }
+};
+
+int main() {
+    SafeBuffer<int> buf;
+    buf.set(0, 42);
+    cout << "SafeBuffer int: " << buf.get(0) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'static_assert(is_trivially_copyable_v<T>, "Must be trivially copyable!");', constructType: 'Condition & Branch', title: 'Trivially Copyable Assertion', explanation: 'Asserts at compile time that type T can be copied via memcpy without custom copy constructors.', keyDetails: [{ variableOrConstruct: 'static_assert + is_trivially_copyable_v', role: 'Compile-time contract enforcer', whyThisWay: 'Fails compilation immediately if type violates memory contract' }] },
+          { lineNum: 2, codeSnippet: 'static_assert(sizeof(T) <= 64, "Size limit!");', constructType: 'Condition & Branch', title: 'Size Limit Assertion', explanation: 'Asserts that `sizeof(T)` does not exceed 64 bytes.', keyDetails: [{ variableOrConstruct: 'static_assert(sizeof <= 64)', role: 'Size constraint enforcer', whyThisWay: 'Enforces memory size bounds at compile time' }] },
+          { lineNum: 3, codeSnippet: 'SafeBuffer<int> buf;', constructType: 'Variable & Initializer', title: 'Instantiate Valid Buffer', explanation: 'Instantiates SafeBuffer for `int`, which satisfies both assertions cleanly.', keyDetails: [{ variableOrConstruct: 'SafeBuffer<int>', role: 'Valid instantiation', whyThisWay: 'Passes all compile-time assertions' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -21661,6 +23633,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "med_backtracking") return getProblem63Details();
   if (id === "med_bit_manipulation") return getProblem64Details();
   if (id === "med_custom_alloc") return getProblem65Details();
+  if (id === "med_optional") return getProblem66Details();
+  if (id === "med_variant") return getProblem67Details();
+  if (id === "med_any") return getProblem68Details();
+  if (id === "med_string_view") return getProblem69Details();
+  if (id === "med_type_traits") return getProblem70Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
