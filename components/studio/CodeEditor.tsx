@@ -393,49 +393,6 @@ export default function CodeEditor() {
 
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           
-          {/* Paste */}
-          <button title="Paste from clipboard" onClick={async () => {
-            try {
-              const text = await navigator.clipboard.readText();
-              if (text && editorRef.current) { editorRef.current.setValue(text); setCode(text); }
-            } catch { alert('Allow clipboard access.'); }
-          }} style={{
-            padding: '3px 9px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
-            background: T.uiSurface, color: T.uiTextMuted, cursor: 'pointer',
-            fontSize: 10, fontFamily: "'JetBrains Mono'"
-          }}>📋 Paste</button>
-
-          {/* Copy */}
-          <button title="Copy all code" onClick={() => {
-            const val = editorRef.current?.getValue() ?? code;
-            navigator.clipboard.writeText(val);
-          }} style={{
-            padding: '3px 9px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
-            background: T.uiSurface, color: T.uiTextMuted, cursor: 'pointer',
-            fontSize: 10, fontFamily: "'JetBrains Mono'"
-          }}>⎘ Copy</button>
-
-          {/* Format */}
-          <button title="Format code" onClick={() => {
-            editorRef.current?.getAction('editor.action.formatDocument')?.run();
-          }} style={{
-            padding: '3px 9px', borderRadius: 6, border: `1px solid ${T.uiBorder}`,
-            background: T.uiSurface, color: T.uiTextMuted, cursor: 'pointer',
-            fontSize: 10, fontFamily: "'JetBrains Mono'"
-          }}>✦ Format</button>
-
-          {/* Clear */}
-          <button title="Clear editor" onClick={() => {
-            editorRef.current?.setValue('');
-            setCode('');
-          }} style={{
-            padding: '3px 9px', borderRadius: 6, border: `1px solid rgba(239,68,68,.25)`,
-            background: 'rgba(239,68,68,.06)', color: '#ef4444', cursor: 'pointer',
-            fontSize: 10, fontFamily: "'JetBrains Mono'"
-          }}>✕ Clear</button>
-
-          <div style={{ width: 1, height: 16, background: T.uiBorder }} />
-
           {/* SAVE OPTION */}
           <button onClick={handleSaveProject} style={{
             padding: '4px 10px', borderRadius: 6, 
