@@ -546,6 +546,60 @@ export function getChallengeDetails(id: string): ChallengeDetails {
       acceptanceRate: "68.1%",
       totalAccepted: "5,900,000"
     },
+    med_revlist: {
+      title: "Reverse Linked List",
+      objective: "Given the head of a singly linked list, reverse the list so the last node becomes the first, the second-to-last becomes the second, and so on. Return the new head of the reversed list.",
+      description: "Traverse the list while maintaining three pointers: prev (initially nullptr), curr (initially head), and nextTemp. At each step, save curr->next into nextTemp, point curr->next to prev, advance prev to curr, then advance curr to nextTemp. When curr becomes nullptr, prev is the new head.",
+      inputDesc: "Line 1: N (number of nodes). Line 2: N space-separated integers representing node values from head to tail.",
+      outputDesc: "N space-separated integers representing the reversed list from new head to new tail.",
+      takeaways: [
+        "Iterative reversal uses O(1) space with three pointers: prev, curr, nextTemp",
+        "Recursive reversal uses O(N) call stack space but reads more elegantly",
+        "Edge cases: empty list (head == nullptr) and single-node list (no reversal needed)"
+      ],
+      examples: [
+        { id: 1, input: "head = [1, 2, 3, 4, 5]", output: "[5, 4, 3, 2, 1]", explanation: "Each pointer is reversed: 5->4->3->2->1->nullptr." },
+        { id: 2, input: "head = [1, 2]", output: "[2, 1]", explanation: "Two-node list: 2->1->nullptr after one swap iteration." },
+        { id: 3, input: "head = [1]", output: "[1]", explanation: "Single node list has nothing to reverse. Return head as-is." },
+        { id: 4, input: "head = []", output: "[]", explanation: "Empty list (head is nullptr). Return nullptr." }
+      ],
+      constraints: [
+        "0 <= N <= 5000",
+        "-5000 <= Node.val <= 5000",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Amazon", "Microsoft", "Bloomberg", "Adobe", "Samsung"],
+      acceptanceRate: "75.3%",
+      totalAccepted: "6,200,000"
+    },
+    med_brackets: {
+      title: "Valid Parentheses",
+      objective: "Given a string s containing only the characters '(', ')', '{', '}', '[', and ']', determine if the input string is valid. A string is valid if every open bracket is closed by the same type of bracket in the correct order.",
+      description: "Use a stack data structure. For each character: if it is an opening bracket, push it onto the stack. If it is a closing bracket, check that the stack is not empty and that the top of the stack is the matching opening bracket — then pop. After processing all characters, the string is valid only if the stack is empty.",
+      inputDesc: "Line 1: a single string s containing only characters from the set { '(', ')', '{', '}', '[', ']' }.",
+      outputDesc: "A single line: 1 if the string has valid bracket nesting, 0 otherwise.",
+      takeaways: [
+        "Stack-based matching: push openers, pop and compare on closers",
+        "Mismatched closer or non-empty stack at end both mean invalid",
+        "O(N) time single pass, O(N) worst-case stack space for all-openers input"
+      ],
+      examples: [
+        { id: 1, input: "s = \"()\"", output: "1 (true)", explanation: "Single pair of parentheses. ( pushed, ) matches top and pops. Stack empty -> valid." },
+        { id: 2, input: "s = \"()[]{}\"", output: "1 (true)", explanation: "Three consecutive matching pairs. Each closer matches its opener. Stack empties -> valid." },
+        { id: 3, input: "s = \"(]\"", output: "0 (false)", explanation: "( is pushed, then ] does not match ( on the stack top. Mismatch -> invalid." },
+        { id: 4, input: "s = \"([{}])\"", output: "1 (true)", explanation: "Nested brackets: [ inside (, { inside [. Each closer matches in correct LIFO order." }
+      ],
+      constraints: [
+        "1 <= s.length <= 10^4",
+        "s consists of parentheses only: '(){}[]'",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Google", "Amazon", "Meta", "Apple", "Uber"],
+      acceptanceRate: "42.8%",
+      totalAccepted: "8,400,000"
+    },
     med_binsearch: {
       title: "Binary Search",
       objective: "Given an array of integers nums sorted in ascending order and a target value, write a function to search target in nums. If target exists, return its index. Otherwise, return -1.",
@@ -571,6 +625,33 @@ export function getChallengeDetails(id: string): ChallengeDetails {
       companies: ["Google", "Amazon", "Meta", "NVIDIA"],
       acceptanceRate: "57.8%",
       totalAccepted: "4,200,000"
+    },
+    med_fibonacci: {
+      title: "Fibonacci Memoization",
+      objective: "Given an integer n (0-indexed), compute the nth Fibonacci number. The Fibonacci sequence is defined as: F(0) = 0, F(1) = 1, and F(n) = F(n-1) + F(n-2) for n >= 2.",
+      description: "Use bottom-up dynamic programming (tabulation) to compute F(n) in O(N) time and O(N) space. Allocate a memo array of size n+1, initialize memo[0] = 0 and memo[1] = 1, then iterate from 2 to n filling memo[i] = memo[i-1] + memo[i-2]. Return memo[n].",
+      inputDesc: "Line 1: a single non-negative integer n (0 <= n <= 45).",
+      outputDesc: "A single integer: the nth Fibonacci number F(n).",
+      takeaways: [
+        "Naive recursion is O(2^N) — memoization or tabulation reduces it to O(N)",
+        "Bottom-up tabulation avoids recursion stack overflow for large n",
+        "Space can be optimized to O(1) by keeping only the last two values"
+      ],
+      examples: [
+        { id: 1, input: "n = 0", output: "0", explanation: "F(0) = 0 by definition." },
+        { id: 2, input: "n = 1", output: "1", explanation: "F(1) = 1 by definition." },
+        { id: 3, input: "n = 10", output: "55", explanation: "F(10) = 55. Sequence: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55." },
+        { id: 4, input: "n = 30", output: "832040", explanation: "F(30) = 832040. Tabulation computes this in exactly 29 additions." }
+      ],
+      constraints: [
+        "0 <= n <= 45",
+        "Answer fits in a 32-bit signed integer for n <= 45",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Google", "Microsoft", "Goldman Sachs", "JPMorgan", "Qualcomm"],
+      acceptanceRate: "71.6%",
+      totalAccepted: "3,500,000"
     }
   };
 
