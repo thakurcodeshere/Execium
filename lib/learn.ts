@@ -23567,6 +23567,2001 @@ int main() {
   };
 }
 
+
+export function getProblem71Details(): LearnModule {
+  return {
+    id: "med_threads_basic",
+    title: "71. Multithreading (std::thread)",
+    category: "Concurrency",
+    difficulty: "medium",
+    shortDesc: "Spawning worker threads, join(), and detach() lifecycle.",
+    fullCode: `// 71. Multithreading - Approach 1: Worker Thread Creation & Joining
+#include <iostream>
+#include <thread>
+using namespace std;
+
+void workerTask(int id) {
+    cout << "Worker thread " << id << " executing." << endl;
+}
+
+int main() {
+    thread t1(workerTask, 1);
+    thread t2(workerTask, 2);
+
+    t1.join(); // Waits for t1 to complete
+    t2.join(); // Waits for t2 to complete
+
+    cout << "Main thread finished." << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "71. Multithreading (std::thread)",
+      objective: "Master C++11 multithreading fundamentals with `std::thread`: spawning threads with functions/lambdas/member functions, `join()` vs `detach()`, passing arguments by value vs reference (`std::ref`), checking `joinable()`, inspecting `hardware_concurrency()`, thread IDs, and thread sleep.",
+      description: "Implement **Multithreading (std::thread)** (Concurrency). Spawn and manage parallel worker threads to execute tasks concurrently on modern multi-core processors.",
+      inputDesc: "Worker task parameters, thread counts, array chunks, or execution delay durations.",
+      outputDesc: "Concurrent task outputs, parallel array computation results, or thread execution logs.",
+      takeaways: [
+        "A `std::thread` object MUST be either joined (`t.join()`) or detached (`t.detach()`) before destruction, otherwise `std::terminate()` is called",
+        "Pass arguments by reference to threads using `std::ref(arg)` because thread arguments are copied by default",
+        "`t.joinable()` checks whether a thread object represents an active thread of execution that can be joined",
+        "`std::thread::hardware_concurrency()` returns the number of concurrent hardware thread contexts available on the CPU"
+      ],
+      examples: [
+        { id: 1, input: "Spawn 2 threads running workerTask(1) & workerTask(2)", output: "Worker thread 1 executing -> Worker thread 2 executing -> Main thread finished", explanation: "Worker threads run concurrently; main thread calls join() to wait for both." },
+        { id: 2, input: "std::thread t(task); t.detach();", output: "Background task runs independently", explanation: "t.detach() separates thread execution from object handle." },
+        { id: 3, input: "Pass reference variable x using std::ref(x) to thread", output: "x mutated by worker thread", explanation: "std::ref wrapper passes actual reference into thread function." }
+      ],
+      constraints: ["Header `<thread>` requires C++11 or higher and system thread library linking (`-pthread`)."],
+      companies: ["NVIDIA", "Microsoft", "Google", "Amazon", "Apple"],
+      acceptanceRate: "91.8%",
+      totalAccepted: "3,250,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Worker Thread Creation & Joining (FREE)", category: "FREE / Core Concurrency",
+        description: "Spawns 2 parallel worker threads using std::thread and joins them to main thread.",
+        prosCons: "Pros: Direct parallel execution control. Cons: Calling join() blocks main thread until worker finishes.",
+        timeComplexity: "O(1) spawn overhead", spaceComplexity: "O(1) thread stack", isFree: true,
+        code: `// 71. Multithreading - Approach 1: Basic Threads
+#include <iostream>
+#include <thread>
+using namespace std;
+
+void workerTask(int id) {
+    cout << "Worker thread " << id << " executing.\n";
+}
+
+int main() {
+    thread t1(workerTask, 1);
+    thread t2(workerTask, 2);
+
+    t1.join();
+    t2.join();
+    cout << "Main thread finished.\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'thread t1(workerTask, 1);', constructType: 'Variable & Initializer', title: 'Spawn Worker Thread t1', explanation: 'Creates and launches a new thread `t1` executing `workerTask(1)` concurrently.', keyDetails: [{ variableOrConstruct: 'thread t1(...)', role: 'Thread launcher', whyThisWay: 'Spawns OS worker thread context' }] },
+          { lineNum: 2, codeSnippet: 't1.join(); t2.join();', constructType: 'Function Signature', title: 'Join Threads to Main', explanation: 'Blocks caller (main thread) until `t1` and `t2` complete execution.', keyDetails: [{ variableOrConstruct: 'join()', role: 'Synchronization join point', whyThisWay: 'Mandatory cleanup to prevent std::terminate on thread object destruction' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Main thread finished.";', constructType: 'Function Signature', title: 'Main Continuation', explanation: 'Runs after all joined worker threads have finished.', keyDetails: [{ variableOrConstruct: 'Main continuation', role: 'Sequential completion', whyThisWay: 'Guaranteed execution after threads finish' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Detached Background Threads (FREE)", category: "FREE / Detached Threads",
+        description: "Detaches worker threads using `.detach()` to run independently in the background.",
+        prosCons: "Pros: Non-blocking background task. Cons: Main process termination destroys detached threads.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 71. Multithreading - Approach 2: Detached Thread
+#include <iostream>
+#include <thread>
+#include <chrono>
+using namespace std;
+
+void backgroundDaemon() {
+    this_thread::sleep_for(chrono::milliseconds(50));
+    cout << "Daemon task finished in background.\n";
+}
+
+int main() {
+    thread t(backgroundDaemon);
+    if (t.joinable()) {
+        t.detach(); // Separates thread from handle!
+    }
+    cout << "Main thread continuing without waiting...\n";
+    this_thread::sleep_for(chrono::milliseconds(100)); // Keep main alive briefly
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (t.joinable()) t.detach();', constructType: 'Condition & Branch', title: 'Check Joinable & Detach', explanation: 'Checks `t.joinable()` then calls `t.detach()`, allowing thread to run independently in OS background.', keyDetails: [{ variableOrConstruct: 't.detach()', role: 'Detachment call', whyThisWay: 'Releases thread handle ownership' }] },
+          { lineNum: 2, codeSnippet: 'this_thread::sleep_for(chrono::milliseconds(50));', constructType: 'Function Signature', title: 'Thread Sleep Interruption', explanation: 'Puts thread to sleep for 50 milliseconds.', keyDetails: [{ variableOrConstruct: 'sleep_for', role: 'Timed thread pause', whyThisWay: 'Simulates background IO or computation time' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Main thread continuing...";', constructType: 'Function Signature', title: 'Non-Blocking Main Execution', explanation: 'Main thread proceeds immediately without waiting for daemon to complete.', keyDetails: [{ variableOrConstruct: 'Non-blocking execution', role: 'Asynchronous flow', whyThisWay: 'Demonstrates detached thread independence' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Passing Arguments by Reference (std::ref) to Threads", category: "Argument Passing",
+        description: "Demonstrates passing reference variables to worker threads using `std::ref` to allow threads to mutate caller variables.",
+        prosCons: "Pros: Direct variable mutation by thread. Cons: Requires synchronization to prevent data races.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 71. Multithreading - Approach 3: std::ref Argument Passing
+#include <iostream>
+#include <thread>
+#include <functional>
+using namespace std;
+
+void incrementCounter(int& val, int amount) {
+    val += amount;
+}
+
+int main() {
+    int counter = 0;
+    thread t(incrementCounter, ref(counter), 5);
+    t.join();
+
+    cout << "Mutated Counter: " << counter << endl; // 5
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'thread t(incrementCounter, ref(counter), 5);', constructType: 'Variable & Initializer', title: 'Pass Reference via std::ref', explanation: 'Wraps `counter` with `std::ref()` because std::thread constructor copies arguments by value by default.', keyDetails: [{ variableOrConstruct: 'std::ref(counter)', role: 'Reference wrapper', whyThisWay: 'Forces std::thread to pass variable by reference instead of value copy' }] },
+          { lineNum: 2, codeSnippet: 'val += amount;', constructType: 'Variable & Initializer', title: 'In-Thread Reference Mutation', explanation: 'Worker thread mutates caller variable directly.', keyDetails: [{ variableOrConstruct: 'val += amount', role: 'Variable mutation', whyThisWay: 'Modifies original variable passed by std::ref' }] },
+          { lineNum: 3, codeSnippet: 't.join(); cout << counter;', constructType: 'Function Signature', title: 'Join & Read Mutated Value', explanation: 'Main thread joins worker and reads updated counter value 5.', keyDetails: [{ variableOrConstruct: 'counter', role: 'Updated variable', whyThisWay: 'Guarantees thread completed mutation before reading' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Launching Member Functions in Worker Threads", category: "Member Functions",
+        description: "Launches class member functions in worker threads using `&Class::method` and object pointer `&obj`.",
+        prosCons: "Pros: OO thread task dispatch. Cons: Must ensure object lifetime outlives thread.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 71. Multithreading - Approach 4: Member Function Thread
+#include <iostream>
+#include <thread>
+#include <string>
+using namespace std;
+
+class Robot {
+public:
+    string name;
+    Robot(string n) : name(n) {}
+    void performTask(int taskId) {
+        cout << "Robot " << name << " executing task " << taskId << endl;
+    }
+};
+
+int main() {
+    Robot r("Atlas");
+    thread t(&Robot::performTask, &r, 101);
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'thread t(&Robot::performTask, &r, 101);', constructType: 'Variable & Initializer', title: 'Member Function Thread Launch', explanation: 'Passes member function pointer `&Robot::performTask`, object instance pointer `&r`, and method argument `101`.', keyDetails: [{ variableOrConstruct: '&Robot::performTask, &r', role: 'Member function target', whyThisWay: 'C++ thread syntax for invoking member methods on object instances' }] },
+          { lineNum: 2, codeSnippet: 'void performTask(int taskId) { ... }', constructType: 'Function Signature', title: 'Member Method Execution', explanation: 'Executes method concurrently inside worker thread context.', keyDetails: [{ variableOrConstruct: 'performTask', role: 'Class method task', whyThisWay: 'Runs OO member logic inside thread' }] },
+          { lineNum: 3, codeSnippet: 't.join();', constructType: 'Function Signature', title: 'Join Member Thread', explanation: 'Waits for member method thread to finish execution.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Synchronization', whyThisWay: 'Ensures object `r` remains valid during execution' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Inspecting Hardware Concurrency & Thread IDs", category: "System Thread Info",
+        description: "Queries CPU core count using `std::thread::hardware_concurrency()` and thread IDs with `get_id()`.",
+        prosCons: "Pros: Adapts thread count dynamically to hardware CPU cores. Cons: May return 0 if undetectable.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 71. Multithreading - Approach 5: Hardware Info
+#include <iostream>
+#include <thread>
+using namespace std;
+
+void printId() {
+    cout << "Worker Thread ID: " << this_thread::get_id() << endl;
+}
+
+int main() {
+    unsigned int cores = thread::hardware_concurrency();
+    cout << "CPU Hardware Concurrency (Cores): " << cores << endl;
+    cout << "Main Thread ID: " << this_thread::get_id() << endl;
+
+    thread t(printId);
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'unsigned int cores = thread::hardware_concurrency();', constructType: 'Variable & Initializer', title: 'CPU Core Count Query', explanation: 'Queries system for number of available hardware CPU execution contexts.', keyDetails: [{ variableOrConstruct: 'hardware_concurrency()', role: 'CPU core query', whyThisWay: 'Allows thread pools to scale thread count to physical CPU cores' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Main Thread ID: " << this_thread::get_id();', constructType: 'Function Signature', title: 'Get Current Thread ID', explanation: '`this_thread::get_id()` returns unique identifier for current executing thread.', keyDetails: [{ variableOrConstruct: 'this_thread::get_id()', role: 'Thread ID query', whyThisWay: 'Identifies current thread context' }] },
+          { lineNum: 3, codeSnippet: 't.join();', constructType: 'Function Signature', title: 'Join Thread', explanation: 'Joins worker thread printing its ID.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Cleanup', whyThisWay: 'Cleans up worker thread' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Parallel Array Processing across Vector of Worker Threads", category: "Parallel Array",
+        description: "Processes large array in parallel by splitting chunks across a vector of `std::thread` instances.",
+        prosCons: "Pros: Scalable multi-core parallel speedup. Cons: Chunk boundary management.",
+        timeComplexity: "O(N / Cores)", spaceComplexity: "O(Cores) threads", isFree: false,
+        code: `// 71. Multithreading - Approach 6: Parallel Array Vector
+#include <iostream>
+#include <vector>
+#include <thread>
+#include <numeric>
+using namespace std;
+
+void sumChunk(const vector<int>& nums, int start, int end, long long& result) {
+    long long sum = 0;
+    for (int i = start; i < end; i++) sum += nums[i];
+    result = sum;
+}
+
+int main() {
+    int n = 100000;
+    vector<int> nums(n, 1);
+    int numThreads = 4;
+    vector<thread> threads;
+    vector<long long> results(numThreads, 0);
+
+    int chunkSize = n / numThreads;
+    for (int i = 0; i < numThreads; i++) {
+        int start = i * chunkSize;
+        int end = (i == numThreads - 1) ? n : (i + 1) * chunkSize;
+        threads.emplace_back(sumChunk, ref(nums), start, end, ref(results[i]));
+    }
+
+    for (auto& t : threads) t.join();
+
+    long long totalSum = accumulate(results.begin(), results.end(), 0LL);
+    cout << "Parallel Sum of 100,000 ones: " << totalSum << endl; // 100000
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'threads.emplace_back(sumChunk, ref(nums), start, end, ref(results[i]));', constructType: 'Variable & Initializer', title: 'Emplace Thread into Vector', explanation: 'Spawns and stores worker thread in vector to process chunk `[start..end]`.', keyDetails: [{ variableOrConstruct: 'threads.emplace_back(...)', role: 'Parallel thread spawner', whyThisWay: 'Manages array of worker threads dynamically' }] },
+          { lineNum: 2, codeSnippet: 'for (auto& t : threads) t.join();', constructType: 'Loop Construct', title: 'Join All Parallel Threads', explanation: 'Loops through thread vector and joins every worker thread.', keyDetails: [{ variableOrConstruct: 't.join() loop', role: 'Barrier synchronization', whyThisWay: 'Waits for all parallel chunk computations to complete' }] },
+          { lineNum: 3, codeSnippet: 'long long totalSum = accumulate(results.begin(), results.end(), 0LL);', constructType: 'Variable & Initializer', title: 'Aggregate Chunk Results', explanation: 'Sums chunk results accumulated by each thread.', keyDetails: [{ variableOrConstruct: 'accumulate(results...)', role: 'Map-reduce reduction', whyThisWay: 'Combines partial sums into final result' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Thread Sleep & Interruption Simulation", category: "Thread Timers",
+        description: "Uses `std::this_thread::sleep_for` and `chrono` durations to control thread execution timing.",
+        prosCons: "Pros: Precise timed thread pauses. Cons: Sleeping holds thread context.",
+        timeComplexity: "O(SleepDuration)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 71. Multithreading - Approach 7: Timed Sleep
+#include <iostream>
+#include <thread>
+#include <chrono>
+using namespace std;
+
+void heartbeatTask() {
+    for (int i = 1; i <= 3; i++) {
+        cout << "Heartbeat " << i << "...\n";
+        this_thread::sleep_for(chrono::milliseconds(20));
+    }
+}
+
+int main() {
+    thread t(heartbeatTask);
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'this_thread::sleep_for(chrono::milliseconds(20));', constructType: 'Function Signature', title: 'Timed Millisecond Sleep', explanation: 'Pauses current thread execution for 20 milliseconds.', keyDetails: [{ variableOrConstruct: 'sleep_for', role: 'Thread pause', whyThisWay: 'Relinquishes CPU slice for specified duration' }] },
+          { lineNum: 2, codeSnippet: 'for (int i = 1; i <= 3; i++)', constructType: 'Loop Construct', title: 'Periodic Loop Execution', explanation: 'Executes 3 timed heartbeat iterations.', keyDetails: [{ variableOrConstruct: '3-pass loop', role: 'Periodic task', whyThisWay: 'Simulates periodic background worker' }] },
+          { lineNum: 3, codeSnippet: 't.join();', constructType: 'Function Signature', title: 'Join Timed Thread', explanation: 'Waits for heartbeat thread to finish 3 iterations.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Thread join', whyThisWay: 'Cleans up thread handle' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Thread Safety with Movable std::thread Instances", category: "Movable Threads",
+        description: "Demonstrates that `std::thread` is non-copyable but move-assignable (`std::move`).",
+        prosCons: "Pros: Move semantics allow thread transfers across functions/containers. Cons: Cannot copy thread handle.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 71. Multithreading - Approach 8: Move Semantics
+#include <iostream>
+#include <thread>
+#include <utility>
+using namespace std;
+
+void worker() { cout << "Moved thread running.\n"; }
+
+thread createThread() {
+    thread t(worker);
+    return t; // Move returned implicitly!
+}
+
+int main() {
+    thread t1 = createThread();
+    thread t2 = move(t1); // Explicit move
+
+    if (!t1.joinable()) cout << "t1 is empty after move.\n";
+    if (t2.joinable()) t2.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'thread t2 = move(t1);', constructType: 'Variable & Initializer', title: 'Explicit Thread Move Assignment', explanation: 'Transfers active thread handle ownership from `t1` to `t2`. `t1` becomes empty/unjoinable.', keyDetails: [{ variableOrConstruct: 'move(t1)', role: 'Thread move transfer', whyThisWay: 'std::thread is move-only to enforce unique ownership of OS thread handle' }] },
+          { lineNum: 2, codeSnippet: 'if (!t1.joinable()) cout << "t1 is empty";', constructType: 'Condition & Branch', title: 'Verify Moved-From State', explanation: 'Verifies `t1` is no longer joinable after ownership was moved to `t2`.', keyDetails: [{ variableOrConstruct: '!t1.joinable()', role: 'Moved-from check', whyThisWay: 'Confirms ownership was transferred' }] },
+          { lineNum: 3, codeSnippet: 't2.join();', constructType: 'Function Signature', title: 'Join Target Thread Handle', explanation: 'Joins `t2` which now owns active worker thread.', keyDetails: [{ variableOrConstruct: 't2.join()', role: 'New owner join', whyThisWay: 'Cleanly joins thread through new owner handle' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Parallel Sum Matrix Computation", category: "2D Parallel Matrix",
+        description: "Computes total sum of 2D matrix rows concurrently using multi-row thread assignments.",
+        prosCons: "Pros: Speedup for matrix math operations. Cons: Thread overhead for small matrices.",
+        timeComplexity: "O(R * C / Cores)", spaceComplexity: "O(R) results", isFree: false,
+        code: `// 71. Multithreading - Approach 9: Parallel Matrix
+#include <iostream>
+#include <vector>
+#include <thread>
+#include <numeric>
+using namespace std;
+
+void sumRow(const vector<int>& row, long long& outSum) {
+    outSum = accumulate(row.begin(), row.end(), 0LL);
+}
+
+int main() {
+    vector<vector<int>> matrix = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12}
+    };
+    int r = matrix.size();
+    vector<thread> threads;
+    vector<long long> rowSums(r, 0);
+
+    for (int i = 0; i < r; i++) {
+        threads.emplace_back(sumRow, ref(matrix[i]), ref(rowSums[i]));
+    }
+    for (auto& t : threads) t.join();
+
+    long long total = accumulate(rowSums.begin(), rowSums.end(), 0LL);
+    cout << "Parallel Matrix Sum: " << total << endl; // 78
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'threads.emplace_back(sumRow, ref(matrix[i]), ref(rowSums[i]));', constructType: 'Variable & Initializer', title: 'Spawn Row Worker Thread', explanation: 'Spawns worker thread to compute sum of row `i` independently.', keyDetails: [{ variableOrConstruct: 'ref(matrix[i])', role: 'Row reference', whyThisWay: 'Passes row matrix slice to thread' }] },
+          { lineNum: 2, codeSnippet: 'for (auto& t : threads) t.join();', constructType: 'Loop Construct', title: 'Wait For All Row Threads', explanation: 'Waits for all row summation threads to complete.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Matrix barrier', whyThisWay: 'Synchronizes all row sum computations' }] },
+          { lineNum: 3, codeSnippet: 'long long total = accumulate(rowSums.begin(), rowSums.end(), 0LL);', constructType: 'Variable & Initializer', title: 'Total Matrix Sum Reduction', explanation: 'Sums individual row outputs into total matrix sum 78.', keyDetails: [{ variableOrConstruct: 'accumulate(rowSums...)', role: 'Total matrix sum', whyThisWay: 'Combines parallel row sums' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Exception Handling Boundaries inside Worker Threads", category: "Thread Exceptions",
+        description: "Demonstrates handling exceptions inside worker threads to prevent `std::terminate()`.",
+        prosCons: "Pros: Prevents worker thread exception crashes. Cons: Exceptions cannot cross thread boundary automatically.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 71. Multithreading - Approach 10: Thread Exceptions
+#include <iostream>
+#include <thread>
+#include <stdexcept>
+using namespace std;
+
+void safeWorker(int val) {
+    try {
+        if (val < 0) throw invalid_argument("Negative value not allowed!");
+        cout << "Processing value: " << val << endl;
+    } catch (const exception& e) {
+        cout << "Caught thread exception: " << e.what() << endl;
+    }
+}
+
+int main() {
+    thread t1(safeWorker, 10);
+    thread t2(safeWorker, -5);
+
+    t1.join();
+    t2.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'try { if (val < 0) throw invalid_argument(...); }', constructType: 'Condition & Branch', title: 'Internal Thread Exception Throw', explanation: 'Throws exception inside worker thread.', keyDetails: [{ variableOrConstruct: 'throw inside thread', role: 'Exception trigger', whyThisWay: 'Uncaught exceptions escaping a thread call std::terminate()' }] },
+          { lineNum: 2, codeSnippet: 'catch (const exception& e) { cout << e.what(); }', constructType: 'Condition & Branch', title: 'Internal Thread Catch Block', explanation: 'Catches exception inside thread to handle error safely without crashing process.', keyDetails: [{ variableOrConstruct: 'catch block inside thread', role: 'Exception handler', whyThisWay: 'Encloses thread task in try-catch to guarantee safety' }] },
+          { lineNum: 3, codeSnippet: 't1.join(); t2.join();', constructType: 'Function Signature', title: 'Clean Thread Join', explanation: 'Main thread joins both threads cleanly.', keyDetails: [{ variableOrConstruct: 'join()', role: 'Clean termination', whyThisWay: 'Completes execution safely' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem72Details(): LearnModule {
+  return {
+    id: "med_mutex_lock",
+    title: "72. Mutexes & Lock Guards",
+    category: "Concurrency",
+    difficulty: "medium",
+    shortDesc: "Preventing race conditions using std::mutex & std::lock_guard.",
+    fullCode: `// 72. Mutex - Approach 1: Thread-Safe Counter with lock_guard
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <vector>
+using namespace std;
+
+mutex counterMutex;
+int counter = 0;
+
+void incrementCounter() {
+    for (int i = 0; i < 10000; i++) {
+        lock_guard<mutex> lock(counterMutex); // RAII Lock
+        counter++;
+    }
+}
+
+int main() {
+    vector<thread> threads;
+    for (int i = 0; i < 10; i++) {
+        threads.emplace_back(incrementCounter);
+    }
+    for (auto& t : threads) t.join();
+
+    cout << "Final Counter (10 * 10,000): " << counter << endl; // 100000
+    return 0;
+}`,
+    problemStatement: {
+      title: "72. Mutexes & Lock Guards",
+      objective: "Master thread synchronization with C++ mutexes: `std::mutex`, RAII `std::lock_guard`, flexible `std::unique_lock`, C++17 multi-mutex `std::scoped_lock`, C++17 `std::shared_mutex` (readers-writer lock), `std::recursive_mutex`, deadlock prevention, and `std::condition_variable`.",
+      description: "Implement **Mutexes & Lock Guards** (Concurrency). Synchronize access to shared data structures across concurrent threads to eliminate data races and prevent memory corruption.",
+      inputDesc: "Concurrent read/write access requests, shared counters, or multi-mutex transactions.",
+      outputDesc: "Synchronized counter values, deadlock-free transaction execution, or readers-writer data access logs.",
+      takeaways: [
+        "A data race occurs when two threads access the same memory concurrently and at least one access is a write",
+        "Use RAII wrappers (`std::lock_guard` or `std::scoped_lock`) to lock mutexes automatically upon entry and unlock upon exit (even if exceptions occur)",
+        "`std::scoped_lock` (C++17) locks multiple mutexes simultaneously using a deadlock-avoidance algorithm",
+        "`std::shared_mutex` (C++17) allows multiple concurrent reader threads (`std::shared_lock`) or a single writer thread (`std::unique_lock`)"
+      ],
+      examples: [
+        { id: 1, input: "10 threads increment shared counter 10,000 times with lock_guard", output: "Final Counter: 100000", explanation: "lock_guard prevents data races; total count reaches exact 100,000." },
+        { id: 2, input: "Transfer money between account A & B using std::scoped_lock(mutA, mutB)", output: "Transfer completed safely without deadlock", explanation: "scoped_lock locks both mutexes simultaneously without deadlock risks." },
+        { id: 3, input: "Multiple readers with shared_lock, single writer with unique_lock", output: "Readers run in parallel, writer executes exclusively", explanation: "shared_mutex optimizes read-heavy data access patterns." }
+      ],
+      constraints: ["Never unlock an un-locked mutex. Maintain strict RAII lock lifetime scoping."],
+      companies: ["Google", "Amazon", "Microsoft", "Meta", "NVIDIA"],
+      acceptanceRate: "90.4%",
+      totalAccepted: "3,890,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Thread-Safe Counter with lock_guard (FREE)", category: "FREE / Core Synchronization",
+        description: "Synchronizes a shared counter across 10 concurrent worker threads using std::mutex and RAII std::lock_guard.",
+        prosCons: "Pros: RAII automatic unlocking prevents deadlocks. Cons: Lock contention overhead.",
+        timeComplexity: "O(N * Iterations)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 72. Mutex - Approach 1: lock_guard Counter
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <vector>
+using namespace std;
+
+mutex counterMutex;
+int counter = 0;
+
+void incrementCounter() {
+    for (int i = 0; i < 10000; i++) {
+        lock_guard<mutex> lock(counterMutex);
+        counter++;
+    }
+}
+
+int main() {
+    vector<thread> threads;
+    for (int i = 0; i < 10; i++) threads.emplace_back(incrementCounter);
+    for (auto& t : threads) t.join();
+    cout << "Counter: " << counter << endl; // 100000
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'lock_guard<mutex> lock(counterMutex);', constructType: 'Variable & Initializer', title: 'RAII Mutex Lock Acquisition', explanation: 'Acquires `counterMutex` upon construction. Unlocks mutex automatically when `lock` scope exits.', keyDetails: [{ variableOrConstruct: 'lock_guard<mutex>', role: 'RAII lock guard', whyThisWay: 'Guarantees mutex unlock even if exception occurs inside block' }] },
+          { lineNum: 2, codeSnippet: 'counter++;', constructType: 'Variable & Initializer', title: 'Synchronized Shared Access', explanation: 'Increments shared variable `counter` inside critical section.', keyDetails: [{ variableOrConstruct: 'counter++', role: 'Critical section write', whyThisWay: 'Only one thread can execute this line at a time' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Counter: " << counter;', constructType: 'Function Signature', title: 'Print Synchronized Final Count', explanation: 'Prints final counter value 100,000 without data races.', keyDetails: [{ variableOrConstruct: 'counter', role: 'Synchronized total', whyThisWay: 'Guaranteed exact count due to mutual exclusion' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Flexible Scope Locking with std::unique_lock (FREE)", category: "FREE / Flexible Locking",
+        description: "Uses std::unique_lock for flexible locking, explicit `.unlock()`, and `.lock()` within a single scope.",
+        prosCons: "Pros: Supports manual unlock/relock and condition variables. Cons: Slightly higher overhead than lock_guard.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 72. Mutex - Approach 2: unique_lock
+#include <iostream>
+#include <thread>
+#include <mutex>
+using namespace std;
+
+mutex mtx;
+
+void flexibleWork() {
+    unique_lock<mutex> lock(mtx); // Locks mutex
+    cout << "Critical section work.\n";
+
+    lock.unlock(); // Explicit early unlock!
+    cout << "Non-critical work running without holding lock...\n";
+
+    lock.lock(); // Relock if needed
+    cout << "Second critical section.\n";
+}
+
+int main() {
+    thread t(flexibleWork);
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'unique_lock<mutex> lock(mtx);', constructType: 'Variable & Initializer', title: 'Unique Lock Acquisition', explanation: 'Constructs `unique_lock` and acquires `mtx`.', keyDetails: [{ variableOrConstruct: 'unique_lock<mutex>', role: 'Flexible RAII lock', whyThisWay: 'Provides manual lock/unlock operations unlike lock_guard' }] },
+          { lineNum: 2, codeSnippet: 'lock.unlock();', constructType: 'Function Signature', title: 'Explicit Early Lock Release', explanation: 'Explicitly unlocks mutex early to allow non-critical section work to run without holding lock.', keyDetails: [{ variableOrConstruct: 'lock.unlock()', role: 'Early release', whyThisWay: 'Reduces lock contention by releasing mutex before long task' }] },
+          { lineNum: 3, codeSnippet: 'lock.lock();', constructType: 'Function Signature', title: 'Explicit Re-lock Acquisition', explanation: 'Re-acquires mutex for second critical section.', keyDetails: [{ variableOrConstruct: 'lock.lock()', role: 'Re-lock', whyThisWay: 'Re-acquires lock for subsequent critical code' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Deadlock Prevention using C++17 std::scoped_lock", category: "Multi-Mutex Locking",
+        description: "Locks multiple mutexes atomically using C++17 `std::scoped_lock` to eliminate deadlock risks.",
+        prosCons: "Pros: Deadlock-free multi-mutex locking. Cons: Requires C++17 compiler.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 72. Mutex - Approach 3: scoped_lock Deadlock Prevention
+#include <iostream>
+#include <thread>
+#include <mutex>
+using namespace std;
+
+struct Account {
+    mutex mtx;
+    int balance;
+    Account(int b) : balance(b) {}
+};
+
+void transfer(Account& from, Account& to, int amount) {
+    // Locks BOTH mutexes atomically without deadlock risk!
+    scoped_lock lock(from.mtx, to.mtx);
+    from.balance -= amount;
+    to.balance += amount;
+}
+
+int main() {
+    Account acc1(1000), acc2(500);
+
+    thread t1(transfer, ref(acc1), ref(acc2), 200);
+    thread t2(transfer, ref(acc2), ref(acc1), 100);
+
+    t1.join();
+    t2.join();
+
+    cout << "Acc1 Balance: " << acc1.balance << endl; // 900
+    cout << "Acc2 Balance: " << acc2.balance << endl; // 600
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'scoped_lock lock(from.mtx, to.mtx);', constructType: 'Variable & Initializer', title: 'C++17 Multi-Mutex Atomic Lock', explanation: 'Locks both `from.mtx` and `to.mtx` atomically using deadlock-avoidance algorithm.', keyDetails: [{ variableOrConstruct: 'scoped_lock lock(m1, m2)', role: 'Deadlock-free multi-lock', whyThisWay: 'Eliminates lock-ordering deadlocks when transfer(A,B) and transfer(B,A) run concurrently' }] },
+          { lineNum: 2, codeSnippet: 'from.balance -= amount; to.balance += amount;', constructType: 'Variable & Initializer', title: 'Atomic Double-Account Mutation', explanation: 'Mutates both account balances safely under double lock.', keyDetails: [{ variableOrConstruct: 'balance transfer', role: 'Synchronized transaction', whyThisWay: 'Protects both account balances simultaneously' }] },
+          { lineNum: 3, codeSnippet: 't1.join(); t2.join();', constructType: 'Function Signature', title: 'Join Concurrent Transfer Threads', explanation: 'Joins both transfer threads.', keyDetails: [{ variableOrConstruct: 't1.join()', role: 'Transaction synchronization', whyThisWay: 'Guarantees both transactions complete cleanly' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Readers-Writer Lock using C++17 std::shared_mutex", category: "Shared Mutex",
+        description: "Uses C++17 `std::shared_mutex` with `std::shared_lock` for readers and `std::unique_lock` for writers.",
+        prosCons: "Pros: High concurrency for read-heavy workloads. Cons: Writer starvation if readers continuous.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 72. Mutex - Approach 4: shared_mutex (Readers-Writer)
+#include <iostream>
+#include <thread>
+#include <shared_mutex>
+#include <string>
+using namespace std;
+
+class SharedConfig {
+    shared_mutex rwMutex;
+    string configValue = "Initial";
+public:
+    string readConfig() {
+        shared_lock<shared_mutex> lock(rwMutex); // Multiple readers allowed!
+        return configValue;
+    }
+    void writeConfig(string newValue) {
+        unique_lock<shared_mutex> lock(rwMutex); // Exclusive writer lock!
+        configValue = newValue;
+    }
+};
+
+int main() {
+    SharedConfig cfg;
+    thread r1([&]() { cout << "Reader 1: " << cfg.readConfig() << endl; });
+    thread r2([&]() { cout << "Reader 2: " << cfg.readConfig() << endl; });
+    thread w1([&]() { cfg.writeConfig("Updated Config"); });
+
+    r1.join(); r2.join(); w1.join();
+    cout << "Final Config: " << cfg.readConfig() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'shared_lock<shared_mutex> lock(rwMutex);', constructType: 'Variable & Initializer', title: 'Shared Reader Lock Acquisition', explanation: 'Acquires shared reader lock (`std::shared_lock`). Multiple reader threads can hold shared lock concurrently.', keyDetails: [{ variableOrConstruct: 'shared_lock', role: 'Shared reader lock', whyThisWay: 'Allows concurrent read access without blocking other readers' }] },
+          { lineNum: 2, codeSnippet: 'unique_lock<shared_mutex> lock(rwMutex);', constructType: 'Variable & Initializer', title: 'Exclusive Writer Lock Acquisition', explanation: 'Acquires exclusive writer lock (`std::unique_lock`). Blocks all readers and other writers.', keyDetails: [{ variableOrConstruct: 'unique_lock', role: 'Exclusive writer lock', whyThisWay: 'Ensures single-writer isolation during updates' }] },
+          { lineNum: 3, codeSnippet: 'configValue = newValue;', constructType: 'Variable & Initializer', title: 'Exclusive Writer Update', explanation: 'Mutates configuration value under exclusive writer lock.', keyDetails: [{ variableOrConstruct: 'configValue update', role: 'Writer critical section', whyThisWay: 'Safe modification without data race' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Recursive Function Locking with std::recursive_mutex", category: "Recursive Mutex",
+        description: "Uses `std::recursive_mutex` to allow a single thread to acquire the same mutex multiple times recursively.",
+        prosCons: "Pros: Prevents self-deadlock in recursive algorithms. Cons: Higher overhead than std::mutex.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 72. Mutex - Approach 5: recursive_mutex
+#include <iostream>
+#include <thread>
+#include <mutex>
+using namespace std;
+
+class RecursiveTask {
+    recursive_mutex recMtx;
+public:
+    void recursiveCall(int count) {
+        lock_guard<recursive_mutex> lock(recMtx); // Can be acquired recursively!
+        cout << "Recursive depth: " << count << endl;
+        if (count > 1) {
+            recursiveCall(count - 1);
+        }
+    }
+};
+
+int main() {
+    RecursiveTask task;
+    thread t([&]() { task.recursiveCall(3); });
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'lock_guard<recursive_mutex> lock(recMtx);', constructType: 'Variable & Initializer', title: 'Recursive Mutex Lock Acquisition', explanation: 'Acquires `recursive_mutex`. Same thread can re-lock `recMtx` multiple times without self-deadlock.', keyDetails: [{ variableOrConstruct: 'recursive_mutex', role: 'Re-entrant lock', whyThisWay: 'Tracks recursion depth count for same thread' }] },
+          { lineNum: 2, codeSnippet: 'if (count > 1) recursiveCall(count - 1);', constructType: 'Condition & Branch', title: 'Recursive Method Call', explanation: 'Calls `recursiveCall` recursively, re-locking `recMtx` at deeper recursion depth.', keyDetails: [{ variableOrConstruct: 'recursive call', role: 'Re-entrant entry', whyThisWay: 'Re-enters locked method safely' }] },
+          { lineNum: 3, codeSnippet: 't.join();', constructType: 'Function Signature', title: 'Join Recursive Thread', explanation: 'Joins recursive thread.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Synchronization', whyThisWay: 'Completes recursive task' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Non-Blocking Mutex Acquisition (try_to_lock)", category: "Non-Blocking Lock",
+        description: "Uses `std::unique_lock` with `std::try_to_lock` to attempt locking without blocking execution.",
+        prosCons: "Pros: Non-blocking thread execution if busy. Cons: Must check `lock.owns_lock()`.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 72. Mutex - Approach 6: try_to_lock
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <chrono>
+using namespace std;
+
+mutex jobMutex;
+
+void tryDoJob(int workerId) {
+    unique_lock<mutex> lock(jobMutex, try_to_lock); // Non-blocking try lock!
+    if (lock.owns_lock()) {
+        cout << "Worker " << workerId << " acquired lock and doing job.\n";
+        this_thread::sleep_for(chrono::milliseconds(50));
+    } else {
+        cout << "Worker " << workerId << " couldn't get lock, doing alternative work.\n";
+    }
+}
+
+int main() {
+    thread t1(tryDoJob, 1);
+    thread t2(tryDoJob, 2);
+    t1.join(); t2.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'unique_lock<mutex> lock(jobMutex, try_to_lock);', constructType: 'Variable & Initializer', title: 'Non-Blocking try_to_lock Acquisition', explanation: 'Attempts to acquire `jobMutex` immediately without blocking if already locked by another thread.', keyDetails: [{ variableOrConstruct: 'try_to_lock', role: 'Non-blocking lock flag', whyThisWay: 'Returns immediately regardless of lock availability' }] },
+          { lineNum: 2, codeSnippet: 'if (lock.owns_lock()) { ... } else { ... }', constructType: 'Condition & Branch', title: 'Check Lock Ownership Status', explanation: 'Checks `lock.owns_lock()` to branch execution based on whether lock was acquired.', keyDetails: [{ variableOrConstruct: 'lock.owns_lock()', role: 'Ownership query', whyThisWay: 'Executes job if lock acquired; alternative work if busy' }] },
+          { lineNum: 3, codeSnippet: 't1.join(); t2.join();', constructType: 'Function Signature', title: 'Join Workers', explanation: 'Joins both non-blocking worker threads.', keyDetails: [{ variableOrConstruct: 't1.join()', role: 'Barrier', whyThisWay: 'Cleans up worker threads' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Thread-Safe Queue Data Structure with Mutex", category: "Thread-Safe Queue",
+        description: "Implements a thread-safe Queue data structure protecting push and pop operations with a mutex.",
+        prosCons: "Pros: Thread-safe data structure encapsulation. Cons: Mutex locking on every push/pop operation.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 72. Mutex - Approach 7: Thread-Safe Queue
+#include <iostream>
+#include <queue>
+#include <mutex>
+#include <optional>
+using namespace std;
+
+template<typename T>
+class SafeQueue {
+    queue<T> q;
+    mutable mutex mtx;
+public:
+    void push(T val) {
+        lock_guard<mutex> lock(mtx);
+        q.push(val);
+    }
+    optional<T> pop() {
+        lock_guard<mutex> lock(mtx);
+        if (q.empty()) return nullopt;
+        T val = q.front();
+        q.pop();
+        return val;
+    }
+};
+
+int main() {
+    SafeQueue<int> sq;
+    sq.push(10); sq.push(20);
+
+    auto item = sq.pop();
+    if (item) cout << "Popped: " << *item << endl; // 10
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'mutable mutex mtx;', constructType: 'Variable & Initializer', title: 'Mutable Mutex Declaration', explanation: 'Declares mutex as `mutable` so `const` methods can lock it.', keyDetails: [{ variableOrConstruct: 'mutable mutex', role: 'Mutable synchronization primitive', whyThisWay: 'Allows locking inside const member functions' }] },
+          { lineNum: 2, codeSnippet: 'lock_guard<mutex> lock(mtx); q.push(val);', constructType: 'Variable & Initializer', title: 'Synchronized Queue Push', explanation: 'Acquires lock before pushing element into underlying std::queue.', keyDetails: [{ variableOrConstruct: 'lock_guard push', role: 'Thread-safe push', whyThisWay: 'Protects queue internal pointers during insertion' }] },
+          { lineNum: 3, codeSnippet: 'optional<T> pop() { ... if (q.empty()) return nullopt; ... }', constructType: 'Function Signature', title: 'Synchronized Non-Blocking Pop', explanation: 'Atomically checks empty state and pops front element, returning `optional<T>`.', keyDetails: [{ variableOrConstruct: 'optional<T> pop()', role: 'Thread-safe pop', whyThisWay: 'Prevents race condition between empty check and pop' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Thread-Safe Bank Account Transfer with Deadlock Avoidance", category: "Bank Transfer",
+        description: "Models bank transfers using `std::lock` to avoid deadlocks when locking two accounts.",
+        prosCons: "Pros: Deadlock-free manual C++11 lock algorithm. Cons: Older syntax compared to C++17 scoped_lock.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 72. Mutex - Approach 8: C++11 std::lock
+#include <iostream>
+#include <thread>
+#include <mutex>
+using namespace std;
+
+struct BankAccount {
+    int id;
+    int balance;
+    mutex mtx;
+    BankAccount(int i, int b) : id(i), balance(b) {}
+};
+
+void safeTransfer(BankAccount& from, BankAccount& to, int amount) {
+    // C++11 std::lock locks multiple mutexes without deadlock!
+    lock(from.mtx, to.mtx);
+    lock_guard<mutex> lockA(from.mtx, adopt_lock);
+    lock_guard<mutex> lockB(to.mtx, adopt_lock);
+
+    from.balance -= amount;
+    to.balance += amount;
+}
+
+int main() {
+    BankAccount b1(1, 500), b2(2, 300);
+    thread t1(safeTransfer, ref(b1), ref(b2), 100);
+    thread t2(safeTransfer, ref(b2), ref(b1), 50);
+
+    t1.join(); t2.join();
+    cout << "B1: " << b1.balance << ", B2: " << b2.balance << endl; // B1: 450, B2: 350
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'lock(from.mtx, to.mtx);', constructType: 'Function Signature', title: 'C++11 std::lock Multi-Lock', explanation: 'Acquires both mutexes using deadlock-avoidance algorithm.', keyDetails: [{ variableOrConstruct: 'std::lock(m1, m2)', role: 'Deadlock-avoidance function', whyThisWay: 'Locks multiple mutexes without order-dependent deadlocks' }] },
+          { lineNum: 2, codeSnippet: 'lock_guard<mutex> lockA(from.mtx, adopt_lock);', constructType: 'Variable & Initializer', title: 'Adopt Lock Ownership', explanation: 'Constructs `lock_guard` with `adopt_lock` flag, informing it that mutex is already locked and should be unlocked on exit.', keyDetails: [{ variableOrConstruct: 'adopt_lock', role: 'RAII adoption flag', whyThisWay: 'Adopts already-locked mutex for automatic RAII unlocking' }] },
+          { lineNum: 3, codeSnippet: 'from.balance -= amount; to.balance += amount;', constructType: 'Variable & Initializer', title: 'Execute Safe Transfer', explanation: 'Mutates balances safely under adopted locks.', keyDetails: [{ variableOrConstruct: 'balance transfer', role: 'Transaction execution', whyThisWay: 'Atomic transfer between accounts' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Timed Locking with std::timed_mutex and try_lock_for", category: "Timed Mutex",
+        description: "Uses `std::timed_mutex` and `try_lock_for` to attempt acquiring a mutex for a specific duration limit.",
+        prosCons: "Pros: Avoids indefinite waiting. Cons: Requires std::timed_mutex.",
+        timeComplexity: "O(Timeout)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 72. Mutex - Approach 9: timed_mutex
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <chrono>
+using namespace std;
+
+timed_mutex tMtx;
+
+void timedJob(int id) {
+    if (tMtx.try_lock_for(chrono::milliseconds(30))) {
+        cout << "Job " << id << " acquired timed lock!\n";
+        this_thread::sleep_for(chrono::milliseconds(50));
+        tMtx.unlock();
+    } else {
+        cout << "Job " << id << " timed out waiting for lock.\n";
+    }
+}
+
+int main() {
+    thread j1(timedJob, 1);
+    thread j2(timedJob, 2);
+    j1.join(); j2.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (tMtx.try_lock_for(chrono::milliseconds(30)))', constructType: 'Condition & Branch', title: 'Timed Mutex Acquisition Attempt', explanation: 'Attempts to acquire `tMtx` for up to 30 milliseconds. Returns true if acquired within timeout.', keyDetails: [{ variableOrConstruct: 'try_lock_for()', role: 'Timed lock attempt', whyThisWay: 'Prevents threads from blocking indefinitely' }] },
+          { lineNum: 2, codeSnippet: 'tMtx.unlock();', constructType: 'Function Signature', title: 'Manual Timed Mutex Unlock', explanation: 'Unlocks `tMtx` after work completes.', keyDetails: [{ variableOrConstruct: 'tMtx.unlock()', role: 'Manual unlock', whyThisWay: 'Releases timed mutex' }] },
+          { lineNum: 3, codeSnippet: 'j1.join(); j2.join();', constructType: 'Function Signature', title: 'Join Timed Threads', explanation: 'Joins timed job threads.', keyDetails: [{ variableOrConstruct: 'j1.join()', role: 'Synchronization', whyThisWay: 'Cleans up job threads' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Condition Variable Signaling with Mutex (std::condition_variable)", category: "Condition Variable",
+        description: "Uses `std::condition_variable` with `std::unique_lock` for worker notification signaling.",
+        prosCons: "Pros: Efficient event-driven thread waiting. Cons: Requires predicate check for spurious wakeups.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 72. Mutex - Approach 10: Condition Variable
+#include <iostream>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+using namespace std;
+
+mutex cvMutex;
+condition_variable cv;
+bool ready = false;
+
+void workerWorker() {
+    unique_lock<mutex> lock(cvMutex);
+    cv.wait(lock, []() { return ready; }); // Prevents spurious wakeups!
+    cout << "Worker woken up by condition variable signal!\n";
+}
+
+int main() {
+    thread t(workerWorker);
+
+    {
+        lock_guard<mutex> lock(cvMutex);
+        ready = true;
+    }
+    cv.notify_one(); // Signal worker thread!
+
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'cv.wait(lock, []() { return ready; });', constructType: 'Function Signature', title: 'Wait on Condition Variable Predicate', explanation: 'Unlocks `lock` and puts thread to sleep until notified AND predicate `ready == true` is satisfied.', keyDetails: [{ variableOrConstruct: 'cv.wait(lock, predicate)', role: 'Condition variable wait', whyThisWay: 'Predicate loop protects against spurious wakeups' }] },
+          { lineNum: 2, codeSnippet: 'cv.notify_one();', constructType: 'Function Signature', title: 'Signal Worker Thread', explanation: 'Wakes up one waiting worker thread.', keyDetails: [{ variableOrConstruct: 'cv.notify_one()', role: 'Worker signal', whyThisWay: 'Notifies waiting thread that work/state is ready' }] },
+          { lineNum: 3, codeSnippet: 't.join();', constructType: 'Function Signature', title: 'Join Signaled Thread', explanation: 'Joins signaled worker thread.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Synchronization', whyThisWay: 'Cleans up worker thread' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem73Details(): LearnModule {
+  return {
+    id: "med_atomics",
+    title: "73. Atomic Operations (std::atomic)",
+    category: "Concurrency",
+    difficulty: "medium",
+    shortDesc: "Lock-free thread-safe atomic counters and memory ordering.",
+    fullColor: `// 73. Atomics - Approach 1: Lock-Free Atomic Counter (fetch_add)
+#include <iostream>
+#include <atomic>
+#include <thread>
+#include <vector>
+using namespace std;
+
+atomic<int> atomicCounter(0);
+
+void incrementAtomic() {
+    for (int i = 0; i < 10000; i++) {
+        atomicCounter.fetch_add(1); // Hardware atomic instruction!
+    }
+}
+
+int main() {
+    vector<thread> threads;
+    for (int i = 0; i < 10; i++) threads.emplace_back(incrementAtomic);
+    for (auto& t : threads) t.join();
+
+    cout << "Atomic Counter: " << atomicCounter.load() << endl; // 100000
+    return 0;
+}`,
+    problemStatement: {
+      title: "73. Atomic Operations (std::atomic)",
+      objective: "Master C++11 lock-free atomic operations with `std::atomic<T>`: `fetch_add`, `fetch_sub`, `exchange`, `compare_exchange_weak`, `compare_exchange_strong`, spinlocks with `std::atomic_flag`, memory ordering constraints (`memory_order_seq_cst`, `memory_order_relaxed`, `acquire`/`release`), and lock-free data structures.",
+      description: "Implement **Atomic Operations (std::atomic)** (Concurrency). Perform lock-free, hardware-accelerated atomic operations across threads without the performance overhead of mutex locking.",
+      inputDesc: "Atomic increment operations, value exchange requests, CAS (Compare-And-Swap) loops, or memory ordering flags.",
+      outputDesc: "Lock-free atomic counter values, spinlock execution logs, or CAS stack top states.",
+      takeaways: [
+        "`std::atomic<T>` provides lock-free thread safety by leveraging CPU atomic instructions (e.g. `LOCK XADD` on x86)",
+        "`fetch_add(val)` atomically increments counter and returns previous value in single instruction",
+        "Compare-And-Swap (CAS) `compare_exchange_weak` is the foundational primitive for all lock-free data structures",
+        "`std::atomic_flag` is guaranteed to be lock-free on all hardware platforms, making it ideal for low-level spinlocks",
+        "Default memory order is `memory_order_seq_cst` (sequentially consistent); `memory_order_relaxed` provides max performance when order is unimportant"
+      ],
+      examples: [
+        { id: 1, input: "10 threads increment atomic<int> 10,000 times using fetch_add(1)", output: "Atomic Counter: 100000", explanation: "Hardware atomic instructions guarantee exact total 100,000 without mutex overhead." },
+        { id: 2, input: "Spinlock test_and_set() acquire / clear() release", output: "Critical section protected by spinlock", explanation: "std::atomic_flag implements low-latency lock-free spinlock." },
+        { id: 3, input: "CAS loop while (!head.compare_exchange_weak(oldHead, newHead));", output: "Node pushed to lock-free stack", explanation: "CAS loop retries until node pointer is atomically updated." }
+      ],
+      constraints: ["Ensure types used in std::atomic are trivially copyable."],
+      companies: ["NVIDIA", "Google", "Microsoft", "Intel", "Apple"],
+      acceptanceRate: "89.7%",
+      totalAccepted: "2,980,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Lock-Free Thread Counter with std::atomic (fetch_add) (FREE)", category: "FREE / Core Atomics",
+        description: "Uses `std::atomic<int>` and `.fetch_add(1)` for lock-free multi-threaded counter increments.",
+        prosCons: "Pros: Hardware accelerated atomic execution, no mutex locking. Cons: Limited to atomic primitives.",
+        timeComplexity: "O(1) per increment", spaceComplexity: "O(1)", isFree: true,
+        code: `// 73. Atomics - Approach 1: Atomic Counter
+#include <iostream>
+#include <atomic>
+#include <thread>
+#include <vector>
+using namespace std;
+
+atomic<int> atomicCounter(0);
+
+void incrementAtomic() {
+    for (int i = 0; i < 10000; i++) {
+        atomicCounter.fetch_add(1);
+    }
+}
+
+int main() {
+    vector<thread> threads;
+    for (int i = 0; i < 10; i++) threads.emplace_back(incrementAtomic);
+    for (auto& t : threads) t.join();
+
+    cout << "Atomic Counter: " << atomicCounter.load() << endl; // 100000
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'atomic<int> atomicCounter(0);', constructType: 'Variable & Initializer', title: 'Atomic Variable Declaration', explanation: 'Declares atomic integer initialized to 0.', keyDetails: [{ variableOrConstruct: 'atomic<int>', role: 'Lock-free atomic variable', whyThisWay: 'Uses CPU bus locking / cache coherency for atomic access' }] },
+          { lineNum: 2, codeSnippet: 'atomicCounter.fetch_add(1);', constructType: 'Function Signature', title: 'Atomic fetch_add Increment', explanation: 'Executes hardware atomic increment instruction (`fetch_add`).', keyDetails: [{ variableOrConstruct: 'fetch_add(1)', role: 'Atomic increment', whyThisWay: 'Atomically increments value in single CPU instruction' }] },
+          { lineNum: 3, codeSnippet: 'cout << atomicCounter.load();', constructType: 'Function Signature', title: 'Atomic Read Load', explanation: 'Atomically loads and returns current value.', keyDetails: [{ variableOrConstruct: 'load()', role: 'Atomic read', whyThisWay: 'Reads atomic value safely' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Spinlock Implementation using std::atomic_flag (FREE)", category: "FREE / Lock-Free Spinlock",
+        description: "Implements a low-latency spinlock using `std::atomic_flag` (`test_and_set` and `clear`).",
+        prosCons: "Pros: Guaranteed lock-free across all hardware platforms. Cons: Busy-waiting burns CPU cycles.",
+        timeComplexity: "O(SpinWait)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 73. Atomics - Approach 2: Spinlock
+#include <iostream>
+#include <atomic>
+#include <thread>
+#include <vector>
+using namespace std;
+
+class Spinlock {
+    atomic_flag flag = ATOMIC_FLAG_INIT;
+public:
+    void lock() {
+        while (flag.test_and_set(memory_order_acquire)) {
+            // Spin wait!
+        }
+    }
+    void unlock() {
+        flag.clear(memory_order_release);
+    }
+};
+
+Spinlock spin;
+int sharedData = 0;
+
+void work() {
+    spin.lock();
+    sharedData++;
+    spin.unlock();
+}
+
+int main() {
+    vector<thread> threads;
+    for (int i = 0; i < 5; i++) threads.emplace_back(work);
+    for (auto& t : threads) t.join();
+    cout << "Spinlock Shared Data: " << sharedData << endl; // 5
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (flag.test_and_set(memory_order_acquire)) { }', constructType: 'Loop Construct', title: 'Atomic Test and Set Spin Loop', explanation: 'Atomically sets flag to true and returns previous value. Spins while flag was already true.', keyDetails: [{ variableOrConstruct: 'test_and_set()', role: 'Spinlock acquire', whyThisWay: 'Guaranteed lock-free atomic test-and-set primitive' }] },
+          { lineNum: 2, codeSnippet: 'flag.clear(memory_order_release);', constructType: 'Function Signature', title: 'Atomic Flag Clear Release', explanation: 'Atomically clears flag to false, releasing spinlock for other waiting threads.', keyDetails: [{ variableOrConstruct: 'flag.clear()', role: 'Spinlock release', whyThisWay: 'Releases spinlock in O(1) time' }] },
+          { lineNum: 3, codeSnippet: 'spin.lock(); sharedData++; spin.unlock();', constructType: 'Variable & Initializer', title: 'Spinlock Critical Section', explanation: 'Executes critical section protected by low-latency spinlock.', keyDetails: [{ variableOrConstruct: 'spinlock protection', role: 'Mutual exclusion', whyThisWay: 'Low-latency protection for short critical sections' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Atomic Exchange & Value Swapping", category: "Atomic Swap",
+        description: "Atomically swaps values using `std::atomic::exchange()` in O(1) time.",
+        prosCons: "Pros: Atomically replaces value and retrieves old value. Cons: Unconditional exchange.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 73. Atomics - Approach 3: Atomic Exchange
+#include <iostream>
+#include <atomic>
+using namespace std;
+
+int main() {
+    atomic<int> activeState(100);
+
+    int oldVal = activeState.exchange(200); // Atomically swaps 200 into activeState!
+    cout << "Old Value: " << oldVal << endl;       // 100
+    cout << "New Value: " << activeState.load() << endl; // 200
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int oldVal = activeState.exchange(200);', constructType: 'Variable & Initializer', title: 'Atomic Exchange Call', explanation: 'Atomically replaces value of `activeState` with 200 and returns previous value 100.', keyDetails: [{ variableOrConstruct: 'exchange(200)', role: 'Atomic swap', whyThisWay: 'Replaces stored value and returns old value atomically' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Old Value: " << oldVal;', constructType: 'Function Signature', title: 'Read Swapped Old Value', explanation: 'Prints retrieved old value 100.', keyDetails: [{ variableOrConstruct: 'oldVal', role: 'Previous value', whyThisWay: 'Captures state prior to swap' }] },
+          { lineNum: 3, codeSnippet: 'cout << "New Value: " << activeState.load();', constructType: 'Function Signature', title: 'Read Updated Atomic State', explanation: 'Loads updated atomic value 200.', keyDetails: [{ variableOrConstruct: 'load()', role: 'Updated state', whyThisWay: 'Reads new value' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Compare-And-Swap (CAS) Loop using compare_exchange_weak", category: "CAS Loop",
+        description: "Implements a classic Compare-And-Swap (CAS) loop using `compare_exchange_weak`.",
+        prosCons: "Pros: Foundational lock-free building block. Cons: May fail spuriously requiring loop retry.",
+        timeComplexity: "O(1) avg", spaceComplexity: "O(1)", isFree: false,
+        code: `// 73. Atomics - Approach 4: CAS Loop
+#include <iostream>
+#include <atomic>
+using namespace std;
+
+void atomicMultiply(atomic<int>& val, int factor) {
+    int expected = val.load();
+    while (!val.compare_exchange_weak(expected, expected * factor)) {
+        // expected is automatically updated with current val on failure!
+    }
+}
+
+int main() {
+    atomic<int> num(5);
+    atomicMultiply(num, 3);
+    cout << "Atomic Multiply (5 * 3): " << num.load() << endl; // 15
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (!val.compare_exchange_weak(expected, expected * factor))', constructType: 'Loop Construct', title: 'CAS Retry Loop', explanation: 'Attempts to atomically update `val` to `expected * factor` if `val == expected`. If `val` changed, updates `expected` and retries loop.', keyDetails: [{ variableOrConstruct: 'compare_exchange_weak', role: 'Compare-And-Swap primitive', whyThisWay: 'Core building block for all custom lock-free atomic math operations' }] },
+          { lineNum: 2, codeSnippet: 'int expected = val.load();', constructType: 'Variable & Initializer', title: 'Load Expected Baseline Value', explanation: 'Loads baseline value into `expected` before entering CAS loop.', keyDetails: [{ variableOrConstruct: 'expected', role: 'Baseline state', whyThisWay: 'Baseline comparison value for CAS' }] },
+          { lineNum: 3, codeSnippet: 'cout << num.load();', constructType: 'Function Signature', title: 'Read CAS Multiplied Result', explanation: 'Prints final multiplied value 15.', keyDetails: [{ variableOrConstruct: 'num.load()', role: 'Final atomic value', whyThisWay: 'Returns updated atomic result' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Lock-Free Stack Node Push Operation", category: "Lock-Free Data Structure",
+        description: "Pushes nodes onto a lock-free stack using `atomic<Node*>` and CAS loop.",
+        prosCons: "Pros: Lock-free dynamic data structure push. Cons: Memory reclamation ABA problem awareness required.",
+        timeComplexity: "O(1) avg push", spaceComplexity: "O(N)", isFree: false,
+        code: `// 73. Atomics - Approach 5: Lock-Free Stack Push
+#include <iostream>
+#include <atomic>
+using namespace std;
+
+struct Node {
+    int data;
+    Node* next;
+    Node(int d) : data(d), next(nullptr) {}
+};
+
+class LockFreeStack {
+    atomic<Node*> head{nullptr};
+public:
+    void push(int val) {
+        Node* newNode = new Node(val);
+        newNode->next = head.load();
+        while (!head.compare_exchange_weak(newNode->next, newNode)) {
+            // CAS retries if head changed
+        }
+    }
+    Node* getHead() const { return head.load(); }
+};
+
+int main() {
+    LockFreeStack stack;
+    stack.push(10);
+    stack.push(20);
+
+    cout << "Top element: " << stack.getHead()->data << endl; // 20
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (!head.compare_exchange_weak(newNode->next, newNode))', constructType: 'Loop Construct', title: 'Lock-Free Head Update CAS Loop', explanation: 'Atomically updates `head` pointer to `newNode` if `head == newNode->next`. On contention failure, updates `newNode->next` and retries.', keyDetails: [{ variableOrConstruct: 'compare_exchange_weak on head', role: 'Lock-free stack push', whyThisWay: 'Pushes node to stack without acquiring mutex locks' }] },
+          { lineNum: 2, codeSnippet: 'newNode->next = head.load();', constructType: 'Variable & Initializer', title: 'Point New Node to Head', explanation: 'Sets new node next pointer to current head pointer.', keyDetails: [{ variableOrConstruct: 'newNode->next', role: 'Link initialization', whyThisWay: 'Prepares new top node' }] },
+          { lineNum: 3, codeSnippet: 'cout << stack.getHead()->data;', constructType: 'Function Signature', title: 'Inspect Stack Top Node', explanation: 'Reads top node payload value 20.', keyDetails: [{ variableOrConstruct: 'stack.getHead()', role: 'Top node query', whyThisWay: 'Reads stack top element' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Atomic Pointer Operations (std::atomic<Node*>)", category: "Atomic Pointers",
+        description: "Manages raw pointers atomically with `std::atomic<T*>`.",
+        prosCons: "Pros: Thread-safe pointer replacement. Cons: Pointers only.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 73. Atomics - Approach 6: Atomic Pointers
+#include <iostream>
+#include <atomic>
+using namespace std;
+
+struct Task { int id; };
+
+int main() {
+    Task t1{101}, t2{202};
+    atomic<Task*> activeTask(&t1);
+
+    Task* oldTask = activeTask.exchange(&t2);
+    cout << "Previous Task ID: " << oldTask->id << endl;   // 101
+    cout << "Active Task ID:   " << activeTask.load()->id << endl; // 202
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'atomic<Task*> activeTask(&t1);', constructType: 'Variable & Initializer', title: 'Atomic Pointer Declaration', explanation: 'Declares atomic pointer initialized to `&t1`.', keyDetails: [{ variableOrConstruct: 'atomic<Task*>', role: 'Atomic pointer container', whyThisWay: 'Thread-safe pointer assignment and access' }] },
+          { lineNum: 2, codeSnippet: 'Task* oldTask = activeTask.exchange(&t2);', constructType: 'Variable & Initializer', title: 'Atomic Pointer Exchange', explanation: 'Swaps pointer to `&t2` into `activeTask` atomically.', keyDetails: [{ variableOrConstruct: 'exchange(&t2)', role: 'Atomic pointer swap', whyThisWay: 'Replaces pointer target in single atomic operation' }] },
+          { lineNum: 3, codeSnippet: 'cout << activeTask.load()->id;', constructType: 'Function Signature', title: 'Dereference Active Atomic Pointer', explanation: 'Loads active task pointer and dereferences `id` field.', keyDetails: [{ variableOrConstruct: 'activeTask.load()->id', role: 'Pointer dereference', whyThisWay: 'Reads fields from target object' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Relaxed Memory Order for High-Performance Metrics", category: "Memory Ordering",
+        description: "Uses `memory_order_relaxed` for high-performance counter metrics where operation ordering is unconstrained.",
+        prosCons: "Pros: Maximum performance, avoids memory bus barrier flushes. Cons: No ordering guarantees.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 73. Atomics - Approach 7: Relaxed Memory Order
+#include <iostream>
+#include <atomic>
+#include <thread>
+#include <vector>
+using namespace std;
+
+atomic<int> metricCounter(0);
+
+void logMetric() {
+    for (int i = 0; i < 1000; i++) {
+        metricCounter.fetch_add(1, memory_order_relaxed); // Max performance!
+    }
+}
+
+int main() {
+    vector<thread> threads;
+    for (int i = 0; i < 5; i++) threads.emplace_back(logMetric);
+    for (auto& t : threads) t.join();
+    cout << "Total Metric Hits: " << metricCounter.load(memory_order_relaxed) << endl; // 5000
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'metricCounter.fetch_add(1, memory_order_relaxed);', constructType: 'Function Signature', title: 'Relaxed Memory Order Increment', explanation: 'Specifies `memory_order_relaxed` to instruct CPU that no synchronization or ordering bounds with other memory locations are needed.', keyDetails: [{ variableOrConstruct: 'memory_order_relaxed', role: 'Relaxed memory ordering', whyThisWay: 'Highest performance atomic operation; optimal for independent metrics' }] },
+          { lineNum: 2, codeSnippet: 'metricCounter.load(memory_order_relaxed)', constructType: 'Function Signature', title: 'Relaxed Memory Order Load', explanation: 'Loads counter value using relaxed memory ordering.', keyDetails: [{ variableOrConstruct: 'load(memory_order_relaxed)', role: 'Relaxed load', whyThisWay: 'Reads atomic value without memory fence' }] },
+          { lineNum: 3, codeSnippet: 'for (auto& t : threads) t.join();', constructType: 'Loop Construct', title: 'Join Threads', explanation: 'Joins all metric logging threads.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Barrier', whyThisWay: 'Ensures threads complete before reading total' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Acquire-Release Synchronization Barrier", category: "Acquire-Release",
+        description: "Synchronizes non-atomic payload data across threads using `memory_order_release` and `memory_order_acquire`.",
+        prosCons: "Pros: Lightweight pair-wise synchronization barrier. Cons: Requires pair setup.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 73. Atomics - Approach 8: Acquire-Release
+#include <iostream>
+#include <atomic>
+#include <thread>
+#include <string>
+using namespace std;
+
+string payloadData;
+atomic<bool> dataReady(false);
+
+void producer() {
+    payloadData = "Payload Data Produced";
+    dataReady.store(true, memory_order_release); // Release barrier!
+}
+
+void consumer() {
+    while (!dataReady.load(memory_order_acquire)) { // Acquire barrier!
+        // Wait
+    }
+    cout << "Consumer received: " << payloadData << endl;
+}
+
+int main() {
+    thread t1(producer);
+    thread t2(consumer);
+    t1.join(); t2.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'dataReady.store(true, memory_order_release);', constructType: 'Function Signature', title: 'Memory Release Barrier Store', explanation: '`memory_order_release` guarantees all preceding writes (like `payloadData`) are visible to any thread that acquires `dataReady`.', keyDetails: [{ variableOrConstruct: 'memory_order_release', role: 'Release barrier', whyThisWay: 'Flushes preceding memory writes before storing flag' }] },
+          { lineNum: 2, codeSnippet: 'while (!dataReady.load(memory_order_acquire))', constructType: 'Loop Construct', title: 'Memory Acquire Barrier Load', explanation: '`memory_order_acquire` guarantees that subsequent memory reads will see the writes released by `producer`.', keyDetails: [{ variableOrConstruct: 'memory_order_acquire', role: 'Acquire barrier', whyThisWay: 'Synchronizes payloadData memory visibility' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Consumer received: " << payloadData;', constructType: 'Function Signature', title: 'Read Synchronized Payload Data', explanation: 'Reads non-atomic `payloadData` safely without data races.', keyDetails: [{ variableOrConstruct: 'payloadData', role: 'Synchronized data read', whyThisWay: 'Guaranteed valid memory data due to acquire-release barrier' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Atomic Floating-Point Accumulator (C++20 std::atomic<double>)", category: "Atomic Floats",
+        description: "Uses C++20 `std::atomic<double>` for thread-safe floating-point accumulations.",
+        prosCons: "Pros: Direct atomic float/double support in C++20. Cons: Requires C++20 standard.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 73. Atomics - Approach 9: Atomic Double (C++20)
+#include <iostream>
+#include <atomic>
+#include <thread>
+#include <vector>
+using namespace std;
+
+atomic<double> atomicSum(0.0);
+
+void addFloat() {
+    for (int i = 0; i < 1000; i++) {
+        // In C++20, atomic<double> supports fetch_add!
+        double expected = atomicSum.load();
+        while (!atomicSum.compare_exchange_weak(expected, expected + 0.5)) {}
+    }
+}
+
+int main() {
+    vector<thread> threads;
+    for (int i = 0; i < 4; i++) threads.emplace_back(addFloat);
+    for (auto& t : threads) t.join();
+    cout << "Atomic Double Total: " << atomicSum.load() << endl; // 2000.0
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'atomic<double> atomicSum(0.0);', constructType: 'Variable & Initializer', title: 'Atomic Double Declaration', explanation: 'Declares atomic floating-point double container.', keyDetails: [{ variableOrConstruct: 'atomic<double>', role: 'Atomic floating point container', whyThisWay: 'C++20 feature enabling atomic operations on double types' }] },
+          { lineNum: 2, codeSnippet: 'while (!atomicSum.compare_exchange_weak(expected, expected + 0.5))', constructType: 'Loop Construct', title: 'Atomic Floating Point CAS Loop', explanation: 'CAS loop accumulates floating point values atomically.', keyDetails: [{ variableOrConstruct: 'expected + 0.5', role: 'Float accumulation', whyThisWay: 'Atomically adds 0.5 to double total' }] },
+          { lineNum: 3, codeSnippet: 'cout << atomicSum.load();', constructType: 'Function Signature', title: 'Read Double Total', explanation: 'Prints final accumulated double sum 2000.0.', keyDetails: [{ variableOrConstruct: 'atomicSum.load()', role: 'Double total', whyThisWay: 'Displays precise atomic float sum' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Thread Synchronization Flag with std::atomic<bool>", category: "Atomic Boolean Flag",
+        description: "Uses `std::atomic<bool>` as a stop flag to signal worker thread shutdown.",
+        prosCons: "Pros: Thread-safe worker termination flag. Cons: Requires worker loop flag checks.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 73. Atomics - Approach 10: Stop Flag
+#include <iostream>
+#include <atomic>
+#include <thread>
+#include <chrono>
+using namespace std;
+
+atomic<bool> stopWorker(false);
+
+void backgroundLoop() {
+    int loops = 0;
+    while (!stopWorker.load()) {
+        loops++;
+        this_thread::sleep_for(chrono::milliseconds(10));
+    }
+    cout << "Worker stopped after " << loops << " iterations.\n";
+}
+
+int main() {
+    thread t(backgroundLoop);
+    this_thread::sleep_for(chrono::milliseconds(50));
+    stopWorker.store(true); // Signal shutdown!
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (!stopWorker.load()) { ... }', constructType: 'Loop Construct', title: 'Check Atomic Stop Flag', explanation: 'Worker loop checks atomic boolean `stopWorker.load()` on each iteration.', keyDetails: [{ variableOrConstruct: '!stopWorker.load()', role: 'Loop termination flag', whyThisWay: 'Thread-safe flag check for loop termination' }] },
+          { lineNum: 2, codeSnippet: 'stopWorker.store(true);', constructType: 'Function Signature', title: 'Signal Worker Thread Shutdown', explanation: 'Main thread sets `stopWorker.store(true)` to signal worker thread exit.', keyDetails: [{ variableOrConstruct: 'stopWorker.store(true)', role: 'Shutdown signal', whyThisWay: 'Signals worker thread to stop cleanly' }] },
+          { lineNum: 3, codeSnippet: 't.join();', constructType: 'Function Signature', title: 'Join Worker Thread', explanation: 'Main thread joins worker thread after shutdown.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Thread join', whyThisWay: 'Ensures thread exits cleanly' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem74Details(): LearnModule {
+  return {
+    id: "med_async_future",
+    title: "74. Async Tasks & Futures",
+    category: "Concurrency",
+    difficulty: "medium",
+    shortDesc: "Asynchronous task execution using std::async & std::future.",
+    fullCode: `// 74. Async - Approach 1: Asynchronous Function Execution
+#include <iostream>
+#include <future>
+using namespace std;
+
+int computeSum(int a, int b) {
+    return a + b;
+}
+
+int main() {
+    future<int> fut = async(launch::async, computeSum, 15, 27);
+
+    cout << "Main thread doing work while task runs in background...\n";
+    int result = fut.get(); // Blocks until async task returns result!
+    cout << "Async Task Result: " << result << endl; // 42
+    return 0;
+}`,
+    problemStatement: {
+      title: "74. Async Tasks & Futures",
+      objective: "Master high-level asynchronous task execution with C++11 futures: `std::async`, `std::future`, `std::shared_future`, `std::promise`, `std::packaged_task`, launch policies (`launch::async` vs `launch::deferred`), `wait_for()`, and exception propagation.",
+      description: "Implement **Async Tasks & Futures** (Concurrency). Execute asynchronous tasks in separate threads and retrieve return values or exceptions cleanly using future handles.",
+      inputDesc: "Asynchronous task functions, promise value setters, launch policies, or timeout durations.",
+      outputDesc: "Future return values, shared future broadcasts, promised data values, or task completion status.",
+      takeaways: [
+        "`std::async` launches a task asynchronously and returns a `std::future<T>` holding the future result",
+        "Calling `fut.get()` retrieves the task return value; `get()` can only be called ONCE on a standard `std::future`",
+        "Use `std::launch::async` to force execution in a new thread; `std::launch::deferred` delays execution until `get()` is called",
+        "`std::promise<T>` allows a producer thread to explicitly set a value or exception to be read by a consumer's `std::future<T>`",
+        "`std::shared_future<T>` allows multiple threads to wait for and read the same future result"
+      ],
+      examples: [
+        { id: 1, input: "future<int> fut = async(launch::async, computeSum, 15, 27); fut.get();", output: "Async Task Result: 42", explanation: "std::async runs calculation in background thread; get() retrieves return value 42." },
+        { id: 2, input: "promise<string> p; future<string> f = p.get_future(); p.set_value('Data');", output: "Promised Value: Data", explanation: "Producer sets value in promise; consumer thread reads value from future." },
+        { id: 3, input: "fut.wait_for(chrono::milliseconds(20))", output: "future_status::timeout", explanation: "wait_for polls future completion status without blocking indefinitely." }
+      ],
+      constraints: ["Header `<future>` requires C++11 or higher and system thread linking (`-pthread`)."],
+      companies: ["Microsoft", "Google", "Amazon", "Apple", "Meta"],
+      acceptanceRate: "92.5%",
+      totalAccepted: "3,150,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Asynchronous Function Execution (std::async & std::future) (FREE)", category: "FREE / Core Async",
+        description: "Executes a computation asynchronously using std::async and retrieves result via std::future::get().",
+        prosCons: "Pros: High-level task concurrency without manual std::thread management. Cons: get() blocks until task completes.",
+        timeComplexity: "O(1) launch", spaceComplexity: "O(1)", isFree: true,
+        code: `// 74. Async - Approach 1: Basic std::async
+#include <iostream>
+#include <future>
+using namespace std;
+
+int computeSquare(int x) {
+    return x * x;
+}
+
+int main() {
+    future<int> fut = async(launch::async, computeSquare, 9);
+    cout << "Async task launched. Doing main thread work...\n";
+    cout << "Result: " << fut.get() << endl; // 81
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'future<int> fut = async(launch::async, computeSquare, 9);', constructType: 'Variable & Initializer', title: 'Launch Async Task', explanation: 'Launches `computeSquare(9)` asynchronously in a new thread, returning a `future<int>` handle.', keyDetails: [{ variableOrConstruct: 'async(launch::async, ...)', role: 'Async task launcher', whyThisWay: 'High-level interface for asynchronous execution' }] },
+          { lineNum: 2, codeSnippet: 'int res = fut.get();', constructType: 'Variable & Initializer', title: 'Retrieve Future Result via get()', explanation: 'Blocks main thread until async task finishes and returns result 81.', keyDetails: [{ variableOrConstruct: 'fut.get()', role: 'Future result getter', whyThisWay: 'Extracts value computed by asynchronous task' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Result: " << res;', constructType: 'Function Signature', title: 'Display Result', explanation: 'Prints retrieved async result.', keyDetails: [{ variableOrConstruct: 'res', role: 'Async output', whyThisWay: 'Displays computed result' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Explicit Launch Policies (launch::async vs launch::deferred) (FREE)", category: "FREE / Launch Policies",
+        description: "Demonstrates differences between `std::launch::async` (immediate new thread) and `std::launch::deferred` (lazy evaluation on get()).",
+        prosCons: "Pros: Controls exact execution timing. Cons: Deferred tasks do not run in background.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 74. Async - Approach 2: Launch Policies
+#include <iostream>
+#include <future>
+using namespace std;
+
+int taskAsync() {
+    cout << "Async task running on background thread!\n";
+    return 10;
+}
+
+int taskDeferred() {
+    cout << "Deferred task running on caller thread when get() is invoked!\n";
+    return 20;
+}
+
+int main() {
+    auto f1 = async(launch::async, taskAsync);
+    auto f2 = async(launch::deferred, taskDeferred);
+
+    cout << "Main thread calling get() on f1 & f2...\n";
+    cout << "f1: " << f1.get() << endl;
+    cout << "f2: " << f2.get() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto f1 = async(launch::async, taskAsync);', constructType: 'Variable & Initializer', title: 'Forced Async Thread Launch', explanation: '`launch::async` forces immediate creation of a new thread to run task in background.', keyDetails: [{ variableOrConstruct: 'launch::async', role: 'Immediate thread policy', whyThisWay: 'Guarantees execution in a separate thread' }] },
+          { lineNum: 2, codeSnippet: 'auto f2 = async(launch::deferred, taskDeferred);', constructType: 'Variable & Initializer', title: 'Lazy Deferred Launch Policy', explanation: '`launch::deferred` delays task execution until `.get()` or `.wait()` is called on caller thread.', keyDetails: [{ variableOrConstruct: 'launch::deferred', role: 'Lazy evaluation policy', whyThisWay: 'Avoids thread overhead until result is actually requested' }] },
+          { lineNum: 3, codeSnippet: 'f2.get()', constructType: 'Function Signature', title: 'Trigger Deferred Task Execution', explanation: 'Calling `.get()` on deferred future triggers `taskDeferred` execution on current caller thread.', keyDetails: [{ variableOrConstruct: 'f2.get()', role: 'Lazy execution trigger', whyThisWay: 'Triggers deferred function evaluation' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Producer-Consumer Value Delivery using std::promise and std::future", category: "Promises",
+        description: "Connects a producer thread to a consumer thread using `std::promise` and `std::future`.",
+        prosCons: "Pros: Direct value channel between threads. Cons: Promise value can only be set once.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 74. Async - Approach 3: std::promise
+#include <iostream>
+#include <future>
+#include <thread>
+#include <string>
+using namespace std;
+
+void producerTask(promise<string> p) {
+    p.set_value("Data Packet from Producer"); // Fulfills promise!
+}
+
+int main() {
+    promise<string> p;
+    future<string> f = p.get_future();
+
+    thread t(producerTask, move(p));
+    cout << "Consumer waiting for promise...\n";
+    cout << "Received: " << f.get() << endl;
+
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'future<string> f = p.get_future();', constructType: 'Variable & Initializer', title: 'Get Future from Promise', explanation: 'Creates `future<string>` endpoint associated with `promise<string>`.', keyDetails: [{ variableOrConstruct: 'p.get_future()', role: 'Future endpoint creator', whyThisWay: 'Connects consumer future to producer promise' }] },
+          { lineNum: 2, codeSnippet: 'p.set_value("Data Packet from Producer");', constructType: 'Function Signature', title: 'Set Value in Promise', explanation: 'Producer thread fulfills promise by calling `p.set_value()`.', keyDetails: [{ variableOrConstruct: 'p.set_value()', role: 'Promise fulfillment', whyThisWay: 'Delivers value to waiting consumer future' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Received: " << f.get();', constructType: 'Function Signature', title: 'Consumer Future Read', explanation: 'Consumer thread unblocks and reads promised value.', keyDetails: [{ variableOrConstruct: 'f.get()', role: 'Promised value retrieval', whyThisWay: 'Reads fulfilled promise value' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Broadcast Single Result using std::shared_future", category: "Shared Future",
+        description: "Broadcasts a single asynchronous result to multiple consumer threads using `std::shared_future`.",
+        prosCons: "Pros: Allows multiple threads to call `.get()`. Cons: Shared future state management.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 74. Async - Approach 4: shared_future
+#include <iostream>
+#include <future>
+#include <thread>
+#include <vector>
+using namespace std;
+
+int loadConfigData() { return 8080; }
+
+void readerThread(int id, shared_future<int> sf) {
+    cout << "Thread " << id << " read config port: " << sf.get() << endl;
+}
+
+int main() {
+    shared_future<int> sf = async(launch::async, loadConfigData).share();
+
+    vector<thread> threads;
+    for (int i = 1; i <= 3; i++) {
+        threads.emplace_back(readerThread, i, sf); // Passes shared_future by value!
+    }
+    for (auto& t : threads) t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'shared_future<int> sf = async(launch::async, loadConfigData).share();', constructType: 'Variable & Initializer', title: 'Create Shared Future via .share()', explanation: 'Converts `std::future` into `std::shared_future` using `.share()`.', keyDetails: [{ variableOrConstruct: '.share()', role: 'Shared future creation', whyThisWay: 'Allows multiple threads to hold copy of future handle and call .get()' }] },
+          { lineNum: 2, codeSnippet: 'void readerThread(int id, shared_future<int> sf) { cout << sf.get(); }', constructType: 'Function Signature', title: 'Multiple Reader Thread .get()', explanation: 'Multiple reader threads call `sf.get()` on copies of shared_future safely.', keyDetails: [{ variableOrConstruct: 'sf.get()', role: 'Shared get access', whyThisWay: 'Does not invalidate shared_future after first get()' }] },
+          { lineNum: 3, codeSnippet: 'for (auto& t : threads) t.join();', constructType: 'Loop Construct', title: 'Join All Reader Threads', explanation: 'Joins all reader threads.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Synchronization', whyThisWay: 'Cleans up reader threads' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Wrapping Function Signatures with std::packaged_task", category: "Packaged Task",
+        description: "Wraps a function signature inside `std::packaged_task` for thread pool task queuing.",
+        prosCons: "Pros: decouples task creation from execution. Cons: Must call packaged_task operator().",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 74. Async - Approach 5: packaged_task
+#include <iostream>
+#include <future>
+#include <thread>
+using namespace std;
+
+int multiply(int a, int b) { return a * b; }
+
+int main() {
+    packaged_task<int(int, int)> task(multiply);
+    future<int> fut = task.get_future();
+
+    thread t(move(task), 6, 7); // Execute packaged_task on worker thread
+    cout << "Packaged Task (6 * 7): " << fut.get() << endl; // 42
+
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'packaged_task<int(int, int)> task(multiply);', constructType: 'Variable & Initializer', title: 'Packaged Task Declaration', explanation: 'Wraps function `multiply` inside `packaged_task<int(int, int)>`.', keyDetails: [{ variableOrConstruct: 'packaged_task<Signature>', role: 'Task wrapper', whyThisWay: 'Packages callable object to connect its return value to a future' }] },
+          { lineNum: 2, codeSnippet: 'future<int> fut = task.get_future();', constructType: 'Variable & Initializer', title: 'Get Future from Packaged Task', explanation: 'Extracts future handle associated with packaged task.', keyDetails: [{ variableOrConstruct: 'task.get_future()', role: 'Future extraction', whyThisWay: 'Retrieves future handle for task return value' }] },
+          { lineNum: 3, codeSnippet: 'thread t(move(task), 6, 7);', constructType: 'Variable & Initializer', title: 'Execute Packaged Task on Thread', explanation: 'Moves packaged_task into worker thread and passes parameters 6 and 7.', keyDetails: [{ variableOrConstruct: 'move(task)', role: 'Task execution dispatch', whyThisWay: 'Executes packaged task asynchronously' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Non-Blocking Future Status Polling with wait_for()", category: "Future Status Polling",
+        description: "Polls future status using `fut.wait_for(duration)` to avoid blocking caller thread indefinitely.",
+        prosCons: "Pros: Non-blocking status checking. Cons: Requires loop polling.",
+        timeComplexity: "O(1) per check", spaceComplexity: "O(1)", isFree: false,
+        code: `// 74. Async - Approach 6: wait_for Polling
+#include <iostream>
+#include <future>
+#include <chrono>
+#include <thread>
+using namespace std;
+
+int longComputation() {
+    this_thread::sleep_for(chrono::milliseconds(50));
+    return 100;
+}
+
+int main() {
+    auto fut = async(launch::async, longComputation);
+
+    while (fut.wait_for(chrono::milliseconds(10)) != future_status::ready) {
+        cout << "Task still computing... main thread working.\n";
+    }
+
+    cout << "Task Ready! Result: " << fut.get() << endl; // 100
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (fut.wait_for(chrono::milliseconds(10)) != future_status::ready)', constructType: 'Loop Construct', title: 'Poll Future Status with Timeout', explanation: 'Polls future status for up to 10ms. Returns `future_status::timeout` if task is not ready.', keyDetails: [{ variableOrConstruct: 'fut.wait_for()', role: 'Non-blocking status poll', whyThisWay: 'Checks task completion without blocking main thread' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Task still computing...";', constructType: 'Function Signature', title: 'Main Thread Intermediate Work', explanation: 'Main thread performs work while waiting for async task.', keyDetails: [{ variableOrConstruct: 'intermediate work', role: 'Non-blocking work', whyThisWay: 'Maintains main thread responsiveness' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Result: " << fut.get();', constructType: 'Function Signature', title: 'Read Ready Future Value', explanation: 'Reads result once `future_status::ready` is confirmed.', keyDetails: [{ variableOrConstruct: 'fut.get()', role: 'Ready result access', whyThisWay: 'Guaranteed non-blocking get()' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Exception Propagation from Async Task to Calling Thread", category: "Async Exceptions",
+        description: "Demonstrates that exceptions thrown inside an async task are captured and re-thrown when calling `fut.get()`.",
+        prosCons: "Pros: Seamless exception propagation across thread boundaries. Cons: Exception overhead.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 74. Async - Approach 7: Exception Propagation
+#include <iostream>
+#include <future>
+#include <stdexcept>
+using namespace std;
+
+int faultyTask() {
+    throw runtime_error("Async Task Failed!");
+}
+
+int main() {
+    auto fut = async(launch::async, faultyTask);
+
+    try {
+        int res = fut.get(); // Re-throws exception from async task!
+        cout << "Result: " << res << endl;
+    } catch (const exception& e) {
+        cout << "Caught exception from async task: " << e.what() << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'throw runtime_error("Async Task Failed!");', constructType: 'Condition & Branch', title: 'Throw Exception inside Async Task', explanation: 'Throws exception inside async task thread. `std::async` captures exception in future state.', keyDetails: [{ variableOrConstruct: 'throw inside async', role: 'Exception capture', whyThisWay: 'Captured by C++ future runtime' }] },
+          { lineNum: 2, codeSnippet: 'int res = fut.get();', constructType: 'Function Signature', title: 'Re-throw Exception on fut.get()', explanation: 'Calling `.get()` on future re-throws captured exception in main thread context.', keyDetails: [{ variableOrConstruct: 'fut.get() re-throw', role: 'Cross-thread exception re-throw', whyThisWay: 'Propagates async thread exceptions cleanly to main thread' }] },
+          { lineNum: 3, codeSnippet: 'catch (const exception& e) { cout << e.what(); }', constructType: 'Condition & Branch', title: 'Catch Propagated Exception', explanation: 'Main thread catches re-thrown exception.', keyDetails: [{ variableOrConstruct: 'catch block', role: 'Exception handler', whyThisWay: 'Handles async task failures safely' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Parallel Map-Reduce using Multiple std::async Tasks", category: "Parallel Map-Reduce",
+        description: "Executes parallel map-reduce over vector elements using multiple `std::async` tasks.",
+        prosCons: "Pros: High-level parallel map-reduce. Cons: Task creation overhead.",
+        timeComplexity: "O(N / Tasks)", spaceComplexity: "O(Tasks)", isFree: false,
+        code: `// 74. Async - Approach 8: Parallel Map-Reduce
+#include <iostream>
+#include <vector>
+#include <future>
+#include <numeric>
+using namespace std;
+
+long long chunkSum(const vector<int>& v, int start, int end) {
+    long long s = 0;
+    for (int i = start; i < end; i++) s += v[i];
+    return s;
+}
+
+int main() {
+    vector<int> nums(10000, 1);
+    auto f1 = async(launch::async, chunkSum, ref(nums), 0, 5000);
+    auto f2 = async(launch::async, chunkSum, ref(nums), 5000, 10000);
+
+    long long total = f1.get() + f2.get();
+    cout << "Parallel Map-Reduce Total: " << total << endl; // 10000
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto f1 = async(launch::async, chunkSum, ref(nums), 0, 5000);', constructType: 'Variable & Initializer', title: 'Launch Async Chunk 1', explanation: 'Launches async task for first half of vector [0..5000].', keyDetails: [{ variableOrConstruct: 'f1 async', role: 'Map chunk 1 launcher', whyThisWay: 'Computes partial sum 1 concurrently' }] },
+          { lineNum: 2, codeSnippet: 'auto f2 = async(launch::async, chunkSum, ref(nums), 5000, 10000);', constructType: 'Variable & Initializer', title: 'Launch Async Chunk 2', explanation: 'Launches async task for second half of vector [5000..10000].', keyDetails: [{ variableOrConstruct: 'f2 async', role: 'Map chunk 2 launcher', whyThisWay: 'Computes partial sum 2 concurrently' }] },
+          { lineNum: 3, codeSnippet: 'long long total = f1.get() + f2.get();', constructType: 'Variable & Initializer', title: 'Reduce Parallel Future Results', explanation: 'Reduces results from both futures into total sum 10,000.', keyDetails: [{ variableOrConstruct: 'f1.get() + f2.get()', role: 'Reduce phase', whyThisWay: 'Combines parallel task outputs' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Setting Exception in Promise (set_exception)", category: "Promise Exceptions",
+        description: "Sets an exception explicitly in a promise using `p.set_exception()`.",
+        prosCons: "Pros: Explicit error delivery from worker threads. Cons: Manual exception_ptr creation.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 74. Async - Approach 9: Promise Exception
+#include <iostream>
+#include <future>
+#include <thread>
+#include <stdexcept>
+using namespace std;
+
+void errorProducer(promise<int> p) {
+    try {
+        throw invalid_argument("Invalid Input Parameter!");
+    } catch (...) {
+        p.set_exception(current_exception()); // Sets exception in promise!
+    }
+}
+
+int main() {
+    promise<int> p;
+    future<int> f = p.get_future();
+
+    thread t(errorProducer, move(p));
+    try {
+        f.get();
+    } catch (const exception& e) {
+        cout << "Caught promised exception: " << e.what() << endl;
+    }
+    t.join();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'p.set_exception(current_exception());', constructType: 'Function Signature', title: 'Set Exception in Promise', explanation: 'Captures active exception with `current_exception()` and sets it in promise.', keyDetails: [{ variableOrConstruct: 'p.set_exception()', role: 'Promise error setter', whyThisWay: 'Passes exception object to consumer future' }] },
+          { lineNum: 2, codeSnippet: 'f.get();', constructType: 'Function Signature', title: 'Re-throw Promised Exception', explanation: 'Consumer future re-throws promised exception on `.get()`.', keyDetails: [{ variableOrConstruct: 'f.get()', role: 'Exception re-throw', whyThisWay: 'Re-throws captured exception in consumer thread' }] },
+          { lineNum: 3, codeSnippet: 't.join();', constructType: 'Function Signature', title: 'Join Producer Thread', explanation: 'Joins producer thread after exception handling.', keyDetails: [{ variableOrConstruct: 't.join()', role: 'Cleanup', whyThisWay: 'Cleans up thread handle' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Chained Async Computations (Future Result Pipeline)", category: "Async Pipeline",
+        description: "Chains multiple async task futures sequentially into a multi-stage execution pipeline.",
+        prosCons: "Pros: Functional asynchronous processing pipeline. Cons: Sequential get() waits.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 74. Async - Approach 10: Async Pipeline
+#include <iostream>
+#include <future>
+#include <string>
+using namespace std;
+
+int step1() { return 10; }
+int step2(int val) { return val * 3; }
+string step3(int val) { return "Pipeline Result: " + to_string(val); }
+
+int main() {
+    auto f1 = async(launch::async, step1);
+    auto f2 = async(launch::async, step2, f1.get());
+    auto f3 = async(launch::async, step3, f2.get());
+
+    cout << f3.get() << endl; // Pipeline Result: 30
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto f2 = async(launch::async, step2, f1.get());', constructType: 'Variable & Initializer', title: 'Pipe Future 1 into Async Task 2', explanation: 'Passes result of `f1.get()` into second async task `step2`.', keyDetails: [{ variableOrConstruct: 'f1.get() input', role: 'Pipeline stage 2', whyThisWay: 'Feeds output of stage 1 into stage 2' }] },
+          { lineNum: 2, codeSnippet: 'auto f3 = async(launch::async, step3, f2.get());', constructType: 'Variable & Initializer', title: 'Pipe Future 2 into Async Task 3', explanation: 'Passes result of `f2.get()` into third async task `step3`.', keyDetails: [{ variableOrConstruct: 'f2.get() input', role: 'Pipeline stage 3', whyThisWay: 'Feeds output of stage 2 into stage 3' }] },
+          { lineNum: 3, codeSnippet: 'cout << f3.get();', constructType: 'Function Signature', title: 'Read Pipeline Final Output', explanation: 'Prints final string output computed by pipeline.', keyDetails: [{ variableOrConstruct: 'f3.get()', role: 'Final output', whyThisWay: 'Displays accumulated pipeline result' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem75Details(): LearnModule {
+  return {
+    id: "med_constexpr",
+    title: "75. Compile-Time Evaluation (constexpr)",
+    category: "Modern C++",
+    difficulty: "medium",
+    shortDesc: "Executing calculations at compile-time using constexpr & consteval.",
+    fullCode: `// 75. Constexpr - Approach 1: Basic constexpr Factorial
+#include <iostream>
+using namespace std;
+
+constexpr long long factorial(int n) {
+    return (n <= 1) ? 1 : n * factorial(n - 1);
+}
+
+int main() {
+    // Evaluated at compile time!
+    constexpr long long fact5 = factorial(5);
+    static_assert(fact5 == 120, "Factorial 5 must be 120!");
+
+    cout << "Compile-time Factorial(5): " << fact5 << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "75. Compile-Time Evaluation (constexpr)",
+      objective: "Master C++ compile-time evaluation: `constexpr` functions, `constexpr` variables, C++20 `consteval` (immediate functions), `std::is_constant_evaluated()`, `constexpr` lookup tables, `constexpr` constructors, `constexpr` string manipulation, and `static_assert` assertions.",
+      description: "Implement **Compile-Time Evaluation (constexpr)** (Modern C++). Move runtime calculations to compile time using `constexpr` and C++20 `consteval`, achieving zero-runtime execution overhead.",
+      inputDesc: "Compile-time constant expressions, integer bounds, lookup table sizes, or string literals.",
+      outputDesc: "Compile-time constants, pre-computed lookup tables, or static_assert validation confirmations.",
+      takeaways: [
+        "`constexpr` functions can be evaluated at compile time if inputs are constant expressions; otherwise they run at runtime",
+        "`consteval` (C++20) defines immediate functions that MUST evaluate at compile time (causes build error if called with non-constexpr args)",
+        "`std::is_constant_evaluated()` (C++20) detects inside a `constexpr` function whether execution is happening at compile time or runtime",
+        "`static_assert(condition, msg)` validates `constexpr` expressions at compile time, stopping compilation if false"
+      ],
+      examples: [
+        { id: 1, input: "constexpr long long fact5 = factorial(5);", output: "fact5 = 120 at compile time", explanation: "Factorial function executes during compilation; constant 120 is embedded in binary." },
+        { id: 2, input: "consteval int square(int x) { return x * x; }", output: "square(6) = 36", explanation: "consteval function guarantees compile-time evaluation." },
+        { id: 3, input: "static_assert(factorial(5) == 120)", output: "Compilation succeeds", explanation: "static_assert validates constexpr calculation before runtime." }
+      ],
+      constraints: ["Constexpr functions cannot call non-constexpr functions or perform dynamic heap memory allocation (prior to C++20)."],
+      companies: ["NVIDIA", "Google", "Microsoft", "Apple", "Bloomberg"],
+      acceptanceRate: "94.6%",
+      totalAccepted: "2,680,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic constexpr Factorial & Compile-Time Evaluation (FREE)", category: "FREE / Core Constexpr",
+        description: "Computes factorial at compile time using a `constexpr` function and validates result with `static_assert`.",
+        prosCons: "Pros: Zero runtime computation cost. Cons: Arguments must be compile-time constants for compile-time execution.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: true,
+        code: `// 75. Constexpr - Approach 1: Factorial
+#include <iostream>
+using namespace std;
+
+constexpr long long factorial(int n) {
+    return (n <= 1) ? 1 : n * factorial(n - 1);
+}
+
+int main() {
+    constexpr long long fact5 = factorial(5);
+    static_assert(fact5 == 120, "Factorial 5 check failed!");
+
+    cout << "Factorial(5): " << fact5 << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr long long factorial(int n)', constructType: 'Function Signature', title: 'Constexpr Function Declaration', explanation: 'Declares function eligible for compile-time evaluation.', keyDetails: [{ variableOrConstruct: 'constexpr function', role: 'Compile-time evaluator', whyThisWay: 'Allows compiler to evaluate function result during compilation' }] },
+          { lineNum: 2, codeSnippet: 'constexpr long long fact5 = factorial(5);', constructType: 'Variable & Initializer', title: 'Compile-Time Variable Assignment', explanation: 'Forces compiler to evaluate `factorial(5)` at compile time and assign constant 120 to `fact5`.', keyDetails: [{ variableOrConstruct: 'constexpr variable', role: 'Compile-time constant', whyThisWay: 'Guarantees value is evaluated during compilation' }] },
+          { lineNum: 3, codeSnippet: 'static_assert(fact5 == 120, "Failed!");', constructType: 'Condition & Branch', title: 'Compile-Time Assertion Check', explanation: 'Validates `fact5 == 120` at compile time, raising build error if false.', keyDetails: [{ variableOrConstruct: 'static_assert', role: 'Compile-time assertion', whyThisWay: 'Validates constant calculation before binary is generated' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Immediate Functions with C++20 consteval (FREE)", category: "FREE / C++20 Consteval",
+        description: "Uses C++20 `consteval` to guarantee that a function MUST be evaluated at compile time.",
+        prosCons: "Pros: Guarantees compile-time evaluation. Cons: Build error if called with runtime arguments.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: true,
+        code: `// 75. Constexpr - Approach 2: consteval (C++20)
+#include <iostream>
+using namespace std;
+
+// consteval forces compile-time evaluation only!
+consteval int sqr(int x) {
+    return x * x;
+}
+
+int main() {
+    constexpr int val = sqr(6); // Evaluated at compile time!
+    cout << "Square of 6: " << val << endl; // 36
+
+    // int runtimeVar = 7;
+    // int fail = sqr(runtimeVar); // COMPILE ERROR: argument not constant!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'consteval int sqr(int x) { return x * x; }', constructType: 'Function Signature', title: 'Immediate Function Declaration', explanation: '`consteval` (C++20) specifies an immediate function. Every call to `sqr` MUST produce a compile-time constant.', keyDetails: [{ variableOrConstruct: 'consteval', role: 'Immediate function specifier', whyThisWay: 'Enforces compile-time evaluation strictly; runtime execution is prohibited' }] },
+          { lineNum: 2, codeSnippet: 'constexpr int val = sqr(6);', constructType: 'Variable & Initializer', title: 'Valid Compile-Time Consteval Call', explanation: 'Calls `sqr(6)` with constant literal 6. Compiles cleanly to constant 36.', keyDetails: [{ variableOrConstruct: 'sqr(6)', role: 'Immediate call', whyThisWay: 'Evaluates to 36 during compilation' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Square of 6: " << val;', constructType: 'Function Signature', title: 'Output Result', explanation: 'Prints pre-computed constant 36.', keyDetails: [{ variableOrConstruct: 'val', role: 'Pre-computed output', whyThisWay: 'Displays zero-runtime computation result' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Compile-Time Lookup Table Generation via constexpr Arrays", category: "Lookup Tables",
+        description: "Pre-computes a lookup table array (e.g. squares or sines) at compile time using a `constexpr` generator.",
+        prosCons: "Pros: O(1) runtime lookup, zero initialization penalty. Cons: Increases binary size for large tables.",
+        timeComplexity: "O(1) runtime lookup", spaceComplexity: "O(N) table size", isFree: false,
+        code: `// 75. Constexpr - Approach 3: Lookup Table
+#include <iostream>
+#include <array>
+using namespace std;
+
+template<size_t N>
+constexpr auto generateSquareTable() {
+    array<int, N> table{};
+    for (size_t i = 0; i < N; i++) {
+        table[i] = i * i;
+    }
+    return table;
+}
+
+int main() {
+    constexpr auto squares = generateSquareTable<10>();
+    static_assert(squares[7] == 49, "Square of 7 must be 49!");
+
+    cout << "Pre-computed 7^2: " << squares[7] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr auto generateSquareTable() { array<int, N> table{}; ... }', constructType: 'Function Signature', title: 'Constexpr Lookup Table Generator', explanation: 'Generates std::array filled with pre-computed values at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr array generator', role: 'Table generator', whyThisWay: 'Builds lookup table during compilation phase' }] },
+          { lineNum: 2, codeSnippet: 'constexpr auto squares = generateSquareTable<10>();', constructType: 'Variable & Initializer', title: 'Instantiate Pre-computed Lookup Table', explanation: 'Instantiates `squares` array pre-filled with [0, 1, 4, 9, 16, 25, 36, 49, 64, 81] embedded in read-only memory.', keyDetails: [{ variableOrConstruct: 'constexpr squares', role: 'Pre-computed lookup array', whyThisWay: 'Zero runtime generation or memory allocation cost' }] },
+          { lineNum: 3, codeSnippet: 'static_assert(squares[7] == 49, "Failed!");', constructType: 'Condition & Branch', title: 'Validate Table Entry', explanation: 'Validates 7th entry at compile time.', keyDetails: [{ variableOrConstruct: 'static_assert', role: 'Table validation', whyThisWay: 'Confirms table contents during build' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: constexpr Class Constructors & Constexpr Struct Methods", category: "Constexpr Objects",
+        description: "Constructs custom objects and calls member methods at compile time using `constexpr` constructors.",
+        prosCons: "Pros: Full object-oriented compile-time evaluation. Cons: All member types must be constexpr compatible.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 75. Constexpr - Approach 4: Constexpr Class
+#include <iostream>
+using namespace std;
+
+class Point3D {
+public:
+    int x, y, z;
+    constexpr Point3D(int x_, int y_, int z_) : x(x_), y(y_), z(z_) {}
+    constexpr int distSquared() const {
+        return x * x + y * y + z * z;
+    }
+};
+
+int main() {
+    constexpr Point3D p(3, 4, 12);
+    constexpr int d2 = p.distSquared();
+    static_assert(d2 == 169, "Distance squared must be 169!");
+
+    cout << "Compile-time Point3D dist^2: " << d2 << endl; // 169
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr Point3D(int x_, int y_, int z_) : x(x_), y(y_), z(z_) {}', constructType: 'Function Signature', title: 'Constexpr Constructor Declaration', explanation: 'Declares `constexpr` constructor allowing object instances to be initialized at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr constructor', role: 'Compile-time object initializer', whyThisWay: 'Enables constexpr instantiation of custom class objects' }] },
+          { lineNum: 2, codeSnippet: 'constexpr int distSquared() const { return x*x + y*y + z*z; }', constructType: 'Function Signature', title: 'Constexpr Member Method', explanation: 'Declares `constexpr` member method executable at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr method', role: 'Compile-time method', whyThisWay: 'Calculates distance squared at compile time' }] },
+          { lineNum: 3, codeSnippet: 'constexpr Point3D p(3, 4, 12);', constructType: 'Variable & Initializer', title: 'Compile-Time Object Instantiation', explanation: 'Instantiates Point3D object at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr Point3D', role: 'Compile-time object', whyThisWay: 'Creates object instance during compilation' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Checking Execution Context with std::is_constant_evaluated()", category: "Execution Context",
+        description: "Uses C++20 `std::is_constant_evaluated()` to select fast runtime algorithm vs compile-time algorithm inside same function.",
+        prosCons: "Pros: Dual-mode optimization (fast SIMD runtime vs pure constexpr). Cons: Requires C++20.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 75. Constexpr - Approach 5: is_constant_evaluated (C++20)
+#include <iostream>
+#include <type_traits>
+using namespace std;
+
+constexpr int computeValue(int n) {
+    if (is_constant_evaluated()) {
+        // Simple loop for compile-time evaluation
+        int sum = 0;
+        for (int i = 0; i <= n; i++) sum += i;
+        return sum;
+    } else {
+        // Fast formula for runtime evaluation
+        return n * (n + 1) / 2;
+    }
+}
+
+int main() {
+    constexpr int compileRes = computeValue(10); // Evaluates compile-time loop!
+    int n = 10;
+    int runtimeRes = computeValue(n);            // Evaluates runtime formula!
+
+    cout << "Compile-time: " << compileRes << endl; // 55
+    cout << "Runtime:      " << runtimeRes << endl; // 55
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (is_constant_evaluated()) { ... } else { ... }', constructType: 'Condition & Branch', title: 'C++20 Execution Context Branch', explanation: '`is_constant_evaluated()` returns true if function is being evaluated in a compile-time context, allowing dual-path optimization.', keyDetails: [{ variableOrConstruct: 'is_constant_evaluated()', role: 'Context detector', whyThisWay: 'Selects compile-time algorithm vs fast runtime hardware algorithm' }] },
+          { lineNum: 2, codeSnippet: 'constexpr int compileRes = computeValue(10);', constructType: 'Variable & Initializer', title: 'Compile-Time Branch Invocation', explanation: 'Invokes compile-time loop branch.', keyDetails: [{ variableOrConstruct: 'compile-time branch', role: 'Compile-time execution', whyThisWay: 'Runs simple constexpr loop during build' }] },
+          { lineNum: 3, codeSnippet: 'int runtimeRes = computeValue(n);', constructType: 'Variable & Initializer', title: 'Runtime Branch Invocation', explanation: 'Invokes runtime formula branch `n*(n+1)/2`.', keyDetails: [{ variableOrConstruct: 'runtime branch', role: 'Runtime execution', whyThisWay: 'Runs fast O(1) math formula at runtime' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: constexpr String Length & Character Search Functions", category: "Constexpr Strings",
+        description: "Executes string length calculations and character searches at compile time using constexpr string_view.",
+        prosCons: "Pros: Zero runtime string processing cost. Cons: String must be compile-time constant.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 75. Constexpr - Approach 6: String Functions
+#include <iostream>
+#include <string_view>
+using namespace std;
+
+constexpr size_t strLen(const char* str) {
+    size_t len = 0;
+    while (str[len] != '\\0') len++;
+    return len;
+}
+
+constexpr int findChar(string_view sv, char c) {
+    for (size_t i = 0; i < sv.length(); i++) {
+        if (sv[i] == c) return i;
+    }
+    return -1;
+}
+
+int main() {
+    constexpr size_t len = strLen("Execium Engine");
+    constexpr int pos = findChar("Execium Engine", 'E');
+    static_assert(len == 14, "String length must be 14!");
+
+    cout << "Compile-time String Length: " << len << endl;
+    cout << "Compile-time 'E' Position: " << pos << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr size_t strLen(const char* str) { ... }', constructType: 'Function Signature', title: 'Constexpr String Length Function', explanation: 'Calculates string length at compile time by scanning for null terminator `\\0`.', keyDetails: [{ variableOrConstruct: 'constexpr strLen', role: 'Compile-time strlen', whyThisWay: 'Replaces runtime strlen with zero-cost compile-time evaluation' }] },
+          { lineNum: 2, codeSnippet: 'constexpr int findChar(string_view sv, char c) { ... }', constructType: 'Function Signature', title: 'Constexpr Character Search', explanation: 'Searches character inside string_view at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr findChar', role: 'Compile-time search', whyThisWay: 'Finds character index during compilation' }] },
+          { lineNum: 3, codeSnippet: 'static_assert(len == 14, "Failed!");', constructType: 'Condition & Branch', title: 'Validate String Length at Build Time', explanation: 'Validates string length at compile time.', keyDetails: [{ variableOrConstruct: 'static_assert', role: 'Build validation', whyThisWay: 'Ensures correct string length during build' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Compile-Time Fibonacci Sequence Calculation", category: "Constexpr Recursion",
+        description: "Computes Nth Fibonacci number at compile time using a `constexpr` recursive function.",
+        prosCons: "Pros: Zero runtime computation. Cons: Deep recursion increases compile time.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 75. Constexpr - Approach 7: Constexpr Fibonacci
+#include <iostream>
+using namespace std;
+
+constexpr long long fibonacci(int n) {
+    if (n <= 0) return 0;
+    if (n == 1) return 1;
+    long long a = 0, b = 1;
+    for (int i = 2; i <= n; i++) {
+        long long next = a + b;
+        a = b;
+        b = next;
+    }
+    return b;
+}
+
+int main() {
+    constexpr long long fib10 = fibonacci(10);
+    static_assert(fib10 == 55, "10th Fibonacci number must be 55!");
+
+    cout << "Compile-time Fib(10): " << fib10 << endl; // 55
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr long long fibonacci(int n) { ... }', constructType: 'Function Signature', title: 'Constexpr Iterative Fibonacci', explanation: 'Calculates Nth Fibonacci number using a `constexpr` loop.', keyDetails: [{ variableOrConstruct: 'constexpr fibonacci', role: 'Compile-time Fibonacci calculator', whyThisWay: 'Computes Fibonacci sequence during compilation' }] },
+          { lineNum: 2, codeSnippet: 'constexpr long long fib10 = fibonacci(10);', constructType: 'Variable & Initializer', title: 'Compile-Time Constant Instantiation', explanation: 'Evaluates `fibonacci(10)` during compilation and stores constant 55.', keyDetails: [{ variableOrConstruct: 'constexpr fib10', role: 'Constant result', whyThisWay: 'Pre-computes 10th Fibonacci number' }] },
+          { lineNum: 3, codeSnippet: 'static_assert(fib10 == 55, "Failed!");', constructType: 'Condition & Branch', title: 'Assert Fibonacci Value', explanation: 'Validates 10th Fibonacci value is 55.', keyDetails: [{ variableOrConstruct: 'static_assert', role: 'Validation check', whyThisWay: 'Confirms calculation accuracy during build' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: constexpr Bitmask Generation and Bit Manipulations", category: "Constexpr Bitmask",
+        description: "Generates complex bitmasks at compile time using `constexpr` bitwise shift functions.",
+        prosCons: "Pros: Zero runtime bitmask construction penalty. Cons: Bit width limits.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 75. Constexpr - Approach 8: Bitmask Generation
+#include <iostream>
+#include <cstdint>
+using namespace std;
+
+constexpr uint32_t makeBitmask(int startBit, int count) {
+    uint32_t mask = 0;
+    for (int i = 0; i < count; i++) {
+        mask |= (1U << (startBit + i));
+    }
+    return mask;
+}
+
+int main() {
+    constexpr uint32_t mask = makeBitmask(4, 4); // Bits 4..7 set -> 0xF0 (240)
+    static_assert(mask == 240, "Bitmask must be 240 (0xF0)!");
+
+    cout << "Compile-time Bitmask: " << mask << endl; // 240
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr uint32_t makeBitmask(int startBit, int count)', constructType: 'Function Signature', title: 'Constexpr Bitmask Generator', explanation: 'Generates contiguous set bitmask starting at `startBit` of length `count` at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr makeBitmask', role: 'Bitmask generator', whyThisWay: 'Pre-computes bitmasks during compilation' }] },
+          { lineNum: 2, codeSnippet: 'constexpr uint32_t mask = makeBitmask(4, 4);', constructType: 'Variable & Initializer', title: 'Compile-Time Bitmask Constant', explanation: 'Generates bitmask `0xF0` (240) for bits 4 through 7 at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr mask', role: 'Constant bitmask', whyThisWay: 'Embeds constant 240 directly in binary' }] },
+          { lineNum: 3, codeSnippet: 'static_assert(mask == 240, "Failed!");', constructType: 'Condition & Branch', title: 'Validate Bitmask Value', explanation: 'Asserts bitmask equals 240.', keyDetails: [{ variableOrConstruct: 'static_assert', role: 'Bitmask check', whyThisWay: 'Verifies correct bitmask generation during build' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: constexpr Matrix Multiplication at Compile Time", category: "Constexpr Matrix",
+        description: "Multiplies 2D matrices at compile time using `constexpr` std::array matrix structures.",
+        prosCons: "Pros: Pre-computed transformation matrices for graphics/physics. Cons: Array size limits.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 75. Constexpr - Approach 9: Matrix Math
+#include <iostream>
+#include <array>
+using namespace std;
+
+struct Matrix2x2 {
+    array<array<int, 2>, 2> m;
+};
+
+constexpr Matrix2x2 multiply(const Matrix2x2& A, const Matrix2x2& B) {
+    Matrix2x2 C{};
+    C.m[0][0] = A.m[0][0]*B.m[0][0] + A.m[0][1]*B.m[1][0];
+    C.m[0][1] = A.m[0][0]*B.m[0][1] + A.m[0][1]*B.m[1][1];
+    C.m[1][0] = A.m[1][0]*B.m[0][0] + A.m[1][1]*B.m[1][0];
+    C.m[1][1] = A.m[1][0]*B.m[0][1] + A.m[1][1]*B.m[1][1];
+    return C;
+}
+
+int main() {
+    constexpr Matrix2x2 A{{{ {{1, 2}}, {{3, 4}} }}};
+    constexpr Matrix2x2 B{{{ {{2, 0}}, {{1, 2}} }}};
+    constexpr Matrix2x2 C = multiply(A, B);
+
+    cout << "C[0][0]: " << C.m[0][0] << ", C[0][1]: " << C.m[0][1] << endl; // 4, 4
+    cout << "C[1][0]: " << C.m[1][0] << ", C[1][1]: " << C.m[1][1] << endl; // 10, 8
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr Matrix2x2 multiply(const Matrix2x2& A, const Matrix2x2& B)', constructType: 'Function Signature', title: 'Constexpr Matrix Multiplier', explanation: 'Multiplies two 2x2 matrices at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr multiply', role: 'Compile-time matrix multiplier', whyThisWay: 'Pre-computes matrix transformation products during build' }] },
+          { lineNum: 2, codeSnippet: 'constexpr Matrix2x2 C = multiply(A, B);', constructType: 'Variable & Initializer', title: 'Pre-computed Matrix Product', explanation: 'Computes matrix product C at compile time.', keyDetails: [{ variableOrConstruct: 'constexpr C', role: 'Constant matrix product', whyThisWay: 'Zero runtime multiplication overhead' }] },
+          { lineNum: 3, codeSnippet: 'cout << "C[0][0]: " << C.m[0][0];', constructType: 'Function Signature', title: 'Output Matrix Cells', explanation: 'Prints pre-computed matrix cells.', keyDetails: [{ variableOrConstruct: 'C.m[0][0]', role: 'Matrix cell output', whyThisWay: 'Displays pre-computed matrix values' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Validation Suite using static_assert on constexpr Functions", category: "Static Assertion Suite",
+        description: "Constructs an automated compile-time test suite using `static_assert` to validate algorithms at build time.",
+        prosCons: "Pros: Build fails if any test fails, zero runtime testing overhead. Cons: Requires compile-time executable code.",
+        timeComplexity: "O(0) compile-time", spaceComplexity: "O(1)", isFree: false,
+        code: `// 75. Constexpr - Approach 10: Static Assert Suite
+#include <iostream>
+using namespace std;
+
+constexpr int clampVal(int val, int minVal, int maxVal) {
+    if (val < minVal) return minVal;
+    if (val > maxVal) return maxVal;
+    return val;
+}
+
+// Compile-Time Unit Test Suite!
+static_assert(clampVal(5, 0, 10) == 5, "Test 1 Failed: In range value");
+static_assert(clampVal(-5, 0, 10) == 0, "Test 2 Failed: Below min value");
+static_assert(clampVal(15, 0, 10) == 10, "Test 3 Failed: Above max value");
+
+int main() {
+    cout << "All compile-time static_assert unit tests passed successfully!\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'constexpr int clampVal(int val, int minVal, int maxVal)', constructType: 'Function Signature', title: 'Constexpr Clamp Function', explanation: 'Defines `constexpr` clamp function.', keyDetails: [{ variableOrConstruct: 'constexpr clampVal', role: 'Utility function', whyThisWay: 'Clamps values within bounds [minVal, maxVal]' }] },
+          { lineNum: 2, codeSnippet: 'static_assert(clampVal(5, 0, 10) == 5, "Test 1 Failed");', constructType: 'Condition & Branch', title: 'Compile-Time Unit Test 1', explanation: 'Tests `clampVal(5, 0, 10) == 5` during compilation.', keyDetails: [{ variableOrConstruct: 'static_assert test 1', role: 'Compile-time test', whyThisWay: 'Guarantees algorithm correctness before binary is produced' }] },
+          { lineNum: 3, codeSnippet: 'static_assert(clampVal(15, 0, 10) == 10, "Test 3 Failed");', constructType: 'Condition & Branch', title: 'Compile-Time Unit Test 3', explanation: 'Tests `clampVal(15, 0, 10) == 10` during compilation.', keyDetails: [{ variableOrConstruct: 'static_assert test 3', role: 'Compile-time test', whyThisWay: 'Validates upper bound clamp behavior at build time' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -23638,6 +25633,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "med_any") return getProblem68Details();
   if (id === "med_string_view") return getProblem69Details();
   if (id === "med_type_traits") return getProblem70Details();
+  if (id === "med_threads_basic") return getProblem71Details();
+  if (id === "med_mutex_lock") return getProblem72Details();
+  if (id === "med_atomics") return getProblem73Details();
+  if (id === "med_async_future") return getProblem74Details();
+  if (id === "med_constexpr") return getProblem75Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
