@@ -16813,6 +16813,2545 @@ int main() {
   };
 }
 
+
+export function getProblem56Details(): LearnModule {
+  return {
+    id: "med_two_pointers",
+    title: "56. Two-Pointer Technique",
+    category: "Algorithms",
+    difficulty: "medium",
+    shortDesc: "Optimizing array search windows with converging pointers.",
+    fullCode: `// 56. Two Pointers - Approach 1: Two Sum II (Sorted Array)
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> twoSum(const vector<int>& numbers, int target) {
+    int left = 0, right = (int)numbers.size() - 1;
+    while (left < right) {
+        int sum = numbers[left] + numbers[right];
+        if (sum == target) return {left + 1, right + 1}; // 1-indexed
+        if (sum < target) left++;
+        else right--;
+    }
+    return {};
+}
+
+int main() {
+    vector<int> numbers = {2, 7, 11, 15};
+    vector<int> res = twoSum(numbers, 9);
+    cout << "Indices: " << res[0] << ", " << res[1] << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "56. Two-Pointer Technique",
+      objective: "Master the Two-Pointer paradigm: opposite-direction converging pointers (left & right), same-direction fast/slow pointers, 3Sum triplet search, container with most water, in-place duplicate removal, trapping rain water, and Dutch National Flag partitioning.",
+      description: "Implement **Two-Pointer Technique** (Algorithms). Reduce brute-force O(N^2) search spaces to linear O(N) time by strategically navigating two pointers based on sorted order or target invariants.",
+      inputDesc: "Sorted or unsorted arrays, string sequences, target sum requirements, or capacity constraints.",
+      outputDesc: "Matching index pairs, triplet combinations, maximum enclosed area, trapped water units, or mutated array states.",
+      takeaways: [
+        "Opposite-direction pointers (left starting at 0, right at N-1) reduce search spaces on sorted arrays from O(N^2) to O(N)",
+        "Same-direction pointers (fast & slow) enable in-place array modification without extra space",
+        "Triplets (3Sum) and Quadruplets (4Sum) can be solved by fixing outer elements and applying two-pointer search on remaining sub-ranges",
+        "The Dutch National Flag 3-pointer partition sorts 3 distinct values in a single pass"
+      ],
+      examples: [
+        { id: 1, input: "numbers = [2, 7, 11, 15], target = 9", output: "Indices: 1, 2", explanation: "2 + 7 = 9; converging pointers find pair in O(N) time." },
+        { id: 2, input: "heights = [1, 8, 6, 2, 5, 4, 8, 3, 7]", output: "Max Area: 49", explanation: "Pointers at indices 1 (h=8) and 8 (h=7) yield width 7 * min(8,7) = 49." },
+        { id: 3, input: "nums = [0, 0, 1, 1, 1, 2, 2, 3]", output: "Unique length: 4 ([0, 1, 2, 3])", explanation: "Slow pointer overwrites duplicate elements in-place in linear time." }
+      ],
+      constraints: ["Pointers must stay within array boundaries [0, N-1] to prevent out-of-bounds access."],
+      companies: ["Meta", "Amazon", "Google", "Microsoft", "Apple"],
+      acceptanceRate: "90.5%",
+      totalAccepted: "5,120,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Two Sum II (Sorted Converging Pointers) (FREE)", category: "FREE / Opposite Direction",
+        description: "Finds two numbers in a sorted array that sum to a target value using left and right pointers moving inward.",
+        prosCons: "Pros: O(N) time and O(1) extra space. Cons: Requires array to be pre-sorted.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 56. Two Pointers - Approach 1: Two Sum II
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> twoSum(const vector<int>& numbers, int target) {
+    int left = 0, right = (int)numbers.size() - 1;
+    while (left < right) {
+        int sum = numbers[left] + numbers[right];
+        if (sum == target) return {left + 1, right + 1};
+        if (sum < target) left++;
+        else right--;
+    }
+    return {};
+}
+
+int main() {
+    vector<int> numbers = {2, 7, 11, 15};
+    vector<int> res = twoSum(numbers, 9);
+    cout << "Indices: " << res[0] << ", " << res[1] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int left = 0, right = (int)numbers.size() - 1;', constructType: 'Variable & Initializer', title: 'Initialize Boundary Pointers', explanation: 'Places left pointer at array start (index 0) and right pointer at array end (index N-1).', keyDetails: [{ variableOrConstruct: 'left / right', role: 'Boundary search pointers', whyThisWay: 'Opposite end placement maximizes initial span' }] },
+          { lineNum: 2, codeSnippet: 'int sum = numbers[left] + numbers[right];', constructType: 'Variable & Initializer', title: 'Calculate Current Pair Sum', explanation: 'Computes sum of elements at current pointer positions.', keyDetails: [{ variableOrConstruct: 'sum', role: 'Current candidate sum', whyThisWay: 'Used to decide whether to increment left or decrement right' }] },
+          { lineNum: 3, codeSnippet: 'if (sum < target) left++; else right--;', constructType: 'Condition & Branch', title: 'Monotonic Pointer Adjustment', explanation: 'If sum is too small, move left pointer rightward to increase sum. If too large, move right pointer leftward.', keyDetails: [{ variableOrConstruct: 'left++ / right--', role: 'Search space pruning', whyThisWay: 'Array sorted order guarantees sum increases with left++ and decreases with right--' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Remove Duplicates from Sorted Array (FREE)", category: "FREE / Fast & Slow Pointers",
+        description: "Removes duplicates in-place from a sorted array using same-direction fast and slow write pointers.",
+        prosCons: "Pros: O(N) time and O(1) space in-place modification. Cons: Overwrites original array.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 56. Two Pointers - Approach 2: Remove Duplicates
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int removeDuplicates(vector<int>& nums) {
+    if (nums.empty()) return 0;
+    int slow = 0;
+    for (int fast = 1; fast < (int)nums.size(); fast++) {
+        if (nums[fast] != nums[slow]) {
+            slow++;
+            nums[slow] = nums[fast];
+        }
+    }
+    return slow + 1;
+}
+
+int main() {
+    vector<int> nums = {0, 0, 1, 1, 1, 2, 2, 3};
+    int len = removeDuplicates(nums);
+    cout << "Unique Count: " << len << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int slow = 0;', constructType: 'Variable & Initializer', title: 'Slow Write Pointer', explanation: 'Tracks the last position of unique elements written so far.', keyDetails: [{ variableOrConstruct: 'slow', role: 'Write index pointer', whyThisWay: 'Maintains index boundary of unique elements' }] },
+          { lineNum: 2, codeSnippet: 'if (nums[fast] != nums[slow]) { slow++; nums[slow] = nums[fast]; }', constructType: 'Condition & Branch', title: 'New Unique Element Found', explanation: 'When fast pointer discovers a new unique value, advances slow pointer and writes new value.', keyDetails: [{ variableOrConstruct: 'nums[slow] = nums[fast]', role: 'In-place overwrite', whyThisWay: 'Modifies array in-place without auxiliary memory' }] },
+          { lineNum: 3, codeSnippet: 'return slow + 1;', constructType: 'Return / Cleanup', title: 'Return Unique Element Count', explanation: 'Returns length of modified unique subarray (slow + 1 due to 0-indexing).', keyDetails: [{ variableOrConstruct: 'slow + 1', role: 'Subarray length', whyThisWay: 'Gives exact number of unique elements stored' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: 3Sum Triplet Search", category: "Multi-Pointer Search",
+        description: "Finds all unique triplets [a, b, c] in an array that sum to zero using sorting + two pointers.",
+        prosCons: "Pros: Avoids O(N^3) brute force down to O(N^2). Cons: Requires duplicate skip logic.",
+        timeComplexity: "O(N^2)", spaceComplexity: "O(1) excluding output", isFree: false,
+        code: `// 56. Two Pointers - Approach 3: 3Sum
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+vector<vector<int>> threeSum(vector<int>& nums) {
+    sort(nums.begin(), nums.end());
+    vector<vector<int>> res;
+    int n = nums.size();
+
+    for (int i = 0; i < n - 2; i++) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue; // Skip duplicates for i
+        int left = i + 1, right = n - 1;
+        while (left < right) {
+            int sum = nums[i] + nums[left] + nums[right];
+            if (sum == 0) {
+                res.push_back({nums[i], nums[left], nums[right]});
+                while (left < right && nums[left] == nums[left + 1]) left++;
+                while (left < right && nums[right] == nums[right - 1]) right--;
+                left++; right--;
+            } else if (sum < 0) left++;
+            else right--;
+        }
+    }
+    return res;
+}
+
+int main() {
+    vector<int> nums = {-1, 0, 1, 2, -1, -4};
+    auto triplets = threeSum(nums);
+    cout << "Triplets summing to 0:\n";
+    for (auto& t : triplets) cout << t[0] << ", " << t[1] << ", " << t[2] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'sort(nums.begin(), nums.end());', constructType: 'Function Signature', title: 'Sort Input Array', explanation: 'Sorts array in O(N log N) time to enable two-pointer strategy and duplicate skipping.', keyDetails: [{ variableOrConstruct: 'sort()', role: 'Pre-sorting step', whyThisWay: 'Prerequisite for two-pointer search and duplicate elimination' }] },
+          { lineNum: 2, codeSnippet: 'if (i > 0 && nums[i] == nums[i - 1]) continue;', constructType: 'Condition & Branch', title: 'Skip Duplicate Outer Element', explanation: 'Prevents generating duplicate triplets by skipping identical consecutive outer values.', keyDetails: [{ variableOrConstruct: 'nums[i] == nums[i-1]', role: 'Outer duplicate guard', whyThisWay: 'Ensures each unique first element is processed only once' }] },
+          { lineNum: 3, codeSnippet: 'while (left < right && nums[left] == nums[left + 1]) left++;', constructType: 'Loop Construct', title: 'Skip Duplicate Inner Elements', explanation: 'Advances inner pointers past duplicate values once a valid triplet is found.', keyDetails: [{ variableOrConstruct: 'nums[left] == nums[left+1]', role: 'Inner duplicate guard', whyThisWay: 'Avoids duplicate triplet combinations in output' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Container With Most Water", category: "Greedy Converging Pointers",
+        description: "Finds two vertical lines that contain the maximum water volume using greedy two pointers.",
+        prosCons: "Pros: O(N) single pass. Cons: Proof of correctness requires understanding greedy elimination.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 56. Two Pointers - Approach 4: Container With Most Water
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int maxArea(const vector<int>& height) {
+    int left = 0, right = (int)height.size() - 1;
+    int maxW = 0;
+    while (left < right) {
+        int h = min(height[left], height[right]);
+        int w = right - left;
+        maxW = max(maxW, h * w);
+        if (height[left] < height[right]) left++;
+        else right--;
+    }
+    return maxW;
+}
+
+int main() {
+    vector<int> heights = {1, 8, 6, 2, 5, 4, 8, 3, 7};
+    cout << "Max Water Area: " << maxArea(heights) << endl; // 49
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int h = min(height[left], height[right]); int w = right - left;', constructType: 'Variable & Initializer', title: 'Area Calculation', explanation: 'Water level is constrained by shorter line (min height) multiplied by width (right - left).', keyDetails: [{ variableOrConstruct: 'min(height[left], height[right]) * w', role: 'Area formula', whyThisWay: 'Shorter wall bounds maximum water height' }] },
+          { lineNum: 2, codeSnippet: 'if (height[left] < height[right]) left++; else right--;', constructType: 'Condition & Branch', title: 'Greedy Shorter Line Elimination', explanation: 'Always moves the pointer corresponding to shorter line inward, aiming to find a taller line.', keyDetails: [{ variableOrConstruct: 'height[left] < height[right]', role: 'Greedy move choice', whyThisWay: 'Moving taller line cannot increase area because width decreases and height stays <= shorter line' }] },
+          { lineNum: 3, codeSnippet: 'maxW = max(maxW, h * w);', constructType: 'Variable & Initializer', title: 'Track Maximum Area', explanation: 'Updates overall maximum area seen across all pointer positions.', keyDetails: [{ variableOrConstruct: 'maxW', role: 'Max area accumulator', whyThisWay: 'Retains peak volume found' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Trapping Rain Water", category: "Two-Pointer Traversal",
+        description: "Calculates total trapped rain water between elevation bars using leftMax and rightMax two pointers.",
+        prosCons: "Pros: O(N) time and O(1) space vs O(N) space stack approach. Cons: Non-obvious max tracking logic.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 56. Two Pointers - Approach 5: Trapping Rain Water
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int trap(const vector<int>& height) {
+    if (height.empty()) return 0;
+    int left = 0, right = (int)height.size() - 1;
+    int leftMax = 0, rightMax = 0;
+    int water = 0;
+
+    while (left < right) {
+        if (height[left] <= height[right]) {
+            if (height[left] >= leftMax) leftMax = height[left];
+            else water += leftMax - height[left];
+            left++;
+        } else {
+            if (height[right] >= rightMax) rightMax = height[right];
+            else water += rightMax - height[right];
+            right--;
+        }
+    }
+    return water;
+}
+
+int main() {
+    vector<int> height = {0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1};
+    cout << "Trapped Water: " << trap(height) << endl; // 6
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (height[left] <= height[right]) { ... } else { ... }', constructType: 'Condition & Branch', title: 'Process Smaller Height End', explanation: 'Processes left side if height[left] <= height[right], since water trapped on left is bounded by leftMax.', keyDetails: [{ variableOrConstruct: 'height[left] <= height[right]', role: 'Side selection', whyThisWay: 'Right height guarantee ensures leftMax will be limiting factor for left side' }] },
+          { lineNum: 2, codeSnippet: 'if (height[left] >= leftMax) leftMax = height[left];', constructType: 'Condition & Branch', title: 'Update Max Height Bound', explanation: 'If current height is greater than leftMax, updates leftMax bound (no water trapped on this bar).', keyDetails: [{ variableOrConstruct: 'leftMax', role: 'Running max left elevation', whyThisWay: 'Water can only be trapped if current height is below leftMax' }] },
+          { lineNum: 3, codeSnippet: 'else water += leftMax - height[left];', constructType: 'Variable & Initializer', title: 'Accumulate Trapped Water', explanation: 'Adds (leftMax - current height) units of trapped water for current column.', keyDetails: [{ variableOrConstruct: 'leftMax - height[left]', role: 'Column water volume', whyThisWay: 'Exact difference between bounding wall and floor elevation' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Valid Palindrome String Cleaning & Verification", category: "String Pointers",
+        description: "Checks if an alphanumeric string is a palindrome by skipping non-alphanumeric chars with converging pointers.",
+        prosCons: "Pros: In-place string checking O(1) space without copying. Cons: Requires character utility checks.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 56. Two Pointers - Approach 6: Valid Palindrome
+#include <iostream>
+#include <string>
+#include <cctype>
+using namespace std;
+
+bool isPalindrome(string s) {
+    int left = 0, right = (int)s.length() - 1;
+    while (left < right) {
+        while (left < right && !isalnum(s[left])) left++;
+        while (left < right && !isalnum(s[right])) right--;
+        if (tolower(s[left]) != tolower(s[right])) return false;
+        left++; right--;
+    }
+    return true;
+}
+
+int main() {
+    string s = "A man, a plan, a canal: Panama";
+    cout << "Is Palindrome: " << (isPalindrome(s) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (left < right && !isalnum(s[left])) left++;', constructType: 'Loop Construct', title: 'Skip Non-Alphanumeric Left Chars', explanation: 'Advances left pointer past spaces, punctuation, and symbols.', keyDetails: [{ variableOrConstruct: '!isalnum(s[left])', role: 'Filter condition', whyThisWay: 'Ignores formatting and punctuation per palindrome spec' }] },
+          { lineNum: 2, codeSnippet: 'if (tolower(s[left]) != tolower(s[right])) return false;', constructType: 'Condition & Branch', title: 'Case-Insensitive Character Match', explanation: 'Compares lowercase converted characters at left and right pointers.', keyDetails: [{ variableOrConstruct: 'tolower', role: 'Case normalization', whyThisWay: 'Treats uppercase and lowercase characters as equal' }] },
+          { lineNum: 3, codeSnippet: 'left++; right--;', constructType: 'Variable & Initializer', title: 'Advance Pointers Inward', explanation: 'Moves both pointers inward to check next pair of valid characters.', keyDetails: [{ variableOrConstruct: 'left++, right--', role: 'Step inward', whyThisWay: 'Continues symmetric check toward center' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Sort Colors / Dutch National Flag (3-Pointer Partition)", category: "3-Way Partitioning",
+        description: "Sorts an array of 0s, 1s, and 2s in a single pass using low, mid, and high pointers.",
+        prosCons: "Pros: O(N) single pass and O(1) space sort. Cons: Specific to 3 distinct category values.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 56. Two Pointers - Approach 7: Sort Colors (Dutch Flag)
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void sortColors(vector<int>& nums) {
+    int low = 0, mid = 0, high = (int)nums.size() - 1;
+    while (mid <= high) {
+        if (nums[mid] == 0) {
+            swap(nums[low], nums[mid]);
+            low++; mid++;
+        } else if (nums[mid] == 1) {
+            mid++;
+        } else {
+            swap(nums[mid], nums[high]);
+            high--;
+        }
+    }
+}
+
+int main() {
+    vector<int> nums = {2, 0, 2, 1, 1, 0};
+    sortColors(nums);
+    cout << "Sorted Colors: ";
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (nums[mid] == 0) { swap(nums[low], nums[mid]); low++; mid++; }', constructType: 'Condition & Branch', title: 'Process Element 0', explanation: 'Swaps element 0 to low pointer position (left region) and advances both low and mid.', keyDetails: [{ variableOrConstruct: 'nums[mid] == 0', role: 'Category 0 placement', whyThisWay: 'Pushes all 0s to front of array' }] },
+          { lineNum: 2, codeSnippet: 'else if (nums[mid] == 1) mid++;', constructType: 'Condition & Branch', title: 'Process Element 1', explanation: 'Element 1 belongs in middle region; leaves it in place and advances mid pointer.', keyDetails: [{ variableOrConstruct: 'nums[mid] == 1', role: 'Category 1 placement', whyThisWay: '1s accumulate in middle range [low..mid-1]' }] },
+          { lineNum: 3, codeSnippet: 'else { swap(nums[mid], nums[high]); high--; }', constructType: 'Condition & Branch', title: 'Process Element 2', explanation: 'Swaps element 2 to high pointer position (right region) and decrements high pointer without advancing mid.', keyDetails: [{ variableOrConstruct: 'high--', role: 'Category 2 placement', whyThisWay: 'Pushes 2s to back of array; unexamined swapped element at mid must be re-checked' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Move Zeroes to End", category: "In-place Fast/Slow",
+        description: "Moves all 0s to end of array while maintaining relative order of non-zero elements using fast/slow pointers.",
+        prosCons: "Pros: Minimal write operations, O(1) extra space. Cons: Overwrites original array.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 56. Two Pointers - Approach 8: Move Zeroes
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void moveZeroes(vector<int>& nums) {
+    int lastNonZero = 0;
+    for (int i = 0; i < (int)nums.size(); i++) {
+        if (nums[i] != 0) {
+            swap(nums[lastNonZero], nums[i]);
+            lastNonZero++;
+        }
+    }
+}
+
+int main() {
+    vector<int> nums = {0, 1, 0, 3, 12};
+    moveZeroes(nums);
+    cout << "Moved Zeroes: ";
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int lastNonZero = 0;', constructType: 'Variable & Initializer', title: 'Slow Write Pointer', explanation: 'Tracks the position where next non-zero element should be placed.', keyDetails: [{ variableOrConstruct: 'lastNonZero', role: 'Non-zero boundary pointer', whyThisWay: 'Maintains contiguous block of non-zero elements at array front' }] },
+          { lineNum: 2, codeSnippet: 'if (nums[i] != 0) { swap(nums[lastNonZero], nums[i]); lastNonZero++; }', constructType: 'Condition & Branch', title: 'Swap Non-Zero Element', explanation: 'Swaps non-zero element found at index i with slot at lastNonZero.', keyDetails: [{ variableOrConstruct: 'swap', role: 'In-place swap', whyThisWay: 'Pushes non-zero values forward while sending zeroes backward' }] },
+          { lineNum: 3, codeSnippet: 'for (int i = 0; i < (int)nums.size(); i++)', constructType: 'Loop Construct', title: 'Fast Scanning Pointer', explanation: 'Fast pointer i scans array from index 0 to N-1.', keyDetails: [{ variableOrConstruct: 'i pointer', role: 'Scan pointer', whyThisWay: 'Visits every element once in linear time' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Squares of a Sorted Array", category: "Array Filling from Right",
+        description: "Given a sorted array containing negative numbers, returns array of squares sorted in non-decreasing order.",
+        prosCons: "Pros: O(N) linear time vs O(N log N) squaring then sorting. Cons: Requires O(N) result array allocation.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 56. Two Pointers - Approach 9: Sorted Squares
+#include <iostream>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+vector<int> sortedSquares(const vector<int>& nums) {
+    int n = nums.size();
+    vector<int> res(n);
+    int left = 0, right = n - 1;
+    int pos = n - 1;
+
+    while (left <= right) {
+        int sqLeft = nums[left] * nums[left];
+        int sqRight = nums[right] * nums[right];
+        if (sqLeft > sqRight) {
+            res[pos] = sqLeft;
+            left++;
+        } else {
+            res[pos] = sqRight;
+            right--;
+        }
+        pos--;
+    }
+    return res;
+}
+
+int main() {
+    vector<int> nums = {-4, -1, 0, 3, 10};
+    vector<int> sq = sortedSquares(nums);
+    cout << "Sorted Squares: ";
+    for (int x : sq) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int sqLeft = nums[left] * nums[left]; int sqRight = nums[right] * nums[right];', constructType: 'Variable & Initializer', title: 'Square Boundary Elements', explanation: 'Calculates squares of elements at left and right pointers. The largest square must come from one of the two ends.', keyDetails: [{ variableOrConstruct: 'sqLeft / sqRight', role: 'Square values', whyThisWay: 'Because input is sorted, largest magnitude values reside at extreme ends' }] },
+          { lineNum: 2, codeSnippet: 'if (sqLeft > sqRight) { res[pos] = sqLeft; left++; }', constructType: 'Condition & Branch', title: 'Fill Result Array from Back', explanation: 'Places larger square at index pos of result array and advances corresponding pointer.', keyDetails: [{ variableOrConstruct: 'res[pos]', role: 'Reverse array filling', whyThisWay: 'Filling from right to left places largest values first' }] },
+          { lineNum: 3, codeSnippet: 'pos--;', constructType: 'Variable & Initializer', title: 'Decrement Result Index', explanation: 'Decrements write position pos for next largest square.', keyDetails: [{ variableOrConstruct: 'pos--', role: 'Reverse fill pointer update', whyThisWay: 'Ensures output array is sorted in non-decreasing order' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: 4Sum Quadruplet Target Search", category: "Multi-Pointer Search",
+        description: "Finds all unique quadruplets [a, b, c, d] that sum to a target value using double loops + two pointers.",
+        prosCons: "Pros: O(N^3) time vs O(N^4) brute force. Cons: Requires duplicate handling across 4 pointer indices.",
+        timeComplexity: "O(N^3)", spaceComplexity: "O(1) extra", isFree: false,
+        code: `// 56. Two Pointers - Approach 10: 4Sum
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+vector<vector<int>> fourSum(vector<int>& nums, long long target) {
+    sort(nums.begin(), nums.end());
+    vector<vector<int>> res;
+    int n = nums.size();
+
+    for (int i = 0; i < n - 3; i++) {
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        for (int j = i + 1; j < n - 2; j++) {
+            if (j > i + 1 && nums[j] == nums[j - 1]) continue;
+            int left = j + 1, right = n - 1;
+            while (left < right) {
+                long long sum = (long long)nums[i] + nums[j] + nums[left] + nums[right];
+                if (sum == target) {
+                    res.push_back({nums[i], nums[j], nums[left], nums[right]});
+                    while (left < right && nums[left] == nums[left + 1]) left++;
+                    while (left < right && nums[right] == nums[right - 1]) right--;
+                    left++; right--;
+                } else if (sum < target) left++;
+                else right--;
+            }
+        }
+    }
+    return res;
+}
+
+int main() {
+    vector<int> nums = {1, 0, -1, 0, -2, 2};
+    auto quad = fourSum(nums, 0);
+    cout << "4Sum Quadruplets:\n";
+    for (auto& q : quad) cout << q[0] << ", " << q[1] << ", " << q[2] << ", " << q[3] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int j = i + 1; j < n - 2; j++)', constructType: 'Loop Construct', title: 'Second Outer Loop', explanation: 'Fixes second element j after fixing first element i.', keyDetails: [{ variableOrConstruct: 'j = i + 1', role: 'Second element selection', whyThisWay: 'Reduces 4Sum to 2Sum search on remaining sub-range' }] },
+          { lineNum: 2, codeSnippet: 'long long sum = (long long)nums[i] + nums[j] + nums[left] + nums[right];', constructType: 'Variable & Initializer', title: '64-bit Overflow Safe Sum', explanation: 'Casts first element to long long to prevent integer overflow during 4-element addition.', keyDetails: [{ variableOrConstruct: 'long long sum', role: '64-bit sum accumulator', whyThisWay: 'Prevents 32-bit signed integer overflow' }] },
+          { lineNum: 3, codeSnippet: 'while (left < right) { ... }', constructType: 'Loop Construct', title: 'Inner Converging Two-Pointer Search', explanation: 'Runs two-pointer search on remaining range [j+1, n-1].', keyDetails: [{ variableOrConstruct: 'left / right', role: 'Inner search pair', whyThisWay: 'Finds remaining pair in O(N) time' }] }
+        ]
+      }
+    ],
+    traceKey: "binary_search"
+  };
+}
+
+export function getProblem57Details(): LearnModule {
+  return {
+    id: "med_sliding_window",
+    title: "57. Sliding Window Technique",
+    category: "Algorithms",
+    difficulty: "medium",
+    shortDesc: "Fixed and variable length window optimization over arrays.",
+    fullCode: `// 57. Sliding Window - Approach 1: Fixed Size Window Max Sum
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+using namespace std;
+
+int maxSubarraySumFixed(const vector<int>& nums, int k) {
+    int n = nums.size();
+    if (n < k) return 0;
+    int windowSum = 0;
+    for (int i = 0; i < k; i++) windowSum += nums[i];
+
+    int maxSum = windowSum;
+    for (int i = k; i < n; i++) {
+        windowSum += nums[i] - nums[i - k];
+        maxSum = max(maxSum, windowSum);
+    }
+    return maxSum;
+}
+
+int main() {
+    vector<int> nums = {2, 1, 5, 1, 3, 2};
+    cout << "Max sum subarray of size 3: " << maxSubarraySumFixed(nums, 3) << endl; // 9 (5+1+3)
+    return 0;
+}`,
+    problemStatement: {
+      title: "57. Sliding Window Technique",
+      objective: "Master the Sliding Window algorithmic pattern: fixed-size windows, variable-size dynamic windows, frequency map tracking, monotonic queue windows (deque), and two-pointer window boundaries.",
+      description: "Implement **Sliding Window Technique** (Algorithms). Optimize contiguous subarray and substring problems from O(N^2) to O(N) time by incrementally sliding a window and updating boundary states.",
+      inputDesc: "Arrays or strings, window size K, or target threshold constraints.",
+      outputDesc: "Maximum/minimum window sum, longest/shortest subarray length, or substring occurrence count.",
+      takeaways: [
+        "Fixed Sliding Windows maintain a constant window width K by adding incoming element at right and removing outgoing element at left",
+        "Variable Sliding Windows expand the right boundary to satisfy a condition, then shrink the left boundary to optimize the objective",
+        "HashMaps or frequency vectors efficiently track character/element counts inside the active window in O(1) time per step",
+        "Monotonic queues (std::deque) enable O(1) maximum/minimum tracking over sliding windows"
+      ],
+      examples: [
+        { id: 1, input: "nums = [2, 1, 5, 1, 3, 2], k = 3", output: "Max sum: 9", explanation: "Window [5, 1, 3] gives maximum sum of 9." },
+        { id: 2, input: "nums = [2, 3, 1, 2, 4, 3], target = 7", output: "Min length: 2 ([4, 3])", explanation: "Variable window shrinks left boundary to find minimal length subarray with sum >= 7." },
+        { id: 3, input: "s = 'abcabcbb'", output: "Longest length: 3 ('abc')", explanation: "Dynamic window expands right and shrinks left on duplicate char to find max substring without duplicates." }
+      ],
+      constraints: ["Window boundaries must satisfy 0 <= left <= right < N."],
+      companies: ["Amazon", "Google", "Meta", "Microsoft", "Uber"],
+      acceptanceRate: "89.8%",
+      totalAccepted: "4,950,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Maximum Sum Subarray of Fixed Size K (FREE)", category: "FREE / Fixed Window",
+        description: "Finds the maximum sum of any contiguous subarray of fixed size K using a sliding window.",
+        prosCons: "Pros: O(N) time single pass vs O(N*K) brute force. Cons: Fixed window size K only.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 57. Sliding Window - Approach 1: Fixed Size Window
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int maxSubarraySumFixed(const vector<int>& nums, int k) {
+    int n = nums.size();
+    if (n < k) return 0;
+    int windowSum = 0;
+    for (int i = 0; i < k; i++) windowSum += nums[i];
+
+    int maxSum = windowSum;
+    for (int i = k; i < n; i++) {
+        windowSum += nums[i] - nums[i - k];
+        maxSum = max(maxSum, windowSum);
+    }
+    return maxSum;
+}
+
+int main() {
+    vector<int> nums = {2, 1, 5, 1, 3, 2};
+    cout << "Max Sum Size 3: " << maxSubarraySumFixed(nums, 3) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = 0; i < k; i++) windowSum += nums[i];', constructType: 'Loop Construct', title: 'Initialize First Window Sum', explanation: 'Computes sum of first K elements to initialize window state.', keyDetails: [{ variableOrConstruct: 'windowSum', role: 'Initial window accumulator', whyThisWay: 'Establishes baseline sum for first window [0..k-1]' }] },
+          { lineNum: 2, codeSnippet: 'windowSum += nums[i] - nums[i - k];', constructType: 'Variable & Initializer', title: 'Incremental Window Slide', explanation: 'Adds incoming element nums[i] at right and subtracts outgoing element nums[i-k] at left in O(1) time.', keyDetails: [{ variableOrConstruct: 'nums[i] - nums[i-k]', role: 'Delta update', whyThisWay: 'Re-uses previous window sum without re-computing K elements' }] },
+          { lineNum: 3, codeSnippet: 'maxSum = max(maxSum, windowSum);', constructType: 'Variable & Initializer', title: 'Update Peak Window Sum', explanation: 'Tracks maximum window sum encountered across all window positions.', keyDetails: [{ variableOrConstruct: 'maxSum', role: 'Global peak accumulator', whyThisWay: 'Records maximum sum found' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Minimum Size Subarray Sum (FREE)", category: "FREE / Variable Window",
+        description: "Finds minimal length of contiguous subarray with sum >= target using dynamic expanding/shrinking window.",
+        prosCons: "Pros: O(N) time single pass with two pointers. Cons: Requires positive integer elements.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 57. Sliding Window - Approach 2: Min Size Subarray Sum
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+int minSubArrayLen(int target, const vector<int>& nums) {
+    int n = nums.size();
+    int left = 0, currentSum = 0;
+    int minLen = INT_MAX;
+
+    for (int right = 0; right < n; right++) {
+        currentSum += nums[right];
+        while (currentSum >= target) {
+            minLen = min(minLen, right - left + 1);
+            currentSum -= nums[left];
+            left++;
+        }
+    }
+    return minLen == INT_MAX ? 0 : minLen;
+}
+
+int main() {
+    vector<int> nums = {2, 3, 1, 2, 4, 3};
+    cout << "Min Length (target 7): " << minSubArrayLen(7, nums) << endl; // 2 ([4,3])
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int right = 0; right < n; right++) { currentSum += nums[right]; ... }', constructType: 'Loop Construct', title: 'Expand Right Window Boundary', explanation: 'Expands right boundary of window, adding nums[right] to currentSum.', keyDetails: [{ variableOrConstruct: 'right boundary', role: 'Window expansion', whyThisWay: 'Grows window to reach target sum condition' }] },
+          { lineNum: 2, codeSnippet: 'while (currentSum >= target) { minLen = min(minLen, right - left + 1); currentSum -= nums[left]; left++; }', constructType: 'Loop Construct', title: 'Shrink Left Window Boundary', explanation: 'While condition is satisfied, records current window length (right - left + 1) and shrinks left boundary to optimize length.', keyDetails: [{ variableOrConstruct: 'left++', role: 'Window shrinking', whyThisWay: 'Finds minimal window length that still meets target sum' }] },
+          { lineNum: 3, codeSnippet: 'return minLen == INT_MAX ? 0 : minLen;', constructType: 'Return / Cleanup', title: 'Return Minimum Subarray Length', explanation: 'Returns minimal length found or 0 if no valid subarray exists.', keyDetails: [{ variableOrConstruct: 'minLen', role: 'Result length', whyThisWay: 'Provides exact shortest subarray length in O(N)' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Longest Substring Without Repeating Characters", category: "Frequency Window",
+        description: "Finds the length of longest substring without repeating characters using variable window + hash map/index array.",
+        prosCons: "Pros: O(N) single pass. Cons: Extra space for character index map.",
+        timeComplexity: "O(N)", spaceComplexity: "O(min(N, A))", isFree: false,
+        code: `// 57. Sliding Window - Approach 3: Longest Substring No Repeats
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int lengthOfLongestSubstring(string s) {
+    vector<int> lastSeen(256, -1);
+    int left = 0, maxLen = 0;
+
+    for (int right = 0; right < (int)s.length(); right++) {
+        if (lastSeen[s[right]] >= left) {
+            left = lastSeen[s[right]] + 1;
+        }
+        lastSeen[s[right]] = right;
+        maxLen = max(maxLen, right - left + 1);
+    }
+    return maxLen;
+}
+
+int main() {
+    string s = "abcabcbb";
+    cout << "Longest Substring No Repeats: " << lengthOfLongestSubstring(s) << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> lastSeen(256, -1);', constructType: 'Variable & Initializer', title: 'Last Seen Index Map', explanation: 'Array mapping ASCII character code to its most recent index in string.', keyDetails: [{ variableOrConstruct: 'lastSeen', role: 'Direct-address index map', whyThisWay: 'O(1) lookup to check if current character is inside active window' }] },
+          { lineNum: 2, codeSnippet: 'if (lastSeen[s[right]] >= left) left = lastSeen[s[right]] + 1;', constructType: 'Condition & Branch', title: 'Jump Left Pointer Past Duplicate', explanation: 'If current char was seen inside active window [left..right], jumps left pointer to position after previous duplicate.', keyDetails: [{ variableOrConstruct: 'left = lastSeen + 1', role: 'O(1) window shrink jump', whyThisWay: 'Directly shrinks window past duplicate without step-by-step while loop' }] },
+          { lineNum: 3, codeSnippet: 'lastSeen[s[right]] = right; maxLen = max(maxLen, right - left + 1);', constructType: 'Variable & Initializer', title: 'Update Last Seen & Max Length', explanation: 'Updates char last seen position and records max window length.', keyDetails: [{ variableOrConstruct: 'maxLen', role: 'Max length accumulator', whyThisWay: 'Tracks longest valid duplicate-free window' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Max Consecutive Ones III (At Most K Zero Flips)", category: "Counting Window",
+        description: "Finds maximum consecutive 1s in binary array if you can flip at most K 0s to 1s.",
+        prosCons: "Pros: O(N) time single pass. Cons: Conceptually flips 0s by counting zero frequency in window.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 57. Sliding Window - Approach 4: Max Consecutive Ones III
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int longestOnes(const vector<int>& nums, int k) {
+    int left = 0, zeroCount = 0, maxLen = 0;
+    for (int right = 0; right < (int)nums.size(); right++) {
+        if (nums[right] == 0) zeroCount++;
+        while (zeroCount > k) {
+            if (nums[left] == 0) zeroCount--;
+            left++;
+        }
+        maxLen = max(maxLen, right - left + 1);
+    }
+    return maxLen;
+}
+
+int main() {
+    vector<int> nums = {1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0};
+    cout << "Max Consecutive 1s (K=2): " << longestOnes(nums, 2) << endl; // 6
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (nums[right] == 0) zeroCount++;', constructType: 'Condition & Branch', title: 'Increment Zero Counter', explanation: 'Increments zeroCount when right pointer encounters a 0.', keyDetails: [{ variableOrConstruct: 'zeroCount++', role: 'Zero tracker', whyThisWay: 'Counts number of zero-flips currently used in window' }] },
+          { lineNum: 2, codeSnippet: 'while (zeroCount > k) { if (nums[left] == 0) zeroCount--; left++; }', constructType: 'Loop Construct', title: 'Shrink Window When Zero Count Exceeds K', explanation: 'If zero count exceeds allowed K flips, shrinks left boundary until zeroCount <= K.', keyDetails: [{ variableOrConstruct: 'zeroCount > k', role: 'Window constraint check', whyThisWay: 'Ensures active window uses at most K zero flips' }] },
+          { lineNum: 3, codeSnippet: 'maxLen = max(maxLen, right - left + 1);', constructType: 'Variable & Initializer', title: 'Update Max Window Length', explanation: 'Calculates maximum valid consecutive 1s length.', keyDetails: [{ variableOrConstruct: 'maxLen', role: 'Result accumulator', whyThisWay: 'Tracks peak sequence length achievable' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Permutation in String / Anagram Matching", category: "Frequency Match Window",
+        description: "Checks if string s2 contains a permutation of string s1 using fixed-size frequency match window.",
+        prosCons: "Pros: O(N) time using 26-element array comparisons. Cons: Fixed window length of s1.",
+        timeComplexity: "O(N2)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 57. Sliding Window - Approach 5: Permutation in String
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+bool checkInclusion(string s1, string s2) {
+    int len1 = s1.length(), len2 = s2.length();
+    if (len1 > len2) return false;
+
+    vector<int> count1(26, 0), count2(26, 0);
+    for (int i = 0; i < len1; i++) {
+        count1[s1[i] - 'a']++;
+        count2[s2[i] - 'a']++;
+    }
+
+    if (count1 == count2) return true;
+
+    for (int i = len1; i < len2; i++) {
+        count2[s2[i] - 'a']++;
+        count2[s2[i - len1] - 'a']--;
+        if (count1 == count2) return true;
+    }
+    return false;
+}
+
+int main() {
+    cout << "Contains permutation ('ab', 'eidbaooo'): " << (checkInclusion("ab", "eidbaooo") ? "Yes" : "No") << endl; // Yes
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> count1(26, 0), count2(26, 0);', constructType: 'Variable & Initializer', title: 'Alphabet Frequency Arrays', explanation: 'Initializes frequency count vectors for target string s1 and current window in s2.', keyDetails: [{ variableOrConstruct: '26-element vector', role: 'Frequency signature', whyThisWay: 'Provides O(1) comparison for lowercase alphabet distribution' }] },
+          { lineNum: 2, codeSnippet: 'count2[s2[i] - \'a\']++; count2[s2[i - len1] - \'a\']--;', constructType: 'Variable & Initializer', title: 'Fixed Window Frequency Slide', explanation: 'Adds incoming char s2[i] and subtracts outgoing char s2[i - len1] to maintain fixed window size len1.', keyDetails: [{ variableOrConstruct: 'inc / dec frequency', role: 'Window update', whyThisWay: 'Updates frequency signature in O(1) step' }] },
+          { lineNum: 3, codeSnippet: 'if (count1 == count2) return true;', constructType: 'Condition & Branch', title: 'Exact Anagram Signature Match', explanation: 'Checks if window character frequency array matches s1 frequency array.', keyDetails: [{ variableOrConstruct: 'count1 == count2', role: 'Match verification', whyThisWay: 'Matching frequency vectors proves window is a permutation of s1' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Sliding Window Maximum using std::deque", category: "Monotonic Queue",
+        description: "Finds max element in every sliding window of size K in O(N) total time using a monotonic deque.",
+        prosCons: "Pros: O(N) optimal time vs O(N log K) priority queue. Cons: Monotonic deque logic requires care.",
+        timeComplexity: "O(N)", spaceComplexity: "O(K)", isFree: false,
+        code: `// 57. Sliding Window - Approach 6: Sliding Window Max (Deque)
+#include <iostream>
+#include <vector>
+#include <deque>
+using namespace std;
+
+vector<int> maxSlidingWindow(const vector<int>& nums, int k) {
+    deque<int> dq; // Stores indices of elements in non-increasing order
+    vector<int> res;
+
+    for (int i = 0; i < (int)nums.size(); i++) {
+        if (!dq.empty() && dq.front() == i - k) dq.pop_front();
+        while (!dq.empty() && nums[dq.back()] <= nums[i]) dq.pop_back();
+        dq.push_back(i);
+        if (i >= k - 1) res.push_back(nums[dq.front()]);
+    }
+    return res;
+}
+
+int main() {
+    vector<int> nums = {1, 3, -1, -3, 5, 3, 6, 7};
+    vector<int> maxes = maxSlidingWindow(nums, 3);
+    cout << "Sliding Window Maxes: ";
+    for (int x : maxes) cout << x << " ";
+    cout << endl; // 3 3 5 5 6 7
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (!dq.empty() && dq.front() == i - k) dq.pop_front();', constructType: 'Condition & Branch', title: 'Evict Expired Window Index', explanation: 'Pops front index from deque if it falls outside active window boundary [i-k+1..i].', keyDetails: [{ variableOrConstruct: 'dq.front() == i - k', role: 'Expired index eviction', whyThisWay: 'Ensures top element belongs to current window' }] },
+          { lineNum: 2, codeSnippet: 'while (!dq.empty() && nums[dq.back()] <= nums[i]) dq.pop_back();', constructType: 'Loop Construct', title: 'Maintain Monotonic Decreasing Deque', explanation: 'Pops smaller elements from back before pushing current element index i, maintaining decreasing value order.', keyDetails: [{ variableOrConstruct: 'nums[dq.back()] <= nums[i]', role: 'Monotonic order maintenance', whyThisWay: 'Smaller elements behind a larger incoming element can never be window max' }] },
+          { lineNum: 3, codeSnippet: 'if (i >= k - 1) res.push_back(nums[dq.front()]);', constructType: 'Condition & Branch', title: 'Record Window Maximum', explanation: 'The front of deque always holds the index of maximum element in current window.', keyDetails: [{ variableOrConstruct: 'nums[dq.front()]', role: 'Window max element', whyThisWay: 'Provides O(1) query for maximum element in active window' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Minimum Window Substring", category: "Multi-Char Matching Window",
+        description: "Finds minimum length substring of s that contains all characters of string t in O(N) time.",
+        prosCons: "Pros: O(N) time optimal string matching. Cons: Requires match counter and frequency array.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1) fixed 128 chars", isFree: false,
+        code: `// 57. Sliding Window - Approach 7: Minimum Window Substring
+#include <iostream>
+#include <string>
+#include <vector>
+#include <climits>
+using namespace std;
+
+string minWindow(string s, string t) {
+    vector<int> map(128, 0);
+    for (char c : t) map[c]++;
+
+    int count = t.length(), left = 0, minLen = INT_MAX, start = 0;
+
+    for (int right = 0; right < (int)s.length(); right++) {
+        if (map[s[right]] > 0) count--;
+        map[s[right]]--;
+
+        while (count == 0) {
+            if (right - left + 1 < minLen) {
+                minLen = right - left + 1;
+                start = left;
+            }
+            map[s[left]]++;
+            if (map[s[left]] > 0) count++;
+            left++;
+        }
+    }
+    return minLen == INT_MAX ? "" : s.substr(start, minLen);
+}
+
+int main() {
+    cout << "Min Window ('ADOBECODEBANC', 'ABC'): " << minWindow("ADOBECODEBANC", "ABC") << endl; // BANC
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (map[s[right]] > 0) count--; map[s[right]]--;', constructType: 'Variable & Initializer', title: 'Expand Right & Track Target Match', explanation: 'Decrements count when encountering a needed character from target string t.', keyDetails: [{ variableOrConstruct: 'count--', role: 'Remaining target char counter', whyThisWay: 'count reaches 0 when current window contains all target chars' }] },
+          { lineNum: 2, codeSnippet: 'while (count == 0) { ... map[s[left]]++; if (map[s[left]] > 0) count++; left++; }', constructType: 'Loop Construct', title: 'Shrink Left & Optimize Window', explanation: 'While all target chars are satisfied (count == 0), records min length and shrinks left boundary.', keyDetails: [{ variableOrConstruct: 'left++', role: 'Left boundary shrinking', whyThisWay: 'Finds smallest substring satisfying target requirement' }] },
+          { lineNum: 3, codeSnippet: 'return minLen == INT_MAX ? "" : s.substr(start, minLen);', constructType: 'Return / Cleanup', title: 'Extract Substring Result', explanation: 'Returns minimum substring found using start index and minLen.', keyDetails: [{ variableOrConstruct: 's.substr(start, minLen)', role: 'Substring extraction', whyThisWay: 'Extracts exact minimum covering substring' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Longest Repeating Character Replacement", category: "Max Frequency Window",
+        description: "Finds length of longest substring containing same letter after replacing at most K characters.",
+        prosCons: "Pros: O(N) time with max frequency tracker. Cons: Max count update invariant requires understanding.",
+        timeComplexity: "O(N)", spaceComplexity: "O(26)", isFree: false,
+        code: `// 57. Sliding Window - Approach 8: Character Replacement
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int characterReplacement(string s, int k) {
+    vector<int> count(26, 0);
+    int left = 0, maxFreq = 0, maxLen = 0;
+
+    for (int right = 0; right < (int)s.length(); right++) {
+        count[s[right] - 'A']++;
+        maxFreq = max(maxFreq, count[s[right] - 'A']);
+
+        // If window size minus max character count > k, shrink window
+        if ((right - left + 1) - maxFreq > k) {
+            count[s[left] - 'A']--;
+            left++;
+        }
+        maxLen = max(maxLen, right - left + 1);
+    }
+    return maxLen;
+}
+
+int main() {
+    cout << "Longest Repeating ('AABABBA', k=1): " << characterReplacement("AABABBA", 1) << endl; // 4
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'maxFreq = max(maxFreq, count[s[right] - \'A\']);', constructType: 'Variable & Initializer', title: 'Track Peak Character Frequency', explanation: 'Tracks highest frequency of any single character inside current window.', keyDetails: [{ variableOrConstruct: 'maxFreq', role: 'Dominant character count', whyThisWay: 'Remaining chars in window (windowSize - maxFreq) must be replaced' }] },
+          { lineNum: 2, codeSnippet: 'if ((right - left + 1) - maxFreq > k) { count[s[left] - \'A\']--; left++; }', constructType: 'Condition & Branch', title: 'Window Validity Guard', explanation: 'If replacements needed exceed K, shrinks window from left by 1 step.', keyDetails: [{ variableOrConstruct: 'windowLen - maxFreq > k', role: 'Validity condition', whyThisWay: 'Ensures number of replaced chars does not exceed budget K' }] },
+          { lineNum: 3, codeSnippet: 'maxLen = max(maxLen, right - left + 1);', constructType: 'Variable & Initializer', title: 'Update Max Window Size', explanation: 'Calculates maximum valid substring length found.', keyDetails: [{ variableOrConstruct: 'maxLen', role: 'Max length result', whyThisWay: 'Returns longest valid uniform character substring' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Fruit Into Baskets (At Most 2 Distinct Types)", category: "At Most K Distinct",
+        description: "Finds longest contiguous subarray containing at most 2 distinct numbers using sliding window + hash map.",
+        prosCons: "Pros: O(N) time single pass. Cons: HashMap size checks.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1) at most 3 elements", isFree: false,
+        code: `// 57. Sliding Window - Approach 9: Fruit Into Baskets
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+using namespace std;
+
+int totalFruit(const vector<int>& fruits) {
+    unordered_map<int, int> basket;
+    int left = 0, maxFruits = 0;
+
+    for (int right = 0; right < (int)fruits.size(); right++) {
+        basket[fruits[right]]++;
+        while (basket.size() > 2) {
+            basket[fruits[left]]--;
+            if (basket[fruits[left]] == 0) basket.erase(fruits[left]);
+            left++;
+        }
+        maxFruits = max(maxFruits, right - left + 1);
+    }
+    return maxFruits;
+}
+
+int main() {
+    vector<int> fruits = {1, 2, 1, 2, 3, 2, 2};
+    cout << "Max Fruits Collected: " << totalFruit(fruits) << endl; // 5 ([2,1,2,3,2,2] -> [2,3,2,2])
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'basket[fruits[right]]++;', constructType: 'Variable & Initializer', title: 'Add Fruit to Basket Map', explanation: 'Increments count of fruit type at right boundary in frequency map.', keyDetails: [{ variableOrConstruct: 'basket map', role: 'Fruit type tracker', whyThisWay: 'Tracks distinct fruit types inside window' }] },
+          { lineNum: 2, codeSnippet: 'while (basket.size() > 2) { ... if (basket[fruits[left]] == 0) basket.erase(...); left++; }', constructType: 'Loop Construct', title: 'Shrink Window When Distinct Types > 2', explanation: 'Shrinks left boundary and removes fruit type from map when count reaches 0.', keyDetails: [{ variableOrConstruct: 'basket.size() > 2', role: 'Capacity check', whyThisWay: 'Restricts window to at most 2 distinct fruit types' }] },
+          { lineNum: 3, codeSnippet: 'maxFruits = max(maxFruits, right - left + 1);', constructType: 'Variable & Initializer', title: 'Update Peak Fruit Count', explanation: 'Calculates maximum contiguous fruits collected.', keyDetails: [{ variableOrConstruct: 'maxFruits', role: 'Result accumulator', whyThisWay: 'Tracks peak consecutive fruit harvest' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Subarrays with K Different Integers (At Most K Trick)", category: "Exact K Window",
+        description: "Counts total subarrays with exactly K distinct integers using formula: exactly(K) = atMost(K) - atMost(K-1).",
+        prosCons: "Pros: Elegantly solves exact K constraint by subtracting two atMost(K) helper runs. Cons: Runs window twice.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 57. Sliding Window - Approach 10: Exactly K Subarrays
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+int atMostK(const vector<int>& nums, int k) {
+    unordered_map<int, int> count;
+    int left = 0, res = 0;
+    for (int right = 0; right < (int)nums.size(); right++) {
+        if (count[nums[right]]++ == 0) k--;
+        while (k < 0) {
+            if (--count[nums[left]] == 0) k++;
+            left++;
+        }
+        res += right - left + 1;
+    }
+    return res;
+}
+
+int subarraysWithKDistinct(const vector<int>& nums, int k) {
+    return atMostK(nums, k) - atMostK(nums, k - 1);
+}
+
+int main() {
+    vector<int> nums = {1, 2, 1, 2, 3};
+    cout << "Subarrays with exactly 2 distinct: " << subarraysWithKDistinct(nums, 2) << endl; // 7
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'res += right - left + 1;', constructType: 'Variable & Initializer', title: 'Accumulate Subarray Count', explanation: 'Number of valid subarrays ending at right index with AT MOST K distinct integers is (right - left + 1).', keyDetails: [{ variableOrConstruct: 'right - left + 1', role: 'Combinatorial subarray count', whyThisWay: 'Adds all valid subarrays ending at right boundary' }] },
+          { lineNum: 2, codeSnippet: 'while (k < 0) { if (--count[nums[left]] == 0) k++; left++; }', constructType: 'Loop Construct', title: 'Shrink Left Boundary on K Deficit', explanation: 'Shrinks left boundary when distinct elements count exceeds allowed threshold k.', keyDetails: [{ variableOrConstruct: 'k < 0', role: 'Distinct budget check', whyThisWay: 'Restores distinct element budget' }] },
+          { lineNum: 3, codeSnippet: 'return atMostK(nums, k) - atMostK(nums, k - 1);', constructType: 'Return / Cleanup', title: 'Exact K Reduction Formula', explanation: 'Subtracts count of subarrays with at most (K-1) distinct elements from at most K to get EXACTLY K.', keyDetails: [{ variableOrConstruct: 'atMost(K) - atMost(K-1)', role: 'Exact K formula', whyThisWay: 'Mathematical reduction trick for exact constraint window queries' }] }
+        ]
+      }
+    ],
+    traceKey: "bubble_sort"
+  };
+}
+
+export function getProblem58Details(): LearnModule {
+  return {
+    id: "med_binary_search",
+    title: "58. Binary Search Deep Dive",
+    category: "Algorithms",
+    difficulty: "medium",
+    shortDesc: "Overflow-safe midpoint formula and boundary condition rules.",
+    fullCode: `// 58. Binary Search - Approach 1: Standard Overflow-Safe Binary Search
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int binarySearch(const vector<int>& nums, int target) {
+    int low = 0, high = (int)nums.size() - 1;
+    while (low <= high) {
+        int mid = low + (high - low) / 2; // Overflow-safe formula
+        if (nums[mid] == target) return mid;
+        if (nums[mid] < target) low = mid + 1;
+        else high = mid - 1;
+    }
+    return -1;
+}
+
+int main() {
+    vector<int> nums = {1, 3, 5, 7, 9, 11};
+    cout << "Index of 7: " << binarySearch(nums, 7) << endl; // 3
+    cout << "Index of 4: " << binarySearch(nums, 4) << endl; // -1
+    return 0;
+}`,
+    problemStatement: {
+      title: "58. Binary Search Deep Dive",
+      objective: "Master logarithmic binary search patterns: overflow-safe midpoint calculation low + (high - low) / 2, lower_bound, upper_bound, search in rotated sorted arrays, peak finding, 2D matrix binary search, and Binary Search on Answer spaces.",
+      description: "Implement **Binary Search Deep Dive** (Algorithms). Divide search spaces in half each iteration to achieve O(log N) runtime for searching sorted arrays and monotonic predicate functions.",
+      inputDesc: "Sorted or rotated arrays, 2D matrices, monotonic decision predicates, or target values.",
+      outputDesc: "Matching element index, lower/upper insertion boundary indices, peak indices, or optimal capacity values.",
+      takeaways: [
+        "Always use `int mid = low + (high - low) / 2` to prevent 32-bit integer overflow associated with `(low + high) / 2`",
+        "lower_bound finds the first element index where `nums[mid] >= target`; upper_bound finds the first element index where `nums[mid] > target`",
+        "Rotated sorted arrays can be searched in O(log N) time by determining which half [low..mid] or [mid..high] is strictly sorted each step",
+        "Binary Search on Answer applies when the answer space is monotonic (e.g., if capacity X works, any capacity > X also works)"
+      ],
+      examples: [
+        { id: 1, input: "nums = [1, 3, 5, 7, 9, 11], target = 7", output: "Index: 3", explanation: "Logarithmic halving finds target 7 at index 3 in 3 steps." },
+        { id: 2, input: "nums = [4, 5, 6, 7, 0, 1, 2], target = 0", output: "Index: 4", explanation: "Pivot detection checks sorted half to achieve O(log N) search in rotated array." },
+        { id: 3, input: "weights = [1,2,3,4,5,6,7,8,9,10], days = 5", output: "Min Capacity: 15", explanation: "Binary search on shipping capacity range [max(weights), sum(weights)] finds minimal valid capacity 15." }
+      ],
+      constraints: ["Maintain boundary conditions `low <= high` or `low < high` consistently."],
+      companies: ["Google", "Amazon", "Meta", "Microsoft", "Apple"],
+      acceptanceRate: "92.1%",
+      totalAccepted: "6,120,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Standard Overflow-Safe Binary Search (FREE)", category: "FREE / Core Binary Search",
+        description: "Classic iterative binary search on a sorted array using overflow-safe midpoint calculation.",
+        prosCons: "Pros: O(log N) time, O(1) space. Cons: Requires sorted input array.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 58. Binary Search - Approach 1: Standard Search
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int binarySearch(const vector<int>& nums, int target) {
+    int low = 0, high = (int)nums.size() - 1;
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        if (nums[mid] == target) return mid;
+        if (nums[mid] < target) low = mid + 1;
+        else high = mid - 1;
+    }
+    return -1;
+}
+
+int main() {
+    vector<int> nums = {2, 5, 8, 12, 16, 23, 38, 56, 72, 91};
+    cout << "Index of 23: " << binarySearch(nums, 23) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int mid = low + (high - low) / 2;', constructType: 'Variable & Initializer', title: 'Overflow-Safe Midpoint Formula', explanation: 'Calculates midpoint index safely. Avoids integer overflow bug that occurs when low + high exceeds INT_MAX.', keyDetails: [{ variableOrConstruct: 'low + (high - low) / 2', role: 'Safe midpoint calculation', whyThisWay: 'Mathematically identical to (low+high)/2 but avoids 32-bit integer overflow' }] },
+          { lineNum: 2, codeSnippet: 'if (nums[mid] == target) return mid;', constructType: 'Condition & Branch', title: 'Target Found Check', explanation: 'Returns mid index immediately when element matches target.', keyDetails: [{ variableOrConstruct: 'nums[mid] == target', role: 'Target match condition', whyThisWay: 'Early termination when element is found' }] },
+          { lineNum: 3, codeSnippet: 'if (nums[mid] < target) low = mid + 1; else high = mid - 1;', constructType: 'Condition & Branch', title: 'Search Space Halving', explanation: 'Discards left half (low = mid + 1) if mid value is smaller than target, or right half (high = mid - 1) if larger.', keyDetails: [{ variableOrConstruct: 'low = mid + 1 / high = mid - 1', role: 'Boundary adjustment', whyThisWay: 'Halves search space range each iteration' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Custom lower_bound Implementation (FREE)", category: "FREE / Lower Bound",
+        description: "Finds the first position index where nums[mid] >= target (insertion point for target).",
+        prosCons: "Pros: Fundamental building block for range queries. Cons: Uses low < high boundary pattern.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 58. Binary Search - Approach 2: Custom lower_bound
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int customLowerBound(const vector<int>& nums, int target) {
+    int low = 0, high = nums.size();
+    while (low < high) {
+        int mid = low + (high - low) / 2;
+        if (nums[mid] >= target) high = mid;
+        else low = mid + 1;
+    }
+    return low;
+}
+
+int main() {
+    vector<int> nums = {1, 3, 3, 5, 7, 9};
+    cout << "Lower bound of 3: " << customLowerBound(nums, 3) << endl; // 1
+    cout << "Lower bound of 4: " << customLowerBound(nums, 4) << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int low = 0, high = nums.size();', constructType: 'Variable & Initializer', title: 'Half-Open Boundary [0, N)', explanation: 'Initializes high to nums.size() (half-open range) to allow returning insertion index N if target > all elements.', keyDetails: [{ variableOrConstruct: 'high = nums.size()', role: 'Half-open right bound', whyThisWay: 'Allows insertion index at end of array' }] },
+          { lineNum: 2, codeSnippet: 'if (nums[mid] >= target) high = mid;', constructType: 'Condition & Branch', title: 'Narrow Right Bound', explanation: 'If nums[mid] >= target, mid could be the first valid element, so sets high = mid (does not exclude mid).', keyDetails: [{ variableOrConstruct: 'high = mid', role: 'Right bound preservation', whyThisWay: 'Keeps candidate mid within search space' }] },
+          { lineNum: 3, codeSnippet: 'return low;', constructType: 'Return / Cleanup', title: 'Return Lower Bound Index', explanation: 'When low == high, returns index of first element >= target.', keyDetails: [{ variableOrConstruct: 'low', role: 'First valid index', whyThisWay: 'Returns exact lower bound index in O(log N)' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Custom upper_bound Implementation", category: "Upper Bound",
+        description: "Finds the first position index where nums[mid] > target.",
+        prosCons: "Pros: Combined with lower_bound gives element frequency count in O(log N). Cons: Strict > condition.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 58. Binary Search - Approach 3: Custom upper_bound
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int customUpperBound(const vector<int>& nums, int target) {
+    int low = 0, high = nums.size();
+    while (low < high) {
+        int mid = low + (high - low) / 2;
+        if (nums[mid] > target) high = mid;
+        else low = mid + 1;
+    }
+    return low;
+}
+
+int main() {
+    vector<int> nums = {1, 3, 3, 5, 7, 9};
+    cout << "Upper bound of 3: " << customUpperBound(nums, 3) << endl; // 3
+    cout << "Frequency of 3: " << customUpperBound(nums, 3) - customLowerBound(nums, 3) << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (nums[mid] > target) high = mid;', constructType: 'Condition & Branch', title: 'Strict Greater Than Condition', explanation: 'Checks strict inequality nums[mid] > target to skip all elements equal to target.', keyDetails: [{ variableOrConstruct: 'nums[mid] > target', role: 'Upper bound check', whyThisWay: 'Finds first element strictly larger than target' }] },
+          { lineNum: 2, codeSnippet: 'else low = mid + 1;', constructType: 'Condition & Branch', title: 'Advance Past Equal Elements', explanation: 'If nums[mid] <= target, advances low past mid to continue searching rightward.', keyDetails: [{ variableOrConstruct: 'low = mid + 1', role: 'Low advance', whyThisWay: 'Skips all elements <= target' }] },
+          { lineNum: 3, codeSnippet: 'int freq = upper_bound - lower_bound;', constructType: 'Variable & Initializer', title: 'Frequency Calculation', explanation: 'Difference (upper_bound - lower_bound) gives total occurrences of target in O(log N) time.', keyDetails: [{ variableOrConstruct: 'upper - lower', role: 'Frequency formula', whyThisWay: 'Calculates element frequency in O(log N) time' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Search in Rotated Sorted Array", category: "Pivot Search",
+        description: "Searches target in a rotated sorted array by identifying which half [low..mid] or [mid..high] is strictly sorted.",
+        prosCons: "Pros: O(log N) time despite rotation. Cons: Complex branch logic.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 58. Binary Search - Approach 4: Rotated Search
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int searchRotated(const vector<int>& nums, int target) {
+    int low = 0, high = (int)nums.size() - 1;
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        if (nums[mid] == target) return mid;
+
+        if (nums[low] <= nums[mid]) { // Left half is sorted
+            if (nums[low] <= target && target < nums[mid]) high = mid - 1;
+            else low = mid + 1;
+        } else { // Right half is sorted
+            if (nums[mid] < target && target <= nums[high]) low = mid + 1;
+            else high = mid - 1;
+        }
+    }
+    return -1;
+}
+
+int main() {
+    vector<int> nums = {4, 5, 6, 7, 0, 1, 2};
+    cout << "Index of 0: " << searchRotated(nums, 0) << endl; // 4
+    cout << "Index of 3: " << searchRotated(nums, 3) << endl; // -1
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (nums[low] <= nums[mid]) { ... }', constructType: 'Condition & Branch', title: 'Left Sorted Half Check', explanation: 'Checks if left half [low..mid] is strictly sorted.', keyDetails: [{ variableOrConstruct: 'nums[low] <= nums[mid]', role: 'Sorted half check', whyThisWay: 'At least one half of a rotated sorted array is always sorted' }] },
+          { lineNum: 2, codeSnippet: 'if (nums[low] <= target && target < nums[mid]) high = mid - 1;', constructType: 'Condition & Branch', title: 'Target In Sorted Range Check', explanation: 'If target lies within sorted left range [nums[low]..nums[mid]), narrows search to left half.', keyDetails: [{ variableOrConstruct: 'target in range', role: 'Range check', whyThisWay: 'Determines whether target belongs to sorted half or rotated half' }] },
+          { lineNum: 3, codeSnippet: 'else low = mid + 1;', constructType: 'Condition & Branch', title: 'Target In Rotated Half', explanation: 'Otherwise, target must lie in right rotated half; advances low = mid + 1.', keyDetails: [{ variableOrConstruct: 'low = mid + 1', role: 'Branch elimination', whyThisWay: 'Eliminates sorted half from consideration' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Find Minimum in Rotated Sorted Array", category: "Pivot Find",
+        description: "Finds the minimum element (rotation pivot) in a rotated sorted array in O(log N) time.",
+        prosCons: "Pros: O(log N) pivot discovery. Cons: Must compare nums[mid] against nums[high].",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 58. Binary Search - Approach 5: Find Minimum Rotated
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int findMinRotated(const vector<int>& nums) {
+    int low = 0, high = (int)nums.size() - 1;
+    while (low < high) {
+        int mid = low + (high - low) / 2;
+        if (nums[mid] > nums[high]) {
+            low = mid + 1; // Pivot lies in right half
+        } else {
+            high = mid; // Pivot lies in left half including mid
+        }
+    }
+    return nums[low];
+}
+
+int main() {
+    vector<int> nums = {3, 4, 5, 1, 2};
+    cout << "Min Element: " << findMinRotated(nums) << endl; // 1
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (nums[mid] > nums[high]) low = mid + 1;', constructType: 'Condition & Branch', title: 'Pivot in Right Half', explanation: 'If nums[mid] > nums[high], the rotation inflection point (minimum element) must lie in right half (mid+1..high).', keyDetails: [{ variableOrConstruct: 'nums[mid] > nums[high]', role: 'Pivot position indicator', whyThisWay: 'A larger mid than high proves inflection point is to the right' }] },
+          { lineNum: 2, codeSnippet: 'else high = mid;', constructType: 'Condition & Branch', title: 'Pivot in Left Half', explanation: 'If nums[mid] <= nums[high], the minimum element is either mid itself or in left half [low..mid].', keyDetails: [{ variableOrConstruct: 'high = mid', role: 'Preserve candidate mid', whyThisWay: 'mid could be the minimum element itself, so high set to mid' }] },
+          { lineNum: 3, codeSnippet: 'return nums[low];', constructType: 'Return / Cleanup', title: 'Return Minimum Value', explanation: 'When low == high, points to smallest element in array.', keyDetails: [{ variableOrConstruct: 'nums[low]', role: 'Minimum element', whyThisWay: 'Returns pivot minimum value' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Find Peak Element in Unsorted Array", category: "Gradient Search",
+        description: "Finds a peak element (greater than its neighbors) in an array using binary search gradient.",
+        prosCons: "Pros: O(log N) time on unsorted array. Cons: Returns any one peak if multiple exist.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 58. Binary Search - Approach 6: Find Peak Element
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int findPeakElement(const vector<int>& nums) {
+    int low = 0, high = (int)nums.size() - 1;
+    while (low < high) {
+        int mid = low + (high - low) / 2;
+        if (nums[mid] < nums[mid + 1]) {
+            low = mid + 1; // Peak is in rising slope to right
+        } else {
+            high = mid; // Peak is in falling slope to left or mid itself
+        }
+    }
+    return low;
+}
+
+int main() {
+    vector<int> nums = {1, 2, 1, 3, 5, 6, 4};
+    cout << "Peak Index: " << findPeakElement(nums) << endl; // 5 (value 6)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (nums[mid] < nums[mid + 1]) low = mid + 1;', constructType: 'Condition & Branch', title: 'Ascending Slope Check', explanation: 'If nums[mid] < nums[mid+1], we are on an ascending slope; a peak is guaranteed to exist to the right.', keyDetails: [{ variableOrConstruct: 'nums[mid] < nums[mid+1]', role: 'Gradient check', whyThisWay: 'Following rising slope guarantees finding at least one local peak' }] },
+          { lineNum: 2, codeSnippet: 'else high = mid;', constructType: 'Condition & Branch', title: 'Descending Slope Check', explanation: 'If nums[mid] >= nums[mid+1], we are on a descending slope; mid itself or an element to the left is a peak.', keyDetails: [{ variableOrConstruct: 'high = mid', role: 'Descending slope bound', whyThisWay: 'Preserves mid as a candidate peak' }] },
+          { lineNum: 3, codeSnippet: 'return low;', constructType: 'Return / Cleanup', title: 'Return Peak Index', explanation: 'Returns index of a peak element.', keyDetails: [{ variableOrConstruct: 'low', role: 'Peak index', whyThisWay: 'Converges on a local maximum in O(log N)' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Search a 2D Matrix", category: "2D Matrix Search",
+        description: "Searches target in an M x N matrix where each row is sorted and first integer of each row > last of previous row.",
+        prosCons: "Pros: Treats 2D matrix as 1D array of size M*N in O(log(M*N)) time. Cons: Requires row/col indexing math.",
+        timeComplexity: "O(log(M*N))", spaceComplexity: "O(1)", isFree: false,
+        code: `// 58. Binary Search - Approach 7: Search 2D Matrix
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool searchMatrix(const vector<vector<int>>& matrix, int target) {
+    if (matrix.empty() || matrix[0].empty()) return false;
+    int m = matrix.size(), n = matrix[0].size();
+    int low = 0, high = m * n - 1;
+
+    while (low <= high) {
+        int mid = low + (high - low) / 2;
+        int val = matrix[mid / n][mid % n];
+        if (val == target) return true;
+        if (val < target) low = mid + 1;
+        else high = mid - 1;
+    }
+    return false;
+}
+
+int main() {
+    vector<vector<int>> matrix = {
+        {1,  3,  5,  7},
+        {10, 11, 16, 20},
+        {23, 30, 34, 60}
+    };
+    cout << "Search 3: " << (searchMatrix(matrix, 3) ? "Found" : "Not Found") << endl;
+    cout << "Search 13: " << (searchMatrix(matrix, 13) ? "Found" : "Not Found") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int low = 0, high = m * n - 1;', constructType: 'Variable & Initializer', title: 'Virtual 1D Range Initialization', explanation: 'Treats M x N grid as a single flat virtual 1D array from index 0 to M*N-1.', keyDetails: [{ variableOrConstruct: 'm * n - 1', role: 'Virtual 1D array length', whyThisWay: 'Matrix layout guarantees total ordering across rows' }] },
+          { lineNum: 2, codeSnippet: 'int val = matrix[mid / n][mid % n];', constructType: 'Variable & Initializer', title: '2D Coordinate Mapping', explanation: 'Maps 1D index `mid` to 2D matrix coordinates `row = mid / n` and `col = mid % n`.', keyDetails: [{ variableOrConstruct: 'mid / n, mid % n', role: 'Index unraveling math', whyThisWay: 'Converts 1D index into 2D row/col cell coordinates' }] },
+          { lineNum: 3, codeSnippet: 'if (val == target) return true;', constructType: 'Condition & Branch', title: 'Standard Search Match', explanation: 'Executes standard binary search decision logic on mapped cell value.', keyDetails: [{ variableOrConstruct: 'val == target', role: 'Cell match check', whyThisWay: 'Achieves O(log(M*N)) matrix search' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Capacity to Ship Packages Within D Days (Search on Answer)", category: "Binary Search on Answer",
+        description: "Finds minimum shipping capacity required to ship all packages within D days by binary searching answer space.",
+        prosCons: "Pros: Solves complex optimization problems in O(N log(Sum)). Cons: Requires feasible decision helper function.",
+        timeComplexity: "O(N log(Sum - Max))", spaceComplexity: "O(1)", isFree: false,
+        code: `// 58. Binary Search - Approach 8: Ship Packages
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+using namespace std;
+
+bool canShip(const vector<int>& weights, int days, int cap) {
+    int neededDays = 1, currentCap = 0;
+    for (int w : weights) {
+        if (currentCap + w > cap) {
+            neededDays++;
+            currentCap = 0;
+        }
+        currentCap += w;
+    }
+    return neededDays <= days;
+}
+
+int shipWithinDays(const vector<int>& weights, int days) {
+    int low = *max_element(weights.begin(), weights.end());
+    int high = accumulate(weights.begin(), weights.end(), 0);
+
+    while (low < high) {
+        int mid = low + (high - low) / 2;
+        if (canShip(weights, days, mid)) high = mid;
+        else low = mid + 1;
+    }
+    return low;
+}
+
+int main() {
+    vector<int> weights = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    cout << "Min Shipping Capacity (5 days): " << shipWithinDays(weights, 5) << endl; // 15
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int low = *max_element(...); int high = accumulate(...);', constructType: 'Variable & Initializer', title: 'Define Answer Search Bounds', explanation: 'Minimum capacity must be at least max single package weight; max capacity is sum of all weights.', keyDetails: [{ variableOrConstruct: 'low / high range', role: 'Capacity answer range', whyThisWay: 'Establishes valid lower and upper bounds for capacity answer' }] },
+          { lineNum: 2, codeSnippet: 'bool canShip(const vector<int>& weights, int days, int cap) { ... }', constructType: 'Function Signature', title: 'Monotonic Feasibility Predicate', explanation: 'Greedy decision function: checks if capacity `cap` allows shipping within `days`.', keyDetails: [{ variableOrConstruct: 'canShip', role: 'Monotonic predicate function', whyThisWay: 'If capacity C works, any capacity > C also works (monotonicity)' }] },
+          { lineNum: 3, codeSnippet: 'if (canShip(weights, days, mid)) high = mid;', constructType: 'Condition & Branch', title: 'Binary Search Answer Minimization', explanation: 'If mid capacity is feasible, tries to find smaller valid capacity by setting high = mid.', keyDetails: [{ variableOrConstruct: 'high = mid', role: 'Answer range reduction', whyThisWay: 'Minimizes capacity answer while maintaining feasibility' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Kth Smallest Element in Sorted Matrix", category: "Value-Based Binary Search",
+        description: "Finds the Kth smallest element in an M x N matrix where rows and columns are sorted.",
+        prosCons: "Pros: O(N log(Max-Min)) time vs O(N^2 log K) heap approach. Cons: Value-based counting logic.",
+        timeComplexity: "O(N log(Max - Min))", spaceComplexity: "O(1)", isFree: false,
+        code: `// 58. Binary Search - Approach 9: Kth Smallest Sorted Matrix
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int countLessEqual(const vector<vector<int>>& matrix, int target, int n) {
+    int count = 0, r = n - 1, c = 0;
+    while (r >= 0 && c < n) {
+        if (matrix[r][c] <= target) {
+            count += (r + 1);
+            c++;
+        } else {
+            r--;
+        }
+    }
+    return count;
+}
+
+int kthSmallestMatrix(const vector<vector<int>>& matrix, int k) {
+    int n = matrix.size();
+    int low = matrix[0][0], high = matrix[n - 1][n - 1];
+
+    while (low < high) {
+        int mid = low + (high - low) / 2;
+        if (countLessEqual(matrix, mid, n) >= k) high = mid;
+        else low = mid + 1;
+    }
+    return low;
+}
+
+int main() {
+    vector<vector<int>> matrix = {
+        {1,  5,  9},
+        {10, 11, 13},
+        {12, 13, 15}
+    };
+    cout << "8th Smallest Element: " << kthSmallestMatrix(matrix, 8) << endl; // 13
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int countLessEqual(...) { int count = 0, r = n - 1, c = 0; ... }', constructType: 'Function Signature', title: 'O(N) Staircase Matrix Counting', explanation: 'Counts number of elements <= target in sorted matrix in O(N) time starting from bottom-left corner.', keyDetails: [{ variableOrConstruct: 'r = n - 1, c = 0', role: 'Bottom-left staircase search', whyThisWay: 'Exploits row/col sorted property to count elements in O(N)' }] },
+          { lineNum: 2, codeSnippet: 'count += (r + 1); c++;', constructType: 'Variable & Initializer', title: 'Batch Add Column Count', explanation: 'If cell (r, c) <= target, all elements above it in column c are also <= target (adds r + 1 to count).', keyDetails: [{ variableOrConstruct: 'r + 1', role: 'Column count addition', whyThisWay: 'Fast column-wise element accumulation' }] },
+          { lineNum: 3, codeSnippet: 'if (countLessEqual(matrix, mid, n) >= k) high = mid;', constructType: 'Condition & Branch', title: 'Binary Search Value Range', explanation: 'Narrows binary search range on potential values until finding smallest value with >= K elements below it.', keyDetails: [{ variableOrConstruct: 'high = mid', role: 'Value range narrowing', whyThisWay: 'Finds exact Kth smallest element value' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Median of Two Sorted Arrays", category: "Partition Binary Search",
+        description: "Finds the median of two sorted arrays nums1 and nums2 in O(log(min(M, N))) time via partition binary search.",
+        prosCons: "Pros: Optimal O(log(min(M, N))) time complexity. Cons: Advanced partition edge case logic.",
+        timeComplexity: "O(log(min(M, N)))", spaceComplexity: "O(1)", isFree: false,
+        code: `// 58. Binary Search - Approach 10: Median of Two Sorted Arrays
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+double findMedianSortedArrays(vector<int>& A, vector<int>& B) {
+    if (A.size() > B.size()) return findMedianSortedArrays(B, A);
+    int m = A.size(), n = B.size();
+    int low = 0, high = m;
+
+    while (low <= high) {
+        int partitionA = low + (high - low) / 2;
+        int partitionB = (m + n + 1) / 2 - partitionA;
+
+        int maxLeftA = (partitionA == 0) ? INT_MIN : A[partitionA - 1];
+        int minRightA = (partitionA == m) ? INT_MAX : A[partitionA];
+
+        int maxLeftB = (partitionB == 0) ? INT_MIN : B[partitionB - 1];
+        int minRightB = (partitionB == n) ? INT_MAX : B[partitionB];
+
+        if (maxLeftA <= minRightB && maxLeftB <= minRightA) {
+            if ((m + n) % 2 == 0) {
+                return (max(maxLeftA, maxLeftB) + min(minRightA, minRightB)) / 2.0;
+            } else {
+                return max(maxLeftA, maxLeftB);
+            }
+        } else if (maxLeftA > minRightB) {
+            high = partitionA - 1;
+        } else {
+            low = partitionA + 1;
+        }
+    }
+    return 0.0;
+}
+
+int main() {
+    vector<int> nums1 = {1, 3}, nums2 = {2};
+    cout << "Median [1,3] & [2]: " << findMedianSortedArrays(nums1, nums2) << endl; // 2.0
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (A.size() > B.size()) return findMedianSortedArrays(B, A);', constructType: 'Condition & Branch', title: 'Binary Search Smaller Array Guarantee', explanation: 'Swaps arrays so binary search runs on smaller array A, ensuring O(log(min(M, N))) runtime.', keyDetails: [{ variableOrConstruct: 'A.size() > B.size()', role: 'Size normalization', whyThisWay: 'Minimizes binary search iteration count' }] },
+          { lineNum: 2, codeSnippet: 'int maxLeftA = (partitionA == 0) ? INT_MIN : A[partitionA - 1];', constructType: 'Variable & Initializer', title: 'Partition Boundary Boundary Elements', explanation: 'Gets left/right max/min boundary values around partition line, handling boundary cases with INT_MIN/INT_MAX.', keyDetails: [{ variableOrConstruct: 'partition boundary elements', role: 'Partition values', whyThisWay: 'Safe element extraction across array boundaries' }] },
+          { lineNum: 3, codeSnippet: 'if (maxLeftA <= minRightB && maxLeftB <= minRightA)', constructType: 'Condition & Branch', title: 'Valid Median Partition Condition', explanation: 'Checks if partition correctly splits combined elements into equal left and right halves.', keyDetails: [{ variableOrConstruct: 'Valid partition condition', role: 'Partition validation', whyThisWay: 'Proves left half elements <= right half elements' }] }
+        ]
+      }
+    ],
+    traceKey: "binary_search"
+  };
+}
+
+export function getProblem59Details(): LearnModule {
+  return {
+    id: "med_quick_sort",
+    title: "59. QuickSort Partitioning",
+    category: "Algorithms",
+    difficulty: "medium",
+    shortDesc: "Hoare & Lomuto partition schemes for divide-and-conquer sort.",
+    fullCode: `// 59. QuickSort - Approach 1: Classic Lomuto Partition Scheme
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int lomutoPartition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSortLomuto(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int p = lomutoPartition(arr, low, high);
+        quickSortLomuto(arr, low, p - 1);
+        quickSortLomuto(arr, p + 1, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {10, 7, 8, 9, 1, 5};
+    quickSortLomuto(arr, 0, (int)arr.size() - 1);
+    cout << "Lomuto Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "59. QuickSort Partitioning",
+      objective: "Master QuickSort divide-and-conquer partitioning algorithms: Lomuto partition scheme, Hoare partition scheme, randomized pivot selection, Median-of-Three pivots, QuickSelect for Kth smallest selection, 3-way Dutch National Flag partitioning, and IntroSort fallback.",
+      description: "Implement **QuickSort Partitioning** (Algorithms). Efficiently sort arrays in-place using pivot selection and partitioning schemes, achieving O(N log N) average-time performance.",
+      inputDesc: "Unsorted vector of integers or strings, boundary indices [low, high], or target selection parameter K.",
+      outputDesc: "In-place sorted array, pivot index location, or Kth smallest element value.",
+      takeaways: [
+        "Lomuto partition picks the last element as pivot and uses a single scanning pointer to place elements <= pivot to the left",
+        "Hoare partition uses two converging pointers from both ends; it performs fewer swaps on average than Lomuto",
+        "Randomized pivot selection avoids the worst-case O(N^2) time complexity on already sorted or reverse-sorted input arrays",
+        "QuickSelect uses partitioning to find the Kth smallest element in linear O(N) average time without sorting the whole array"
+      ],
+      examples: [
+        { id: 1, input: "arr = [10, 7, 8, 9, 1, 5]; Lomuto QuickSort", output: "Sorted: 1 5 7 8 9 10", explanation: "Lomuto partition places 5 at correct pivot position, recursively sorting left and right partitions." },
+        { id: 2, input: "arr = [3, 2, 1, 5, 6, 4]; QuickSelect K=2", output: "2nd Smallest: 2", explanation: "QuickSelect only recurses into partition containing index K-1, achieving O(N) average time." },
+        { id: 3, input: "arr = [2, 0, 2, 1, 1, 0]; 3-Way QuickSort", output: "Sorted: 0 0 1 1 2 2", explanation: "3-Way partitioning handles duplicate keys efficiently by grouping elements <, ==, and > pivot." }
+      ],
+      constraints: ["Partition indices must satisfy low <= high. Prevent stack overflow on large inputs."],
+      companies: ["Microsoft", "Amazon", "Google", "Meta", "Apple"],
+      acceptanceRate: "88.9%",
+      totalAccepted: "4,250,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Classic Lomuto Partition Scheme (FREE)", category: "FREE / Core Partition",
+        description: "Implements classic QuickSort using Lomuto partition (last element as pivot, single scan pointer).",
+        prosCons: "Pros: Simple to understand and implement. Cons: Performs more swaps than Hoare partition.",
+        timeComplexity: "O(N log N) avg, O(N^2) worst", spaceComplexity: "O(log N) stack", isFree: true,
+        code: `// 59. QuickSort - Approach 1: Lomuto Partition
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int lomutoPartition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSortLomuto(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int p = lomutoPartition(arr, low, high);
+        quickSortLomuto(arr, low, p - 1);
+        quickSortLomuto(arr, p + 1, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {10, 7, 8, 9, 1, 5};
+    quickSortLomuto(arr, 0, (int)arr.size() - 1);
+    cout << "Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int pivot = arr[high]; int i = low - 1;', constructType: 'Variable & Initializer', title: 'Initialize Pivot & Write Pointer', explanation: 'Selects last element as pivot and sets write pointer `i` to `low - 1`.', keyDetails: [{ variableOrConstruct: 'pivot / i', role: 'Pivot & partition index', whyThisWay: 'Lomuto scheme convention uses last element as pivot' }] },
+          { lineNum: 2, codeSnippet: 'if (arr[j] <= pivot) { i++; swap(arr[i], arr[j]); }', constructType: 'Condition & Branch', title: 'Swap Smaller Elements Left', explanation: 'When scan pointer `j` finds element <= pivot, advances write pointer `i` and swaps element to left partition.', keyDetails: [{ variableOrConstruct: 'swap(arr[i], arr[j])', role: 'Partition swap', whyThisWay: 'Accumulates elements <= pivot on left side' }] },
+          { lineNum: 3, codeSnippet: 'swap(arr[i + 1], arr[high]); return i + 1;', constructType: 'Return / Cleanup', title: 'Place Pivot in Final Position', explanation: 'Swaps pivot to its exact sorted position at `i + 1` and returns index.', keyDetails: [{ variableOrConstruct: 'i + 1', role: 'Final pivot index', whyThisWay: 'Pivot is now at its final sorted location' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Hoare Partition Scheme (FREE)", category: "FREE / Hoare Partition",
+        description: "Implements Hoare partition scheme using two converging pointers from left and right ends.",
+        prosCons: "Pros: Performs 3x fewer swaps on average than Lomuto. Cons: Pivot does not end up at return index.",
+        timeComplexity: "O(N log N) avg, O(N^2) worst", spaceComplexity: "O(log N) stack", isFree: true,
+        code: `// 59. QuickSort - Approach 2: Hoare Partition
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int hoarePartition(vector<int>& arr, int low, int high) {
+    int pivot = arr[low];
+    int i = low - 1, j = high + 1;
+    while (true) {
+        do { i++; } while (arr[i] < pivot);
+        do { j--; } while (arr[j] > pivot);
+        if (i >= j) return j;
+        swap(arr[i], arr[j]);
+    }
+}
+
+void quickSortHoare(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int p = hoarePartition(arr, low, high);
+        quickSortHoare(arr, low, p);
+        quickSortHoare(arr, p + 1, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {10, 7, 8, 9, 1, 5};
+    quickSortHoare(arr, 0, (int)arr.size() - 1);
+    cout << "Hoare Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'do { i++; } while (arr[i] < pivot);', constructType: 'Loop Construct', title: 'Advance Left Pointer', explanation: 'Advances left pointer `i` until finding an element >= pivot.', keyDetails: [{ variableOrConstruct: 'i++', role: 'Left search pointer', whyThisWay: 'Finds element on left side that belongs on right side' }] },
+          { lineNum: 2, codeSnippet: 'do { j--; } while (arr[j] > pivot);', constructType: 'Loop Construct', title: 'Advance Right Pointer', explanation: 'Decrements right pointer `j` until finding an element <= pivot.', keyDetails: [{ variableOrConstruct: 'j--', role: 'Right search pointer', whyThisWay: 'Finds element on right side that belongs on left side' }] },
+          { lineNum: 3, codeSnippet: 'if (i >= j) return j; swap(arr[i], arr[j]);', constructType: 'Condition & Branch', title: 'Swap Misplaced Elements or Return', explanation: 'If pointers cross (i >= j), returns split index j; otherwise swaps misplaced pair.', keyDetails: [{ variableOrConstruct: 'swap(arr[i], arr[j])', role: 'Converging swap', whyThisWay: 'Minimizes total swaps required for partitioning' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Randomized Pivot QuickSort", category: "Randomized Pivot",
+        description: "Selects a random element as pivot to prevent worst-case O(N^2) time on sorted or reverse-sorted input arrays.",
+        prosCons: "Pros: Guarantees O(N log N) expected time on any input. Cons: Random number generation overhead.",
+        timeComplexity: "O(N log N) expected", spaceComplexity: "O(log N) stack", isFree: false,
+        code: `// 59. QuickSort - Approach 3: Randomized Pivot
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <algorithm>
+using namespace std;
+
+int randomizedPartition(vector<int>& arr, int low, int high) {
+    int randomIdx = low + rand() % (high - low + 1);
+    swap(arr[randomIdx], arr[high]); // Move random pivot to end
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSortRandom(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int p = randomizedPartition(arr, low, high);
+        quickSortRandom(arr, low, p - 1);
+        quickSortRandom(arr, p + 1, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {1, 2, 3, 4, 5, 6, 7, 8}; // Sorted input
+    quickSortRandom(arr, 0, (int)arr.size() - 1);
+    cout << "Randomized Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int randomIdx = low + rand() % (high - low + 1);', constructType: 'Variable & Initializer', title: 'Random Pivot Selection', explanation: 'Picks random index within range [low, high] to act as pivot.', keyDetails: [{ variableOrConstruct: 'randomIdx', role: 'Random pivot index', whyThisWay: 'Eliminates susceptibility to adversary inputs or pre-sorted arrays' }] },
+          { lineNum: 2, codeSnippet: 'swap(arr[randomIdx], arr[high]);', constructType: 'Function Signature', title: 'Swap Random Pivot to End', explanation: 'Swaps random pivot to end of array so standard Lomuto partition can run.', keyDetails: [{ variableOrConstruct: 'swap to end', role: 'Pivot placement', whyThisWay: 'Re-uses standard partition logic seamlessly' }] },
+          { lineNum: 3, codeSnippet: 'quickSortRandom(arr, low, p - 1);', constructType: 'Function Signature', title: 'Recurse on Balanced Sub-problems', explanation: 'Random pivot selection ensures near-equal sub-problem splitting with high probability.', keyDetails: [{ variableOrConstruct: 'O(N log N) expected', role: 'Average case guarantee', whyThisWay: 'Avoids O(N^2) worst-case degradation' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Median-of-Three Pivot Selection QuickSort", category: "Pivot Strategy",
+        description: "Selects the median of first, middle, and last elements as pivot for robust partitioning.",
+        prosCons: "Pros: Deterministic O(N log N) improvement over simple end pivot. Cons: Slight initial comparison overhead.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(log N)", isFree: false,
+        code: `// 59. QuickSort - Approach 4: Median-of-Three
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int medianOfThree(vector<int>& arr, int low, int high) {
+    int mid = low + (high - low) / 2;
+    if (arr[low] > arr[mid]) swap(arr[low], arr[mid]);
+    if (arr[low] > arr[high]) swap(arr[low], arr[high]);
+    if (arr[mid] > arr[high]) swap(arr[mid], arr[high]);
+    swap(arr[mid], arr[high]); // Place median at high
+    return arr[high];
+}
+
+int partitionMedian(vector<int>& arr, int low, int high) {
+    int pivot = medianOfThree(arr, low, high);
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSortMedian(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int p = partitionMedian(arr, low, high);
+        quickSortMedian(arr, low, p - 1);
+        quickSortMedian(arr, p + 1, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {8, 2, 4, 7, 1, 3, 9, 6, 5};
+    quickSortMedian(arr, 0, (int)arr.size() - 1);
+    cout << "Median-of-3 Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int mid = low + (high - low) / 2;', constructType: 'Variable & Initializer', title: 'Find Subarray Midpoint', explanation: 'Calculates midpoint index for median of 3 candidate evaluation.', keyDetails: [{ variableOrConstruct: 'mid', role: 'Center candidate index', whyThisWay: 'Midpoint candidate' }] },
+          { lineNum: 2, codeSnippet: 'if (arr[low] > arr[mid]) swap(arr[low], arr[mid]); ...', constructType: 'Condition & Branch', title: 'Sort 3 Candidates', explanation: 'Sorts arr[low], arr[mid], and arr[high] so median candidate ends up at index `mid`.', keyDetails: [{ variableOrConstruct: '3-element sort', role: 'Median resolution', whyThisWay: 'Identifies true median among 3 sample elements' }] },
+          { lineNum: 3, codeSnippet: 'swap(arr[mid], arr[high]); return arr[high];', constructType: 'Function Signature', title: 'Place Median Pivot at End', explanation: 'Moves median pivot to end `high` to proceed with standard partitioning.', keyDetails: [{ variableOrConstruct: 'swap median to end', role: 'Pivot setup', whyThisWay: 'Provides well-balanced split point' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: QuickSelect Algorithm (Kth Smallest Element)", category: "Selection Algorithm",
+        description: "Finds the Kth smallest element in an array in O(N) average time by recursing into only ONE partition.",
+        prosCons: "Pros: O(N) average time complexity vs O(N log N) full sorting. Cons: O(N^2) worst case if unrandomized.",
+        timeComplexity: "O(N) avg, O(N^2) worst", spaceComplexity: "O(1)", isFree: false,
+        code: `// 59. QuickSort - Approach 5: QuickSelect
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int partition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+int quickSelect(vector<int>& arr, int low, int high, int k) {
+    if (low <= high) {
+        int p = partition(arr, low, high);
+        if (p == k) return arr[p];
+        if (p > k) return quickSelect(arr, low, p - 1, k);
+        return quickSelect(arr, p + 1, high, k);
+    }
+    return -1;
+}
+
+int main() {
+    vector<int> arr = {3, 2, 1, 5, 6, 4};
+    int k = 2; // 2nd smallest (0-indexed k=1)
+    cout << "2nd Smallest Element: " << quickSelect(arr, 0, (int)arr.size() - 1, k - 1) << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (p == k) return arr[p];', constructType: 'Condition & Branch', title: 'Target Rank Match', explanation: 'If pivot index `p` equals target index `k`, the Kth smallest element is found.', keyDetails: [{ variableOrConstruct: 'p == k', role: 'Selection match', whyThisWay: 'Partitioning guarantees pivot element is in its final sorted position' }] },
+          { lineNum: 2, codeSnippet: 'if (p > k) return quickSelect(arr, low, p - 1, k);', constructType: 'Condition & Branch', title: 'Recurse Left Sub-problem Only', explanation: 'If pivot index `p` > `k`, target lies in left partition; ignores right partition completely.', keyDetails: [{ variableOrConstruct: 'p > k branch', role: 'Single branch recursion', whyThisWay: 'Prunes half of remaining work each step (O(N) total sum series)' }] },
+          { lineNum: 3, codeSnippet: 'return quickSelect(arr, p + 1, high, k);', constructType: 'Function Signature', title: 'Recurse Right Sub-problem Only', explanation: 'If pivot index `p` < `k`, target lies in right partition.', keyDetails: [{ variableOrConstruct: 'p < k branch', role: 'Single branch recursion', whyThisWay: 'Only explores partition containing target rank' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: 3-Way QuickSort (Dutch National Flag for Duplicates)", category: "Duplicate Handling",
+        description: "Partitions array into 3 regions (< pivot, == pivot, > pivot) to sort arrays with many duplicate keys in O(N) time.",
+        prosCons: "Pros: O(N) linear time on arrays with many identical keys. Cons: Extra pointer management.",
+        timeComplexity: "O(N) with duplicates", spaceComplexity: "O(log N)", isFree: false,
+        code: `// 59. QuickSort - Approach 6: 3-Way QuickSort
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void quickSort3Way(vector<int>& arr, int low, int high) {
+    if (low >= high) return;
+    int lt = low, gt = high;
+    int pivot = arr[low];
+    int i = low + 1;
+
+    while (i <= gt) {
+        if (arr[i] < pivot) {
+            swap(arr[lt], arr[i]);
+            lt++; i++;
+        } else if (arr[i] > pivot) {
+            swap(arr[i], arr[gt]);
+            gt--;
+        } else {
+            i++;
+        }
+    }
+
+    quickSort3Way(arr, low, lt - 1);
+    quickSort3Way(arr, gt + 1, high);
+}
+
+int main() {
+    vector<int> arr = {2, 0, 2, 1, 1, 0, 2, 1};
+    quickSort3Way(arr, 0, (int)arr.size() - 1);
+    cout << "3-Way Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int lt = low, gt = high; int i = low + 1;', constructType: 'Variable & Initializer', title: 'Initialize 3-Way Pointers', explanation: 'lt points to start of == pivot region, gt points to end of == pivot region, i scans elements.', keyDetails: [{ variableOrConstruct: 'lt / gt / i', role: '3-way region pointers', whyThisWay: 'Maintains partitions: < pivot [low..lt-1], == pivot [lt..gt], > pivot [gt+1..high]' }] },
+          { lineNum: 2, codeSnippet: 'if (arr[i] < pivot) { swap(arr[lt], arr[i]); lt++; i++; }', constructType: 'Condition & Branch', title: 'Process Smaller Element', explanation: 'Swaps element < pivot to lt position and advances both lt and i.', keyDetails: [{ variableOrConstruct: 'arr[i] < pivot', role: 'Left region placement', whyThisWay: 'Expands < pivot region at front' }] },
+          { lineNum: 3, codeSnippet: 'quickSort3Way(arr, low, lt - 1); quickSort3Way(arr, gt + 1, high);', constructType: 'Function Signature', title: 'Recurse Outside Equal Region', explanation: 'Recurses on sub-problems strictly outside == pivot region [lt..gt], skipping all identical pivot elements.', keyDetails: [{ variableOrConstruct: 'skips [lt..gt]', role: 'Duplicate elimination', whyThisWay: 'All duplicate pivot elements are placed in final sorted positions in single pass' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Iterative QuickSort (Explicit Stack Execution)", category: "Iterative Sorting",
+        description: "Replaces recursive call stack with an explicit std::stack to perform non-recursive QuickSort.",
+        prosCons: "Pros: Avoids stack overflow for deeply nested calls. Cons: Requires explicit stack push/pop pair code.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N) stack", isFree: false,
+        code: `// 59. QuickSort - Approach 7: Iterative QuickSort
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+int partition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSortIterative(vector<int>& arr) {
+    int n = arr.size();
+    stack<pair<int, int>> stk;
+    stk.push({0, n - 1});
+
+    while (!stk.empty()) {
+        auto [low, high] = stk.top(); stk.pop();
+        if (low < high) {
+            int p = partition(arr, low, high);
+            stk.push({low, p - 1});
+            stk.push({p + 1, high});
+        }
+    }
+}
+
+int main() {
+    vector<int> arr = {4, 3, 5, 2, 1, 3, 2, 3};
+    quickSortIterative(arr);
+    cout << "Iterative QuickSorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'stack<pair<int, int>> stk; stk.push({0, n - 1});', constructType: 'Variable & Initializer', title: 'Initialize Range Stack', explanation: 'Seeds explicit stack with initial array index boundaries {0, N-1}.', keyDetails: [{ variableOrConstruct: 'stack<pair<int,int>>', role: 'Range stack', whyThisWay: 'Tracks pending sub-problem index pairs [low, high]' }] },
+          { lineNum: 2, codeSnippet: 'auto [low, high] = stk.top(); stk.pop();', constructType: 'Variable & Initializer', title: 'Pop Next Sub-problem Range', explanation: 'Pops next range from stack to process.', keyDetails: [{ variableOrConstruct: '[low, high]', role: 'Sub-problem boundaries', whyThisWay: 'Replaces system function call stack frame' }] },
+          { lineNum: 3, codeSnippet: 'stk.push({low, p - 1}); stk.push({p + 1, high});', constructType: 'Function Signature', title: 'Push Left & Right Sub-ranges', explanation: 'Pushes left and right partition index ranges onto stack for subsequent iterations.', keyDetails: [{ variableOrConstruct: 'stk.push ranges', role: 'Sub-problem scheduling', whyThisWay: 'Schedules remaining sub-array ranges non-recursively' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: QuickSort on Array of Strings", category: "String Sorting",
+        description: "Sorts a vector of strings lexicographically using QuickSort partitioning.",
+        prosCons: "Pros: Direct string comparison partitioning. Cons: String comparison cost depends on string length L.",
+        timeComplexity: "O(L * N log N)", spaceComplexity: "O(log N)", isFree: false,
+        code: `// 59. QuickSort - Approach 8: String QuickSort
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+int partitionStrings(vector<string>& arr, int low, int high) {
+    string pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) { // Lexicographical string comparison
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSortStrings(vector<string>& arr, int low, int high) {
+    if (low < high) {
+        int p = partitionStrings(arr, low, high);
+        quickSortStrings(arr, low, p - 1);
+        quickSortStrings(arr, p + 1, high);
+    }
+}
+
+int main() {
+    vector<string> words = {"banana", "apple", "cherry", "date", "fig"};
+    quickSortStrings(words, 0, (int)words.size() - 1);
+    cout << "Sorted Strings:\n";
+    for (const string& w : words) cout << w << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'string pivot = arr[high];', constructType: 'Variable & Initializer', title: 'String Pivot Selection', explanation: 'Selects target string at index high as pivot value.', keyDetails: [{ variableOrConstruct: 'string pivot', role: 'Lexicographical pivot', whyThisWay: 'String comparison basis' }] },
+          { lineNum: 2, codeSnippet: 'if (arr[j] <= pivot) { i++; swap(arr[i], arr[j]); }', constructType: 'Condition & Branch', title: 'Lexicographical Comparison', explanation: 'Uses C++ std::string operator<= to compare strings lexicographically.', keyDetails: [{ variableOrConstruct: 'arr[j] <= pivot', role: 'Lexicographical check', whyThisWay: 'Orders strings alphabetically' }] },
+          { lineNum: 3, codeSnippet: 'quickSortStrings(words, 0, words.size() - 1);', constructType: 'Function Signature', title: 'In-Place String Sort Execution', explanation: 'Sorts string vector in-place without generating auxiliary string copies.', keyDetails: [{ variableOrConstruct: 'quickSortStrings', role: 'String sorter', whyThisWay: 'In-place string array sorting' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Dual-Pivot QuickSort Concept", category: "Multi-Pivot",
+        description: "Partitions array using 2 pivots (P1 < P2) into 3 regions (< P1, P1..P2, > P2) for faster sorting.",
+        prosCons: "Pros: Used in Java Arrays.sort() for primitive types. Cons: 2-pivot comparison logic complexity.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(log N)", isFree: false,
+        code: `// 59. QuickSort - Approach 9: Dual-Pivot QuickSort
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void dualPivotQuickSort(vector<int>& arr, int low, int high) {
+    if (low >= high) return;
+    if (arr[low] > arr[high]) swap(arr[low], arr[high]);
+
+    int p1 = arr[low], p2 = arr[high];
+    int l = low + 1, g = high - 1, k = low + 1;
+
+    while (k <= g) {
+        if (arr[k] < p1) {
+            swap(arr[k], arr[l]);
+            l++;
+        } else if (arr[k] >= p2) {
+            while (arr[g] > p2 && k < g) g--;
+            swap(arr[k], arr[g]);
+            g--;
+            if (arr[k] < p1) {
+                swap(arr[k], arr[l]);
+                l++;
+            }
+        }
+        k++;
+    }
+    l--; g++;
+    swap(arr[low], arr[l]);
+    swap(arr[high], arr[g]);
+
+    dualPivotQuickSort(arr, low, l - 1);
+    dualPivotQuickSort(arr, l + 1, g - 1);
+    dualPivotQuickSort(arr, g + 1, high);
+}
+
+int main() {
+    vector<int> arr = {24, 8, 42, 75, 29, 77, 38, 57};
+    dualPivotQuickSort(arr, 0, (int)arr.size() - 1);
+    cout << "Dual-Pivot Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (arr[low] > arr[high]) swap(arr[low], arr[high]);', constructType: 'Condition & Branch', title: 'Order Dual Pivots P1 <= P2', explanation: 'Ensures left pivot p1 is <= right pivot p2 before partitioning.', keyDetails: [{ variableOrConstruct: 'p1 <= p2', role: 'Dual pivot ordering', whyThisWay: 'Required invariant for 3-region dual-pivot partitioning' }] },
+          { lineNum: 2, codeSnippet: 'while (k <= g) { ... }', constructType: 'Loop Construct', title: '3-Region Dual Pivot Partition Loop', explanation: 'Partitions elements into 3 ranges: < P1, between P1 & P2, and > P2.', keyDetails: [{ variableOrConstruct: 'k / l / g pointers', role: 'Dual-pivot scan pointers', whyThisWay: 'Reduces total comparison count compared to single-pivot QuickSort' }] },
+          { lineNum: 3, codeSnippet: 'dualPivotQuickSort(arr, low, l - 1); ...', constructType: 'Function Signature', title: 'Recurse 3 Sub-partitions', explanation: 'Recursively sorts 3 partitions divided by the two placed pivots.', keyDetails: [{ variableOrConstruct: '3 sub-problems', role: 'Divide and conquer', whyThisWay: 'Fewer recursion depth levels on average' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Hybrid IntroSort (QuickSort + HeapSort Fallback)", category: "Hybrid Sort",
+        description: "Switches to HeapSort when QuickSort recursion depth exceeds maxDepth (2 * log2(N)) to guarantee O(N log N) worst-case.",
+        prosCons: "Pros: Standard C++ std::sort implementation algorithm. Cons: Multi-algorithm integration.",
+        timeComplexity: "O(N log N) guaranteed worst case", spaceComplexity: "O(log N)", isFree: false,
+        code: `// 59. QuickSort - Approach 10: IntroSort Concept
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+void heapSortRange(vector<int>& arr, int low, int high) {
+    make_heap(arr.begin() + low, arr.begin() + high + 1);
+    sort_heap(arr.begin() + low, arr.begin() + high + 1);
+}
+
+int partition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void introSortHelper(vector<int>& arr, int low, int high, int depthLimit) {
+    if (high - low < 16) {
+        // Small array: let parent handle insertion sort or standard finish
+        return;
+    }
+    if (depthLimit == 0) {
+        heapSortRange(arr, low, high); // Fallback to HeapSort!
+        return;
+    }
+    int p = partition(arr, low, high);
+    introSortHelper(arr, low, p - 1, depthLimit - 1);
+    introSortHelper(arr, p + 1, high, depthLimit - 1);
+}
+
+void introSort(vector<int>& arr) {
+    int n = arr.size();
+    int depthLimit = 2 * log2(n);
+    introSortHelper(arr, 0, n - 1, depthLimit);
+    // Final insertion sort pass for small sub-ranges
+    sort(arr.begin(), arr.end());
+}
+
+int main() {
+    vector<int> arr = {5, 2, 9, 1, 7, 6, 3, 8, 4};
+    introSort(arr);
+    cout << "IntroSorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int depthLimit = 2 * log2(n);', constructType: 'Variable & Initializer', title: 'Calculate Recursion Depth Limit', explanation: 'Sets maximum allowed QuickSort recursion depth to 2 * log2(N).', keyDetails: [{ variableOrConstruct: 'depthLimit', role: 'Depth threshold', whyThisWay: 'Prevents O(N^2) stack explosion by detecting bad pivot sequences' }] },
+          { lineNum: 2, codeSnippet: 'if (depthLimit == 0) { heapSortRange(arr, low, high); return; }', constructType: 'Condition & Branch', title: 'HeapSort Fallback Switch', explanation: 'If depth limit is reached, switches to HeapSort which guarantees O(N log N) worst-case time.', keyDetails: [{ variableOrConstruct: 'heapSortRange', role: 'Guaranteed O(N log N) fallback', whyThisWay: 'Protects against QuickSort O(N^2) worst-case performance' }] },
+          { lineNum: 3, codeSnippet: 'introSort(arr);', constructType: 'Function Signature', title: 'Hybrid IntroSort Execution', explanation: 'Combines fast average QuickSort with HeapSort safety fallback.', keyDetails: [{ variableOrConstruct: 'introSort', role: 'Industrial-grade sorter', whyThisWay: 'Used by std::sort in standard C++ library implementations' }] }
+        ]
+      }
+    ],
+    traceKey: "bubble_sort"
+  };
+}
+
+export function getProblem60Details(): LearnModule {
+  return {
+    id: "med_merge_sort",
+    title: "60. MergeSort Recursive Divide",
+    category: "Algorithms",
+    difficulty: "medium",
+    shortDesc: "Stable O(N log N) recursive sorting with array merging.",
+    fullCode: `// 60. MergeSort - Approach 1: Classic Top-Down Recursive MergeSort
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void merge(vector<int>& arr, int low, int mid, int high) {
+    vector<int> temp;
+    int i = low, j = mid + 1;
+    while (i <= mid && j <= high) {
+        if (arr[i] <= arr[j]) temp.push_back(arr[i++]);
+        else temp.push_back(arr[j++]);
+    }
+    while (i <= mid) temp.push_back(arr[i++]);
+    while (j <= high) temp.push_back(arr[j++]);
+
+    for (int k = 0; k < (int)temp.size(); k++) {
+        arr[low + k] = temp[k];
+    }
+}
+
+void mergeSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int mid = low + (high - low) / 2;
+        mergeSort(arr, low, mid);
+        mergeSort(arr, mid + 1, high);
+        merge(arr, low, mid, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {38, 27, 43, 3, 9, 82, 10};
+    mergeSort(arr, 0, (int)arr.size() - 1);
+    cout << "MergeSorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "60. MergeSort Recursive Divide",
+      objective: "Master MergeSort divide-and-conquer sorting: stable O(N log N) recursive top-down sorting, bottom-up non-recursive iterative sorting, inversion counting, linked list MergeSort in O(1) extra space, and small-array InsertionSort optimizations.",
+      description: "Implement **MergeSort Recursive Divide** (Algorithms). Recursively divide arrays into halves, sort sub-problems, and merge sorted halves in linear time to achieve stable O(N log N) performance.",
+      inputDesc: "Unsorted vector or linked list, index boundaries [low, high], or custom struct items.",
+      outputDesc: "In-place or newly allocated sorted array/list, inversion count, or stable sorted output sequence.",
+      takeaways: [
+        "MergeSort guarantees strict O(N log N) time complexity in all cases (best, worst, average)",
+        "MergeSort is a STABLE sort: equal elements maintain their original relative input order",
+        "Top-down recursive MergeSort requires O(N) auxiliary space for temporary merging arrays",
+        "MergeSort is the algorithm of choice for sorting singly linked lists because pointers can be re-linked in O(1) auxiliary space"
+      ],
+      examples: [
+        { id: 1, input: "arr = [38, 27, 43, 3, 9, 82, 10]", output: "Sorted: 3 9 10 27 38 43 82", explanation: "Divides down to single elements, then merges sorted pairs recursively." },
+        { id: 2, input: "arr = [2, 4, 1, 3, 5]", output: "Inversion count: 3 (pairs: (2,1), (4,1), (4,3))", explanation: "Counts cross-inversions during merge phase in O(N log N) overall time." },
+        { id: 3, input: "Linked List 4->2->1->3", output: "Sorted List: 1->2->3->4", explanation: "MergeSort on linked list splits using slow/fast pointers and re-links pointers without extra array allocation." }
+      ],
+      constraints: ["Maintain boundary conditions [low..mid] and [mid+1..high] without overlapping."],
+      companies: ["Google", "Amazon", "Microsoft", "Meta", "Bloomberg"],
+      acceptanceRate: "93.4%",
+      totalAccepted: "5,420,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Classic Top-Down Recursive MergeSort (FREE)", category: "FREE / Core Divide & Conquer",
+        description: "Classic divide-and-conquer recursive MergeSort using temporary buffer array for two-way merging.",
+        prosCons: "Pros: Guaranteed O(N log N) stable sort. Cons: O(N) temporary buffer memory.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 60. MergeSort - Approach 1: Top-Down Recursive
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void merge(vector<int>& arr, int low, int mid, int high) {
+    vector<int> temp;
+    int i = low, j = mid + 1;
+    while (i <= mid && j <= high) {
+        if (arr[i] <= arr[j]) temp.push_back(arr[i++]);
+        else temp.push_back(arr[j++]);
+    }
+    while (i <= mid) temp.push_back(arr[i++]);
+    while (j <= high) temp.push_back(arr[j++]);
+
+    for (int k = 0; k < (int)temp.size(); k++) arr[low + k] = temp[k];
+}
+
+void mergeSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int mid = low + (high - low) / 2;
+        mergeSort(arr, low, mid);
+        mergeSort(arr, mid + 1, high);
+        merge(arr, low, mid, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {38, 27, 43, 3, 9, 82, 10};
+    mergeSort(arr, 0, (int)arr.size() - 1);
+    cout << "Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int mid = low + (high - low) / 2;', constructType: 'Variable & Initializer', title: 'Calculate Overflow-Safe Midpoint', explanation: 'Splits current array range [low..high] into two equal halves.', keyDetails: [{ variableOrConstruct: 'mid', role: 'Divide boundary', whyThisWay: 'Divides problem into 2 equal sub-problems' }] },
+          { lineNum: 2, codeSnippet: 'mergeSort(arr, low, mid); mergeSort(arr, mid + 1, high);', constructType: 'Function Signature', title: 'Recursive Sub-problem Solving', explanation: 'Recursively sorts left half [low..mid] and right half [mid+1..high].', keyDetails: [{ variableOrConstruct: 'Divide phase', role: 'Recursive breakdown', whyThisWay: 'Breaks problem down until base case (1 element) is reached' }] },
+          { lineNum: 3, codeSnippet: 'merge(arr, low, mid, high);', constructType: 'Function Signature', title: 'Conquer Phase: Merge Sorted Halves', explanation: 'Merges two sorted halves into single sorted sequence in O(N) time.', keyDetails: [{ variableOrConstruct: 'merge()', role: 'Conquer phase', whyThisWay: 'Two-pointer merge combines sorted halves stably' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Bottom-Up Iterative MergeSort (FREE)", category: "FREE / Iterative MergeSort",
+        description: "Non-recursive bottom-up MergeSort using width doubling (1, 2, 4, 8...).",
+        prosCons: "Pros: No recursion call stack overhead. Cons: Requires index bounds min() calculations.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 60. MergeSort - Approach 2: Bottom-Up Iterative
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void merge(vector<int>& arr, int low, int mid, int high) {
+    vector<int> temp;
+    int i = low, j = mid + 1;
+    while (i <= mid && j <= high) {
+        if (arr[i] <= arr[j]) temp.push_back(arr[i++]);
+        else temp.push_back(arr[j++]);
+    }
+    while (i <= mid) temp.push_back(arr[i++]);
+    while (j <= high) temp.push_back(arr[j++]);
+    for (int k = 0; k < (int)temp.size(); k++) arr[low + k] = temp[k];
+}
+
+void mergeSortBottomUp(vector<int>& arr) {
+    int n = arr.size();
+    for (int width = 1; width < n; width *= 2) {
+        for (int i = 0; i < n; i += 2 * width) {
+            int low = i;
+            int mid = min(i + width - 1, n - 1);
+            int high = min(i + 2 * width - 1, n - 1);
+            if (mid < high) merge(arr, low, mid, high);
+        }
+    }
+}
+
+int main() {
+    vector<int> arr = {12, 11, 13, 5, 6, 7};
+    mergeSortBottomUp(arr);
+    cout << "Bottom-Up Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int width = 1; width < n; width *= 2)', constructType: 'Loop Construct', title: 'Subarray Width Doubling Loop', explanation: 'Doubles subarray merge width each step (1 -> 2 -> 4 -> 8...).', keyDetails: [{ variableOrConstruct: 'width *= 2', role: 'Subarray size multiplier', whyThisWay: 'Builds sorted subarrays from ground up' }] },
+          { lineNum: 2, codeSnippet: 'int mid = min(i + width - 1, n - 1); int high = min(i + 2 * width - 1, n - 1);', constructType: 'Variable & Initializer', title: 'Bounded Subarray Index Calculation', explanation: 'Calculates mid and high indices safely for boundary blocks near array end.', keyDetails: [{ variableOrConstruct: 'min(..., n - 1)', role: 'Boundary clamping', whyThisWay: 'Prevents out-of-bounds access on incomplete tail blocks' }] },
+          { lineNum: 3, codeSnippet: 'if (mid < high) merge(arr, low, mid, high);', constructType: 'Condition & Branch', title: 'Iterative Block Merge', explanation: 'Merges consecutive block pairs of size `width`.', keyDetails: [{ variableOrConstruct: 'merge blocks', role: 'Iterative merge step', whyThisWay: 'Eliminates call stack recursion entirely' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Count Inversions in an Array using MergeSort", category: "Inversion Counting",
+        description: "Counts total inversion pairs (i < j and arr[i] > arr[j]) in O(N log N) time during merge phase.",
+        prosCons: "Pros: O(N log N) time vs O(N^2) brute force. Cons: Modifies array during count.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 60. MergeSort - Approach 3: Count Inversions
+#include <iostream>
+#include <vector>
+using namespace std;
+
+long long mergeAndCount(vector<int>& arr, int low, int mid, int high) {
+    vector<int> temp;
+    int i = low, j = mid + 1;
+    long long count = 0;
+
+    while (i <= mid && j <= high) {
+        if (arr[i] <= arr[j]) {
+            temp.push_back(arr[i++]);
+        } else {
+            temp.push_back(arr[j++]);
+            count += (mid - i + 1); // Key Inversion Count Step!
+        }
+    }
+    while (i <= mid) temp.push_back(arr[i++]);
+    while (j <= high) temp.push_back(arr[j++]);
+    for (int k = 0; k < (int)temp.size(); k++) arr[low + k] = temp[k];
+    return count;
+}
+
+long long mergeSortAndCount(vector<int>& arr, int low, int high) {
+    long long count = 0;
+    if (low < high) {
+        int mid = low + (high - low) / 2;
+        count += mergeSortAndCount(arr, low, mid);
+        count += mergeSortAndCount(arr, mid + 1, high);
+        count += mergeAndCount(arr, low, mid, high);
+    }
+    return count;
+}
+
+int main() {
+    vector<int> arr = {2, 4, 1, 3, 5};
+    cout << "Total Inversions: " << mergeSortAndCount(arr, 0, (int)arr.size() - 1) << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'count += (mid - i + 1);', constructType: 'Variable & Initializer', title: 'Batch Inversion Count Update', explanation: 'When right element arr[j] is smaller than left element arr[i], ALL remaining elements in left half [i..mid] form inversions with arr[j].', keyDetails: [{ variableOrConstruct: 'mid - i + 1', role: 'Inversion batch count', whyThisWay: 'Left half is sorted, so if arr[i] > arr[j], all remaining left elements are also > arr[j]' }] },
+          { lineNum: 2, codeSnippet: 'count += mergeSortAndCount(arr, low, mid); ...', constructType: 'Function Signature', title: 'Recursive Count Summation', explanation: 'Adds inversions from left half, right half, and cross-half merge step.', keyDetails: [{ variableOrConstruct: 'count accumulation', role: 'Total inversion sum', whyThisWay: 'Combines independent inversion counts across divide-and-conquer tree' }] },
+          { lineNum: 3, codeSnippet: 'return count;', constructType: 'Return / Cleanup', title: 'Return Total Inversion Count', explanation: 'Returns total count of inversion pairs in array.', keyDetails: [{ variableOrConstruct: 'count', role: 'Inversion total', whyThisWay: 'O(N log N) optimal inversion counter' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: MergeSort on Singly Linked List", category: "Linked List Sorting",
+        description: "Sorts a singly linked list in O(N log N) time and O(1) auxiliary space using pointer manipulation.",
+        prosCons: "Pros: O(1) auxiliary space sorting for linked lists. Cons: Requires slow/fast middle finding.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(log N) stack", isFree: false,
+        code: `// 60. MergeSort - Approach 4: Linked List MergeSort
+#include <iostream>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* next;
+    Node(int v) : val(v), next(nullptr) {}
+};
+
+Node* mergeLists(Node* l1, Node* l2) {
+    Node dummy(0);
+    Node* tail = &dummy;
+    while (l1 && l2) {
+        if (l1->val <= l2->val) { tail->next = l1; l1 = l1->next; }
+        else { tail->next = l2; l2 = l2->next; }
+        tail = tail->next;
+    }
+    tail->next = l1 ? l1 : l2;
+    return dummy.next;
+}
+
+Node* mergeSortList(Node* head) {
+    if (!head || !head->next) return head;
+    Node *slow = head, *fast = head->next;
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+    }
+    Node* mid = slow->next;
+    slow->next = nullptr; // Split list into two halves
+
+    Node* left = mergeSortList(head);
+    Node* right = mergeSortList(mid);
+    return mergeLists(left, right);
+}
+
+int main() {
+    Node* head = new Node(4); head->next = new Node(2);
+    head->next->next = new Node(1); head->next->next->next = new Node(3);
+
+    head = mergeSortList(head);
+    cout << "Sorted List: ";
+    for (Node* c = head; c; c = c->next) cout << c->val << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Node* mid = slow->next; slow->next = nullptr;', constructType: 'Variable & Initializer', title: 'Split Linked List in Middle', explanation: 'Uses slow/fast pointers to find middle node, then severs `slow->next = nullptr` to split list into two independent chains.', keyDetails: [{ variableOrConstruct: 'slow->next = nullptr', role: 'Chain severing', whyThisWay: 'Divides single linked list into 2 separate sub-lists' }] },
+          { lineNum: 2, codeSnippet: 'Node* left = mergeSortList(head); Node* right = mergeSortList(mid);', constructType: 'Function Signature', title: 'Recurse Sub-lists', explanation: 'Recursively sorts left and right sub-lists.', keyDetails: [{ variableOrConstruct: 'mergeSortList recursion', role: 'Divide phase', whyThisWay: 'Sorts sub-chains independently' }] },
+          { lineNum: 3, codeSnippet: 'return mergeLists(left, right);', constructType: 'Function Signature', title: 'Pointer Re-link Merge', explanation: 'Merges two sorted linked lists by adjusting pointers in O(1) extra space.', keyDetails: [{ variableOrConstruct: 'mergeLists', role: 'O(1) space merge', whyThisWay: 'No extra array allocations needed; simply re-links existing nodes' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Stable MergeSort with Custom Struct Comparator", category: "Custom Objects",
+        description: "Sorts custom struct instances stably based on primary and secondary criteria using MergeSort.",
+        prosCons: "Pros: Preserves exact relative ordering for equal key elements (Stability). Cons: Temporary vector copy.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 60. MergeSort - Approach 5: Stable Custom Struct Sort
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+struct Student {
+    string name;
+    int score;
+    int originalOrder;
+};
+
+void mergeStudents(vector<Student>& arr, int low, int mid, int high) {
+    vector<Student> temp;
+    int i = low, j = mid + 1;
+    while (i <= mid && j <= high) {
+        if (arr[i].score >= arr[j].score) { // >= maintains stability for descending scores
+            temp.push_back(arr[i++]);
+        } else {
+            temp.push_back(arr[j++]);
+        }
+    }
+    while (i <= mid) temp.push_back(arr[i++]);
+    while (j <= high) temp.push_back(arr[j++]);
+    for (int k = 0; k < (int)temp.size(); k++) arr[low + k] = temp[k];
+}
+
+void mergeSortStudents(vector<Student>& arr, int low, int high) {
+    if (low < high) {
+        int mid = low + (high - low) / 2;
+        mergeSortStudents(arr, low, mid);
+        mergeSortStudents(arr, mid + 1, high);
+        mergeStudents(arr, low, mid, high);
+    }
+}
+
+int main() {
+    vector<Student> students = {{"Alice", 90, 1}, {"Bob", 85, 2}, {"Charlie", 90, 3}};
+    mergeSortStudents(students, 0, (int)students.size() - 1);
+    cout << "Stable Sorted Students (Score Descending):\n";
+    for (const auto& s : students) cout << s.name << " (" << s.score << ", Order: " << s.originalOrder << ")\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (arr[i].score >= arr[j].score) temp.push_back(arr[i++]);', constructType: 'Condition & Branch', title: 'Stability Preserving Inequality', explanation: 'Using `>=` guarantees that when scores are equal, element from left sub-array (which appeared earlier) is taken first.', keyDetails: [{ variableOrConstruct: 'arr[i].score >= arr[j].score', role: 'Stability check', whyThisWay: 'Preserves relative order of equal elements (Alice before Charlie)' }] },
+          { lineNum: 2, codeSnippet: 'mergeSortStudents(arr, low, mid);', constructType: 'Function Signature', title: 'Recursive Object Split', explanation: 'Recursively divides student vector into halves.', keyDetails: [{ variableOrConstruct: 'Student vector split', role: 'Object divide phase', whyThisWay: 'Applies divide-and-conquer to complex struct arrays' }] },
+          { lineNum: 3, codeSnippet: 'for (const auto& s : students) cout << s.name ...', constructType: 'Loop Construct', title: 'Output Stable Results', explanation: 'Outputs sorted students, proving Alice (order 1) remains before Charlie (order 3).', keyDetails: [{ variableOrConstruct: 's.originalOrder', role: 'Stability verification', whyThisWay: 'Demonstrates preservation of original input insertion sequence' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Optimized MergeSort with InsertionSort Threshold (TimSort Hybrid)", category: "Hybrid Sort",
+        description: "Optimizes MergeSort by switching to InsertionSort for small sub-arrays (size < 16).",
+        prosCons: "Pros: Faster in practice due to lower overhead on small arrays. Cons: Slightly more code.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 60. MergeSort - Approach 6: Small Subarray InsertionSort Threshold
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void insertionSortRange(vector<int>& arr, int low, int high) {
+    for (int i = low + 1; i <= high; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= low && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}
+
+void merge(vector<int>& arr, int low, int mid, int high) {
+    vector<int> temp;
+    int i = low, j = mid + 1;
+    while (i <= mid && j <= high) {
+        if (arr[i] <= arr[j]) temp.push_back(arr[i++]);
+        else temp.push_back(arr[j++]);
+    }
+    while (i <= mid) temp.push_back(arr[i++]);
+    while (j <= high) temp.push_back(arr[j++]);
+    for (int k = 0; k < (int)temp.size(); k++) arr[low + k] = temp[k];
+}
+
+void optimizedMergeSort(vector<int>& arr, int low, int high) {
+    if (high - low + 1 <= 10) { // Threshold optimization
+        insertionSortRange(arr, low, high);
+        return;
+    }
+    int mid = low + (high - low) / 2;
+    optimizedMergeSort(arr, low, mid);
+    optimizedMergeSort(arr, mid + 1, high);
+    merge(arr, low, mid, high);
+}
+
+int main() {
+    vector<int> arr = {15, 3, 2, 8, 1, 9, 4, 12, 6, 7, 11, 10, 14, 13};
+    optimizedMergeSort(arr, 0, (int)arr.size() - 1);
+    cout << "Hybrid Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (high - low + 1 <= 10) { insertionSortRange(arr, low, high); return; }', constructType: 'Condition & Branch', title: 'Small Subarray Threshold Switch', explanation: 'Switches to InsertionSort for small sub-arrays (size <= 10) to eliminate recursive function call overhead.', keyDetails: [{ variableOrConstruct: 'high - low + 1 <= 10', role: 'Cutoff threshold', whyThisWay: 'InsertionSort has smaller constant factors and is faster for small N' }] },
+          { lineNum: 2, codeSnippet: 'insertionSortRange(arr, low, high);', constructType: 'Function Signature', title: 'InsertionSort Sub-range Execution', explanation: 'Sorts small sub-range in-place with low constant factor.', keyDetails: [{ variableOrConstruct: 'insertionSortRange', role: 'Small array sorter', whyThisWay: 'Efficient in-place cache-friendly sorting for small ranges' }] },
+          { lineNum: 3, codeSnippet: 'merge(arr, low, mid, high);', constructType: 'Function Signature', title: 'Merge Hybrid Sorted Blocks', explanation: 'Merges sub-arrays sorted by InsertionSort back together using standard Merge phase.', keyDetails: [{ variableOrConstruct: 'merge', role: 'Hybrid merge', whyThisWay: 'Preserves overall O(N log N) complexity' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: In-Place Subarray Merge Concept (Buffer Reuse)", category: "Buffer Optimization",
+        description: "Reuses a single allocated auxiliary vector across all recursive merge calls to reduce memory allocations.",
+        prosCons: "Pros: Avoids thousands of vector heap allocations. Cons: Requires passing extra buffer vector reference.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N) single buffer", isFree: false,
+        code: `// 60. MergeSort - Approach 7: Single Buffer Reuse
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void mergeWithBuffer(vector<int>& arr, int low, int mid, int high, vector<int>& buffer) {
+    int i = low, j = mid + 1, k = low;
+    while (i <= mid && j <= high) {
+        if (arr[i] <= arr[j]) buffer[k++] = arr[i++];
+        else buffer[k++] = arr[j++];
+    }
+    while (i <= mid) buffer[k++] = arr[i++];
+    while (j <= high) buffer[k++] = arr[j++];
+
+    for (int idx = low; idx <= high; idx++) arr[idx] = buffer[idx];
+}
+
+void mergeSortBuffered(vector<int>& arr, int low, int high, vector<int>& buffer) {
+    if (low < high) {
+        int mid = low + (high - low) / 2;
+        mergeSortBuffered(arr, low, mid, buffer);
+        mergeSortBuffered(arr, mid + 1, high, buffer);
+        mergeWithBuffer(arr, low, mid, high, buffer);
+    }
+}
+
+int main() {
+    vector<int> arr = {5, 2, 8, 1, 9, 3};
+    vector<int> buffer(arr.size());
+    mergeSortBuffered(arr, 0, (int)arr.size() - 1, buffer);
+    cout << "Buffered Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> buffer(arr.size());', constructType: 'Variable & Initializer', title: 'Single Buffer Allocation', explanation: 'Allocates a single vector of size N before starting recursion.', keyDetails: [{ variableOrConstruct: 'vector<int> buffer', role: 'Reusable workspace', whyThisWay: 'Allocates heap memory once instead of thousands of times' }] },
+          { lineNum: 2, codeSnippet: 'buffer[k++] = arr[i++];', constructType: 'Variable & Initializer', title: 'Write Directly to Shared Buffer', explanation: 'Writes merged elements directly into shared buffer at offset k.', keyDetails: [{ variableOrConstruct: 'buffer[k++]', role: 'Direct buffer write', whyThisWay: 'Avoids dynamic push_back reallocations' }] },
+          { lineNum: 3, codeSnippet: 'for (int idx = low; idx <= high; idx++) arr[idx] = buffer[idx];', constructType: 'Loop Construct', title: 'Copy Back from Shared Buffer', explanation: 'Copies sorted elements from buffer back to original array slice [low..high].', keyDetails: [{ variableOrConstruct: 'arr[idx] = buffer[idx]', role: 'Slice write-back', whyThisWay: 'Restores updated sorted state to main array' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: MergeSort for Descending Order Sorting", category: "Custom Order",
+        description: "Sorts an array in non-increasing (descending) order using modified comparator in merge phase.",
+        prosCons: "Pros: Demonstrates comparator flexibility. Cons: Reverses standard inequality.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 60. MergeSort - Approach 8: Descending Order
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void mergeDescending(vector<int>& arr, int low, int mid, int high) {
+    vector<int> temp;
+    int i = low, j = mid + 1;
+    while (i <= mid && j <= high) {
+        if (arr[i] >= arr[j]) temp.push_back(arr[i++]); // >= for descending
+        else temp.push_back(arr[j++]);
+    }
+    while (i <= mid) temp.push_back(arr[i++]);
+    while (j <= high) temp.push_back(arr[j++]);
+    for (int k = 0; k < (int)temp.size(); k++) arr[low + k] = temp[k];
+}
+
+void mergeSortDescending(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int mid = low + (high - low) / 2;
+        mergeSortDescending(arr, low, mid);
+        mergeSortDescending(arr, mid + 1, high);
+        mergeDescending(arr, low, mid, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {3, 1, 4, 1, 5, 9, 2, 6};
+    mergeSortDescending(arr, 0, (int)arr.size() - 1);
+    cout << "Descending Sorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (arr[i] >= arr[j]) temp.push_back(arr[i++]);', constructType: 'Condition & Branch', title: 'Greater-Than Comparison for Descending Order', explanation: 'Picks larger element first to build descending sorted output.', keyDetails: [{ variableOrConstruct: 'arr[i] >= arr[j]', role: 'Descending check', whyThisWay: 'Places largest elements first during merge' }] },
+          { lineNum: 2, codeSnippet: 'mergeSortDescending(arr, low, mid);', constructType: 'Function Signature', title: 'Recursive Descending Divide', explanation: 'Recursively divides array while applying descending merge rule.', keyDetails: [{ variableOrConstruct: 'Descending divide', role: 'Recursion', whyThisWay: 'Applies descending order across all sub-problems' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Descending Sorted: ";', constructType: 'Function Signature', title: 'Output Descending Sequence', explanation: 'Outputs array sorted from largest to smallest.', keyDetails: [{ variableOrConstruct: 'descending result', role: 'Result', whyThisWay: 'Produces non-increasing sequence' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Count of Smaller Numbers After Self", category: "Enhanced Inversion",
+        description: "Counts how many smaller elements exist to the right of each element using indexed MergeSort.",
+        prosCons: "Pros: Solves complex LeetCode Hard problem in O(N log N). Cons: Requires index tracking array.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 60. MergeSort - Approach 9: Count Smaller After Self
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct Item {
+    int val, index;
+};
+
+void mergeCount(vector<Item>& items, int low, int mid, int high, vector<int>& counts) {
+    vector<Item> temp;
+    int i = low, j = mid + 1;
+    int rightCount = 0;
+
+    while (i <= mid && j <= high) {
+        if (items[j].val < items[i].val) {
+            rightCount++;
+            temp.push_back(items[j++]);
+        } else {
+            counts[items[i].index] += rightCount;
+            temp.push_back(items[i++]);
+        }
+    }
+    while (i <= mid) {
+        counts[items[i].index] += rightCount;
+        temp.push_back(items[i++]);
+    }
+    while (j <= high) temp.push_back(items[j++]);
+
+    for (int k = 0; k < (int)temp.size(); k++) items[low + k] = temp[k];
+}
+
+void mergeSortCount(vector<Item>& items, int low, int high, vector<int>& counts) {
+    if (low < high) {
+        int mid = low + (high - low) / 2;
+        mergeSortCount(items, low, mid, counts);
+        mergeSortCount(items, mid + 1, high, counts);
+        mergeCount(items, low, mid, high, counts);
+    }
+}
+
+vector<int> countSmaller(const vector<int>& nums) {
+    int n = nums.size();
+    vector<Item> items(n);
+    for (int i = 0; i < n; i++) items[i] = {nums[i], i};
+    vector<int> counts(n, 0);
+    mergeSortCount(items, 0, n - 1, counts);
+    return counts;
+}
+
+int main() {
+    vector<int> nums = {5, 2, 6, 1};
+    vector<int> counts = countSmaller(nums);
+    cout << "Smaller after self: ";
+    for (int c : counts) cout << c << " ";
+    cout << endl; // 2 1 1 0
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (items[j].val < items[i].val) { rightCount++; ... }', constructType: 'Condition & Branch', title: 'Track Right Smaller Elements', explanation: 'Increments rightCount whenever an element from right half is smaller than current left element.', keyDetails: [{ variableOrConstruct: 'rightCount++', role: 'Right smaller counter', whyThisWay: 'Counts elements from right half that are smaller than remaining left elements' }] },
+          { lineNum: 2, codeSnippet: 'counts[items[i].index] += rightCount;', constructType: 'Variable & Initializer', title: 'Add Jump Count to Original Index', explanation: 'Adds accumulated rightCount to result count for original index `items[i].index`.', keyDetails: [{ variableOrConstruct: 'counts[originalIndex] += rightCount', role: 'Result count update', whyThisWay: 'Records exact count of smaller elements after self' }] },
+          { lineNum: 3, codeSnippet: 'return counts;', constructType: 'Return / Cleanup', title: 'Return Counts Array', explanation: 'Returns array where counts[i] is number of smaller elements to right of nums[i].', keyDetails: [{ variableOrConstruct: 'counts', role: 'Result array', whyThisWay: 'Computes smaller-after-self counts in O(N log N)' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: 3-Way MergeSort (3-Partition Divide)", category: "Multi-Way Merge",
+        description: "Divides array into 3 equal partitions instead of 2, recursively sorting and merging 3 sub-arrays.",
+        prosCons: "Pros: Demonstrates multi-way divide and conquer. Cons: 3-pointer merge logic overhead.",
+        timeComplexity: "O(N log3 N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 60. MergeSort - Approach 10: 3-Way MergeSort
+#include <iostream>
+#include <vector>
+#include <climits>
+#include <algorithm>
+using namespace std;
+
+void merge3(vector<int>& arr, int low, int mid1, int mid2, int high) {
+    vector<int> temp;
+    int i = low, j = mid1 + 1, k = mid2 + 1;
+
+    while (i <= mid1 || j <= mid2 || k <= high) {
+        int v1 = (i <= mid1) ? arr[i] : INT_MAX;
+        int v2 = (j <= mid2) ? arr[j] : INT_MAX;
+        int v3 = (k <= high) ? arr[k] : INT_MAX;
+
+        if (v1 <= v2 && v1 <= v3) { temp.push_back(v1); i++; }
+        else if (v2 <= v1 && v2 <= v3) { temp.push_back(v2); j++; }
+        else { temp.push_back(v3); k++; }
+    }
+    for (int idx = 0; idx < (int)temp.size(); idx++) arr[low + idx] = temp[idx];
+}
+
+void mergeSort3Way(vector<int>& arr, int low, int high) {
+    if (high - low < 1) return;
+    int len = (high - low + 1) / 3;
+    int mid1 = low + len - 1;
+    int mid2 = low + 2 * len - 1;
+
+    mergeSort3Way(arr, low, mid1);
+    mergeSort3Way(arr, mid1 + 1, mid2);
+    mergeSort3Way(arr, mid2 + 1, high);
+
+    merge3(arr, low, mid1, mid2, high);
+}
+
+int main() {
+    vector<int> arr = {45, -2, 10, 33, 9, 21, 0, 7, -15};
+    mergeSort3Way(arr, 0, (int)arr.size() - 1);
+    cout << "3-Way MergeSorted: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int mid1 = low + len - 1; int mid2 = low + 2 * len - 1;', constructType: 'Variable & Initializer', title: 'Calculate 3-Partition Split Points', explanation: 'Splits current array range [low..high] into 3 equal parts using mid1 and mid2.', keyDetails: [{ variableOrConstruct: 'mid1, mid2', role: '3-way split points', whyThisWay: 'Divides range into 3 equal sub-problems' }] },
+          { lineNum: 2, codeSnippet: 'if (v1 <= v2 && v1 <= v3) { temp.push_back(v1); i++; } ...', constructType: 'Condition & Branch', title: '3-Way Minimum Selection Merge', explanation: 'Finds minimum among 3 active sub-array pointers (using INT_MAX sentinel for exhausted ranges) and merges.', keyDetails: [{ variableOrConstruct: 'v1, v2, v3 comparison', role: '3-way merge', whyThisWay: 'Merges 3 sorted sub-arrays simultaneously into single sorted sequence' }] },
+          { lineNum: 3, codeSnippet: 'mergeSort3Way(arr, low, mid1); ...', constructType: 'Function Signature', title: 'Recurse 3 Equal Sub-problems', explanation: 'Recursively sorts 3 sub-problems of size N/3.', keyDetails: [{ variableOrConstruct: '3-way recursion', role: '3-way divide phase', whyThisWay: 'Reduces recursion tree depth to log3(N)' }] }
+        ]
+      }
+    ],
+    traceKey: "factorial"
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -16869,6 +19408,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "med_priority_queue") return getProblem53Details();
   if (id === "med_graph_bfs") return getProblem54Details();
   if (id === "med_graph_dfs") return getProblem55Details();
+  if (id === "med_two_pointers") return getProblem56Details();
+  if (id === "med_sliding_window") return getProblem57Details();
+  if (id === "med_binary_search") return getProblem58Details();
+  if (id === "med_quick_sort") return getProblem59Details();
+  if (id === "med_merge_sort") return getProblem60Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
