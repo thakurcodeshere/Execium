@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import { CODING_CHALLENGES, getChallengeDetails, getDailyChallenge, CodingChallenge } from "@/lib/challenges";
-import { Search, Trophy, Flame, Clock, CheckCircle2, Circle, ArrowRight, Zap, Eye, X, Building2, Percent, Users } from "lucide-react";
+import { Search, Trophy, Flame, Clock, CheckCircle2, Circle, ArrowRight, Zap, Eye, X, Building2, Percent, Users, RotateCcw } from "lucide-react";
 
 export default function PracticePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -137,7 +137,7 @@ export default function PracticePage() {
       </div>
 
       {/* Main Container */}
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 24px" }}>
+      <div style={{ maxWidth: 1360, margin: "0 auto", padding: "40px 24px" }}>
 
         {/* Featured Daily Challenge Card */}
         <div style={{
@@ -196,229 +196,264 @@ export default function PracticePage() {
           </div>
         </div>
 
-        {/* Filter Controls Bar */}
-        <div style={{
-          display: "flex", flexDirection: "column", gap: 16, marginBottom: 32,
-          background: "rgba(15,23,42,0.6)", padding: 18, borderRadius: 14,
-          border: "1px solid rgba(255,255,255,0.06)", backdropFilter: "blur(12px)"
-        }}>
-          {/* Status Filter Row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono'", color: "#64748b", textTransform: "uppercase", marginRight: 4, fontWeight: 800 }}>
-              Status:
-            </span>
-            {[
-              { id: "all", label: `ALL (${CODING_CHALLENGES.length})` },
-              { id: "unsolved", label: `UNSOLVED (${CODING_CHALLENGES.length - solvedChallenges.length})` },
-              { id: "attempted", label: `ATTEMPTED (${attemptedChallenges.filter(id => !solvedChallenges.includes(id)).length})` },
-              { id: "solved", label: `SOLVED (${solvedChallenges.length})` }
-            ].map(st => {
-              const isActive = selectedStatus === st.id;
-              return (
-                <button
-                  key={st.id}
-                  onClick={() => setSelectedStatus(st.id)}
-                  style={{
-                    padding: "5px 12px", borderRadius: 8,
-                    border: `1px solid ${isActive ? "#f59e0b" : "rgba(255,255,255,0.08)"}`,
-                    background: isActive ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.02)",
-                    color: isActive ? "#f59e0b" : "#94a3b8", fontSize: 11,
-                    fontFamily: "'JetBrains Mono'", fontWeight: isActive ? 800 : 600,
-                    cursor: "pointer", transition: "all 0.15s"
-                  }}
-                >
-                  {st.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* ── 2-COLUMN LAYOUT: Left Challenges Grid + Right Vertical Filter Box ── */}
+        <div style={{ display: "flex", gap: 24, alignItems: "flex-start" }}>
 
-          {/* Difficulty & Company Filters Row */}
-          <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
-            {/* Difficulty */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono'", color: "#64748b", textTransform: "uppercase", fontWeight: 800 }}>
-                Difficulty:
-              </span>
-              {(["all", "easy", "medium", "hard"] as const).map(diff => {
-                const isActive = selectedDiff === diff;
-                const color = diff === "easy" ? "#10b981" : diff === "medium" ? "#f59e0b" : diff === "hard" ? "#ef4444" : "#3b82f6";
-                return (
-                  <button
-                    key={diff}
-                    onClick={() => setSelectedDiff(diff)}
-                    style={{
-                      padding: "4px 10px", borderRadius: 6,
-                      border: `1px solid ${isActive ? color : "rgba(255,255,255,0.08)"}`,
-                      background: isActive ? `${color}20` : "transparent",
-                      color: isActive ? color : "#94a3b8", fontSize: 10,
-                      fontFamily: "'JetBrains Mono'", fontWeight: isActive ? 800 : 600,
-                      cursor: "pointer", textTransform: "uppercase"
-                    }}
-                  >
-                    {diff}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Company */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-              <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono'", color: "#64748b", textTransform: "uppercase", fontWeight: 800 }}>
-                Company Tag:
-              </span>
-              {companiesList.map(comp => {
-                const isActive = selectedCompany === comp;
-                return (
-                  <button
-                    key={comp}
-                    onClick={() => setSelectedCompany(comp)}
-                    style={{
-                      padding: "4px 9px", borderRadius: 6,
-                      border: `1px solid ${isActive ? "#3b82f6" : "rgba(255,255,255,0.08)"}`,
-                      background: isActive ? "rgba(59,130,246,0.2)" : "transparent",
-                      color: isActive ? "#60a5fa" : "#94a3b8", fontSize: 10,
-                      fontFamily: "'JetBrains Mono'", fontWeight: isActive ? 800 : 600,
-                      cursor: "pointer"
-                    }}
-                  >
-                    {comp === "all" ? "All Companies" : comp}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Challenges Table / Grid */}
-        {filteredChallenges.length === 0 ? (
-          <div style={{
-            padding: 60, textAlign: "center", background: "rgba(15,23,42,0.4)",
-            borderRadius: 16, border: "1px solid rgba(255,255,255,0.06)"
-          }}>
-            <div style={{ fontSize: 18, fontWeight: 800, color: "#e2e8f0", marginBottom: 8 }}>
-              No Challenges Found
-            </div>
-            <div style={{ fontSize: 13, color: "#64748b" }}>
-              No coding challenges match your active filter settings. Try clearing company or status filters.
-            </div>
-          </div>
-        ) : (
-          <div style={{
-            display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: 20
-          }}>
-            {filteredChallenges.map(c => {
-              const details = getChallengeDetails(c.id);
-              const isSolved = solvedChallenges.includes(c.id);
-              const isAttempted = attemptedChallenges.includes(c.id) && !isSolved;
-              const diffColor = c.difficulty === "easy" ? "#10b981" : c.difficulty === "medium" ? "#f59e0b" : "#ef4444";
-
-              return (
-                <div
-                  key={c.id}
-                  style={{
-                    background: "rgba(15,23,42,0.6)", border: "1px solid rgba(255,255,255,0.08)",
-                    borderRadius: 14, padding: 20, display: "flex", flexDirection: "column",
-                    justifyContent: "space-between", backdropFilter: "blur(12px)"
-                  }}
-                >
-                  <div>
-                    {/* Header Row */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        {isSolved ? (
-                          <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#10b981", fontWeight: 800, display: "flex", alignItems: "center", gap: 4 }}>
-                            <CheckCircle2 size={13} /> SOLVED
-                          </span>
-                        ) : isAttempted ? (
-                          <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#f59e0b", fontWeight: 800, display: "flex", alignItems: "center", gap: 4 }}>
-                            <Clock size={13} /> ATTEMPTED
-                          </span>
-                        ) : (
-                          <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#64748b", fontWeight: 800, display: "flex", alignItems: "center", gap: 4 }}>
-                            <Circle size={13} /> UNSOLVED
-                          </span>
-                        )}
-                        <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#64748b" }}>
-                          {c.category}
-                        </span>
-                      </div>
-
-                      <span style={{
-                        fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                        padding: "2px 7px", borderRadius: 4, background: `${diffColor}18`,
-                        color: diffColor, border: `1px solid ${diffColor}35`, textTransform: "uppercase"
-                      }}>
-                        {c.difficulty}
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    <h3 style={{ fontSize: 17, fontWeight: 800, color: "#f8fafc", marginBottom: 6 }}>
-                      {c.title}
-                    </h3>
-
-                    {/* Desc */}
-                    <p style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5, marginBottom: 14 }}>
-                      {c.desc}
-                    </p>
-
-                    {/* Companies Badges */}
-                    {details.problemStatement.companies && (
-                      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-                        {details.problemStatement.companies.map((comp, ci) => (
-                          <span key={ci} style={{
-                            fontSize: 9, fontFamily: "'JetBrains Mono'", color: "#cbd5e1",
-                            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
-                            padding: "2px 6px", borderRadius: 4
-                          }}>
-                            {comp}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Footer Bar */}
-                  <div style={{
-                    display: "flex", alignItems: "center", justifyContent: "space-between",
-                    paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)"
-                  }}>
-                    <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#64748b" }}>
-                      Acc: <strong style={{ color: "#e2e8f0" }}>{details.problemStatement.acceptanceRate}</strong>
-                    </div>
-
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button
-                        onClick={() => setPreviewChallengeId(c.id)}
-                        style={{
-                          padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.12)",
-                          background: "rgba(255,255,255,0.03)", color: "#e2e8f0", fontSize: 10,
-                          fontFamily: "'JetBrains Mono'", fontWeight: 700, cursor: "pointer",
-                          display: "flex", alignItems: "center", gap: 4
-                        }}
-                      >
-                        <Eye size={12} /> Preview
-                      </button>
-
-                      <Link
-                        href={`/studio?challenge=${c.id}`}
-                        style={{
-                          padding: "6px 12px", borderRadius: 6, border: "none",
-                          background: "linear-gradient(135deg, #f59e0b, #a855f7)", color: "#fff",
-                          fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                          textDecoration: "none", display: "flex", alignItems: "center", gap: 4
-                        }}
-                      >
-                        <Zap size={12} /> Solve
-                      </Link>
-                    </div>
-                  </div>
+          {/* LEFT AREA: Challenges Directory Cards Grid */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            {filteredChallenges.length === 0 ? (
+              <div style={{
+                padding: 60, textAlign: "center", background: "rgba(15,23,42,0.4)",
+                borderRadius: 16, border: "1px solid rgba(255,255,255,0.06)"
+              }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "#e2e8f0", marginBottom: 8 }}>
+                  No Challenges Found
                 </div>
-              );
-            })}
+                <div style={{ fontSize: 13, color: "#64748b" }}>
+                  No coding challenges match your active filter settings. Try resetting filters on the right sidebar.
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(330px, 1fr))", gap: 20
+              }}>
+                {filteredChallenges.map(c => {
+                  const details = getChallengeDetails(c.id);
+                  const isSolved = solvedChallenges.includes(c.id);
+                  const isAttempted = attemptedChallenges.includes(c.id) && !isSolved;
+                  const diffColor = c.difficulty === "easy" ? "#10b981" : c.difficulty === "medium" ? "#f59e0b" : "#ef4444";
+
+                  return (
+                    <div
+                      key={c.id}
+                      style={{
+                        background: "rgba(15,23,42,0.6)", border: "1px solid rgba(255,255,255,0.08)",
+                        borderRadius: 14, padding: 20, display: "flex", flexDirection: "column",
+                        justify: "space-between", backdropFilter: "blur(12px)"
+                      }}
+                    >
+                      <div>
+                        {/* Header Row */}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            {isSolved ? (
+                              <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#10b981", fontWeight: 800, display: "flex", alignItems: "center", gap: 4 }}>
+                                <CheckCircle2 size={13} /> SOLVED
+                              </span>
+                            ) : isAttempted ? (
+                              <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#f59e0b", fontWeight: 800, display: "flex", alignItems: "center", gap: 4 }}>
+                                <Clock size={13} /> ATTEMPTED
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#64748b", fontWeight: 800, display: "flex", alignItems: "center", gap: 4 }}>
+                                <Circle size={13} /> UNSOLVED
+                              </span>
+                            )}
+                            <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#64748b" }}>
+                              {c.category}
+                            </span>
+                          </div>
+
+                          <span style={{
+                            fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                            padding: "2px 7px", borderRadius: 4, background: `${diffColor}18`,
+                            color: diffColor, border: `1px solid ${diffColor}35`, textTransform: "uppercase"
+                          }}>
+                            {c.difficulty}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <h3 style={{ fontSize: 17, fontWeight: 800, color: "#f8fafc", marginBottom: 6 }}>
+                          {c.title}
+                        </h3>
+
+                        {/* Desc */}
+                        <p style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5, marginBottom: 14 }}>
+                          {c.desc}
+                        </p>
+
+                        {/* Companies Badges */}
+                        {details.problemStatement.companies && (
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+                            {details.problemStatement.companies.map((comp, ci) => (
+                              <span key={ci} style={{
+                                fontSize: 9, fontFamily: "'JetBrains Mono'", color: "#cbd5e1",
+                                background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+                                padding: "2px 6px", borderRadius: 4
+                              }}>
+                                {comp}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Footer Bar */}
+                      <div style={{
+                        display: "flex", alignItems: "center", justifyContent: "space-between",
+                        paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.06)"
+                      }}>
+                        <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#64748b" }}>
+                          Acc: <strong style={{ color: "#e2e8f0" }}>{details.problemStatement.acceptanceRate}</strong>
+                        </div>
+
+                        <div style={{ display: "flex", gap: 6 }}>
+                          <button
+                            onClick={() => setPreviewChallengeId(c.id)}
+                            style={{
+                              padding: "6px 10px", borderRadius: 6, border: "1px solid rgba(255,255,255,0.12)",
+                              background: "rgba(255,255,255,0.03)", color: "#e2e8f0", fontSize: 10,
+                              fontFamily: "'JetBrains Mono'", fontWeight: 700, cursor: "pointer",
+                              display: "flex", alignItems: "center", gap: 4
+                            }}
+                          >
+                            <Eye size={12} /> Preview
+                          </button>
+
+                          <Link
+                            href={`/studio?challenge=${c.id}`}
+                            style={{
+                              padding: "6px 12px", borderRadius: 6, border: "none",
+                              background: "linear-gradient(135deg, #f59e0b, #a855f7)", color: "#fff",
+                              fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                              textDecoration: "none", display: "flex", alignItems: "center", gap: 4
+                            }}
+                          >
+                            <Zap size={12} /> Solve
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        )}
+
+          {/* RIGHT SIDEBAR: Vertical Filter Box */}
+          <div style={{
+            width: 330, flexShrink: 0, position: "sticky", top: 80,
+            background: "rgba(15,23,42,0.75)", border: "1px solid rgba(245,158,11,0.25)",
+            borderRadius: 16, padding: 20, backdropFilter: "blur(16px)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.5)", display: "flex", flexDirection: "column", gap: 20
+          }}>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 12, borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+              <span style={{ fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#f59e0b", letterSpacing: 0.5 }}>
+                ⚙️ CHALLENGE FILTERS
+              </span>
+              <button
+                onClick={() => { setSelectedStatus("all"); setSelectedDiff("all"); setSelectedCompany("all"); setSearchQuery(""); }}
+                style={{
+                  background: "transparent", border: "none", color: "#64748b", cursor: "pointer",
+                  fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 700, display: "flex", alignItems: "center", gap: 4
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = "#f59e0b"}
+                onMouseLeave={e => e.currentTarget.style.color = "#64748b"}
+              >
+                <RotateCcw size={11} /> Reset
+              </button>
+            </div>
+
+            {/* STATUS Section (Vertical Box) */}
+            <div>
+              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                STATUS:
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {[
+                  { id: "all", label: `ALL (${CODING_CHALLENGES.length})` },
+                  { id: "unsolved", label: `UNSOLVED (${CODING_CHALLENGES.length - solvedChallenges.length})` },
+                  { id: "attempted", label: `ATTEMPTED (${attemptedChallenges.filter(id => !solvedChallenges.includes(id)).length})` },
+                  { id: "solved", label: `SOLVED (${solvedChallenges.length})` }
+                ].map(st => {
+                  const isActive = selectedStatus === st.id;
+                  return (
+                    <button
+                      key={st.id}
+                      onClick={() => setSelectedStatus(st.id)}
+                      style={{
+                        width: "100%", padding: "7px 12px", borderRadius: 8, textAlign: "left",
+                        border: `1px solid ${isActive ? "#f59e0b" : "rgba(255,255,255,0.06)"}`,
+                        background: isActive ? "rgba(245,158,11,0.18)" : "rgba(255,255,255,0.02)",
+                        color: isActive ? "#f59e0b" : "#94a3b8", fontSize: 11,
+                        fontFamily: "'JetBrains Mono'", fontWeight: isActive ? 800 : 600,
+                        cursor: "pointer", transition: "all 0.15s", display: "flex",
+                        alignItems: "center", justifyContent: "space-between"
+                      }}
+                    >
+                      <span>{st.label}</span>
+                      {isActive && <span style={{ fontSize: 12 }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* DIFFICULTY Section (Vertical Box) */}
+            <div>
+              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                DIFFICULTY:
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                {(["all", "easy", "medium", "hard"] as const).map(diff => {
+                  const isActive = selectedDiff === diff;
+                  const color = diff === "easy" ? "#10b981" : diff === "medium" ? "#f59e0b" : diff === "hard" ? "#ef4444" : "#3b82f6";
+                  return (
+                    <button
+                      key={diff}
+                      onClick={() => setSelectedDiff(diff)}
+                      style={{
+                        padding: "7px 10px", borderRadius: 8, textAlign: "center",
+                        border: `1px solid ${isActive ? color : "rgba(255,255,255,0.06)"}`,
+                        background: isActive ? `${color}20` : "rgba(255,255,255,0.02)",
+                        color: isActive ? color : "#94a3b8", fontSize: 10,
+                        fontFamily: "'JetBrains Mono'", fontWeight: isActive ? 800 : 600,
+                        cursor: "pointer", textTransform: "uppercase", transition: "all 0.15s"
+                      }}
+                    >
+                      {diff}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* COMPANY TAG Section (Vertical Box) */}
+            <div>
+              <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#64748b", textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>
+                COMPANY TAG:
+              </div>
+              <div style={{
+                display: "flex", flexWrap: "wrap", gap: 6, maxHeight: 220, overflowY: "auto",
+                paddingRight: 4, scrollbarWidth: "thin"
+              }}>
+                {companiesList.map(comp => {
+                  const isActive = selectedCompany === comp;
+                  return (
+                    <button
+                      key={comp}
+                      onClick={() => setSelectedCompany(comp)}
+                      style={{
+                        padding: "5px 9px", borderRadius: 6,
+                        border: `1px solid ${isActive ? "#3b82f6" : "rgba(255,255,255,0.08)"}`,
+                        background: isActive ? "rgba(59,130,246,0.25)" : "rgba(255,255,255,0.02)",
+                        color: isActive ? "#60a5fa" : "#94a3b8", fontSize: 10,
+                        fontFamily: "'JetBrains Mono'", fontWeight: isActive ? 800 : 600,
+                        cursor: "pointer", transition: "all 0.15s"
+                      }}
+                    >
+                      {comp === "all" ? "All Companies" : comp}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
       </div>
 
       {/* Challenge Preview Modal */}
