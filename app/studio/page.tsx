@@ -23,7 +23,7 @@ function StudioContent() {
   const { 
     theme, showAI, isCollapsed, activeChallengeId, activeLearnModuleId,
     setLearnModuleId, setChallengeId, setProjectId, setProjectName, setCode,
-    code, projectId, projectName, pid
+    code, projectId, projectName, pid, openTab
   } = useStore();
   const T = theme;
   const [hydrated, setHydrated] = useState(false);
@@ -32,51 +32,50 @@ function StudioContent() {
   const [sidebarWidth, setSidebarWidth] = useState(64);
   const [isResizing, setIsResizing] = useState(false);
 
-  // 1. URL Query Parameter Driven State Synchronization (Fires on soft navigation and initial mount)
+  // 1. URL Query Parameter Driven State Synchronization (Initial mount tab loading)
   useEffect(() => {
     try {
       if (learnParam) {
-        setLearnModuleId(learnParam);
+        const mod = getLearnModuleDetails(learnParam);
         const savedCode = localStorage.getItem(`execium_code_learn_${learnParam}`);
-        if (savedCode) {
-          setCode(savedCode);
-        } else {
-          const mod = getLearnModuleDetails(learnParam);
-          if (mod?.fullCode) setCode(mod.fullCode);
-        }
+        const codeToUse = savedCode || (mod?.fullCode ?? "");
+        openTab({
+          id: `learn-${learnParam}`,
+          type: 'learn',
+          title: mod?.title ?? `Module ${learnParam}`,
+          code: codeToUse,
+          activeLearnModuleId: learnParam
+        });
       } else if (challengeParam) {
-        setChallengeId(challengeParam);
+        const ch = getChallengeDetails(challengeParam);
         const savedCode = localStorage.getItem(`execium_code_challenge_${challengeParam}`);
-        if (savedCode) {
-          setCode(savedCode);
-        } else {
-          const ch = getChallengeDetails(challengeParam);
-          if (ch?.starterCode) setCode(ch.starterCode);
-        }
+        const codeToUse = savedCode || (ch?.starterCode ?? "");
+        openTab({
+          id: `challenge-${challengeParam}`,
+          type: 'challenge',
+          title: ch?.title ?? `Challenge ${challengeParam}`,
+          code: codeToUse,
+          activeChallengeId: challengeParam
+        });
       } else if (projParam) {
-        setProjectId(projParam);
         const projs = localStorage.getItem("execium_projects");
         if (projs) {
           const list = JSON.parse(projs);
           const found = list.find((p: any) => p.id === projParam);
           if (found) {
-            setProjectName(found.name);
-            setCode(found.code);
+            openTab({
+              id: `proj-${projParam}`,
+              type: 'project',
+              title: found.name,
+              code: found.code,
+              projectId: projParam
+            });
           }
         }
-      } else {
-        // Entering Studio fresh without query parameters: Default to clean full-width Untitled Project
-        setLearnModuleId(null);
-        setChallengeId(null);
-        setProjectId(null);
-        setProjectName("Untitled Project");
-        setCode(DEFAULT_UNTITLED_CODE);
-        localStorage.removeItem("execium_active_popover");
-        localStorage.removeItem("execium_studio_session");
       }
     } catch {}
     setHydrated(true);
-  }, [learnParam, challengeParam, projParam]);
+  }, []);
 
   // 2. State & URL Synchronization effect (persist active session & URL query)
   useEffect(() => {
