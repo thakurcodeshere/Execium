@@ -19352,6 +19352,2249 @@ int main() {
   };
 }
 
+
+export function getProblem61Details(): LearnModule {
+  return {
+    id: "med_dp_1d",
+    title: "61. 1D Dynamic Programming",
+    category: "Dynamic Programming",
+    difficulty: "medium",
+    shortDesc: "Tabulation and memoization for subproblem optimization.",
+    fullCode: `// 61. 1D DP - Approach 1: Climbing Stairs Tabulation & O(1) Space
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int climbStairs(int n) {
+    if (n <= 2) return n;
+    int prev2 = 1, prev1 = 2;
+    for (int i = 3; i <= n; i++) {
+        int curr = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = curr;
+    }
+    return prev1;
+}
+
+int main() {
+    cout << "Ways to climb 5 stairs: " << climbStairs(5) << endl; // 8
+    return 0;
+}`,
+    problemStatement: {
+      title: "61. 1D Dynamic Programming",
+      objective: "Master 1D Dynamic Programming: subproblem decomposition, state representation dp[i], transition formulas, top-down memoization, bottom-up tabulation, space optimization from O(N) array down to O(1) variables, House Robber, Coin Change, and LIS.",
+      description: "Implement **1D Dynamic Programming** (Dynamic Programming). Solve complex optimization problems by breaking them into overlapping subproblems, storing intermediate results, and building optimal solutions iteratively.",
+      inputDesc: "Integer values, arrays of house values, coin denominations, digit strings, or numerical sequences.",
+      outputDesc: "Maximum profit/ways count, minimum coins required, longest sequence length, or decoded string count.",
+      takeaways: [
+        "1D DP problems define state `dp[i]` as the optimal answer for a subproblem of size or end-index `i`",
+        "Tabulation builds answers bottom-up from base cases `dp[0]` up to `dp[N]`",
+        "Space optimization replaces full `dp` array with constant O(1) variables when state `dp[i]` only depends on `dp[i-1]` and `dp[i-2]`",
+        "Coin Change and LIS demonstrate how 1D DP arrays accumulate optimal values across multiple subproblem choices"
+      ],
+      examples: [
+        { id: 1, input: "n = 5 stairs", output: "Ways: 8", explanation: "dp[i] = dp[i-1] + dp[i-2]; Fibonacci transition yields 8 ways." },
+        { id: 2, input: "houses = [2, 7, 9, 3, 1]", output: "Max Stolen: 12", explanation: "dp[i] = max(dp[i-1], dp[i-2] + nums[i]); optimal choice robs houses at indices 0, 2, 4 (2+9+1 = 12)." },
+        { id: 3, input: "coins = [1, 2, 5], amount = 11", output: "Min Coins: 3 (5+5+1)", explanation: "dp[11] = min(dp[11-1], dp[11-2], dp[11-5]) + 1 yields 3 coins." }
+      ],
+      constraints: ["State bounds 0 <= i <= N. Base cases must be initialized prior to DP loop."],
+      companies: ["Google", "Amazon", "Meta", "Microsoft", "Apple"],
+      acceptanceRate: "91.2%",
+      totalAccepted: "6,850,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Climbing Stairs (Tabulation & O(1) Space) (FREE)", category: "FREE / Core 1D DP",
+        description: "Calculates total ways to climb N stairs taking 1 or 2 steps at a time, optimized to O(1) space.",
+        prosCons: "Pros: O(N) time and O(1) space optimization. Cons: Specific to 2-step Fibonacci recurrence.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 61. 1D DP - Approach 1: Climbing Stairs
+#include <iostream>
+using namespace std;
+
+int climbStairs(int n) {
+    if (n <= 2) return n;
+    int prev2 = 1, prev1 = 2;
+    for (int i = 3; i <= n; i++) {
+        int curr = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = curr;
+    }
+    return prev1;
+}
+
+int main() {
+    cout << "Stairs(4): " << climbStairs(4) << endl; // 5
+    cout << "Stairs(5): " << climbStairs(5) << endl; // 8
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (n <= 2) return n;', constructType: 'Condition & Branch', title: 'Base Cases Check', explanation: 'Directly returns base cases: 1 step has 1 way, 2 steps have 2 ways (1+1 or 2).', keyDetails: [{ variableOrConstruct: 'n <= 2', role: 'Base case handler', whyThisWay: 'Initialization points for recurrence relation' }] },
+          { lineNum: 2, codeSnippet: 'int curr = prev1 + prev2;', constructType: 'Variable & Initializer', title: 'DP Recurrence Transition', explanation: 'Computes total ways to reach step `i` by adding ways from step `i-1` and step `i-2`.', keyDetails: [{ variableOrConstruct: 'curr = prev1 + prev2', role: 'State transition formula', whyThisWay: 'Subproblem optimal structure: dp[i] = dp[i-1] + dp[i-2]' }] },
+          { lineNum: 3, codeSnippet: 'prev2 = prev1; prev1 = curr;', constructType: 'Variable & Initializer', title: 'O(1) Memory Rolling Update', explanation: 'Slides memory variables forward, maintaining constant space.', keyDetails: [{ variableOrConstruct: 'prev2 = prev1', role: 'Space optimization shift', whyThisWay: 'Discards old state variables no longer needed for future steps' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: House Robber (Non-Adjacent Max Sum DP) (FREE)", category: "FREE / Choice DP",
+        description: "Finds maximum money that can be robbed without alerting police by robbing adjacent houses.",
+        prosCons: "Pros: O(N) time and O(1) space choice decision. Cons: Handles 1D non-adjacent constraints only.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 61. 1D DP - Approach 2: House Robber
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int rob(const vector<int>& nums) {
+    int robPrev2 = 0, robPrev1 = 0;
+    for (int num : nums) {
+        int current = max(robPrev1, robPrev2 + num);
+        robPrev2 = robPrev1;
+        robPrev1 = current;
+    }
+    return robPrev1;
+}
+
+int main() {
+    vector<int> houses = {2, 7, 9, 3, 1};
+    cout << "Max Robbed Amount: " << rob(houses) << endl; // 12
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int current = max(robPrev1, robPrev2 + num);', constructType: 'Variable & Initializer', title: 'Rob vs Skip Choice Transition', explanation: 'At each house, chooses maximum between skipping house (`robPrev1`) or robbing house (`robPrev2 + num`).', keyDetails: [{ variableOrConstruct: 'max(robPrev1, robPrev2 + num)', role: 'DP decision choice', whyThisWay: 'Enforces non-adjacent constraint: robbing current house requires skipping previous' }] },
+          { lineNum: 2, codeSnippet: 'robPrev2 = robPrev1; robPrev1 = current;', constructType: 'Variable & Initializer', title: 'Slide Decision Memory', explanation: 'Advances DP states forward to prepare for next house evaluation.', keyDetails: [{ variableOrConstruct: 'robPrev1', role: 'Optimal answer up to current house', whyThisWay: 'Maintains running optimal total in O(1) space' }] },
+          { lineNum: 3, codeSnippet: 'return robPrev1;', constructType: 'Return / Cleanup', title: 'Return Maximum Stolen Value', explanation: 'Returns final maximum profit accumulated across all houses.', keyDetails: [{ variableOrConstruct: 'robPrev1', role: 'Result profit', whyThisWay: 'Contains maximum money robbed from N houses' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Coin Change (Minimum Coins Subproblem)", category: "Min Unbounded DP",
+        description: "Computes fewest coins needed to make up a target amount using 1D tabulation array.",
+        prosCons: "Pros: O(N * Amount) time optimal solution. Cons: Requires initialization array of size Amount+1.",
+        timeComplexity: "O(N * Amount)", spaceComplexity: "O(Amount)", isFree: false,
+        code: `// 61. 1D DP - Approach 3: Coin Change
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int coinChange(const vector<int>& coins, int amount) {
+    vector<int> dp(amount + 1, amount + 1);
+    dp[0] = 0;
+
+    for (int i = 1; i <= amount; i++) {
+        for (int coin : coins) {
+            if (i - coin >= 0) {
+                dp[i] = min(dp[i], dp[i - coin] + 1);
+            }
+        }
+    }
+    return dp[amount] > amount ? -1 : dp[amount];
+}
+
+int main() {
+    vector<int> coins = {1, 2, 5};
+    cout << "Min coins for 11: " << coinChange(coins, 11) << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> dp(amount + 1, amount + 1); dp[0] = 0;', constructType: 'Variable & Initializer', title: 'Initialize DP Array with Infinity Sentinel', explanation: 'Initializes DP array of size `amount+1` with sentinel value `amount+1` (acting as infinity), setting base case `dp[0] = 0`.', keyDetails: [{ variableOrConstruct: 'dp[0] = 0', role: 'Base case', whyThisWay: '0 coins required to make 0 amount' }] },
+          { lineNum: 2, codeSnippet: 'if (i - coin >= 0) dp[i] = min(dp[i], dp[i - coin] + 1);', constructType: 'Condition & Branch', title: 'Min Coin Transition Rule', explanation: 'Tries each coin denomination and updates `dp[i]` with minimum count.', keyDetails: [{ variableOrConstruct: 'dp[i - coin] + 1', role: 'Coin choice transition', whyThisWay: 'Computes minimum coins to reach amount i using coin' }] },
+          { lineNum: 3, codeSnippet: 'return dp[amount] > amount ? -1 : dp[amount];', constructType: 'Return / Cleanup', title: 'Return Result or Failure (-1)', explanation: 'Returns `dp[amount]` or `-1` if target amount cannot be formed by any combination.', keyDetails: [{ variableOrConstruct: 'dp[amount]', role: 'Min coin count', whyThisWay: 'Provides exact minimum coins needed' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Longest Increasing Subsequence (LIS)", category: "Subsequence DP",
+        description: "Finds length of longest strictly increasing subsequence in an array using 1D DP tabulation.",
+        prosCons: "Pros: Classic 1D DP pattern. Cons: O(N^2) time complexity (can be optimized to O(N log N) via binary search).",
+        timeComplexity: "O(N^2)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 61. 1D DP - Approach 4: Longest Increasing Subsequence
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int lengthOfLIS(const vector<int>& nums) {
+    if (nums.empty()) return 0;
+    int n = nums.size();
+    vector<int> dp(n, 1);
+    int maxLIS = 1;
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < i; j++) {
+            if (nums[j] < nums[i]) {
+                dp[i] = max(dp[i], dp[j] + 1);
+            }
+        }
+        maxLIS = max(maxLIS, dp[i]);
+    }
+    return maxLIS;
+}
+
+int main() {
+    vector<int> nums = {10, 9, 2, 5, 3, 7, 101, 18};
+    cout << "LIS Length: " << lengthOfLIS(nums) << endl; // 4 ([2, 3, 7, 101])
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> dp(n, 1);', constructType: 'Variable & Initializer', title: 'Initialize LIS DP Array', explanation: 'Initializes `dp[i] = 1` for all indices because each single element is an increasing subsequence of length 1.', keyDetails: [{ variableOrConstruct: 'dp[i] = 1', role: 'Initial LIS state', whyThisWay: 'Base length of any individual element is 1' }] },
+          { lineNum: 2, codeSnippet: 'if (nums[j] < nums[i]) dp[i] = max(dp[i], dp[j] + 1);', constructType: 'Condition & Branch', title: 'Increasing Element Transition', explanation: 'If `nums[j] < nums[i]`, `nums[i]` can extend the increasing subsequence ending at index `j`.', keyDetails: [{ variableOrConstruct: 'dp[j] + 1', role: 'Subsequence extension', whyThisWay: 'Extends LIS ending at index j to include index i' }] },
+          { lineNum: 3, codeSnippet: 'maxLIS = max(maxLIS, dp[i]);', constructType: 'Variable & Initializer', title: 'Track Peak Subsequence Length', explanation: 'Tracks maximum subsequence length found across all ending indices `i`.', keyDetails: [{ variableOrConstruct: 'maxLIS', role: 'Global maximum LIS', whyThisWay: 'Returns longest sequence length overall' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Word Break Problem", category: "String Segmentation",
+        description: "Determines if string s can be segmented into space-separated dictionary words using 1D DP.",
+        prosCons: "Pros: O(N * L^2) time string DP. Cons: Requires unordered_set for fast dictionary lookups.",
+        timeComplexity: "O(N * L^2)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 61. 1D DP - Approach 5: Word Break
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_set>
+using namespace std;
+
+bool wordBreak(string s, const vector<string>& wordDict) {
+    unordered_set<string> dict(wordDict.begin(), wordDict.end());
+    int n = s.length();
+    vector<bool> dp(n + 1, false);
+    dp[0] = true;
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 0; j < i; j++) {
+            if (dp[j] && dict.find(s.substr(j, i - j)) != dict.end()) {
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp[n];
+}
+
+int main() {
+    vector<string> dict = {"leetcode", "code"};
+    cout << "Can break 'leetcode': " << (wordBreak("leetcode", dict) ? "Yes" : "No") << endl; // Yes
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<bool> dp(n + 1, false); dp[0] = true;', constructType: 'Variable & Initializer', title: 'Boolean Segmentation DP Array', explanation: '`dp[i]` is true if prefix `s[0..i-1]` can be segmented into valid dictionary words. Base case `dp[0] = true`.', keyDetails: [{ variableOrConstruct: 'dp[0] = true', role: 'Empty prefix base case', whyThisWay: 'Empty string is valid base segmentation' }] },
+          { lineNum: 2, codeSnippet: 'if (dp[j] && dict.find(s.substr(j, i - j)) != dict.end())', constructType: 'Condition & Branch', title: 'Prefix & Word Match Transition', explanation: 'If prefix `s[0..j-1]` is valid (`dp[j] == true`) AND substring `s[j..i-1]` is in dictionary, then `dp[i] = true`.', keyDetails: [{ variableOrConstruct: 's.substr(j, i - j)', role: 'Dictionary word lookup', whyThisWay: 'Validates concatenation of valid prefix and valid dictionary word' }] },
+          { lineNum: 3, codeSnippet: 'return dp[n];', constructType: 'Return / Cleanup', title: 'Return Full String Validity', explanation: 'Returns `dp[n]` confirming whether full string can be segmented.', keyDetails: [{ variableOrConstruct: 'dp[n]', role: 'Full string result', whyThisWay: 'Final state answers problem for full string s' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Decode Ways", category: "String Decodings",
+        description: "Counts total ways to decode a digit string mapped 'A'->1 .. 'Z'->26 using 1D DP.",
+        prosCons: "Pros: Handles invalid leading zeros ('0'). Cons: Multiple boundary checks for 1-digit and 2-digit pairs.",
+        timeComplexity: "O(N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 61. 1D DP - Approach 6: Decode Ways
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int numDecodings(string s) {
+    if (s.empty() || s[0] == '0') return 0;
+    int n = s.length();
+    vector<int> dp(n + 1, 0);
+    dp[0] = 1;
+    dp[1] = 1;
+
+    for (int i = 2; i <= n; i++) {
+        int oneDigit = s[i - 1] - '0';
+        int twoDigits = (s[i - 2] - '0') * 10 + oneDigit;
+
+        if (oneDigit >= 1 && oneDigit <= 9) dp[i] += dp[i - 1];
+        if (twoDigits >= 10 && twoDigits <= 26) dp[i] += dp[i - 2];
+    }
+    return dp[n];
+}
+
+int main() {
+    cout << "Decode ways for '226': " << numDecodings("226") << endl; // 3 ("BZ", "VF", "BBF")
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (oneDigit >= 1 && oneDigit <= 9) dp[i] += dp[i - 1];', constructType: 'Condition & Branch', title: 'Single-Digit Decode Branch', explanation: 'If current single digit is valid (1..9), adds decoding ways from `dp[i-1]`.', keyDetails: [{ variableOrConstruct: 'dp[i-1]', role: 'Single-digit transition', whyThisWay: 'Single digit decodes to a single character (A..I)' }] },
+          { lineNum: 2, codeSnippet: 'if (twoDigits >= 10 && twoDigits <= 26) dp[i] += dp[i - 2];', constructType: 'Condition & Branch', title: 'Double-Digit Decode Branch', explanation: 'If 2-digit pair is valid (10..26), adds decoding ways from `dp[i-2]`.', keyDetails: [{ variableOrConstruct: 'dp[i-2]', role: 'Double-digit transition', whyThisWay: 'Two digits decode to a single character (J..Z)' }] },
+          { lineNum: 3, codeSnippet: 'return dp[n];', constructType: 'Return / Cleanup', title: 'Return Total Decodings', explanation: 'Returns total valid decoding ways for string.', keyDetails: [{ variableOrConstruct: 'dp[n]', role: 'Total decoding count', whyThisWay: 'Aggregates single and double digit transitions' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Maximum Subarray Sum (Kadane's 1D DP)", category: "Kadane DP",
+        description: "Finds maximum sum of any contiguous subarray using Kadane's 1D DP in O(N) time and O(1) space.",
+        prosCons: "Pros: O(N) time and O(1) space optimal subarray sum. Cons: Handles contiguous subarrays only.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 61. 1D DP - Approach 7: Kadane's Algorithm
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int maxSubArray(const vector<int>& nums) {
+    int maxEndingHere = nums[0];
+    int maxSoFar = nums[0];
+
+    for (size_t i = 1; i < nums.size(); i++) {
+        maxEndingHere = max(nums[i], maxEndingHere + nums[i]);
+        maxSoFar = max(maxSoFar, maxEndingHere);
+    }
+    return maxSoFar;
+}
+
+int main() {
+    vector<int> nums = {-2, 1, -3, 4, -1, 2, 1, -5, 4};
+    cout << "Max Subarray Sum: " << maxSubArray(nums) << endl; // 6 ([4, -1, 2, 1])
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'maxEndingHere = max(nums[i], maxEndingHere + nums[i]);', constructType: 'Variable & Initializer', title: 'Kadane State Transition', explanation: 'At index `i`, decides whether to extend previous contiguous subarray (`maxEndingHere + nums[i]`) or start a new subarray at `nums[i]`.', keyDetails: [{ variableOrConstruct: 'maxEndingHere', role: 'Local maximum ending at i', whyThisWay: 'Core 1D DP choice: extend or restart' }] },
+          { lineNum: 2, codeSnippet: 'maxSoFar = max(maxSoFar, maxEndingHere);', constructType: 'Variable & Initializer', title: 'Track Global Maximum Sum', explanation: 'Updates overall max sum encountered so far.', keyDetails: [{ variableOrConstruct: 'maxSoFar', role: 'Global maximum accumulator', whyThisWay: 'Retains peak subarray sum across all ending positions' }] },
+          { lineNum: 3, codeSnippet: 'return maxSoFar;', constructType: 'Return / Cleanup', title: 'Return Maximum Subarray Sum', explanation: 'Returns global maximum contiguous subarray sum.', keyDetails: [{ variableOrConstruct: 'maxSoFar', role: 'Result sum', whyThisWay: 'Optimal linear time Kadane result' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Min Cost Climbing Stairs", category: "Cost Minimization DP",
+        description: "Computes minimum cost to reach top of floor stepping 1 or 2 stairs at a time with costs.",
+        prosCons: "Pros: O(N) time and O(1) space min-cost traversal. Cons: Array size >= 2 required.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 61. 1D DP - Approach 8: Min Cost Climbing Stairs
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int minCostClimbingStairs(const vector<int>& cost) {
+    int prev2 = cost[0];
+    int prev1 = cost[1];
+
+    for (size_t i = 2; i < cost.size(); i++) {
+        int curr = cost[i] + min(prev1, prev2);
+        prev2 = prev1;
+        prev1 = curr;
+    }
+    return min(prev1, prev2);
+}
+
+int main() {
+    vector<int> cost = {10, 15, 20};
+    cout << "Min Cost: " << minCostClimbingStairs(cost) << endl; // 15
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int curr = cost[i] + min(prev1, prev2);', constructType: 'Variable & Initializer', title: 'Min Cost Step Transition', explanation: 'Cost to step on stair `i` equals `cost[i]` plus minimum of costs to reach stair `i-1` or `i-2`.', keyDetails: [{ variableOrConstruct: 'min(prev1, prev2)', role: 'Min cost choice', whyThisWay: 'Selects cheaper preceding stair step' }] },
+          { lineNum: 2, codeSnippet: 'prev2 = prev1; prev1 = curr;', constructType: 'Variable & Initializer', title: 'Shift Cost Memory', explanation: 'Slides O(1) memory variables forward.', keyDetails: [{ variableOrConstruct: 'prev1', role: 'State shift', whyThisWay: 'Maintains running cost values in O(1) space' }] },
+          { lineNum: 3, codeSnippet: 'return min(prev1, prev2);', constructType: 'Return / Cleanup', title: 'Return Min Cost to Top', explanation: 'Top can be reached from either last stair (`prev1`) or second-to-last stair (`prev2`).', keyDetails: [{ variableOrConstruct: 'min(prev1, prev2)', role: 'Final min cost', whyThisWay: 'Picks cheaper exit point to reach top of floor' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Coin Change II (Total Combination Ways Unbounded DP)", category: "Combination Ways DP",
+        description: "Calculates total number of unique combinations that make up a target amount.",
+        prosCons: "Pros: Outer coin loop avoids duplicate permutations. Cons: Requires 1D array of size Amount+1.",
+        timeComplexity: "O(N * Amount)", spaceComplexity: "O(Amount)", isFree: false,
+        code: `// 61. 1D DP - Approach 9: Coin Change II (Ways)
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int change(int amount, const vector<int>& coins) {
+    vector<int> dp(amount + 1, 0);
+    dp[0] = 1; // 1 way to make amount 0
+
+    for (int coin : coins) {
+        for (int i = coin; i <= amount; i++) {
+            dp[i] += dp[i - coin];
+        }
+    }
+    return dp[amount];
+}
+
+int main() {
+    vector<int> coins = {1, 2, 5};
+    cout << "Total combinations for 5: " << change(5, coins) << endl; // 4
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> dp(amount + 1, 0); dp[0] = 1;', constructType: 'Variable & Initializer', title: 'Initialize Combination Ways DP', explanation: '`dp[i]` stores total unique combinations to make amount `i`. Base case `dp[0] = 1`.', keyDetails: [{ variableOrConstruct: 'dp[0] = 1', role: 'Base combination way', whyThisWay: 'Exactly 1 combination (empty set) forms amount 0' }] },
+          { lineNum: 2, codeSnippet: 'for (int coin : coins) { for (int i = coin; i <= amount; i++) { dp[i] += dp[i - coin]; } }', constructType: 'Loop Construct', title: 'Outer Coin Loop Prevents Permutations', explanation: 'Outer loop over `coins` ensures combinations (not permutations) are counted by enforcing coin selection order.', keyDetails: [{ variableOrConstruct: 'dp[i] += dp[i - coin]', role: 'Combination accumulation', whyThisWay: 'Outer coin loop guarantees unique unordered combination counts' }] },
+          { lineNum: 3, codeSnippet: 'return dp[amount];', constructType: 'Return / Cleanup', title: 'Return Total Combination Ways', explanation: 'Returns total unique coin combinations that total `amount`.', keyDetails: [{ variableOrConstruct: 'dp[amount]', role: 'Total ways result', whyThisWay: 'Provides exact total combination count' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Partition Array for Maximum Sum (Variable K Window DP)", category: "Subarray Partition DP",
+        description: "Partitions array into contiguous subarrays of length at most K to maximize sum after changing elements to max value of partition.",
+        prosCons: "Pros: O(N * K) time 1D DP solution. Cons: Requires tracking running max inside K window.",
+        timeComplexity: "O(N * K)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 61. 1D DP - Approach 10: Partition Array Max Sum
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int maxSumAfterPartitioning(const vector<int>& arr, int k) {
+    int n = arr.size();
+    vector<int> dp(n + 1, 0);
+
+    for (int i = 1; i <= n; i++) {
+        int curMax = 0;
+        for (int len = 1; len <= k && i - len >= 0; len++) {
+            curMax = max(curMax, arr[i - len]);
+            dp[i] = max(dp[i], dp[i - len] + curMax * len);
+        }
+    }
+    return dp[n];
+}
+
+int main() {
+    vector<int> arr = {1, 15, 7, 9, 2, 5, 10};
+    cout << "Max Partition Sum (k=3): " << maxSumAfterPartitioning(arr, 3) << endl; // 84
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int len = 1; len <= k && i - len >= 0; len++)', constructType: 'Loop Construct', title: 'Iterate Window Length len <= K', explanation: 'Tries all possible partition lengths `len` from 1 to K ending at index `i`.', keyDetails: [{ variableOrConstruct: 'len <= k', role: 'Partition length bound', whyThisWay: 'Partitions cannot exceed maximum length K' }] },
+          { lineNum: 2, codeSnippet: 'curMax = max(curMax, arr[i - len]);', constructType: 'Variable & Initializer', title: 'Track Max Element in Partition', explanation: 'Maintains max element value in active partition window `arr[i-len..i-1]`.', keyDetails: [{ variableOrConstruct: 'curMax', role: 'Partition max element', whyThisWay: 'All elements in partition take this maximum value' }] },
+          { lineNum: 3, codeSnippet: 'dp[i] = max(dp[i], dp[i - len] + curMax * len);', constructType: 'Variable & Initializer', title: 'DP Partition Transition', explanation: 'Updates `dp[i]` with maximum sum achieved by adding `curMax * len` to optimal solution of prefix `dp[i-len]`.', keyDetails: [{ variableOrConstruct: 'dp[i-len] + curMax * len', role: 'Partition sum transition', whyThisWay: 'Combines optimal prefix sum with current partition sum' }] }
+        ]
+      }
+    ],
+    traceKey: "factorial"
+  };
+}
+
+export function getProblem62Details(): LearnModule {
+  return {
+    id: "med_dp_knapsack",
+    title: "62. 0/1 Knapsack DP Problem",
+    category: "Dynamic Programming",
+    difficulty: "medium",
+    shortDesc: "Optimal subset selection under weight capacity bounds.",
+    fullCode: `// 62. Knapsack - Approach 1: Classic 2D Table 0/1 Knapsack
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int knapsack2D(int W, const vector<int>& wt, const vector<int>& val, int n) {
+    vector<vector<int>> dp(n + 1, vector<int>(W + 1, 0));
+
+    for (int i = 1; i <= n; i++) {
+        for (int w = 1; w <= W; w++) {
+            if (wt[i - 1] <= w) {
+                dp[i][w] = max(val[i - 1] + dp[i - 1][w - wt[i - 1]], dp[i - 1][w]);
+            } else {
+                dp[i][w] = dp[i - 1][w];
+            }
+        }
+    }
+    return dp[n][W];
+}
+
+int main() {
+    vector<int> val = {60, 100, 120};
+    vector<int> wt = {10, 20, 30};
+    int W = 50;
+    cout << "Max Knapsack Value: " << knapsack2D(W, wt, val, val.size()) << endl; // 220
+    return 0;
+}`,
+    problemStatement: {
+      title: "62. 0/1 Knapsack DP Problem",
+      objective: "Master the 0/1 Knapsack DP pattern and variants: 2D DP table construction, 1D array space optimization (right-to-left reverse iteration), Subset Sum, Partition Equal Subset Sum, Target Sum, Unbounded Knapsack, Rod Cutting, and Minimum Subset Difference.",
+      description: "Implement **0/1 Knapsack DP Problem** (Dynamic Programming). Optimize subset selection under capacity bounds where each item can either be taken (1) or left (0).",
+      inputDesc: "Item weights array wt[], item values array val[], knapsack capacity W, or target sum values.",
+      outputDesc: "Maximum achievable value, boolean partition feasibility, or subset count.",
+      takeaways: [
+        "In 0/1 Knapsack, `dp[i][w]` represents maximum value using a subset of first `i` items with capacity `w`",
+        "To optimize 0/1 Knapsack space from O(N*W) to 1D O(W), iterate capacity `w` from W down to wt[i] (right-to-left) to avoid re-using same item twice",
+        "Subset Sum and Partition Equal Subset Sum transform capacity into a target sum value `S/2`",
+        "Unbounded Knapsack iterates capacity left-to-right (0 to W) allowing items to be selected infinitely many times"
+      ],
+      examples: [
+        { id: 1, input: "wt = [10, 20, 30], val = [60, 100, 120], W = 50", output: "Max Value: 220", explanation: "Selecting items 1 (wt 20, val 100) & 2 (wt 30, val 120) total weight 50, value 220." },
+        { id: 2, input: "nums = [1, 5, 11, 5]", output: "Can Partition: Yes ([1, 5, 5] & [11])", explanation: "Target sum is 22/2 = 11. Subset sum DP finds subset [1, 5, 5] equaling 11." },
+        { id: 3, input: "Unbounded Knapsack: wt = [1, 3, 4], val = [15, 50, 60], W = 8", output: "Max Value: 130", explanation: "Taking item 1 (wt 3, val 50) twice and item 0 (wt 1, val 15) twice yields 50*2 + 15*2 = 130." }
+      ],
+      constraints: ["Capacity W >= 0. Item weights wt[i] > 0."],
+      companies: ["Amazon", "Microsoft", "Google", "Meta", "Bloomberg"],
+      acceptanceRate: "88.7%",
+      totalAccepted: "4,780,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Classic 2D Table 0/1 Knapsack (FREE)", category: "FREE / Core 2D DP",
+        description: "Solves 0/1 Knapsack using a 2D table dp[i][w] tracking items 1..N and capacities 0..W.",
+        prosCons: "Pros: Intuitive state representation. Cons: Requires O(N * W) space.",
+        timeComplexity: "O(N * W)", spaceComplexity: "O(N * W)", isFree: true,
+        code: `// 62. Knapsack - Approach 1: 2D Table
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int knapsack2D(int W, const vector<int>& wt, const vector<int>& val, int n) {
+    vector<vector<int>> dp(n + 1, vector<int>(W + 1, 0));
+
+    for (int i = 1; i <= n; i++) {
+        for (int w = 1; w <= W; w++) {
+            if (wt[i - 1] <= w) {
+                dp[i][w] = max(val[i - 1] + dp[i - 1][w - wt[i - 1]], dp[i - 1][w]);
+            } else {
+                dp[i][w] = dp[i - 1][w];
+            }
+        }
+    }
+    return dp[n][W];
+}
+
+int main() {
+    vector<int> val = {60, 100, 120};
+    vector<int> wt = {10, 20, 30};
+    cout << "Max Value: " << knapsack2D(50, wt, val, 3) << endl; // 220
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<vector<int>> dp(n + 1, vector<int>(W + 1, 0));', constructType: 'Variable & Initializer', title: '2D DP Table Declaration', explanation: 'Allocates (N+1) x (W+1) table initialized to 0.', keyDetails: [{ variableOrConstruct: 'dp[n+1][W+1]', role: '2D state table', whyThisWay: 'dp[i][w] holds max value with first i items and capacity w' }] },
+          { lineNum: 2, codeSnippet: 'if (wt[i - 1] <= w) dp[i][w] = max(val[i - 1] + dp[i - 1][w - wt[i - 1]], dp[i - 1][w]);', constructType: 'Condition & Branch', title: 'Include vs Exclude Choice', explanation: 'If item i fits in capacity w, chooses max between taking item i (`val[i-1] + dp[i-1][w-wt[i-1]]`) or skipping item i (`dp[i-1][w]`).', keyDetails: [{ variableOrConstruct: '0/1 Knapsack recurrence', role: 'DP decision', whyThisWay: 'Takes item i at most once' }] },
+          { lineNum: 3, codeSnippet: 'return dp[n][W];', constructType: 'Return / Cleanup', title: 'Return Optimal Capacity Value', explanation: 'Returns maximum value possible using N items and full capacity W.', keyDetails: [{ variableOrConstruct: 'dp[n][W]', role: 'Final optimal value', whyThisWay: 'Contains global optimal knapsack value' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: 1D Memory-Optimized 0/1 Knapsack (FREE)", category: "FREE / 1D Space Optimization",
+        description: "Optimizes 0/1 Knapsack memory to 1D array of size W+1 by iterating capacity right-to-left.",
+        prosCons: "Pros: Reduces space from O(N * W) to O(W). Cons: Reverse loop order mandatory.",
+        timeComplexity: "O(N * W)", spaceComplexity: "O(W)", isFree: true,
+        code: `// 62. Knapsack - Approach 2: 1D Array Optimization
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int knapsack1D(int W, const vector<int>& wt, const vector<int>& val, int n) {
+    vector<int> dp(W + 1, 0);
+
+    for (int i = 0; i < n; i++) {
+        for (int w = W; w >= wt[i]; w--) { // Reverse loop ensures 0/1 single use!
+            dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);
+        }
+    }
+    return dp[W];
+}
+
+int main() {
+    vector<int> val = {60, 100, 120};
+    vector<int> wt = {10, 20, 30};
+    cout << "1D Max Value: " << knapsack1D(50, wt, val, 3) << endl; // 220
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> dp(W + 1, 0);', constructType: 'Variable & Initializer', title: '1D DP Array Allocation', explanation: 'Allocates single array `dp` of size W+1 to store max values per capacity.', keyDetails: [{ variableOrConstruct: 'dp[W + 1]', role: '1D memory array', whyThisWay: 'O(W) space optimization' }] },
+          { lineNum: 2, codeSnippet: 'for (int w = W; w >= wt[i]; w--)', constructType: 'Loop Construct', title: 'Right-to-Left Reverse Capacity Loop', explanation: 'CRITICAL: Iterates capacity `w` backwards from W down to wt[i]. This prevents using the same item `i` multiple times.', keyDetails: [{ variableOrConstruct: 'w = W down to wt[i]', role: 'Reverse iteration guard', whyThisWay: 'Ensures dp[w - wt[i]] comes from PREVIOUS item iteration, enforcing 0/1 constraint' }] },
+          { lineNum: 3, codeSnippet: 'dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);', constructType: 'Variable & Initializer', title: '1D In-Place Transition', explanation: 'Updates `dp[w]` in-place with maximum value achievable.', keyDetails: [{ variableOrConstruct: 'dp[w]', role: 'In-place state update', whyThisWay: 'Reduces memory by factor of N' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Subset Sum Equals Target", category: "Boolean Subset Sum",
+        description: "Determines if there exists a subset of numbers that sum up to a target sum using boolean 1D DP.",
+        prosCons: "Pros: O(N * Target) time boolean DP. Cons: Requires target sum.",
+        timeComplexity: "O(N * Target)", spaceComplexity: "O(Target)", isFree: false,
+        code: `// 62. Knapsack - Approach 3: Subset Sum
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool isSubsetSum(const vector<int>& nums, int target) {
+    vector<bool> dp(target + 1, false);
+    dp[0] = true; // Base case: sum 0 is always possible with empty subset
+
+    for (int num : nums) {
+        for (int sum = target; sum >= num; sum--) {
+            dp[sum] = dp[sum] || dp[sum - num];
+        }
+    }
+    return dp[target];
+}
+
+int main() {
+    vector<int> nums = {3, 34, 4, 12, 5, 2};
+    cout << "Subset sum 9 possible: " << (isSubsetSum(nums, 9) ? "Yes" : "No") << endl; // Yes (4+5)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<bool> dp(target + 1, false); dp[0] = true;', constructType: 'Variable & Initializer', title: 'Boolean Subset Sum DP Array', explanation: '`dp[s]` is true if a subset exists with sum `s`. Base case `dp[0] = true`.', keyDetails: [{ variableOrConstruct: 'dp[0] = true', role: 'Base case boolean', whyThisWay: 'Empty subset sums to 0' }] },
+          { lineNum: 2, codeSnippet: 'dp[sum] = dp[sum] || dp[sum - num];', constructType: 'Variable & Initializer', title: 'Boolean Or Transition', explanation: 'Updates `dp[sum]` to true if sum was already possible OR `sum - num` was possible.', keyDetails: [{ variableOrConstruct: 'dp[sum] || dp[sum - num]', role: 'Boolean OR choice', whyThisWay: 'Propagates achievable subset sums' }] },
+          { lineNum: 3, codeSnippet: 'return dp[target];', constructType: 'Return / Cleanup', title: 'Return Target Feasibility', explanation: 'Returns whether target sum is achievable by any subset.', keyDetails: [{ variableOrConstruct: 'dp[target]', role: 'Feasibility result', whyThisWay: 'Answers subset sum query' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Partition Equal Subset Sum", category: "Partition DP",
+        description: "Determines if array can be partitioned into two subsets with equal sum by checking if sum/2 is achievable.",
+        prosCons: "Pros: Reduces equal partition problem directly to Subset Sum DP. Cons: Odd total sums impossible.",
+        timeComplexity: "O(N * Sum)", spaceComplexity: "O(Sum)", isFree: false,
+        code: `// 62. Knapsack - Approach 4: Partition Equal Subset Sum
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+bool canPartition(const vector<int>& nums) {
+    int totalSum = accumulate(nums.begin(), nums.end(), 0);
+    if (totalSum % 2 != 0) return false;
+    int target = totalSum / 2;
+
+    vector<bool> dp(target + 1, false);
+    dp[0] = true;
+
+    for (int num : nums) {
+        for (int s = target; s >= num; s--) {
+            dp[s] = dp[s] || dp[s - num];
+        }
+    }
+    return dp[target];
+}
+
+int main() {
+    vector<int> nums = {1, 5, 11, 5};
+    cout << "Can partition equal sum: " << (canPartition(nums) ? "Yes" : "No") << endl; // Yes
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (totalSum % 2 != 0) return false; int target = totalSum / 2;', constructType: 'Condition & Branch', title: 'Parity Check & Target Setup', explanation: 'If total sum is odd, equal partition is impossible; otherwise target is `totalSum / 2`.', keyDetails: [{ variableOrConstruct: 'totalSum / 2', role: 'Half sum target', whyThisWay: 'Two equal subsets must each sum to exactly half of total sum' }] },
+          { lineNum: 2, codeSnippet: 'dp[s] = dp[s] || dp[s - num];', constructType: 'Variable & Initializer', title: 'Subset Sum DP Pass', explanation: 'Executes 1D subset sum DP pass for target `totalSum / 2`.', keyDetails: [{ variableOrConstruct: 'Subset sum pass', role: 'Target reachability', whyThisWay: 'Re-uses subset sum algorithm for equal partition' }] },
+          { lineNum: 3, codeSnippet: 'return dp[target];', constructType: 'Return / Cleanup', title: 'Return Partition Feasibility', explanation: 'Returns true if subset with sum `totalSum / 2` exists.', keyDetails: [{ variableOrConstruct: 'dp[target]', role: 'Partition result', whyThisWay: 'Proves array can be partitioned into two equal sum subsets' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Target Sum (+ / - Sign Assignment)", category: "Target Sum DP",
+        description: "Assigns + or - to array elements to reach target sum, transformed into Subset Sum DP.",
+        prosCons: "Pros: O(N * Target) time transformation. Cons: Requires mathematical formula transformation.",
+        timeComplexity: "O(N * Target)", spaceComplexity: "O(Target)", isFree: false,
+        code: `// 62. Knapsack - Approach 5: Target Sum
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <cmath>
+using namespace std;
+
+int findTargetSumWays(const vector<int>& nums, int target) {
+    int sum = accumulate(nums.begin(), nums.end(), 0);
+    if (abs(target) > sum || (sum + target) % 2 != 0) return 0;
+    int P = (sum + target) / 2;
+
+    vector<int> dp(P + 1, 0);
+    dp[0] = 1;
+
+    for (int num : nums) {
+        for (int s = P; s >= num; s--) {
+            dp[s] += dp[s - num];
+        }
+    }
+    return dp[P];
+}
+
+int main() {
+    vector<int> nums = {1, 1, 1, 1, 1};
+    cout << "Ways to reach target 3: " << findTargetSumWays(nums, 3) << endl; // 5
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int P = (sum + target) / 2;', constructType: 'Variable & Initializer', title: 'Mathematical Reduction Formula', explanation: 'Let P be positive subset sum, N be negative subset sum. P - N = target and P + N = sum => 2P = sum + target => P = (sum + target)/2.', keyDetails: [{ variableOrConstruct: '(sum + target) / 2', role: 'Positive subset sum formula', whyThisWay: 'Transforms sign assignment problem into counting subsets summing to P' }] },
+          { lineNum: 2, codeSnippet: 'dp[s] += dp[s - num];', constructType: 'Variable & Initializer', title: 'Ways Accumulator Transition', explanation: 'Accumulates total ways to achieve positive subset sum P.', keyDetails: [{ variableOrConstruct: 'dp[s] += dp[s - num]', role: 'Ways count addition', whyThisWay: 'Sums ways to form subset sum P' }] },
+          { lineNum: 3, codeSnippet: 'return dp[P];', constructType: 'Return / Cleanup', title: 'Return Total Target Ways', explanation: 'Returns total sign assignment ways to reach target sum.', keyDetails: [{ variableOrConstruct: 'dp[P]', role: 'Total valid assignments', whyThisWay: 'Solves Target Sum in O(N * P) time' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Unbounded Knapsack (Infinite Item Supply)", category: "Unbounded DP",
+        description: "Solves Knapsack where each item can be chosen infinitely many times by iterating capacity left-to-right.",
+        prosCons: "Pros: O(N * W) time with 1D array. Cons: Forward capacity loop creates repeated item selection.",
+        timeComplexity: "O(N * W)", spaceComplexity: "O(W)", isFree: false,
+        code: `// 62. Knapsack - Approach 6: Unbounded Knapsack
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int unboundedKnapsack(int W, const vector<int>& wt, const vector<int>& val, int n) {
+    vector<int> dp(W + 1, 0);
+
+    for (int w = 1; w <= W; w++) {
+        for (int i = 0; i < n; i++) {
+            if (wt[i] <= w) {
+                dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);
+            }
+        }
+    }
+    return dp[W];
+}
+
+int main() {
+    vector<int> val = {15, 50, 60};
+    vector<int> wt = {1, 3, 4};
+    cout << "Unbounded Max Value (W=8): " << unboundedKnapsack(8, wt, val, 3) << endl; // 130
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int w = 1; w <= W; w++)', constructType: 'Loop Construct', title: 'Forward Capacity Loop', explanation: 'Iterates capacity `w` FORWARD (left-to-right 1..W). This allows updating `dp[w]` using newly updated `dp[w - wt[i]]` from the SAME item.', keyDetails: [{ variableOrConstruct: 'w = 1 to W', role: 'Forward iteration', whyThisWay: 'Forward loop enables multiple/infinite selection of same item' }] },
+          { lineNum: 2, codeSnippet: 'if (wt[i] <= w) dp[w] = max(dp[w], val[i] + dp[w - wt[i]]);', constructType: 'Condition & Branch', title: 'Unbounded Item Reuse Transition', explanation: 'Computes maximum value allowing item `i` to be selected repeatedly.', keyDetails: [{ variableOrConstruct: 'val[i] + dp[w - wt[i]]', role: 'Unbounded choice', whyThisWay: 'Uses updated dp value from same item pass' }] },
+          { lineNum: 3, codeSnippet: 'return dp[W];', constructType: 'Return / Cleanup', title: 'Return Max Unbounded Value', explanation: 'Returns maximum value with capacity W allowing infinite item reuse.', keyDetails: [{ variableOrConstruct: 'dp[W]', role: 'Unbounded knapsack result', whyThisWay: 'Solves unbounded knapsack in O(N * W)' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Rod Cutting Problem", category: "Unbounded DP Variant",
+        description: "Cuts a rod of length N into pieces to maximize total price using Unbounded Knapsack DP.",
+        prosCons: "Pros: Solves classic commercial optimization problem. Cons: Length array 1..N.",
+        timeComplexity: "O(N^2)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 62. Knapsack - Approach 7: Rod Cutting
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int cutRod(const vector<int>& price, int n) {
+    vector<int> dp(n + 1, 0);
+
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= i; j++) {
+            dp[i] = max(dp[i], price[j - 1] + dp[i - j]);
+        }
+    }
+    return dp[n];
+}
+
+int main() {
+    vector<int> price = {1, 5, 8, 9, 10, 17, 17, 20};
+    cout << "Max Rod Cutting Profit (length 8): " << cutRod(price, 8) << endl; // 22 (piece 2 & 6 -> 5+17=22)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = 1; i <= n; i++)', constructType: 'Loop Construct', title: 'Outer Rod Length Loop', explanation: '`dp[i]` stores maximum revenue achievable for rod of length `i`.', keyDetails: [{ variableOrConstruct: 'dp[i]', role: 'Max revenue for length i', whyThisWay: 'Subproblem of optimal revenue for rod length i' }] },
+          { lineNum: 2, codeSnippet: 'dp[i] = max(dp[i], price[j - 1] + dp[i - j]);', constructType: 'Variable & Initializer', title: 'Cut Piece Transition', explanation: 'Considers cutting first piece of length `j` with price `price[j-1]` and recursively solving remaining length `i-j`.', keyDetails: [{ variableOrConstruct: 'price[j-1] + dp[i-j]', role: 'Cut transition', whyThisWay: 'Tries all possible first cut lengths 1..i' }] },
+          { lineNum: 3, codeSnippet: 'return dp[n];', constructType: 'Return / Cleanup', title: 'Return Maximum Cutting Revenue', explanation: 'Returns maximum profit for rod of length N.', keyDetails: [{ variableOrConstruct: 'dp[n]', role: 'Optimal revenue result', whyThisWay: 'Gives max profit for full length N' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Count of Subsets with Given Sum", category: "Ways Counting",
+        description: "Counts total number of subsets whose elements sum up to a specified target value.",
+        prosCons: "Pros: O(N * Sum) ways count. Cons: Integer overflow for very large subset counts.",
+        timeComplexity: "O(N * Sum)", spaceComplexity: "O(Sum)", isFree: false,
+        code: `// 62. Knapsack - Approach 8: Count Subsets
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int countSubsetsWithSum(const vector<int>& nums, int sum) {
+    vector<int> dp(sum + 1, 0);
+    dp[0] = 1;
+
+    for (int num : nums) {
+        for (int s = sum; s >= num; s--) {
+            dp[s] += dp[s - num];
+        }
+    }
+    return dp[sum];
+}
+
+int main() {
+    vector<int> nums = {1, 2, 3, 3};
+    cout << "Subsets with sum 6: " << countSubsetsWithSum(nums, 6) << endl; // 3 ({1,2,3}, {1,2,3}, {3,3})
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'dp[s] += dp[s - num];', constructType: 'Variable & Initializer', title: 'Ways Accumulator Transition', explanation: 'Adds number of ways to form sum `s - num` to total ways to form sum `s`.', keyDetails: [{ variableOrConstruct: 'dp[s] += dp[s - num]', role: 'Subset count addition', whyThisWay: 'Accumulates total valid subset combinations' }] },
+          { lineNum: 2, codeSnippet: 'for (int s = sum; s >= num; s--)', constructType: 'Loop Construct', title: 'Reverse Capacity Pass', explanation: 'Iterates reverse order to ensure each array element is used at most once in each subset.', keyDetails: [{ variableOrConstruct: 's = sum down to num', role: 'Reverse iteration', whyThisWay: '0/1 single use element constraint' }] },
+          { lineNum: 3, codeSnippet: 'return dp[sum];', constructType: 'Return / Cleanup', title: 'Return Total Matching Subsets Count', explanation: 'Returns count of subsets summing to target sum.', keyDetails: [{ variableOrConstruct: 'dp[sum]', role: 'Subset count result', whyThisWay: 'Returns exact subset count' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Minimum Subset Sum Difference", category: "Min Difference DP",
+        description: "Partitions an array into two subsets S1 and S2 such that |Sum(S1) - Sum(S2)| is minimized.",
+        prosCons: "Pros: Solves partition optimization in O(N * TotalSum). Cons: Requires scanning 1D boolean table.",
+        timeComplexity: "O(N * TotalSum)", spaceComplexity: "O(TotalSum)", isFree: false,
+        code: `// 62. Knapsack - Approach 9: Min Subset Difference
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <cmath>
+#include <algorithm>
+using namespace std;
+
+int minSubsetSumDifference(const vector<int>& nums) {
+    int sum = accumulate(nums.begin(), nums.end(), 0);
+    int target = sum / 2;
+
+    vector<bool> dp(target + 1, false);
+    dp[0] = true;
+
+    for (int num : nums) {
+        for (int s = target; s >= num; s--) {
+            dp[s] = dp[s] || dp[s - num];
+        }
+    }
+
+    for (int s = target; s >= 0; s--) {
+        if (dp[s]) {
+            return sum - 2 * s; // S2 - S1 = (sum - s) - s = sum - 2s
+        }
+    }
+    return sum;
+}
+
+int main() {
+    vector<int> nums = {1, 6, 11, 5};
+    cout << "Min Subset Difference: " << minSubsetSumDifference(nums) << endl; // 1 (S1={1,6,5}=12, S2={11}=11 -> 12-11=1)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int s = target; s >= 0; s--) { if (dp[s]) return sum - 2 * s; }', constructType: 'Loop Construct', title: 'Scan Achievable Sum Closest to Half', explanation: 'Scans backward from `sum / 2` to find largest achievable subset sum `s`. Difference is `sum - 2*s`.', keyDetails: [{ variableOrConstruct: 'sum - 2 * s', role: 'Min difference formula', whyThisWay: 'Minimizes difference between two subset sums (sum - s) - s' }] },
+          { lineNum: 2, codeSnippet: 'dp[s] = dp[s] || dp[s - num];', constructType: 'Variable & Initializer', title: 'Boolean Subset Sum Table Build', explanation: 'Fills boolean subset sum table up to `sum / 2`.', keyDetails: [{ variableOrConstruct: 'dp table', role: 'Achievable sum marker', whyThisWay: 'Marks which subset sums can be formed' }] },
+          { lineNum: 3, codeSnippet: 'return sum - 2 * s;', constructType: 'Return / Cleanup', title: 'Return Minimum Difference Result', explanation: 'Returns minimal non-negative difference between two subset sums.', keyDetails: [{ variableOrConstruct: 'min difference', role: 'Optimal partition difference', whyThisWay: 'Provides minimal subset sum difference' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Last Stone Weight II", category: "Stone Difference DP",
+        description: "Smashes stones together to minimize final remaining stone weight, transformed into Min Subset Difference DP.",
+        prosCons: "Pros: Direct application of 0/1 Knapsack to physical collision simulation. Cons: Problem transformation required.",
+        timeComplexity: "O(N * TotalSum)", spaceComplexity: "O(TotalSum)", isFree: false,
+        code: `// 62. Knapsack - Approach 10: Last Stone Weight II
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+using namespace std;
+
+int lastStoneWeightII(const vector<int>& stones) {
+    int sum = accumulate(stones.begin(), stones.end(), 0);
+    int target = sum / 2;
+
+    vector<bool> dp(target + 1, false);
+    dp[0] = true;
+
+    for (int stone : stones) {
+        for (int s = target; s >= stone; s--) {
+            dp[s] = dp[s] || dp[s - stone];
+        }
+    }
+
+    for (int s = target; s >= 0; s--) {
+        if (dp[s]) return sum - 2 * s;
+    }
+    return 0;
+}
+
+int main() {
+    vector<int> stones = {2, 7, 4, 1, 8, 1};
+    cout << "Min Remaining Stone Weight: " << lastStoneWeightII(stones) << endl; // 1
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int target = sum / 2;', constructType: 'Variable & Initializer', title: 'Collision Target Transformation', explanation: 'Smashing stones cancels weight out; optimal smash sequence reduces to partitioning stones into two groups with minimum weight difference.', keyDetails: [{ variableOrConstruct: 'sum / 2', role: 'Subset target sum', whyThisWay: 'Identical mathematical reduction to Min Subset Difference' }] },
+          { lineNum: 2, codeSnippet: 'dp[s] = dp[s] || dp[s - stone];', constructType: 'Variable & Initializer', title: 'Stone Weight Subset Sum Pass', explanation: 'Computes achievable stone group weights up to half total weight.', keyDetails: [{ variableOrConstruct: 'dp[s]', role: 'Stone group weight boolean', whyThisWay: 'Calculates possible weight partitions' }] },
+          { lineNum: 3, codeSnippet: 'return sum - 2 * s;', constructType: 'Return / Cleanup', title: 'Return Min Remaining Weight', explanation: 'Returns smallest possible weight of last remaining stone.', keyDetails: [{ variableOrConstruct: 'sum - 2 * s', role: 'Remaining stone weight', whyThisWay: 'Solves Last Stone Weight II in linear-exponential time' }] }
+        ]
+      }
+    ],
+    traceKey: "factorial"
+  };
+}
+
+export function getProblem63Details(): LearnModule {
+  return {
+    id: "med_backtracking",
+    title: "63. Backtracking Subsets Generator",
+    category: "Backtracking",
+    difficulty: "medium",
+    shortDesc: "State space tree search with recursive choice and undo step.",
+    fullCode: `// 63. Backtracking - Approach 1: Power Set Subsets Generation
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void subsetsHelper(int start, const vector<int>& nums, vector<int>& current, vector<vector<int>>& result) {
+    result.push_back(current);
+    for (int i = start; i < (int)nums.size(); i++) {
+        current.push_back(nums[i]);                     // Make choice
+        subsetsHelper(i + 1, nums, current, result);    // Recurse
+        current.pop_back();                             // Undo choice (Backtrack)
+    }
+}
+
+vector<vector<int>> subsets(const vector<int>& nums) {
+    vector<vector<int>> result;
+    vector<int> current;
+    subsetsHelper(0, nums, current, result);
+    return result;
+}
+
+int main() {
+    vector<int> nums = {1, 2, 3};
+    auto res = subsets(nums);
+    cout << "Total Subsets (2^N): " << res.size() << endl; // 8
+    for (auto& sub : res) {
+        cout << "[ "; for (int x : sub) cout << x << " "; cout << "]\n";
+    }
+    return 0;
+}`,
+    problemStatement: {
+      title: "63. Backtracking Subsets Generator",
+      objective: "Master Backtracking state space tree exploration: choice-recurse-undo template, power set subsets, subset duplicates elimination (Subsets II), permutations, combination sum, N-Queens board constraints, and Sudoku solving.",
+      description: "Implement **Backtracking Subsets Generator** (Backtracking). Explore problem state space trees recursively by making choices, traversing down decisions, and explicitly undoing choices (backtracking) to explore alternate branches.",
+      inputDesc: "Array of unique/duplicate elements, candidate numbers, chessboard dimensions, or incomplete 2D grids.",
+      outputDesc: "Power set combinations, unique permutations, valid board configurations, or solved grids.",
+      takeaways: [
+        "The universal Backtracking pattern is: Make Choice -> Recurse -> Undo Choice (Backtrack)",
+        "Power set generating `subsets` visits 2^N state nodes; Permutations visit N! state nodes",
+        "Handling duplicate elements in subsets/permutations requires sorting the array first and skipping identical consecutive choices at the same tree level (`if (i > start && nums[i] == nums[i-1]) continue`)",
+        "Grid backtracking (N-Queens, Sudoku, Word Search) maintains constraint safety checks before choosing a branch"
+      ],
+      examples: [
+        { id: 1, input: "nums = [1, 2, 3]", output: "8 Subsets: [], [1], [1,2], [1,2,3], [1,3], [2], [2,3], [3]", explanation: "State space tree exploration generates all 2^3 = 8 power set subsets." },
+        { id: 2, input: "nums = [1, 2, 2]", output: "6 Unique Subsets: [], [1], [1,2], [1,2,2], [2], [2,2]", explanation: "Sorting + duplicate skip `i > start && nums[i] == nums[i-1]` prevents duplicate subsets." },
+        { id: 3, input: "N-Queens N = 4", output: "2 Valid Board Solutions", explanation: "Backtracking places 4 non-attacking queens on a 4x4 chessboard." }
+      ],
+      constraints: ["Maintain push_back / pop_back state symmetry across all recursive branches."],
+      companies: ["Google", "Amazon", "Meta", "Microsoft", "Apple"],
+      acceptanceRate: "90.1%",
+      totalAccepted: "5,890,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Power Set Subsets Generation (FREE)", category: "FREE / Core Backtracking",
+        description: "Generates all 2^N subsets of a set of unique integers using standard choice-recurse-undo backtracking.",
+        prosCons: "Pros: Clean 3-step backtracking template. Cons: Generates exponential 2^N output size.",
+        timeComplexity: "O(N * 2^N)", spaceComplexity: "O(N) recursion stack", isFree: true,
+        code: `// 63. Backtracking - Approach 1: Power Set Subsets
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void subsetsHelper(int start, const vector<int>& nums, vector<int>& current, vector<vector<int>>& result) {
+    result.push_back(current);
+    for (int i = start; i < (int)nums.size(); i++) {
+        current.push_back(nums[i]);                  // Make Choice
+        subsetsHelper(i + 1, nums, current, result); // Recurse
+        current.pop_back();                          // Undo Choice (Backtrack)
+    }
+}
+
+vector<vector<int>> subsets(const vector<int>& nums) {
+    vector<vector<int>> result;
+    vector<int> current;
+    subsetsHelper(0, nums, current, result);
+    return result;
+}
+
+int main() {
+    vector<int> nums = {1, 2, 3};
+    auto res = subsets(nums);
+    cout << "Total Subsets: " << res.size() << endl; // 8
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'result.push_back(current);', constructType: 'Variable & Initializer', title: 'Record Current Subset State', explanation: 'Adds snapshot of current subset configuration to result list at every state node.', keyDetails: [{ variableOrConstruct: 'result.push_back', role: 'Snapshot recorder', whyThisWay: 'Every state tree node represents a valid subset in power set' }] },
+          { lineNum: 2, codeSnippet: 'current.push_back(nums[i]); subsetsHelper(i + 1...);', constructType: 'Function Signature', title: 'Make Choice & Recurse Next Index', explanation: 'Includes `nums[i]` in active subset and recurses to select remaining elements from index `i + 1`.', keyDetails: [{ variableOrConstruct: 'i + 1', role: 'Forward index constraint', whyThisWay: 'Moving forward prevents duplicate subset combinations' }] },
+          { lineNum: 3, codeSnippet: 'current.pop_back(); // Undo Choice', constructType: 'Return / Cleanup', title: 'Undo Choice (Backtrack Step)', explanation: 'Removes `nums[i]` from active subset vector, restoring state before testing next candidate element.', keyDetails: [{ variableOrConstruct: 'current.pop_back()', role: 'Backtracking step', whyThisWay: 'Saves memory by reusing single vector buffer across recursion' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Subsets II with Duplicates (FREE)", category: "FREE / Duplicate Handling",
+        description: "Generates all unique subsets from an array containing duplicate integers by sorting and skipping duplicates.",
+        prosCons: "Pros: Avoids duplicate subset generation. Cons: Requires sorting array first.",
+        timeComplexity: "O(N * 2^N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 63. Backtracking - Approach 2: Subsets II
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void subsetsWithDupHelper(int start, vector<int>& nums, vector<int>& current, vector<vector<int>>& result) {
+    result.push_back(current);
+    for (int i = start; i < (int)nums.size(); i++) {
+        if (i > start && nums[i] == nums[i - 1]) continue; // Skip duplicates at same tree depth!
+        current.push_back(nums[i]);
+        subsetsWithDupHelper(i + 1, nums, current, result);
+        current.pop_back();
+    }
+}
+
+vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+    sort(nums.begin(), nums.end());
+    vector<vector<int>> result;
+    vector<int> current;
+    subsetsWithDupHelper(0, nums, current, result);
+    return result;
+}
+
+int main() {
+    vector<int> nums = {1, 2, 2};
+    auto res = subsetsWithDup(nums);
+    cout << "Unique Subsets (1,2,2): " << res.size() << endl; // 6
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'sort(nums.begin(), nums.end());', constructType: 'Function Signature', title: 'Sort Input Array', explanation: 'Sorts elements to group identical values together.', keyDetails: [{ variableOrConstruct: 'sort()', role: 'Pre-sorting', whyThisWay: 'Grouping identical values allows duplicate detection' }] },
+          { lineNum: 2, codeSnippet: 'if (i > start && nums[i] == nums[i - 1]) continue;', constructType: 'Condition & Branch', title: 'Duplicate Tree Depth Guard', explanation: 'If current element equals previous element AND we are at the same decision level (`i > start`), skips candidate.', keyDetails: [{ variableOrConstruct: 'i > start && nums[i] == nums[i-1]', role: 'Duplicate branch prune', whyThisWay: 'Prevents spawning identical subset branches at same depth' }] },
+          { lineNum: 3, codeSnippet: 'subsetsWithDupHelper(i + 1, nums, current, result);', constructType: 'Function Signature', title: 'Recurse Unique Branch', explanation: 'Recurses on next index after choice.', keyDetails: [{ variableOrConstruct: 'i + 1', role: 'Forward recursion', whyThisWay: 'Generates unique power set' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Array Permutations Generation", category: "Permutations",
+        description: "Generates all N! permutations of an array of unique integers using swap backtracking.",
+        prosCons: "Pros: In-place array swapping O(N!) search. Cons: Produces N! permutations.",
+        timeComplexity: "O(N * N!)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 63. Backtracking - Approach 3: Permutations
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void permuteHelper(int start, vector<int>& nums, vector<vector<int>>& result) {
+    if (start == (int)nums.size()) {
+        result.push_back(nums);
+        return;
+    }
+    for (int i = start; i < (int)nums.size(); i++) {
+        swap(nums[start], nums[i]);       // Make Choice (Swap)
+        permuteHelper(start + 1, nums, result);
+        swap(nums[start], nums[i]);       // Undo Choice (Backtrack Swap)
+    }
+}
+
+vector<vector<int>> permute(vector<int>& nums) {
+    vector<vector<int>> result;
+    permuteHelper(0, nums, result);
+    return result;
+}
+
+int main() {
+    vector<int> nums = {1, 2, 3};
+    auto perms = permute(nums);
+    cout << "Total Permutations (3!): " << perms.size() << endl; // 6
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (start == (int)nums.size()) { result.push_back(nums); return; }', constructType: 'Condition & Branch', title: 'Permutation Base Case', explanation: 'When swap index `start` reaches end of array, current array configuration is a complete permutation.', keyDetails: [{ variableOrConstruct: 'start == nums.size()', role: 'Leaf node check', whyThisWay: 'Full permutation generated' }] },
+          { lineNum: 2, codeSnippet: 'swap(nums[start], nums[i]);', constructType: 'Function Signature', title: 'Swap Choice', explanation: 'Swaps element at index `i` into current position `start`.', keyDetails: [{ variableOrConstruct: 'swap(start, i)', role: 'Element choice', whyThisWay: 'Places candidate element in current position' }] },
+          { lineNum: 3, codeSnippet: 'swap(nums[start], nums[i]); // Backtrack Swap', constructType: 'Function Signature', title: 'Restore Original Array Order', explanation: 'Swaps back elements to restore original array state for next iteration.', keyDetails: [{ variableOrConstruct: 'swap backtrack', role: 'State restoration', whyThisWay: 'Preserves array ordering for adjacent branch iterations' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Permutations II with Duplicates", category: "Duplicate Permutations",
+        description: "Generates unique permutations of an array containing duplicates using visited boolean tracking array.",
+        prosCons: "Pros: Prevents duplicate permutation output. Cons: Requires O(N) visited array.",
+        timeComplexity: "O(N * N!)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 63. Backtracking - Approach 4: Permutations II
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void permuteUniqueHelper(vector<int>& nums, vector<bool>& used, vector<int>& current, vector<vector<int>>& result) {
+    if (current.size() == nums.size()) {
+        result.push_back(current);
+        return;
+    }
+    for (size_t i = 0; i < nums.size(); i++) {
+        if (used[i]) continue;
+        if (i > 0 && nums[i] == nums[i - 1] && !used[i - 1]) continue; // Skip duplicate candidate!
+
+        used[i] = true;
+        current.push_back(nums[i]);
+        permuteUniqueHelper(nums, used, current, result);
+        current.pop_back();
+        used[i] = false;
+    }
+}
+
+vector<vector<int>> permuteUnique(vector<int>& nums) {
+    sort(nums.begin(), nums.end());
+    vector<vector<int>> result;
+    vector<int> current;
+    vector<bool> used(nums.size(), false);
+    permuteUniqueHelper(nums, used, current, result);
+    return result;
+}
+
+int main() {
+    vector<int> nums = {1, 1, 2};
+    auto perms = permuteUnique(nums);
+    cout << "Unique Permutations (1,1,2): " << perms.size() << endl; // 3 ([1,1,2], [1,2,1], [2,1,1])
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (i > 0 && nums[i] == nums[i - 1] && !used[i - 1]) continue;', constructType: 'Condition & Branch', title: 'Duplicate Permutation Prune', explanation: 'If current element equals previous element AND previous element was not used in current branch, skips candidate.', keyDetails: [{ variableOrConstruct: '!used[i-1]', role: 'Duplicate permutation guard', whyThisWay: 'Enforces taking duplicate elements in strict relative index order' }] },
+          { lineNum: 2, codeSnippet: 'used[i] = true; current.push_back(nums[i]);', constructType: 'Variable & Initializer', title: 'Mark Used & Append Choice', explanation: 'Marks element `i` as used and appends it to active permutation.', keyDetails: [{ variableOrConstruct: 'used[i] = true', role: 'Visited tracking', whyThisWay: 'Prevents using same element instance twice in permutation' }] },
+          { lineNum: 3, codeSnippet: 'current.pop_back(); used[i] = false;', constructType: 'Variable & Initializer', title: 'Backtrack Element State', explanation: 'Removes element and unmarks used state upon returning from recursive call.', keyDetails: [{ variableOrConstruct: 'used[i] = false', role: 'Visited reset', whyThisWay: 'Frees element for use in alternative branches' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Combination Sum (Unbounded Candidate Re-use)", category: "Combination Search",
+        description: "Finds all unique combinations summing to target where candidate numbers can be re-used infinitely.",
+        prosCons: "Pros: Solves unbounded combination search. Cons: Requires sorting or non-decreasing start index.",
+        timeComplexity: "Exponential O(2^T)", spaceComplexity: "O(T)", isFree: false,
+        code: `// 63. Backtracking - Approach 5: Combination Sum
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void combSumHelper(int start, int target, const vector<int>& candidates, vector<int>& current, vector<vector<int>>& result) {
+    if (target == 0) {
+        result.push_back(current);
+        return;
+    }
+    for (int i = start; i < (int)candidates.size(); i++) {
+        if (candidates[i] <= target) {
+            current.push_back(candidates[i]);
+            combSumHelper(i, target - candidates[i], candidates, current, result); // Recurse with index 'i' (reuse allowed)
+            current.pop_back();
+        }
+    }
+}
+
+vector<vector<int>> combinationSum(const vector<int>& candidates, int target) {
+    vector<vector<int>> result;
+    vector<int> current;
+    combSumHelper(0, target, candidates, current, result);
+    return result;
+}
+
+int main() {
+    vector<int> candidates = {2, 3, 6, 7};
+    auto res = combinationSum(candidates, 7);
+    cout << "Combinations for 7:\n";
+    for (auto& c : res) {
+        cout << "[ "; for (int x : c) cout << x << " "; cout << "]\n";
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (target == 0) { result.push_back(current); return; }', constructType: 'Condition & Branch', title: 'Target Sum Match', explanation: 'Saves current combination when target reaches 0.', keyDetails: [{ variableOrConstruct: 'target == 0', role: 'Combination match', whyThisWay: 'Valid target sum achieved' }] },
+          { lineNum: 2, codeSnippet: 'combSumHelper(i, target - candidates[i]...', constructType: 'Function Signature', title: 'Unbounded Re-use Recursion', explanation: 'Passes index `i` (NOT `i+1`) to recursive call, allowing candidate `candidates[i]` to be re-used multiple times.', keyDetails: [{ variableOrConstruct: 'index i', role: 'Candidate re-use', whyThisWay: 'Allows selecting same number multiple times' }] },
+          { lineNum: 3, codeSnippet: 'current.pop_back();', constructType: 'Return / Cleanup', title: 'Backtrack Candidate Selection', explanation: 'Removes candidate from combination after sub-tree search finishes.', keyDetails: [{ variableOrConstruct: 'pop_back()', role: 'Backtrack step', whyThisWay: 'Restores state for next candidate' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Combination Sum II (Single-Use Candidates)", category: "Bounded Combinations",
+        description: "Finds unique combinations summing to target where each candidate element can be used at most once.",
+        prosCons: "Pros: Handles duplicates in candidates array. Cons: Requires sorting.",
+        timeComplexity: "O(2^N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 63. Backtracking - Approach 6: Combination Sum II
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void combSum2Helper(int start, int target, vector<int>& candidates, vector<int>& current, vector<vector<int>>& result) {
+    if (target == 0) {
+        result.push_back(current);
+        return;
+    }
+    for (int i = start; i < (int)candidates.size(); i++) {
+        if (i > start && candidates[i] == candidates[i - 1]) continue; // Skip duplicate candidates
+        if (candidates[i] > target) break; // Prune search branch!
+
+        current.push_back(candidates[i]);
+        combSum2Helper(i + 1, target - candidates[i], candidates, current, result);
+        current.pop_back();
+    }
+}
+
+vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
+    sort(candidates.begin(), candidates.end());
+    vector<vector<int>> result;
+    vector<int> current;
+    combSum2Helper(0, target, candidates, current, result);
+    return result;
+}
+
+int main() {
+    vector<int> candidates = {10, 1, 2, 7, 6, 1, 5};
+    auto res = combinationSum2(candidates, 8);
+    cout << "Unique combinations for 8:\n";
+    for (auto& c : res) {
+        cout << "[ "; for (int x : c) cout << x << " "; cout << "]\n";
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (i > start && candidates[i] == candidates[i - 1]) continue;', constructType: 'Condition & Branch', title: 'Duplicate Candidate Pruning', explanation: 'Skips duplicate values at same decision level to avoid generating duplicate combinations.', keyDetails: [{ variableOrConstruct: 'i > start && duplicate', role: 'Duplicate combo guard', whyThisWay: 'Ensures unique combination output' }] },
+          { lineNum: 2, codeSnippet: 'if (candidates[i] > target) break;', constructType: 'Condition & Branch', title: 'Sorted Array Early Pruning', explanation: 'Since candidates array is sorted, if current candidate exceeds target, all subsequent candidates will also exceed target; breaks loop.', keyDetails: [{ variableOrConstruct: 'break', role: 'Early pruning', whyThisWay: 'Prunes remaining impossible search subtrees' }] },
+          { lineNum: 3, codeSnippet: 'combSum2Helper(i + 1, target - candidates[i]...', constructType: 'Function Signature', title: 'Single Use Recursion', explanation: 'Passes `i + 1` to ensure each element instance is used at most once.', keyDetails: [{ variableOrConstruct: 'i + 1', role: 'Single-use index advance', whyThisWay: 'Enforces 0/1 candidate selection constraint' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: N-Queens Board Problem", category: "Board Backtracking",
+        description: "Places N non-attacking queens on an N x N chessboard using column and diagonal constraint tracking.",
+        prosCons: "Pros: Classic constraint satisfaction problem. Cons: Exponential N! search space.",
+        timeComplexity: "O(N!)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 63. Backtracking - Approach 7: N-Queens
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+void solveNQueensHelper(int row, int n, vector<bool>& cols, vector<bool>& diag1, vector<bool>& diag2, vector<string>& board, vector<vector<string>>& result) {
+    if (row == n) {
+        result.push_back(board);
+        return;
+    }
+    for (int col = 0; col < n; col++) {
+        int d1 = row + col;
+        int d2 = row - col + n - 1;
+        if (!cols[col] && !diag1[d1] && !diag2[d2]) {
+            board[row][col] = 'Q';
+            cols[col] = diag1[d1] = diag2[d2] = true;
+
+            solveNQueensHelper(row + 1, n, cols, diag1, diag2, board, result);
+
+            board[row][col] = '.';
+            cols[col] = diag1[d1] = diag2[d2] = false;
+        }
+    }
+}
+
+vector<vector<string>> solveNQueens(int n) {
+    vector<vector<string>> result;
+    vector<string> board(n, string(n, '.'));
+    vector<bool> cols(n, false), diag1(2 * n, false), diag2(2 * n, false);
+    solveNQueensHelper(0, n, cols, diag1, diag2, board, result);
+    return result;
+}
+
+int main() {
+    auto solutions = solveNQueens(4);
+    cout << "N-Queens (N=4) Solutions: " << solutions.size() << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int d1 = row + col; int d2 = row - col + n - 1;', constructType: 'Variable & Initializer', title: 'O(1) Diagonal Index Formula', explanation: 'Maps 2D board coordinates (row, col) to 1D diagonal array indices `d1` (anti-diagonal) and `d2` (main diagonal).', keyDetails: [{ variableOrConstruct: 'row + col / row - col + n - 1', role: 'Diagonal mapping formula', whyThisWay: 'Provides O(1) diagonal attack conflict checking' }] },
+          { lineNum: 2, codeSnippet: 'if (!cols[col] && !diag1[d1] && !diag2[d2])', constructType: 'Condition & Branch', title: 'Queen Attack Conflict Guard', explanation: 'Validates that column and both diagonals are free of previously placed queens.', keyDetails: [{ variableOrConstruct: 'cols & diags check', role: 'Constraint validation', whyThisWay: 'Ensures no two queens threaten each other' }] },
+          { lineNum: 3, codeSnippet: 'board[row][col] = \'.\'; cols[col] = diag1[d1] = diag2[d2] = false;', constructType: 'Variable & Initializer', title: 'Backtrack Board State', explanation: 'Removes queen from board and resets constraint boolean arrays.', keyDetails: [{ variableOrConstruct: 'Backtrack state reset', role: 'Constraint undo', whyThisWay: 'Restores board for exploring alternative column placements' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Sudoku Solver", category: "Grid Backtracking",
+        description: "Solves a 9x9 Sudoku puzzle in-place using row, column, and 3x3 box validity checks.",
+        prosCons: "Pros: Full Sudoku puzzle solver. Cons: Exponential worst-case search space.",
+        timeComplexity: "O(9^(N*N))", spaceComplexity: "O(N*N) stack", isFree: false,
+        code: `// 63. Backtracking - Approach 8: Sudoku Solver
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool isValidSudoku(const vector<vector<char>>& board, int r, int c, char digit) {
+    for (int i = 0; i < 9; i++) {
+        if (board[r][i] == digit) return false;
+        if (board[i][c] == digit) return false;
+        if (board[3 * (r / 3) + i / 3][3 * (c / 3) + i % 3] == digit) return false;
+    }
+    return true;
+}
+
+bool solveSudoku(vector<vector<char>>& board) {
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            if (board[r][c] == '.') {
+                for (char d = '1'; d <= '9'; d++) {
+                    if (isValidSudoku(board, r, c, d)) {
+                        board[r][c] = d;
+                        if (solveSudoku(board)) return true;
+                        board[r][c] = '.'; // Backtrack
+                    }
+                }
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+int main() {
+    vector<vector<char>> board = {
+        {'5','3','.','.','7','.','.','.','.'},
+        {'6','.','.','1','9','5','.','.','.'},
+        {'.','9','8','.','.','.','.','6','.'},
+        {'8','.','.','.','6','.','.','.','3'},
+        {'4','.','.','8','.','3','.','.','1'},
+        {'7','.','.','.','2','.','.','.','6'},
+        {'.','6','.','.','.','.','2','8','.'},
+        {'.','.','.','4','1','9','.','.','5'},
+        {'.','.','.','.','8','.','.','7','9'}
+    };
+    if (solveSudoku(board)) {
+        cout << "Sudoku Solved! Top-left 3x3:\n";
+        for (int r = 0; r < 3; r++) {
+            for (int c = 0; c < 3; c++) cout << board[r][c] << " ";
+            cout << endl;
+        }
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (board[3 * (r / 3) + i / 3][3 * (c / 3) + i % 3] == digit) return false;', constructType: 'Condition & Branch', title: '3x3 Subgrid Validity Check', explanation: 'Checks if target digit exists in corresponding 3x3 subgrid using coordinate division.', keyDetails: [{ variableOrConstruct: '3 * (r / 3) + i / 3', role: '3x3 box mapping', whyThisWay: 'Validates 3x3 box constraint in Sudoku' }] },
+          { lineNum: 2, codeSnippet: 'for (char d = \'1\'; d <= \'9\'; d++)', constructType: 'Loop Construct', title: 'Try Digit Candidates 1..9', explanation: 'Tries all possible digits \'1\' through \'9\' for empty cell \'.\'.', keyDetails: [{ variableOrConstruct: 'd = \'1\' to \'9\'', role: 'Candidate choices', whyThisWay: 'Exhaustive candidate trial for empty grid cell' }] },
+          { lineNum: 3, codeSnippet: 'board[r][c] = \'.\'; // Backtrack', constructType: 'Variable & Initializer', title: 'Backtrack Cell Assignment', explanation: 'Resets cell to \'.\' when recursion down trial digit `d` fails to solve grid.', keyDetails: [{ variableOrConstruct: 'board[r][c] = \'.\'', role: 'Grid state undo', whyThisWay: 'Undoes digit placement to test next digit' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Word Search on 2D Board", category: "Board Word Search",
+        description: "Checks if a target word exists on a 2D character grid using 4-directional DFS backtracking.",
+        prosCons: "Pros: Uses temporary character replacement for O(1) visited tracking. Cons: Modifies board during search.",
+        timeComplexity: "O(R * C * 4^L)", spaceComplexity: "O(L)", isFree: false,
+        code: `// 63. Backtracking - Approach 9: Word Search
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+bool wordSearchDFS(vector<vector<char>>& board, string& word, int idx, int r, int c, int R, int C) {
+    if (idx == (int)word.length()) return true;
+    if (r < 0 || r >= R || c < 0 || c >= C || board[r][c] != word[idx]) return false;
+
+    char temp = board[r][c];
+    board[r][c] = '#'; // Mark visited
+
+    bool found = wordSearchDFS(board, word, idx + 1, r - 1, c, R, C) ||
+                 wordSearchDFS(board, word, idx + 1, r + 1, c, R, C) ||
+                 wordSearchDFS(board, word, idx + 1, r, c - 1, R, C) ||
+                 wordSearchDFS(board, word, idx + 1, r, c + 1, R, C);
+
+    board[r][c] = temp; // Backtrack
+    return found;
+}
+
+bool exist(vector<vector<char>>& board, string word) {
+    int R = board.size(), C = board[0].size();
+    for (int r = 0; r < R; r++) {
+        for (int c = 0; c < C; c++) {
+            if (wordSearchDFS(board, word, 0, r, c, R, C)) return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    vector<vector<char>> board = {
+        {'A','B','C','E'},
+        {'S','F','C','S'},
+        {'A','D','E','E'}
+    };
+    cout << "ABCCED exists: " << (exist(board, "ABCCED") ? "Yes" : "No") << endl; // Yes
+    cout << "SEE exists: " << (exist(board, "SEE") ? "Yes" : "No") << endl; // Yes
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'char temp = board[r][c]; board[r][c] = \'#\';', constructType: 'Variable & Initializer', title: 'In-Place Board Visited Mark', explanation: 'Replaces character with \'#\' to mark cell visited in active path without extra visited matrix.', keyDetails: [{ variableOrConstruct: 'board[r][c] = \'#\'', role: 'In-place mark', whyThisWay: 'Prevents re-using same cell instance in current word search path' }] },
+          { lineNum: 2, codeSnippet: 'bool found = wordSearchDFS(...) || wordSearchDFS(...);', constructType: 'Condition & Branch', title: '4-Directional Recursive Search', explanation: 'Recursively checks adjacent neighbors in 4 cardinal directions (UP, DOWN, LEFT, RIGHT).', keyDetails: [{ variableOrConstruct: '4-directional OR', role: 'Grid search expansion', whyThisWay: 'Short-circuits as soon as any path finds remaining letters' }] },
+          { lineNum: 3, codeSnippet: 'board[r][c] = temp; // Backtrack', constructType: 'Variable & Initializer', title: 'Restore Original Board Character', explanation: 'Restores original board character upon returning from recursive branch.', keyDetails: [{ variableOrConstruct: 'board[r][c] = temp', role: 'Backtrack character restore', whyThisWay: 'Restores board state for other word search paths' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Palindrome Partitioning", category: "String Partitioning",
+        description: "Partitions string s such that every substring of partition is a palindrome.",
+        prosCons: "Pros: Complete palindrome partition enumerator. Cons: O(N * 2^N) time.",
+        timeComplexity: "O(N * 2^N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 63. Backtracking - Approach 10: Palindrome Partitioning
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+bool isPalindrome(const string& s, int low, int high) {
+    while (low < high) {
+        if (s[low++] != s[high--]) return false;
+    }
+    return true;
+}
+
+void partitionHelper(int start, const string& s, vector<string>& current, vector<vector<string>>& result) {
+    if (start == (int)s.length()) {
+        result.push_back(current);
+        return;
+    }
+    for (int i = start; i < (int)s.length(); i++) {
+        if (isPalindrome(s, start, i)) {
+            current.push_back(s.substr(start, i - start + 1));
+            partitionHelper(i + 1, s, current, result);
+            current.pop_back();
+        }
+    }
+}
+
+vector<vector<string>> partition(string s) {
+    vector<vector<string>> result;
+    vector<string> current;
+    partitionHelper(0, s, current, result);
+    return result;
+}
+
+int main() {
+    auto res = partition("aab");
+    cout << "Palindrome partitions for 'aab':\n";
+    for (auto& p : res) {
+        cout << "[ "; for (auto& str : p) cout << str << " "; cout << "]\n";
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (isPalindrome(s, start, i)) { ... }', constructType: 'Condition & Branch', title: 'Palindrome Prefix Check', explanation: 'Validates that substring slice `s[start..i]` is a palindrome before taking recursive branch.', keyDetails: [{ variableOrConstruct: 'isPalindrome', role: 'Partition validity check', whyThisWay: 'Ensures every partition piece is a valid palindrome' }] },
+          { lineNum: 2, codeSnippet: 'current.push_back(s.substr(start, i - start + 1));', constructType: 'Variable & Initializer', title: 'Append Palindrome Substring', explanation: 'Appends valid palindrome slice to active partition configuration.', keyDetails: [{ variableOrConstruct: 'substr', role: 'Partition slice selection', whyThisWay: 'Includes palindrome substring in active choice list' }] },
+          { lineNum: 3, codeSnippet: 'current.pop_back();', constructType: 'Return / Cleanup', title: 'Backtrack Partition State', explanation: 'Pops last substring from active partition vector upon return.', keyDetails: [{ variableOrConstruct: 'pop_back()', role: 'Partition undo', whyThisWay: 'Restores state to test longer prefix slices' }] }
+        ]
+      }
+    ],
+    traceKey: "factorial"
+  };
+}
+
+export function getProblem64Details(): LearnModule {
+  return {
+    id: "med_bit_manipulation",
+    title: "64. Bitwise Tricks & Bitmasks",
+    category: "Bit Manipulation",
+    difficulty: "medium",
+    shortDesc: "Brian Kernighans bit count, XOR single number, and bitmasks.",
+    fullCode: `// 64. Bitwise - Approach 1: Brian Kernighans Bit Count
+#include <iostream>
+using namespace std;
+
+int countSetBits(int n) {
+    int count = 0;
+    while (n > 0) {
+        n = n & (n - 1); // Clears the lowest set bit!
+        count++;
+    }
+    return count;
+}
+
+int main() {
+    cout << "Set bits in 12 (1100b): " << countSetBits(12) << endl; // 2
+    cout << "Set bits in 7 (0111b): " << countSetBits(7) << endl;  // 3
+    return 0;
+}`,
+    problemStatement: {
+      title: "64. Bitwise Tricks & Bitmasks",
+      objective: "Master Bit Manipulation & Bitmasking algorithms: Brian Kernighan's bit count `n & (n - 1)`, Single Number XOR reduction, Single Number II (bit counts modulo 3), Single Number III (lowbit isolating diff bit), Bitmask Subsets generation (0 to 2^N - 1), bitwise range AND, power of 2/4 validation, 32-bit reversal, and Bitmask DP.",
+      description: "Implement **Bitwise Tricks & Bitmasks** (Bit Manipulation). Leverage binary bitwise operators (`&`, `|`, `^`, `~`, `<<`, `>>`) for high-performance O(1) bit operations and state representations.",
+      inputDesc: "Integers, array of numbers with duplicate counts, number ranges, or bitmask states.",
+      outputDesc: "Set bit count, unique number value, bitmask subsets, or power-of-two booleans.",
+      takeaways: [
+        "`n & (n - 1)` clears the lowest set bit in an integer in O(1) time",
+        "XOR properties: `x ^ x = 0` and `x ^ 0 = x`; XOR cancels paired numbers to isolate single unique numbers",
+        "Lowbit extraction `lowbit = diff & (-diff)` isolates the lowest 1-bit set in an integer",
+        "Bitmasking uses integer bits 0..N-1 as boolean flags representing element inclusion/exclusion in a set"
+      ],
+      examples: [
+        { id: 1, input: "n = 12 (binary 1100)", output: "Set bits count: 2", explanation: "Brian Kernighan's `n & (n-1)` clears lowest set bit twice to count 2 bits." },
+        { id: 2, input: "nums = [4, 1, 2, 1, 2]", output: "Single Number: 4", explanation: "XOR of all elements cancels paired 1s and 2s, leaving 4." },
+        { id: 3, input: "nums = [1, 2, 1, 3, 2, 5]", output: "Two Unique Numbers: 3 and 5", explanation: "Diff XOR lowbit divides numbers into two groups to find 3 and 5." }
+      ],
+      constraints: ["Pay attention to operator precedence (e.g. `(n & 1)` needs parentheses)."],
+      companies: ["Google", "Amazon", "Microsoft", "Meta", "Apple"],
+      acceptanceRate: "92.8%",
+      totalAccepted: "6,250,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Brian Kernighan's Bit Count Algorithm (FREE)", category: "FREE / Core Bitwise",
+        description: "Counts total set 1-bits in an integer in O(K) time where K is number of set bits using n & (n - 1).",
+        prosCons: "Pros: Runs in O(K) time proportional only to set bits. Cons: Integer input required.",
+        timeComplexity: "O(K) where K = set bits", spaceComplexity: "O(1)", isFree: true,
+        code: `// 64. Bitwise - Approach 1: Brian Kernighan's Bit Count
+#include <iostream>
+using namespace std;
+
+int countSetBits(int n) {
+    int count = 0;
+    while (n > 0) {
+        n = n & (n - 1); // Clears the lowest set bit
+        count++;
+    }
+    return count;
+}
+
+int main() {
+    cout << "Set bits in 12 (1100b): " << countSetBits(12) << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'n = n & (n - 1);', constructType: 'Variable & Initializer', title: 'Clear Lowest Set Bit Trick', explanation: 'Subtracting 1 flips all bits from lowest 1-bit rightward. Bitwise AND `n & (n-1)` clears that lowest 1-bit to 0.', keyDetails: [{ variableOrConstruct: 'n & (n - 1)', role: 'Lowest set bit clearing trick', whyThisWay: 'Clears exactly one set 1-bit in constant time O(1)' }] },
+          { lineNum: 2, codeSnippet: 'count++;', constructType: 'Variable & Initializer', title: 'Increment Set Bit Counter', explanation: 'Increments count for each cleared set bit until `n` becomes 0.', keyDetails: [{ variableOrConstruct: 'count++', role: 'Bit count accumulator', whyThisWay: 'Runs exactly K times for K set bits' }] },
+          { lineNum: 3, codeSnippet: 'return count;', constructType: 'Return / Cleanup', title: 'Return Total Set Bits Count', explanation: 'Returns final population count of 1-bits.', keyDetails: [{ variableOrConstruct: 'count', role: 'Population count', whyThisWay: 'Fast O(K) bit count' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Single Number I (XOR Cancelling Duplicates) (FREE)", category: "FREE / XOR Reduction",
+        description: "Finds the single number in an array where every other number appears twice using XOR properties.",
+        prosCons: "Pros: O(N) time and O(1) space optimal solution. Cons: Works only when non-target numbers appear even times.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: true,
+        code: `// 64. Bitwise - Approach 2: Single Number XOR
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int singleNumber(const vector<int>& nums) {
+    int result = 0;
+    for (int num : nums) {
+        result ^= num;
+    }
+    return result;
+}
+
+int main() {
+    vector<int> nums = {4, 1, 2, 1, 2};
+    cout << "Single Number: " << singleNumber(nums) << endl; // 4
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int result = 0;', constructType: 'Variable & Initializer', title: 'Initialize XOR Accumulator', explanation: 'Initializes accumulator to 0 (since `0 ^ x = x`).', keyDetails: [{ variableOrConstruct: 'result = 0', role: 'XOR accumulator', whyThisWay: 'Identity element for XOR operation' }] },
+          { lineNum: 2, codeSnippet: 'result ^= num;', constructType: 'Variable & Initializer', title: 'XOR Reduction Pass', explanation: 'XORs current number with accumulator. Paired duplicates cancel out (`x ^ x = 0`).', keyDetails: [{ variableOrConstruct: 'result ^= num', role: 'XOR cancellation', whyThisWay: 'Duplicate numbers cancel to 0, leaving single unique number' }] },
+          { lineNum: 3, codeSnippet: 'return result;', constructType: 'Return / Cleanup', title: 'Return Isolated Single Number', explanation: 'Returns remaining non-cancelled single number.', keyDetails: [{ variableOrConstruct: 'result', role: 'Single number result', whyThisWay: 'Linear O(N) time and O(1) space' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Single Number II (Bit Counting Modulo 3)", category: "Bit Counting Modulo K",
+        description: "Finds the single number in an array where every other element appears 3 times by counting bits mod 3.",
+        prosCons: "Pros: O(N) time and O(1) space for 3x duplicate array. Cons: 32-bit loop overhead.",
+        timeComplexity: "O(32 * N) = O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 64. Bitwise - Approach 3: Single Number II (Mod 3)
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int singleNumberII(const vector<int>& nums) {
+    int result = 0;
+    for (int b = 0; b < 32; b++) {
+        int bitSum = 0;
+        for (int num : nums) {
+            if ((num >> b) & 1) bitSum++;
+        }
+        if (bitSum % 3 != 0) {
+            result |= (1 << b);
+        }
+    }
+    return result;
+}
+
+int main() {
+    vector<int> nums = {2, 2, 3, 2};
+    cout << "Single Number (3x duplicates): " << singleNumberII(nums) << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if ((num >> b) & 1) bitSum++;', constructType: 'Condition & Branch', title: 'Count Bits at Position b', explanation: 'Right-shifts `num` by `b` bits and tests bit 0 to count set bits across all numbers at bit position `b`.', keyDetails: [{ variableOrConstruct: '(num >> b) & 1', role: 'Bit position extraction', whyThisWay: 'Extracts bit value at 0-indexed position b' }] },
+          { lineNum: 2, codeSnippet: 'if (bitSum % 3 != 0) result |= (1 << b);', constructType: 'Condition & Branch', title: 'Reconstruct Target Bit', explanation: 'If total bit count at position `b` is not a multiple of 3, the single number has a 1-bit at position `b`. Sets bit in result.', keyDetails: [{ variableOrConstruct: 'result |= (1 << b)', role: 'Bit reconstruction', whyThisWay: 'Restores 1-bit in target result at position b' }] },
+          { lineNum: 3, codeSnippet: 'return result;', constructType: 'Return / Cleanup', title: 'Return Reconstructed Single Number', explanation: 'Returns reconstructed 32-bit single number.', keyDetails: [{ variableOrConstruct: 'result', role: 'Single number II result', whyThisWay: 'Solves 3x duplicate single number problem in constant space' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Single Number III (Two Unique Numbers via Lowbit)", category: "Lowbit Partition",
+        description: "Finds two unique numbers in an array where all other numbers appear twice using lowbit `diff & (-diff)`.",
+        prosCons: "Pros: O(N) time and O(1) space for 2 unique numbers. Cons: Requires bitwise negation lowbit.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 64. Bitwise - Approach 4: Single Number III
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<int> singleNumberIII(const vector<int>& nums) {
+    long long diff = 0;
+    for (int num : nums) diff ^= num; // diff = num1 ^ num2
+
+    long long lowbit = diff & (-diff); // Isolates lowest set bit where num1 and num2 differ
+
+    int num1 = 0, num2 = 0;
+    for (int num : nums) {
+        if (num & lowbit) num1 ^= num; // Group 1: bit set
+        else num2 ^= num;              // Group 2: bit unset
+    }
+    return {num1, num2};
+}
+
+int main() {
+    vector<int> nums = {1, 2, 1, 3, 2, 5};
+    vector<int> res = singleNumberIII(nums);
+    cout << "Two Unique Numbers: " << res[0] << " and " << res[1] << endl; // 3 and 5 (or 5 and 3)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'long long lowbit = diff & (-diff);', constructType: 'Variable & Initializer', title: 'Isolate Lowest Differentiating Bit', explanation: 'Computes `diff & (-diff)` to isolate the lowest 1-bit where `num1` and `num2` differ.', keyDetails: [{ variableOrConstruct: 'diff & (-diff)', role: 'Lowbit isolation trick', whyThisWay: 'Extracts rightmost 1-bit where the two unique numbers disagree' }] },
+          { lineNum: 2, codeSnippet: 'if (num & lowbit) num1 ^= num; else num2 ^= num;', constructType: 'Condition & Branch', title: 'Partition Numbers into Two Groups', explanation: 'Partitions all numbers into two groups based on whether lowbit is set or unset, then XORs each group independently.', keyDetails: [{ variableOrConstruct: 'num & lowbit', role: 'Group partitioning', whyThisWay: 'Splits num1 and num2 into separate groups while keeping paired numbers together' }] },
+          { lineNum: 3, codeSnippet: 'return {num1, num2};', constructType: 'Return / Cleanup', title: 'Return Two Unique Numbers', explanation: 'Returns pair of isolated unique numbers.', keyDetails: [{ variableOrConstruct: '{num1, num2}', role: 'Two unique numbers result', whyThisWay: 'Solves Single Number III in O(N) time and O(1) space' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Subsets Generation via Bitmask Iteration", category: "Bitmask Enumeration",
+        description: "Generates all 2^N subsets of an array by iterating an integer bitmask from 0 to (2^N - 1).",
+        prosCons: "Pros: Non-recursive subset generation. Cons: Bounded by N <= 30 due to integer bit limits.",
+        timeComplexity: "O(N * 2^N)", spaceComplexity: "O(1) extra", isFree: false,
+        code: `// 64. Bitwise - Approach 5: Bitmask Subsets
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<vector<int>> subsetsBitmask(const vector<int>& nums) {
+    int n = nums.size();
+    int totalSubsets = 1 << n; // 2^N
+    vector<vector<int>> result;
+
+    for (int mask = 0; mask < totalSubsets; mask++) {
+        vector<int> current;
+        for (int i = 0; i < n; i++) {
+            if (mask & (1 << i)) { // Check if i-th bit is set
+                current.push_back(nums[i]);
+            }
+        }
+        result.push_back(current);
+    }
+    return result;
+}
+
+int main() {
+    vector<int> nums = {10, 20, 30};
+    auto res = subsetsBitmask(nums);
+    cout << "Bitmask Subsets Count (2^3): " << res.size() << endl; // 8
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int totalSubsets = 1 << n;', constructType: 'Variable & Initializer', title: 'Calculate Total Subsets Count 2^N', explanation: 'Left-shifts 1 by N bits (`1 << n`) to calculate 2^N.', keyDetails: [{ variableOrConstruct: '1 << n', role: '2^N total subsets', whyThisWay: 'Fast binary shift for power of two' }] },
+          { lineNum: 2, codeSnippet: 'if (mask & (1 << i)) current.push_back(nums[i]);', constructType: 'Condition & Branch', title: 'Bit Test Element Inclusion', explanation: 'Checks if i-th bit of integer `mask` is 1; if set, includes element `nums[i]` in current subset.', keyDetails: [{ variableOrConstruct: 'mask & (1 << i)', role: 'Bit inclusion test', whyThisWay: 'Bit i represents boolean inclusion of element nums[i]' }] },
+          { lineNum: 3, codeSnippet: 'result.push_back(current);', constructType: 'Variable & Initializer', title: 'Append Generated Subset', explanation: 'Appends completed subset for current bitmask to output list.', keyDetails: [{ variableOrConstruct: 'result.push_back', role: 'Subset accumulator', whyThisWay: 'Collects all 2^N power set combinations non-recursively' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Bitwise AND of Numbers Range", category: "Range Bitwise AND",
+        description: "Computes bitwise AND of all numbers in range [m, n] by finding common binary prefix.",
+        prosCons: "Pros: O(1) bit shift iterations vs O(N) loop. Cons: Requires understanding common prefix shift rule.",
+        timeComplexity: "O(1) (at most 32 shifts)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 64. Bitwise - Approach 6: Range Bitwise AND
+#include <iostream>
+using namespace std;
+
+int rangeBitwiseAnd(int left, int right) {
+    int shift = 0;
+    while (left < right) {
+        left >>= 1;
+        right >>= 1;
+        shift++;
+    }
+    return left << shift;
+}
+
+int main() {
+    cout << "Range AND [5, 7]: " << rangeBitwiseAnd(5, 7) << endl; // 4 (5=101, 6=110, 7=111 -> 100b = 4)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (left < right) { left >>= 1; right >>= 1; shift++; }', constructType: 'Loop Construct', title: 'Find Common Binary Prefix', explanation: 'Right-shifts both bounds until `left == right`, counting shifted bits. Differing lower bits cancel to 0 during range AND.', keyDetails: [{ variableOrConstruct: 'left >>= 1; right >>= 1', role: 'Prefix shift extraction', whyThisWay: 'Removes lower bits that flip across range [left..right]' }] },
+          { lineNum: 2, codeSnippet: 'return left << shift;', constructType: 'Return / Cleanup', title: 'Re-align Common Prefix', explanation: 'Left-shifts common prefix back by `shift` positions, padding lower bits with 0s.', keyDetails: [{ variableOrConstruct: 'left << shift', role: 'Result reconstruction', whyThisWay: 'Restores common prefix value' }] },
+          { lineNum: 3, codeSnippet: 'rangeBitwiseAnd(5, 7)', constructType: 'Function Signature', title: 'Execute Range AND', explanation: 'Computes range AND in at most 32 shift operations.', keyDetails: [{ variableOrConstruct: 'at most 32 shifts', role: 'Constant time complexity', whyThisWay: 'O(1) time regardless of range size' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Minimum Bit Flips to Convert Number", category: "Hamming Distance",
+        description: "Finds minimum bit flips required to convert start number to goal number using XOR + bit count.",
+        prosCons: "Pros: O(1) time Hamming distance calculation. Cons: Simple XOR application.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 64. Bitwise - Approach 7: Minimum Bit Flips
+#include <iostream>
+using namespace std;
+
+int minBitFlips(int start, int goal) {
+    int diff = start ^ goal;
+    int count = 0;
+    while (diff > 0) {
+        diff &= (diff - 1);
+        count++;
+    }
+    return count;
+}
+
+int main() {
+    cout << "Bit flips 10 -> 7: " << minBitFlips(10, 7) << endl; // 3 (10=1010b, 7=0111b -> diff 1101b = 3 bits)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int diff = start ^ goal;', constructType: 'Variable & Initializer', title: 'XOR Differing Bits', explanation: 'XORs start and goal numbers; set 1-bits in `diff` represent exact positions where bits differ.', keyDetails: [{ variableOrConstruct: 'start ^ goal', role: 'Difference bitmask', whyThisWay: 'XOR outputs 1 for differing bits and 0 for matching bits' }] },
+          { lineNum: 2, codeSnippet: 'while (diff > 0) { diff &= (diff - 1); count++; }', constructType: 'Loop Construct', title: 'Count Differing Bits', explanation: 'Counts set 1-bits in `diff` using Brian Kernighan\'s algorithm.', keyDetails: [{ variableOrConstruct: 'diff &= (diff - 1)', role: 'Hamming distance count', whyThisWay: 'Counts number of bit positions that need to be flipped' }] },
+          { lineNum: 3, codeSnippet: 'return count;', constructType: 'Return / Cleanup', title: 'Return Minimum Bit Flips Count', explanation: 'Returns total bit flips count required to convert start to goal.', keyDetails: [{ variableOrConstruct: 'count', role: 'Bit flips result', whyThisWay: 'Exact Hamming distance' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Power of Two & Power of Four Check", category: "Bitmask Properties",
+        description: "Checks if a number is a power of 2 or power of 4 using O(1) bitmask conditions.",
+        prosCons: "Pros: O(1) constant time checks without loops. Cons: Requires bitmask 0x55555555 for power of 4.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 64. Bitwise - Approach 8: Power of 2 & 4
+#include <iostream>
+using namespace std;
+
+bool isPowerOfTwo(int n) {
+    return n > 0 && (n & (n - 1)) == 0;
+}
+
+bool isPowerOfFour(int n) {
+    return n > 0 && (n & (n - 1)) == 0 && (n & 0x55555555) != 0;
+}
+
+int main() {
+    cout << "16 is Power of 2: " << (isPowerOfTwo(16) ? "Yes" : "No") << endl; // Yes
+    cout << "16 is Power of 4: " << (isPowerOfFour(16) ? "Yes" : "No") << endl; // Yes
+    cout << "8 is Power of 4: " << (isPowerOfFour(8) ? "Yes" : "No") << endl;   // No
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return n > 0 && (n & (n - 1)) == 0;', constructType: 'Return / Cleanup', title: 'Power of Two Bitmask Formula', explanation: 'A power of 2 has exactly one 1-bit. Thus, clearing its lowest 1-bit via `n & (n-1)` results in 0.', keyDetails: [{ variableOrConstruct: '(n & (n - 1)) == 0', role: 'Single bit check', whyThisWay: 'O(1) proof that number has exactly one set bit' }] },
+          { lineNum: 2, codeSnippet: 'n & 0x55555555', constructType: 'Condition & Branch', title: 'Even Bit Position Mask', explanation: '0x55555555 is a bitmask with 1s at odd bit positions (0, 2, 4, 6...). Powers of 4 must have their single 1-bit at an even bit position.', keyDetails: [{ variableOrConstruct: '0x55555555', role: 'Odd-position bitmask filter', whyThisWay: 'Distinguishes power of 4 (4^k = 2^(2k)) from other powers of 2' }] },
+          { lineNum: 3, codeSnippet: 'isPowerOfFour(16)', constructType: 'Function Signature', title: 'Execute Power Check', explanation: 'Returns boolean result in O(1) time.', keyDetails: [{ variableOrConstruct: 'isPowerOfFour', role: 'O(1) verification', whyThisWay: 'Zero iteration bitwise check' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Reverse Bits of 32-bit Unsigned Integer", category: "Bit Reversal",
+        description: "Reverses the 32 bits of a given unsigned integer using bit shifting and OR operations.",
+        prosCons: "Pros: O(1) fixed 32-step loop. Cons: Requires unsigned integer operations.",
+        timeComplexity: "O(1) fixed 32 steps", spaceComplexity: "O(1)", isFree: false,
+        code: `// 64. Bitwise - Approach 9: Reverse Bits
+#include <iostream>
+#include <cstdint>
+using namespace std;
+
+uint32_t reverseBits(uint32_t n) {
+    uint32_t result = 0;
+    for (int i = 0; i < 32; i++) {
+        result = (result << 1) | (n & 1);
+        n >>= 1;
+    }
+    return result;
+}
+
+int main() {
+    uint32_t n = 43261596; // 00000010100101000001111010011100b
+    cout << "Reversed Bits Result: " << reverseBits(n) << endl; // 964176192
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'result = (result << 1) | (n & 1);', constructType: 'Variable & Initializer', title: 'Shift Result & Append Lowest Bit', explanation: 'Left-shifts result by 1 bit to make space, then appends lowest bit of `n` (`n & 1`).', keyDetails: [{ variableOrConstruct: '(result << 1) | (n & 1)', role: 'Bit reversal shift', whyThisWay: 'Pushes bits into result in reverse order' }] },
+          { lineNum: 2, codeSnippet: 'n >>= 1;', constructType: 'Variable & Initializer', title: 'Right-Shift Input Integer', explanation: 'Right-shifts `n` by 1 bit to prepare next bit for extraction.', keyDetails: [{ variableOrConstruct: 'n >>= 1', role: 'Input bit shift', whyThisWay: 'Brings next bit to lowest position' }] },
+          { lineNum: 3, codeSnippet: 'return result;', constructType: 'Return / Cleanup', title: 'Return 32-bit Reversed Integer', explanation: 'Returns reversed 32-bit unsigned integer.', keyDetails: [{ variableOrConstruct: 'result', role: 'Reversed bits integer', whyThisWay: 'Completes 32-bit reversal' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Bitmask State Representation for Subsets / TSP", category: "Bitmask DP State",
+        description: "Uses integer bitmasks as compact set state representations in Dynamic Programming (e.g., Traveling Salesperson).",
+        prosCons: "Pros: O(1) set operations (add, remove, check). Cons: Set size N <= 30.",
+        timeComplexity: "O(1) set ops", spaceComplexity: "O(1)", isFree: false,
+        code: `// 64. Bitwise - Approach 10: Bitmask State Ops
+#include <iostream>
+using namespace std;
+
+int addElement(int mask, int elem) { return mask | (1 << elem); }
+int removeElement(int mask, int elem) { return mask & ~(1 << elem); }
+bool hasElement(int mask, int elem) { return (mask & (1 << elem)) != 0; }
+int toggleElement(int mask, int elem) { return mask ^ (1 << elem); }
+
+int main() {
+    int mask = 0; // Empty set
+    mask = addElement(mask, 2); // Set {2} -> mask 4 (100b)
+    mask = addElement(mask, 0); // Set {0, 2} -> mask 5 (101b)
+
+    cout << "Has element 2: " << (hasElement(mask, 2) ? "Yes" : "No") << endl;
+    cout << "Has element 1: " << (hasElement(mask, 1) ? "Yes" : "No") << endl;
+
+    mask = removeElement(mask, 2);
+    cout << "Has element 2 after remove: " << (hasElement(mask, 2) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int addElement(int mask, int elem) { return mask | (1 << elem); }', constructType: 'Function Signature', title: 'Add Element Bitwise OR', explanation: 'Sets bit `elem` to 1 using bitwise OR `mask | (1 << elem)`.', keyDetails: [{ variableOrConstruct: 'mask | (1 << elem)', role: 'Set insertion', whyThisWay: 'Sets specific bit to 1 in O(1)' }] },
+          { lineNum: 2, codeSnippet: 'int removeElement(int mask, int elem) { return mask & ~(1 << elem); }', constructType: 'Function Signature', title: 'Remove Element Bitwise AND-NOT', explanation: 'Clears bit `elem` to 0 using bitwise AND with bitwise NOT mask `mask & ~(1 << elem)`.', keyDetails: [{ variableOrConstruct: 'mask & ~(1 << elem)', role: 'Set deletion', whyThisWay: 'Clears specific bit to 0 in O(1)' }] },
+          { lineNum: 3, codeSnippet: 'bool hasElement(int mask, int elem) { return (mask & (1 << elem)) != 0; }', constructType: 'Function Signature', title: 'Check Element Bitwise AND', explanation: 'Tests if bit `elem` is set using bitwise AND `(mask & (1 << elem)) != 0`.', keyDetails: [{ variableOrConstruct: '(mask & (1 << elem)) != 0', role: 'Set membership test', whyThisWay: 'Tests specific bit in O(1)' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem65Details(): LearnModule {
+  return {
+    id: "med_custom_alloc",
+    title: "65. Manual Heap Memory Allocation",
+    category: "Memory & Pointers",
+    difficulty: "medium",
+    shortDesc: "Low-level memory management with new[], delete[], and placement new.",
+    fullCode: `// 65. Memory - Approach 1: Basic Heap Object Allocation
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Widget {
+public:
+    string name;
+    Widget(string n) : name(n) {
+        cout << "Widget(" << name << ") constructed." << endl;
+    }
+    ~Widget() {
+        cout << "~Widget(" << name << ") destroyed." << endl;
+    }
+};
+
+int main() {
+    Widget* w = new Widget("Button");
+    cout << "Widget name: " << w->name << endl;
+    delete w; // Must invoke delete to run destructor and free memory!
+    return 0;
+}`,
+    problemStatement: {
+      title: "65. Manual Heap Memory Allocation",
+      objective: "Master low-level C++ heap memory management: scalar `new` and `delete`, dynamic array `new[]` and `delete[]`, placement new operator `new (ptr) T(...)`, explicit destructor invocation `ptr->~T()`, custom memory pool allocators, arena allocators, and class-specific `operator new` / `operator delete` overloading.",
+      description: "Implement **Manual Heap Memory Allocation** (Memory & Pointers). Control explicit memory lifecycle, object construction, destruction, and custom memory pool allocation in high-performance C++ environments.",
+      inputDesc: "Allocation requests, buffer pointers, dynamic array sizes, or pre-allocated byte blocks.",
+      outputDesc: "Heap pointers, constructed object references, memory pool block allocations, or deallocation confirmations.",
+      takeaways: [
+        "`new` allocates heap memory via `operator new` AND calls constructor; `delete` calls destructor AND frees memory via `operator delete`",
+        "Arrays allocated with `new[]` MUST be freed with `delete[]`; mixing scalar `delete` with `new[]` causes undefined behavior",
+        "Placement new (`new (buffer) T(...)`) constructs an object in pre-allocated memory without allocating new heap memory",
+        "Objects constructed via placement new MUST be destroyed explicitly by calling `ptr->~T()` (never use `delete` on placement new objects)"
+      ],
+      examples: [
+        { id: 1, input: "Widget* w = new Widget('Button'); delete w;", output: "Widget constructed -> Widget destroyed", explanation: "Scalar new allocates heap memory and calls constructor; delete calls destructor and frees memory." },
+        { id: 2, input: "char buffer[1024]; Widget* w = new (buffer) Widget('Panel'); w->~Widget();", output: "Placement Widget constructed in buffer -> Explicit ~Widget called", explanation: "Placement new constructs object inside stack buffer; explicit destructor cleans up." },
+        { id: 3, input: "Custom MemoryPool pool; Node* n = pool.allocate(); pool.deallocate(n);", output: "O(1) Pool Block Allocation & Deallocation", explanation: "Fixed-size memory pool provides O(1) allocation without OS heap fragmentation." }
+      ],
+      constraints: ["Always pair `new` with `delete`, `new[]` with `delete[]`, and placement `new` with explicit `~T()`."],
+      companies: ["NVIDIA", "Microsoft", "Apple", "Google", "Bloomberg"],
+      acceptanceRate: "86.4%",
+      totalAccepted: "2,450,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Heap Object Allocation & Cleanup (FREE)", category: "FREE / Core Memory",
+        description: "Allocates a single object on the heap using scalar `new` and cleans up using `delete`.",
+        prosCons: "Pros: Direct dynamic object lifecycle control. Cons: Forgetting `delete` causes memory leaks.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1) heap", isFree: true,
+        code: `// 65. Memory - Approach 1: Basic Heap Allocation
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Widget {
+public:
+    string name;
+    Widget(string n) : name(n) {
+        cout << "Widget(" << name << ") constructed." << endl;
+    }
+    ~Widget() {
+        cout << "~Widget(" << name << ") destroyed." << endl;
+    }
+};
+
+int main() {
+    Widget* w = new Widget("Button");
+    cout << "Widget name: " << w->name << endl;
+    delete w;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Widget* w = new Widget("Button");', constructType: 'Variable & Initializer', title: 'Scalar new Heap Allocation', explanation: 'Scalar `new` performs 2 steps: (1) allocates sizeof(Widget) bytes on heap, (2) invokes Widget constructor.', keyDetails: [{ variableOrConstruct: 'new Widget', role: 'Heap allocation & construction', whyThisWay: 'Allocates dynamic object on heap' }] },
+          { lineNum: 2, codeSnippet: 'cout << w->name;', constructType: 'Function Signature', title: 'Access Heap Object Member', explanation: 'Accesses member fields using arrow operator `->`.', keyDetails: [{ variableOrConstruct: 'w->name', role: 'Member dereference', whyThisWay: 'Pointer access to heap object fields' }] },
+          { lineNum: 3, codeSnippet: 'delete w;', constructType: 'Return / Cleanup', title: 'Scalar delete Deallocation', explanation: 'Scalar `delete` performs 2 steps: (1) invokes Widget destructor `~Widget()`, (2) frees heap memory.', keyDetails: [{ variableOrConstruct: 'delete w', role: 'Destruction & heap free', whyThisWay: 'Mandatory cleanup to prevent heap memory leaks' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Dynamic Array Allocation & Cleanup (FREE)", category: "FREE / Array Allocation",
+        description: "Allocates an array of objects on the heap using `new[]` and deallocates using `delete[]`.",
+        prosCons: "Pros: Heap dynamic array creation. Cons: MUST use `delete[]` (never scalar `delete`).",
+        timeComplexity: "O(N)", spaceComplexity: "O(N) heap", isFree: true,
+        code: `// 65. Memory - Approach 2: Array Allocation
+#include <iostream>
+using namespace std;
+
+class Item {
+public:
+    int id;
+    Item() : id(0) { cout << "Item default ctor." << endl; }
+    ~Item() { cout << "Item dtor." << endl; }
+};
+
+int main() {
+    int count = 3;
+    Item* arr = new Item[count]; // Allocates 3 Items and runs 3 default ctors
+    for (int i = 0; i < count; i++) arr[i].id = (i + 1) * 10;
+
+    cout << "Item 1 ID: " << arr[1].id << endl;
+    delete[] arr; // MUST use delete[] for arrays!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'Item* arr = new Item[count];', constructType: 'Variable & Initializer', title: 'new[] Array Heap Allocation', explanation: 'Allocates memory for 3 Item objects on heap and calls default constructor on each element.', keyDetails: [{ variableOrConstruct: 'new Item[count]', role: 'Array heap allocation', whyThisWay: 'Allocates contiguous array of objects dynamically' }] },
+          { lineNum: 2, codeSnippet: 'for (int i = 0; i < count; i++) arr[i].id = ...;', constructType: 'Loop Construct', title: 'Subscript Access to Heap Array', explanation: 'Accesses elements using standard array subscript `arr[i]`.', keyDetails: [{ variableOrConstruct: 'arr[i]', role: 'Subscript dereference', whyThisWay: 'Contiguous array elements' }] },
+          { lineNum: 3, codeSnippet: 'delete[] arr;', constructType: 'Return / Cleanup', title: 'delete[] Array Deallocation', explanation: '`delete[]` reads hidden array size header, calls destructors for all elements, and frees array block.', keyDetails: [{ variableOrConstruct: 'delete[] arr', role: 'Array destruction & free', whyThisWay: 'Using scalar delete instead of delete[] causes undefined behavior' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Placement New Operator", category: "Placement New",
+        description: "Constructs an object inside a pre-allocated memory buffer using placement new (`new (buffer) T(...)`).",
+        prosCons: "Pros: Zero heap allocation overhead, custom buffer construction. Cons: Must manually invoke destructor.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 65. Memory - Approach 3: Placement New
+#include <iostream>
+#include <new>
+#include <string>
+using namespace std;
+
+class Sensor {
+public:
+    string type;
+    int val;
+    Sensor(string t, int v) : type(t), val(v) {
+        cout << "Sensor(" << type << ", " << val << ") constructed at " << this << endl;
+    }
+    ~Sensor() {
+        cout << "~Sensor(" << type << ") destroyed." << endl;
+    }
+};
+
+int main() {
+    alignas(Sensor) char buffer[sizeof(Sensor)]; // Pre-allocated stack buffer
+
+    Sensor* s = new (buffer) Sensor("Thermal", 42); // Placement new
+    cout << "Sensor Value: " << s->val << endl;
+
+    s->~Sensor(); // Explicit destructor call required!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'alignas(Sensor) char buffer[sizeof(Sensor)];', constructType: 'Variable & Initializer', title: 'Aligned Byte Buffer', explanation: 'Allocates stack byte buffer aligned to `Sensor` type requirements.', keyDetails: [{ variableOrConstruct: 'alignas(Sensor)', role: 'Memory alignment', whyThisWay: 'Ensures buffer address meets CPU alignment constraints for Sensor' }] },
+          { lineNum: 2, codeSnippet: 'Sensor* s = new (buffer) Sensor("Thermal", 42);', constructType: 'Variable & Initializer', title: 'Placement New Construction', explanation: 'Constructs Sensor object directly inside `buffer` without requesting new heap memory.', keyDetails: [{ variableOrConstruct: 'new (buffer)', role: 'Placement new operator', whyThisWay: 'Constructs object in pre-allocated memory address' }] },
+          { lineNum: 3, codeSnippet: 's->~Sensor();', constructType: 'Return / Cleanup', title: 'Explicit Destructor Call', explanation: 'Explicitly invokes destructor `s->~Sensor()`. NEVER call `delete s` on placement new objects!', keyDetails: [{ variableOrConstruct: 's->~Sensor()', role: 'Explicit destructor call', whyThisWay: 'Placement new objects do not own heap memory; only destructor cleanup is needed' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Explicit Destructor Invocations", category: "Explicit Destructor",
+        description: "Demonstrates when and how to explicitly invoke destructors when managing raw memory buffers.",
+        prosCons: "Pros: Controls exact destruction time without freeing memory. Cons: Calling destructor twice causes UB.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 65. Memory - Approach 4: Explicit Destructor
+#include <iostream>
+#include <new>
+#include <string>
+using namespace std;
+
+class Resource {
+public:
+    string tag;
+    Resource(string t) : tag(t) { cout << "Resource " << tag << " created." << endl; }
+    ~Resource() { cout << "Resource " << tag << " destroyed." << endl; }
+};
+
+int main() {
+    char memBlock[sizeof(Resource)];
+    Resource* res = new (memBlock) Resource("DatabaseConnection");
+
+    // Manually destroy object before buffer reuse
+    res->~Resource();
+
+    // Re-construct another object in same memory block!
+    res = new (memBlock) Resource("FileStream");
+    res->~Resource();
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'res->~Resource();', constructType: 'Return / Cleanup', title: 'Manual Destructor Invocation', explanation: 'Manually calls destructor `~Resource()` to clean up object state while keeping memory buffer intact.', keyDetails: [{ variableOrConstruct: 'res->~Resource()', role: 'Explicit destructor call', whyThisWay: 'Cleans up object without deallocating backing buffer' }] },
+          { lineNum: 2, codeSnippet: 'res = new (memBlock) Resource("FileStream");', constructType: 'Variable & Initializer', title: 'Re-construct Object in Cleared Buffer', explanation: 'Re-constructs a new object in the same memory block after explicit destructor call.', keyDetails: [{ variableOrConstruct: 'new (memBlock)', role: 'Buffer recycling', whyThisWay: 'Recycles raw memory buffer for new object instances' }] },
+          { lineNum: 3, codeSnippet: 'res->~Resource();', constructType: 'Return / Cleanup', title: 'Final Explicit Destructor Call', explanation: 'Final explicit destructor call before buffer goes out of scope.', keyDetails: [{ variableOrConstruct: 'explicit dtor', role: 'Final cleanup', whyThisWay: 'Ensures no resource leaks on stack buffer' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Simple Fixed-Block Memory Pool Allocator", category: "Memory Pool",
+        description: "Implements a high-performance fixed-size memory pool allocator using a free-list.",
+        prosCons: "Pros: O(1) allocation and deallocation, zero fragmentation. Cons: Fixed block size.",
+        timeComplexity: "O(1) alloc/dealloc", spaceComplexity: "O(N * BlockSize)", isFree: false,
+        code: `// 65. Memory - Approach 5: Memory Pool
+#include <iostream>
+#include <vector>
+using namespace std;
+
+template<typename T, size_t BlockCount = 10>
+class MemoryPool {
+    union Node {
+        T element;
+        Node* nextFree;
+        Node() {}
+        ~Node() {}
+    };
+    Node pool[BlockCount];
+    Node* freeList;
+public:
+    MemoryPool() {
+        for (size_t i = 0; i < BlockCount - 1; i++) {
+            pool[i].nextFree = &pool[i + 1];
+        }
+        pool[BlockCount - 1].nextFree = nullptr;
+        freeList = &pool[0];
+    }
+    T* allocate() {
+        if (!freeList) throw bad_alloc();
+        Node* block = freeList;
+        freeList = freeList->nextFree;
+        return reinterpret_cast<T*>(block);
+    }
+    void deallocate(T* ptr) {
+        Node* block = reinterpret_cast<Node*>(ptr);
+        block->nextFree = freeList;
+        freeList = block;
+    }
+};
+
+struct Point { int x, y; };
+
+int main() {
+    MemoryPool<Point, 5> pool;
+    Point* p1 = pool.allocate();
+    p1->x = 10; p1->y = 20;
+    cout << "Point 1: (" << p1->x << ", " << p1->y << ")" << endl;
+    pool.deallocate(p1);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'union Node { T element; Node* nextFree; };', constructType: 'Variable & Initializer', title: 'Free-List Union Node', explanation: 'Uses a union to overlay element storage with free-list pointer. When allocated, holds `T element`; when free, holds `Node* nextFree`.', keyDetails: [{ variableOrConstruct: 'union Node', role: 'Memory overlay block', whyThisWay: 'Achieves zero memory overhead for free-list pointer' }] },
+          { lineNum: 2, codeSnippet: 'Node* block = freeList; freeList = freeList->nextFree; return reinterpret_cast<T*>(block);', constructType: 'Function Signature', title: 'O(1) Pool Allocation', explanation: 'Pops first block from free-list in constant O(1) time.', keyDetails: [{ variableOrConstruct: 'freeList pop', role: 'O(1) allocation', whyThisWay: 'Avoids OS heap allocation overhead' }] },
+          { lineNum: 3, codeSnippet: 'Node* block = reinterpret_cast<Node*>(ptr); block->nextFree = freeList; freeList = block;', constructType: 'Function Signature', title: 'O(1) Pool Deallocation', explanation: 'Pushes deallocated block back onto free-list in constant O(1) time.', keyDetails: [{ variableOrConstruct: 'freeList push', role: 'O(1) deallocation', whyThisWay: 'Recycles memory block instantly without fragmentation' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Custom Arena / Region-Based Memory Allocator", category: "Arena Allocator",
+        description: "Implements a bump-pointer arena allocator that allocates memory rapidly and resets all memory at once.",
+        prosCons: "Pros: Ultra-fast O(1) bump pointer allocation, bulk reset. Cons: Individual deallocations not supported.",
+        timeComplexity: "O(1) alloc, O(1) bulk reset", spaceComplexity: "O(ArenaSize)", isFree: false,
+        code: `// 65. Memory - Approach 6: Arena Allocator
+#include <iostream>
+#include <cstdint>
+#include <cstddef>
+using namespace std;
+
+class ArenaAllocator {
+    char* buffer;
+    size_t capacity;
+    size_t offset;
+public:
+    ArenaAllocator(size_t cap) : capacity(cap), offset(0) {
+        buffer = new char[capacity];
+    }
+    ~ArenaAllocator() { delete[] buffer; }
+
+    void* allocate(size_t bytes, size_t alignment = alignof(max_align_t)) {
+        size_t current = reinterpret_cast<size_t>(buffer + offset);
+        size_t padding = (alignment - (current % alignment)) % alignment;
+        if (offset + padding + bytes > capacity) throw bad_alloc();
+        offset += padding;
+        void* ptr = buffer + offset;
+        offset += bytes;
+        return ptr;
+    }
+    void reset() { offset = 0; } // Bulk deallocation in O(1)!
+};
+
+int main() {
+    ArenaAllocator arena(1024);
+    int* num = new (arena.allocate(sizeof(int))) int(42);
+    double* dbl = new (arena.allocate(sizeof(double))) double(3.14159);
+
+    cout << "Arena Int: " << *num << ", Double: " << *dbl << endl;
+    arena.reset(); // Instant clear!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'size_t padding = (alignment - (current % alignment)) % alignment;', constructType: 'Variable & Initializer', title: 'Alignment Padding Calculation', explanation: 'Computes necessary byte padding to ensure returned address satisfies alignment constraints.', keyDetails: [{ variableOrConstruct: 'padding', role: 'Alignment padding', whyThisWay: 'Prevents misaligned memory access CPU crashes' }] },
+          { lineNum: 2, codeSnippet: 'void* ptr = buffer + offset; offset += bytes;', constructType: 'Variable & Initializer', title: 'O(1) Bump Pointer Allocation', explanation: 'Advances internal offset pointer forward by requested byte count.', keyDetails: [{ variableOrConstruct: 'offset += bytes', role: 'Bump allocation', whyThisWay: 'Fastest possible memory allocation method' }] },
+          { lineNum: 3, codeSnippet: 'void reset() { offset = 0; }', constructType: 'Function Signature', title: 'O(1) Bulk Deallocation Reset', explanation: 'Resets offset to 0, instantly freeing all allocated arena memory at once.', keyDetails: [{ variableOrConstruct: 'offset = 0', role: 'Bulk reset', whyThisWay: 'Frees entire allocation region in O(1) time' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Aligned Heap Allocation (std::aligned_alloc)", category: "Aligned Allocation",
+        description: "Allocates heap memory aligned to custom byte boundaries (e.g. 64-byte alignment for SIMD/cache lines).",
+        prosCons: "Pros: Guarantees cache line and SIMD alignment. Cons: Size must be a multiple of alignment.",
+        timeComplexity: "O(1)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 65. Memory - Approach 7: Aligned Allocation
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+
+int main() {
+    size_t alignment = 64; // 64-byte cache line alignment
+    size_t size = 256;      // Must be multiple of alignment
+
+    #if defined(_MSC_VER)
+    int* ptr = static_cast<int*>(_aligned_malloc(size, alignment));
+    #else
+    int* ptr = static_cast<int*>(aligned_alloc(alignment, size));
+    #endif
+
+    if (ptr) {
+        ptr[0] = 100;
+        cout << "Pointer Address: " << ptr << endl;
+        cout << "Is 64-byte aligned: " << (reinterpret_cast<size_t>(ptr) % alignment == 0 ? "Yes" : "No") << endl;
+
+        #if defined(_MSC_VER)
+        _aligned_free(ptr);
+        #else
+        free(ptr);
+        #endif
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'size_t alignment = 64;', constructType: 'Variable & Initializer', title: '64-Byte Cache Alignment Specifier', explanation: 'Specifies 64-byte alignment corresponding to modern CPU cache line boundaries.', keyDetails: [{ variableOrConstruct: 'alignment = 64', role: 'Alignment requirement', whyThisWay: 'Optimizes SIMD vector instructions and prevents false sharing' }] },
+          { lineNum: 2, codeSnippet: 'reinterpret_cast<size_t>(ptr) % alignment == 0', constructType: 'Condition & Branch', title: 'Alignment Verification Check', explanation: 'Validates that returned memory address is a strict multiple of 64.', keyDetails: [{ variableOrConstruct: 'address % 64 == 0', role: 'Alignment check', whyThisWay: 'Confirms pointer meets alignment contract' }] },
+          { lineNum: 3, codeSnippet: 'free(ptr);', constructType: 'Return / Cleanup', title: 'Aligned Memory Cleanup', explanation: 'Frees aligned memory buffer.', keyDetails: [{ variableOrConstruct: 'free(ptr)', role: 'Deallocation', whyThisWay: 'Cleans up allocated aligned memory' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Overloading Class-Specific operator new & operator delete", category: "Custom Operator Overload",
+        description: "Overloads class-specific `operator new` and `operator delete` to intercept and customize allocation.",
+        prosCons: "Pros: Class-level custom memory control. Cons: Global heap allocation intercept complexity.",
+        timeComplexity: "O(1)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 65. Memory - Approach 8: Class Operator New Overload
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+
+class CustomNode {
+public:
+    int data;
+    CustomNode(int d) : data(d) { cout << "CustomNode ctor." << endl; }
+    ~CustomNode() { cout << "CustomNode dtor." << endl; }
+
+    void* operator new(size_t size) {
+        cout << "Custom operator new allocated " << size << " bytes." << endl;
+        void* p = malloc(size);
+        if (!p) throw bad_alloc();
+        return p;
+    }
+
+    void operator delete(void* p) noexcept {
+        cout << "Custom operator delete freed memory." << endl;
+        free(p);
+    }
+};
+
+int main() {
+    CustomNode* node = new CustomNode(42);
+    cout << "Node data: " << node->data << endl;
+    delete node; // Triggers custom operator delete!
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void* operator new(size_t size) { ... void* p = malloc(size); return p; }', constructType: 'Function Signature', title: 'Class-Specific operator new Overload', explanation: 'Intercepts scalar `new CustomNode` requests to provide custom memory allocation logic.', keyDetails: [{ variableOrConstruct: 'operator new(size_t)', role: 'Custom memory allocator', whyThisWay: 'Customizes memory allocation for CustomNode instances' }] },
+          { lineNum: 2, codeSnippet: 'void operator delete(void* p) noexcept { ... free(p); }', constructType: 'Function Signature', title: 'Class-Specific operator delete Overload', explanation: 'Intercepts scalar `delete node` requests to provide custom deallocation logic.', keyDetails: [{ variableOrConstruct: 'operator delete(void*)', role: 'Custom memory deallocator', whyThisWay: 'Customizes memory deallocation for CustomNode instances' }] },
+          { lineNum: 3, codeSnippet: 'CustomNode* node = new CustomNode(42); delete node;', constructType: 'Variable & Initializer', title: 'Custom New & Delete Execution', explanation: 'Uses class-specific overloads automatically when creating/deleting CustomNode instances.', keyDetails: [{ variableOrConstruct: 'new / delete', role: 'Overloaded invocation', whyThisWay: 'Seamless OOP syntax with custom memory backend' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Custom Reallocating Dynamic Array Wrapper", category: "Raw Pointer Array",
+        description: "Implements a custom dynamic vector-like array using raw pointers, `new[]`, and capacity reallocations.",
+        prosCons: "Pros: Full visibility into dynamic array reallocation. Cons: Manual Rule of 3/5 implementation required.",
+        timeComplexity: "O(1) amortized push", spaceComplexity: "O(Capacity)", isFree: false,
+        code: `// 65. Memory - Approach 9: Raw Pointer Dynamic Array
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+class RawVector {
+    int* data;
+    size_t sz;
+    size_t cap;
+
+    void reallocate(size_t newCap) {
+        int* newBlock = new int[newCap];
+        for (size_t i = 0; i < sz; i++) newBlock[i] = data[i];
+        delete[] data;
+        data = newBlock;
+        cap = newCap;
+    }
+public:
+    RawVector() : data(nullptr), sz(0), cap(0) {}
+    ~RawVector() { delete[] data; }
+
+    void pushBack(int val) {
+        if (sz == cap) {
+            reallocate(cap == 0 ? 2 : cap * 2);
+        }
+        data[sz++] = val;
+    }
+    int at(size_t idx) const { return data[idx]; }
+    size_t size() const { return sz; }
+};
+
+int main() {
+    RawVector vec;
+    for (int i = 1; i <= 5; i++) vec.pushBack(i * 10);
+    cout << "RawVector elements: ";
+    for (size_t i = 0; i < vec.size(); i++) cout << vec.at(i) << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void reallocate(size_t newCap) { int* newBlock = new int[newCap]; ... delete[] data; }', constructType: 'Function Signature', title: 'Dynamic Capacity Reallocation', explanation: 'Allocates new larger array block, copies elements over, and frees old array block using `delete[]`.', keyDetails: [{ variableOrConstruct: 'reallocate()', role: 'Array capacity expansion', whyThisWay: 'Doubles capacity when vector becomes full' }] },
+          { lineNum: 2, codeSnippet: 'if (sz == cap) reallocate(cap == 0 ? 2 : cap * 2);', constructType: 'Condition & Branch', title: 'Capacity Growth Trigger', explanation: 'Triggers geometric growth (doubling capacity) when size equals current capacity.', keyDetails: [{ variableOrConstruct: 'cap * 2', role: 'Geometric growth factor', whyThisWay: 'Guarantees O(1) amortized push_back time' }] },
+          { lineNum: 3, codeSnippet: '~RawVector() { delete[] data; }', constructType: 'Return / Cleanup', title: 'RAII Destructor Array Cleanup', explanation: 'Destructor frees heap array using `delete[]` when RawVector goes out of scope.', keyDetails: [{ variableOrConstruct: 'delete[] data', role: 'RAII cleanup', whyThisWay: 'Prevents memory leaks when dynamic array is destroyed' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Memory Leak Tracker Wrapper", category: "Memory Debugging",
+        description: "Tracks total active heap allocations and detects memory leaks upon application exit.",
+        prosCons: "Pros: Detects memory leaks during development. Cons: Global tracking atomic counter overhead.",
+        timeComplexity: "O(1) overhead", spaceComplexity: "O(1)", isFree: false,
+        code: `// 65. Memory - Approach 10: Memory Leak Tracker
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+
+static size_t totalAllocated = 0;
+static size_t totalFreed = 0;
+
+void* operator new(size_t size) {
+    totalAllocated += size;
+    void* p = malloc(size);
+    if (!p) throw bad_alloc();
+    return p;
+}
+
+void operator delete(void* p, size_t size) noexcept {
+    totalFreed += size;
+    free(p);
+}
+
+void reportMemoryLeaks() {
+    cout << "=== Memory Report ===\n";
+    cout << "Total Allocated: " << totalAllocated << " bytes\n";
+    cout << "Total Freed:     " << totalFreed << " bytes\n";
+    if (totalAllocated == totalFreed) {
+        cout << "STATUS: No Memory Leaks Detected!\n";
+    } else {
+        cout << "WARNING: " << (totalAllocated - totalFreed) << " bytes LEAKED!\n";
+    }
+}
+
+int main() {
+    int* a = new int(10);
+    delete a;
+
+    int* leaked = new int(20); // Intentionally leaked for demonstration!
+    (void)leaked; // Suppress unused variable warning
+
+    reportMemoryLeaks();
+    delete leaked; // Clean up demonstration leak
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void* operator new(size_t size) { totalAllocated += size; ... }', constructType: 'Function Signature', title: 'Global operator new Tracker', explanation: 'Overloads global `operator new` to record total bytes allocated.', keyDetails: [{ variableOrConstruct: 'totalAllocated += size', role: 'Allocation metric tracker', whyThisWay: 'Monitors global heap memory allocations' }] },
+          { lineNum: 2, codeSnippet: 'void operator delete(void* p, size_t size) noexcept { totalFreed += size; ... }', constructType: 'Function Signature', title: 'Global operator delete Tracker', explanation: 'Overloads global sized `operator delete` to record total bytes freed.', keyDetails: [{ variableOrConstruct: 'totalFreed += size', role: 'Deallocation metric tracker', whyThisWay: 'Monitors global heap memory deallocations' }] },
+          { lineNum: 3, codeSnippet: 'if (totalAllocated == totalFreed) { ... }', constructType: 'Condition & Branch', title: 'Memory Leak Check Verification', explanation: 'Compares total allocated bytes against total freed bytes to detect leaks.', keyDetails: [{ variableOrConstruct: 'totalAllocated == totalFreed', role: 'Leak detection check', whyThisWay: 'Confirms all allocated heap memory was properly deallocated' }] }
+        ]
+      }
+    ],
+    traceKey: "smart_ptr"
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -19413,6 +21656,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "med_binary_search") return getProblem58Details();
   if (id === "med_quick_sort") return getProblem59Details();
   if (id === "med_merge_sort") return getProblem60Details();
+  if (id === "med_dp_1d") return getProblem61Details();
+  if (id === "med_dp_knapsack") return getProblem62Details();
+  if (id === "med_backtracking") return getProblem63Details();
+  if (id === "med_bit_manipulation") return getProblem64Details();
+  if (id === "med_custom_alloc") return getProblem65Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
