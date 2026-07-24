@@ -652,6 +652,111 @@ export function getChallengeDetails(id: string): ChallengeDetails {
       companies: ["Google", "Microsoft", "Goldman Sachs", "JPMorgan", "Qualcomm"],
       acceptanceRate: "71.6%",
       totalAccepted: "3,500,000"
+    },
+    hard_queens: {
+      title: "N-Queens Solver",
+      objective: "Place n queens on an n x n chessboard such that no two queens attack each other. Return the 0-based column indices of queens placed in each row [0..n-1] for the first valid configuration found.",
+      description: "A queen can attack horizontally, vertically, and diagonally. Use backtracking to place queens row by row from row 0 to row n-1. Maintain safety checks for column conflicts (board[i] == col) and diagonal conflicts (abs(board[i] - col) == abs(i - row)).",
+      inputDesc: "Line 1: a single integer n (1 <= n <= 9), representing board dimensions.",
+      outputDesc: "N space-separated integers: board[0], board[1], ..., board[n-1], where board[r] is the column index of the queen in row r.",
+      takeaways: [
+        "Backtracking systematically prunes illegal search tree branches early",
+        "Diagonal safety check abs(c1 - c2) == abs(r1 - r2) verifies main & anti-diagonals",
+        "State space is O(N!), bitmask optimization achieves maximum solver speed"
+      ],
+      examples: [
+        { id: 1, input: "n = 4", output: "[1, 3, 0, 2]", explanation: "Row 0 -> col 1, Row 1 -> col 3, Row 2 -> col 0, Row 3 -> col 2. No queens attack." },
+        { id: 2, input: "n = 1", output: "[0]", explanation: "Single 1x1 board with 1 queen placed at (0, 0)." },
+        { id: 3, input: "n = 8", output: "[0, 4, 7, 5, 2, 6, 1, 3]", explanation: "Standard 8-Queens puzzle first solution configuration." }
+      ],
+      constraints: [
+        "1 <= n <= 9",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Google", "Meta", "Amazon", "Uber", "Oracle"],
+      acceptanceRate: "68.4%",
+      totalAccepted: "950,000"
+    },
+    hard_mergelists: {
+      title: "Merge K Sorted Lists",
+      objective: "You are given an array of k linked-lists, each sorted in ascending order. Merge all the linked-lists into one sorted linked-list and return its head.",
+      description: "Use a Min-Heap (priority queue) or Divide-and-Conquer pairing algorithm. In Min-Heap approach, push head nodes into heap, extract smallest, append to result list, and push next node until heap is empty. Runtime is O(N log k).",
+      inputDesc: "Line 1: k (number of sorted lists). Following k lines: list length followed by space-separated elements.",
+      outputDesc: "Space-separated integers of the unified merged sorted linked list.",
+      takeaways: [
+        "Min-Heap / Priority Queue achieves optimal O(N log k) time complexity where N is total nodes",
+        "Divide & conquer pairing achieves O(N log k) time with O(1) auxiliary space",
+        "Edge cases: k = 0, empty sublists, duplicate values across lists"
+      ],
+      examples: [
+        { id: 1, input: "lists = [[1,4,5],[1,3,4],[2,6]]", output: "[1,1,2,3,4,4,5,6]", explanation: "All 3 sorted lists merged into a single sorted chain." },
+        { id: 2, input: "lists = []", output: "[]", explanation: "No lists provided. Return nullptr." },
+        { id: 3, input: "lists = [[]]", output: "[]", explanation: "Array contains 1 empty list. Return nullptr." }
+      ],
+      constraints: [
+        "0 <= k <= 10^4",
+        "0 <= total nodes <= 10^5",
+        "-10^4 <= Node.val <= 10^4",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Meta", "Amazon", "Google", "Microsoft", "ByteDance"],
+      acceptanceRate: "53.1%",
+      totalAccepted: "1,850,000"
+    },
+    hard_lrucache: {
+      title: "LRU Cache Solver",
+      objective: "Design a data structure that follows the constraints of a Least Recently Used (LRU) cache with O(1) average time complexity for both get and put operations.",
+      description: "Combine a Hash Map (unordered_map) with a Doubly Linked List (list). Hash map stores key to node iterator for O(1) lookups. Doubly linked list maintains access order: most recently used items at front, least recently used at back. Evict back element when capacity is exceeded.",
+      inputDesc: "Line 1: capacity. Following lines: operation commands PUT key val or GET key.",
+      outputDesc: "Results of GET operations (-1 if key not found, value if key exists).",
+      takeaways: [
+        "Doubly linked list allows O(1) node deletion and insertion at head",
+        "Hash map iterator caching enables direct O(1) node access without traversal",
+        "Eviction policy pops from list tail and erases key from map when size > capacity"
+      ],
+      examples: [
+        { id: 1, input: "LRUCache(2); put(1,10); put(2,20); get(1); put(3,30); get(2);", output: "get(1)->10, get(2)->-1", explanation: "put(3,30) evicts key 2 because key 1 was recently accessed by get(1)." },
+        { id: 2, input: "LRUCache(1); put(2,1); get(2); put(3,2); get(2);", output: "get(2)->1, get(2)->-1", explanation: "Capacity is 1. put(3,2) evicts key 2." }
+      ],
+      constraints: [
+        "1 <= capacity <= 3000",
+        "0 <= key <= 10^4",
+        "0 <= value <= 10^5",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Amazon", "Google", "Microsoft", "Apple", "Bloomberg"],
+      acceptanceRate: "43.5%",
+      totalAccepted: "1,600,000"
+    },
+    hard_longestvalid: {
+      title: "Longest Balanced Parentheses",
+      objective: "Given a string s containing just the characters '(' and ')', return the length of the longest valid (well-formed) parentheses substring.",
+      description: "Use a stack initialized with -1 to serve as a boundary base index. For each char at index i: if '(', push i. If ')', pop top. If stack becomes empty, push i as new base boundary. Otherwise, calculate max length as max(maxLen, i - stack.top()).",
+      inputDesc: "Line 1: a single string s consisting of '(' and ')' characters.",
+      outputDesc: "A single integer representing the length of the longest valid parentheses substring.",
+      takeaways: [
+        "Base index -1 in stack handles valid substrings starting at index 0",
+        "Pushing current index on empty stack resets boundary after invalid closing bracket",
+        "Runs in single pass O(N) time with O(N) stack space; O(1) space alternative uses left/right counters"
+      ],
+      examples: [
+        { id: 1, input: "s = \")(()())\"", output: "6", explanation: "The longest valid parentheses substring is \"(()())\" of length 6." },
+        { id: 2, input: "s = \"(()\"", output: "2", explanation: "The longest valid parentheses substring is \"()\" of length 2." },
+        { id: 3, input: "s = \")()())\"", output: "4", explanation: "The longest valid parentheses substring is \"()()\" of length 4." },
+        { id: 4, input: "s = \"\"", output: "0", explanation: "Empty string has length 0." }
+      ],
+      constraints: [
+        "0 <= s.length <= 3 * 10^4",
+        "s[i] is '(' or ')'",
+        "Time Limit: 1.0s",
+        "Memory Limit: 256MB"
+      ],
+      companies: ["Meta", "Google", "Amazon", "Microsoft", "ByteDance"],
+      acceptanceRate: "34.7%",
+      totalAccepted: "890,000"
     }
   };
 
