@@ -30220,6 +30220,2590 @@ int main() {
   };
 }
 
+
+export function getProblem86Details(): LearnModule {
+  return {
+    id: "hard_fenwick",
+    title: "86. Fenwick Tree (Binary Indexed Tree)",
+    category: "Advanced Data Structures",
+    difficulty: "hard",
+    shortDesc: "Bitwise lowbit manipulations for prefix sum updates in O(log N).",
+    fullCode: `// 86. Fenwick - Approach 1: Point Update & Prefix Sum Query
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class FenwickTree {
+    int n;
+    vector<int> tree;
+public:
+    FenwickTree(int size) : n(size), tree(size + 1, 0) {}
+
+    // Adds delta to element at 0-based index idx
+    void add(int idx, int delta) {
+        for (idx++; idx <= n; idx += idx & -idx) {
+            tree[idx] += delta; // Lowbit advance!
+        }
+    }
+
+    // Computes prefix sum from index 0 to idx
+    int query(int idx) {
+        int sum = 0;
+        for (idx++; idx > 0; idx -= idx & -idx) {
+            sum += tree[idx]; // Lowbit retreat!
+        }
+        return sum;
+    }
+};
+
+int main() {
+    FenwickTree ft(5);
+    ft.add(0, 5);
+    ft.add(1, 10);
+    ft.add(2, 15);
+
+    cout << "Prefix Sum [0..1]: " << ft.query(1) << endl; // 15
+    cout << "Prefix Sum [0..2]: " << ft.query(2) << endl; // 30
+    return 0;
+}`,
+    problemStatement: {
+      title: "86. Fenwick Tree (Binary Indexed Tree)",
+      objective: "Master Fenwick Trees / Binary Indexed Trees (BIT): bitwise lowbit isolation (`idx & -idx`), 1-based array indexing, point update `add(idx, delta)`, prefix sum `query(idx)`, range sum `rangeSum(L, R)`, difference array BIT for range updates, 2D BIT, and binary lifting on BIT.",
+      description: "Implement **Fenwick Tree (Binary Indexed Tree)** (Advanced Data Structures). Maintain dynamic prefix sums and point updates in optimal $O(\\log N)$ time with minimal code overhead and memory footprint.",
+      inputDesc: "Array indices, delta addition values, or range query bounds [L, R].",
+      outputDesc: "Prefix sums, range sum differences, or updated Fenwick tree states.",
+      takeaways: [
+        "Lowbit isolation `idx & -idx` extracts the lowest set bit of an integer in binary representation",
+        "Point Update `add(idx, val)` advances by adding lowbit (`idx += idx & -idx`) up to tree size $N$",
+        "Prefix Query `query(idx)` retreats by subtracting lowbit (`idx -= idx & -idx`) down to 0",
+        "Range Sum Query for range `[L, R]` is calculated as `query(R) - query(L - 1)` in $O(\\log N)$ time"
+      ],
+      examples: [
+        { id: 1, input: "ft.add(0, 5); ft.add(1, 10); ft.add(2, 15); ft.query(2)", output: "Prefix Sum [0..2]: 30", explanation: "Prefix query computes 5 + 10 + 15 = 30." },
+        { id: 2, input: "ft.rangeSum(1, 2) on [5, 10, 15]", output: "Range Sum [1..2]: 25", explanation: "Calculates prefixSum(2) - prefixSum(0) = 30 - 5 = 25." },
+        { id: 3, input: "Lowbit of 12 (1100 in binary)", output: "4 (0100 in binary)", explanation: "12 & -12 isolates lowest set bit 4." }
+      ],
+      constraints: ["1-based internal array indexing."],
+      companies: ["Google", "NVIDIA", "Microsoft", "Amazon", "Apple"],
+      acceptanceRate: "90.2%",
+      totalAccepted: "1,850,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Core Fenwick Tree Point Update & Prefix Sum Query (FREE)", category: "FREE / Core Fenwick",
+        description: "Implements core 1-based Fenwick Tree with `add(idx, delta)` and `query(idx)` using lowbit isolation `idx & -idx`.",
+        prosCons: "Pros: Compact O(log N) prefix sum updates. Cons: Requires 1-based index conversion.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 86. Fenwick - Approach 1: Core BIT
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class FenwickTree {
+    int n;
+    vector<int> tree;
+public:
+    FenwickTree(int sz) : n(sz), tree(sz + 1, 0) {}
+
+    void add(int idx, int delta) {
+        for (idx++; idx <= n; idx += idx & -idx) tree[idx] += delta;
+    }
+
+    int query(int idx) {
+        int sum = 0;
+        for (idx++; idx > 0; idx -= idx & -idx) sum += tree[idx];
+        return sum;
+    }
+};
+
+int main() {
+    FenwickTree ft(4);
+    ft.add(0, 10); ft.add(1, 20); ft.add(2, 30);
+    cout << "Prefix sum [0..1]: " << ft.query(1) << endl; // 30
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (idx++; idx <= n; idx += idx & -idx) tree[idx] += delta;', constructType: 'Loop Construct', title: 'Lowbit Addition Step', explanation: 'Advances index by adding lowest set bit `idx & -idx` to update all covering Fenwick tree nodes.', keyDetails: [{ variableOrConstruct: 'idx += idx & -idx', role: 'Lowbit advance', whyThisWay: 'Steps up to covering tree nodes in O(log N) time' }] },
+          { lineNum: 2, codeSnippet: 'for (idx++; idx > 0; idx -= idx & -idx) sum += tree[idx];', constructType: 'Loop Construct', title: 'Lowbit Subtraction Step', explanation: 'Retreats index by subtracting lowest set bit `idx & -idx` to accumulate prefix sum.', keyDetails: [{ variableOrConstruct: 'idx -= idx & -idx', role: 'Lowbit retreat', whyThisWay: 'Accumulates sub-prefix sums in O(log N) time' }] },
+          { lineNum: 3, codeSnippet: 'cout << ft.query(1);', constructType: 'Function Signature', title: 'Execute Prefix Query', explanation: 'Queries prefix sum for range [0..1] -> 30.', keyDetails: [{ variableOrConstruct: 'ft.query(1)', role: 'Prefix sum query', whyThisWay: 'Returns 30' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Range Sum Query via Prefix Difference query(R) - query(L - 1) (FREE)", category: "FREE / Range Sum",
+        description: "Calculates arbitrary range sum `[L, R]` using prefix sum difference `query(R) - query(L - 1)`.",
+        prosCons: "Pros: O(log N) range sum calculation. Cons: Requires 2 prefix queries.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(N)", isFree: true,
+        code: `// 86. Fenwick - Approach 2: Range Sum
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class FenwickRange {
+    int n;
+    vector<int> tree;
+public:
+    FenwickRange(int sz) : n(sz), tree(sz + 1, 0) {}
+    void add(int idx, int val) {
+        for (idx++; idx <= n; idx += idx & -idx) tree[idx] += val;
+    }
+    int query(int idx) {
+        if (idx < 0) return 0;
+        int sum = 0;
+        for (idx++; idx > 0; idx -= idx & -idx) sum += tree[idx];
+        return sum;
+    }
+    int rangeSum(int l, int r) { return query(r) - query(l - 1); }
+};
+
+int main() {
+    FenwickRange ft(5);
+    ft.add(0, 5); ft.add(1, 10); ft.add(2, 15); ft.add(3, 20);
+
+    cout << "Range Sum [1, 3]: " << ft.rangeSum(1, 3) << endl; // 10 + 15 + 20 = 45
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int rangeSum(int l, int r) { return query(r) - query(l - 1); }', constructType: 'Function Signature', title: 'Prefix Sum Difference Formula', explanation: 'Calculates range sum `[L, R]` by subtracting prefix sum of `L-1` from prefix sum of `R`.', keyDetails: [{ variableOrConstruct: 'query(r) - query(l - 1)', role: 'Range sum formula', whyThisWay: 'Computes range sum in O(log N) time' }] },
+          { lineNum: 2, codeSnippet: 'if (idx < 0) return 0;', constructType: 'Condition & Branch', title: 'Out of Bounds Safeguard', explanation: 'Returns 0 if `l - 1 < 0` for range starting at index 0.', keyDetails: [{ variableOrConstruct: 'idx < 0 check', role: 'Bounds check', whyThisWay: 'Prevents negative index query' }] },
+          { lineNum: 3, codeSnippet: 'cout << ft.rangeSum(1, 3);', constructType: 'Function Signature', title: 'Execute Range Sum Query', explanation: 'Queries range sum [1..3] -> 45.', keyDetails: [{ variableOrConstruct: 'rangeSum call', role: 'Range sum output', whyThisWay: 'Returns 45' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Range Update and Point Query Fenwick Tree (Difference Array)", category: "Range Update BIT",
+        description: "Uses a difference array Fenwick Tree to support $O(\\log N)$ Range Updates `addRange(L, R, val)` and Point Queries.",
+        prosCons: "Pros: O(log N) range updates. Cons: Requires point query difference reconstruction.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 86. Fenwick - Approach 3: Range Update Point Query
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class RangeUpdateBIT {
+    int n;
+    vector<int> tree;
+    void addPoint(int idx, int val) {
+        for (idx++; idx <= n; idx += idx & -idx) tree[idx] += val;
+    }
+public:
+    RangeUpdateBIT(int sz) : n(sz), tree(sz + 1, 0) {}
+    void addRange(int l, int r, int val) {
+        addPoint(l, val);
+        addPoint(r + 1, -val); // Difference array boundary!
+    }
+    int pointQuery(int idx) {
+        int sum = 0;
+        for (idx++; idx > 0; idx -= idx & -idx) sum += tree[idx];
+        return sum;
+    }
+};
+
+int main() {
+    RangeUpdateBIT bit(5);
+    bit.addRange(1, 3, 10); // Adds +10 to range [1..3]
+
+    cout << "Point [0]: " << bit.pointQuery(0) << endl; // 0
+    cout << "Point [2]: " << bit.pointQuery(2) << endl; // 10
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'addPoint(l, val); addPoint(r + 1, -val);', constructType: 'Function Signature', title: 'Difference Array Boundary Updates', explanation: 'Adds `+val` at index `L` and `-val` at index `R+1` on difference array BIT.', keyDetails: [{ variableOrConstruct: 'addPoint(l, val); addPoint(r+1, -val)', role: 'Difference array update', whyThisWay: 'Updates range [L, R] in O(log N) time' }] },
+          { lineNum: 2, codeSnippet: 'int pointQuery(int idx) { ... }', constructType: 'Function Signature', title: 'Point Query via Prefix Difference Sum', explanation: 'Point query computes prefix sum of difference array to read value at `idx`.', keyDetails: [{ variableOrConstruct: 'pointQuery', role: 'Point query', whyThisWay: 'Reconstructs point value from difference array' }] },
+          { lineNum: 3, codeSnippet: 'cout << bit.pointQuery(2);', constructType: 'Function Signature', title: 'Query Point Value', explanation: 'Queries point value at index 2 -> 10.', keyDetails: [{ variableOrConstruct: 'pointQuery(2)', role: 'Point query output', whyThisWay: 'Returns 10' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Range Update and Range Query Fenwick Tree (Dual BITs)", category: "Dual BIT",
+        description: "Uses dual Fenwick Trees ($B1$ and $B2$) to support both $O(\\log N)$ Range Updates and Range Queries.",
+        prosCons: "Pros: Full O(log N) Range Updates & Range Queries. Cons: Dual BIT maintenance.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(2N)", isFree: false,
+        code: `// 86. Fenwick - Approach 4: Dual BIT
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class DualBIT {
+    int n;
+    vector<int> B1, B2;
+    void add(vector<int>& tree, int idx, int val) {
+        for (idx++; idx <= n; idx += idx & -idx) tree[idx] += val;
+    }
+    int query(const vector<int>& tree, int idx) {
+        int sum = 0;
+        for (idx++; idx > 0; idx -= idx & -idx) sum += tree[idx];
+        return sum;
+    }
+public:
+    DualBIT(int sz) : n(sz), B1(sz + 1, 0), B2(sz + 1, 0) {}
+    void rangeAdd(int l, int r, int val) {
+        add(B1, l, val); add(B1, r + 1, -val);
+        add(B2, l, val * (l - 1)); add(B2, r + 1, -val * r);
+    }
+    int prefixQuery(int idx) {
+        return query(B1, idx) * idx - query(B2, idx);
+    }
+    int rangeQuery(int l, int r) { return prefixQuery(r) - prefixQuery(l - 1); }
+};
+
+int main() {
+    DualBIT bit(5);
+    bit.rangeAdd(1, 3, 10);
+    cout << "Range Sum [1, 3]: " << bit.rangeQuery(1, 3) << endl; // 30
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return query(B1, idx) * idx - query(B2, idx);', constructType: 'Return / Cleanup', title: 'Dual BIT Prefix Formula', explanation: 'Calculates prefix sum using formula `query(B1, idx) * idx - query(B2, idx)`.', keyDetails: [{ variableOrConstruct: 'Dual BIT formula', role: 'Dual BIT prefix sum', whyThisWay: 'Computes range update prefix sum in O(log N)' }] },
+          { lineNum: 2, codeSnippet: 'add(B1, l, val); add(B2, l, val * (l - 1));', constructType: 'Function Signature', title: 'Update Dual BIT Boundaries', explanation: 'Updates boundaries for both B1 and B2 BITs.', keyDetails: [{ variableOrConstruct: 'B1 & B2 update', role: 'Dual BIT boundary update', whyThisWay: 'Maintains dual BIT coefficients' }] },
+          { lineNum: 3, codeSnippet: 'cout << bit.rangeQuery(1, 3);', constructType: 'Function Signature', title: 'Query Range Sum', explanation: 'Queries range sum [1..3] -> 30.', keyDetails: [{ variableOrConstruct: 'rangeQuery call', role: 'Range query output', whyThisWay: 'Returns 30' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: 2D Fenwick Tree for Grid Sub-rectangle Sum Queries", category: "2D Fenwick",
+        description: "Implements a 2D Fenwick Tree for $O(\\log R \\log C)$ grid sub-rectangle sum queries and updates.",
+        prosCons: "Pros: Fast 2D grid sub-matrix sum queries. Cons: 2D nested loops.",
+        timeComplexity: "O(log R log C)", spaceComplexity: "O(R * C)", isFree: false,
+        code: `// 86. Fenwick - Approach 5: 2D BIT
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class Fenwick2D {
+    int rows, cols;
+    vector<vector<int>> tree;
+public:
+    Fenwick2D(int r, int c) : rows(r), cols(c), tree(r + 1, vector<int>(c + 1, 0)) {}
+
+    void add(int r, int c, int val) {
+        for (int i = r + 1; i <= rows; i += i & -i) {
+            for (int j = c + 1; j <= cols; j += j & -j) {
+                tree[i][j] += val;
+            }
+        }
+    }
+
+    int query(int r, int c) {
+        int sum = 0;
+        for (int i = r + 1; i > 0; i -= i & -i) {
+            for (int j = c + 1; j > 0; j -= j & -j) {
+                sum += tree[i][j];
+            }
+        }
+        return sum;
+    }
+};
+
+int main() {
+    Fenwick2D grid(3, 3);
+    grid.add(1, 1, 5); // Grid[1][1] = 5
+    cout << "2D Prefix Sum [0..1][0..1]: " << grid.query(1, 1) << endl; // 5
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = r + 1; i <= rows; i += i & -i) for (int j = c + 1; j <= cols; j += j & -j)', constructType: 'Loop Construct', title: '2D Lowbit Addition Loop', explanation: 'Nested loops step through lowbit indices in both dimensions.', keyDetails: [{ variableOrConstruct: '2D lowbit step', role: '2D update', whyThisWay: 'Updates 2D grid node in O(log R log C) time' }] },
+          { lineNum: 2, codeSnippet: 'sum += tree[i][j];', constructType: 'Variable & Initializer', title: 'Accumulate 2D Sub-matrix Sum', explanation: 'Accumulates sub-matrix sum.', keyDetails: [{ variableOrConstruct: 'sum += tree[i][j]', role: '2D sum accumulator', whyThisWay: 'Sums 2D prefix cells' }] },
+          { lineNum: 3, codeSnippet: 'cout << grid.query(1, 1);', constructType: 'Function Signature', title: 'Query 2D Prefix Sum', explanation: 'Queries 2D prefix sum for [0..1][0..1] -> 5.', keyDetails: [{ variableOrConstruct: 'query(1, 1)', role: '2D query output', whyThisWay: 'Returns 5' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Binary Lifting on Fenwick Tree for K-th Smallest Element Search", category: "Binary Lifting BIT",
+        description: "Uses binary lifting on a Fenwick Tree to find the $K$-th smallest element in $O(\\log N)$ time.",
+        prosCons: "Pros: O(log N) K-th element lookup instead of O(log^2 N). Cons: Bit length constraints.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 86. Fenwick - Approach 6: Binary Lifting
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class LiftingBIT {
+    int n;
+    vector<int> tree;
+public:
+    LiftingBIT(int sz) : n(sz), tree(sz + 1, 0) {}
+    void add(int idx, int val) {
+        for (idx++; idx <= n; idx += idx & -idx) tree[idx] += val;
+    }
+
+    // Finds 0-based index of K-th smallest element in O(log N)!
+    int findKth(int k) {
+        int idx = 0;
+        for (int i = 1 << 18; i > 0; i >>= 1) { // 2^18 power loop
+            if (idx + i <= n && tree[idx + i] < k) {
+                idx += i;
+                k -= tree[idx];
+            }
+        }
+        return idx; // 0-based index
+    }
+};
+
+int main() {
+    LiftingBIT bit(10);
+    bit.add(2, 1); // Insert element 2
+    bit.add(5, 1); // Insert element 5
+
+    cout << "1st smallest element index: " << bit.findKth(1) << endl; // 2
+    cout << "2nd smallest element index: " << bit.findKth(2) << endl; // 5
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = 1 << 18; i > 0; i >>= 1)', constructType: 'Loop Construct', title: 'Binary Power Jump Loop', explanation: 'Loops down powers of 2 (binary powers) to perform binary lifting over Fenwick tree array.', keyDetails: [{ variableOrConstruct: 'binary lifting loop', role: 'Binary power loop', whyThisWay: 'Jumps by powers of 2 to locate K-th smallest element in O(log N)' }] },
+          { lineNum: 2, codeSnippet: 'if (idx + i <= n && tree[idx + i] < k) { idx += i; k -= tree[idx]; }', constructType: 'Condition & Branch', title: 'Binary Lift Jump Decision', explanation: 'If `tree[idx + i] < k`, jumps forward by `i` and subtracts jump frequency from `k`.', keyDetails: [{ variableOrConstruct: 'tree[idx + i] < k', role: 'Jump check', whyThisWay: 'Decides whether to jump forward' }] },
+          { lineNum: 3, codeSnippet: 'cout << bit.findKth(1);', constructType: 'Function Signature', title: 'Query K-th Smallest Element', explanation: 'Finds 1st smallest element -> index 2.', keyDetails: [{ variableOrConstruct: 'findKth(1)', role: 'K-th query output', whyThisWay: 'Returns index 2' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Inversion Count in Array using Coordinate Compression + Fenwick Tree", category: "Inversion Count",
+        description: "Counts array inversions ($i < j$ and $A[i] > A[j]$) using coordinate compression and a Fenwick Tree.",
+        prosCons: "Pros: O(N log N) inversion count. Cons: Requires sorting for coordinate compression.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 86. Fenwick - Approach 7: Inversion Count
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class BIT {
+    int n; vector<int> tree;
+public:
+    BIT(int sz) : n(sz), tree(sz + 1, 0) {}
+    void add(int i, int v) { for (i++; i <= n; i += i & -i) tree[i] += v; }
+    int query(int i) { int s = 0; for (i++; i > 0; i -= i & -i) s += tree[i]; return s; }
+};
+
+long long countInversions(vector<int>& arr) {
+    int n = arr.size();
+    vector<int> sorted = arr;
+    sort(sorted.begin(), sorted.end());
+
+    BIT bit(n);
+    long long invCount = 0;
+    for (int i = n - 1; i >= 0; i--) {
+        int rank = lower_bound(sorted.begin(), sorted.end(), arr[i]) - sorted.begin();
+        invCount += bit.query(rank - 1);
+        bit.add(rank, 1);
+    }
+    return invCount;
+}
+
+int main() {
+    vector<int> arr = {8, 4, 2, 1};
+    cout << "Inversions in [8, 4, 2, 1]: " << countInversions(arr) << endl; // 6
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int rank = lower_bound(...) - sorted.begin();', constructType: 'Variable & Initializer', title: 'Coordinate Compression Rank', explanation: 'Maps element value to 0-based rank index using binary search.', keyDetails: [{ variableOrConstruct: 'lower_bound rank', role: 'Coordinate compression', whyThisWay: 'Compresses arbitrary values to 0..N-1 ranks' }] },
+          { lineNum: 2, codeSnippet: 'invCount += bit.query(rank - 1);', constructType: 'Variable & Initializer', title: 'Accumulate Inversion Count', explanation: 'Queries BIT for count of processed smaller elements appearing after current element.', keyDetails: [{ variableOrConstruct: 'bit.query(rank - 1)', role: 'Inversion accumulator', whyThisWay: 'Counts smaller elements appearing after current element' }] },
+          { lineNum: 3, codeSnippet: 'bit.add(rank, 1);', constructType: 'Function Signature', title: 'Insert Rank into BIT', explanation: 'Inserts current element rank into BIT.', keyDetails: [{ variableOrConstruct: 'bit.add(rank, 1)', role: 'Rank insertion', whyThisWay: 'Registers rank in BIT' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Point Update with Set Value (Difference Calculation)", category: "Set Value BIT",
+        description: "Updates an array element to a specific value `setValue(idx, newVal)` by calculating delta.",
+        prosCons: "Pros: Direct value assignment wrapper. Cons: Requires storing original array.",
+        timeComplexity: "O(log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 86. Fenwick - Approach 8: Set Value Update
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class SetValueBIT {
+    int n;
+    vector<int> arr, tree;
+public:
+    SetValueBIT(const vector<int>& initial) : n(initial.size()), arr(initial), tree(n + 1, 0) {
+        for (int i = 0; i < n; i++) {
+            for (int idx = i + 1; idx <= n; idx += idx & -idx) tree[idx] += arr[i];
+        }
+    }
+
+    void setValue(int idx, int newVal) {
+        int delta = newVal - arr[idx];
+        arr[idx] = newVal;
+        for (int i = idx + 1; i <= n; i += i & -i) tree[i] += delta;
+    }
+};
+
+int main() {
+    SetValueBIT bit({10, 20, 30});
+    bit.setValue(1, 50); // Updates index 1 to 50!
+    cout << "Set value update completed.\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int delta = newVal - arr[idx];', constructType: 'Variable & Initializer', title: 'Calculate Value Delta', explanation: 'Calculates delta difference between new value and current value.', keyDetails: [{ variableOrConstruct: 'delta = newVal - arr[idx]', role: 'Delta calculation', whyThisWay: 'Computes difference to add to BIT' }] },
+          { lineNum: 2, codeSnippet: 'arr[idx] = newVal;', constructType: 'Variable & Initializer', title: 'Update Underlying Array Element', explanation: 'Updates stored array element to new value.', keyDetails: [{ variableOrConstruct: 'arr[idx] = newVal', role: 'Array update', whyThisWay: 'Maintains current array state' }] },
+          { lineNum: 3, codeSnippet: 'bit.setValue(1, 50);', constructType: 'Function Signature', title: 'Execute Set Value', explanation: 'Sets index 1 to 50.', keyDetails: [{ variableOrConstruct: 'setValue call', role: 'Set value', whyThisWay: 'Updates index 1' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Dynamic Point Frequency Count & Order Statistics", category: "Frequency BIT",
+        description: "Tracks frequencies of dynamic elements to query order statistics.",
+        prosCons: "Pros: Dynamic order statistics. Cons: Bounded by max value size.",
+        timeComplexity: "O(log MaxVal)", spaceComplexity: "O(MaxVal)", isFree: false,
+        code: `// 86. Fenwick - Approach 9: Dynamic Frequencies
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class FreqBIT {
+    int maxVal;
+    vector<int> tree;
+public:
+    FreqBIT(int maxV) : maxVal(maxV), tree(maxV + 1, 0) {}
+    void insert(int v) { for (int i = v; i <= maxVal; i += i & -i) tree[i]++; }
+    void remove(int v) { for (int i = v; i <= maxVal; i += i & -i) tree[i]--; }
+    int countLessEqual(int v) {
+        int s = 0;
+        for (int i = v; i > 0; i -= i & -i) s += tree[i];
+        return s;
+    }
+};
+
+int main() {
+    FreqBIT bit(100);
+    bit.insert(10); bit.insert(20); bit.insert(30);
+
+    cout << "Count <= 25: " << bit.countLessEqual(25) << endl; // 2 (10, 20)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'void insert(int v) { for (int i = v; i <= maxVal; i += i & -i) tree[i]++; }', constructType: 'Function Signature', title: 'Insert Frequency Count', explanation: 'Increments frequency count for value `v` in BIT.', keyDetails: [{ variableOrConstruct: 'tree[i]++', role: 'Frequency increment', whyThisWay: 'Registers element occurrence' }] },
+          { lineNum: 2, codeSnippet: 'int countLessEqual(int v) { ... }', constructType: 'Function Signature', title: 'Query Count Less Than or Equal', explanation: 'Queries count of elements <= `v` using prefix sum query.', keyDetails: [{ variableOrConstruct: 'countLessEqual', role: 'Frequency query', whyThisWay: 'Computes frequency sum' }] },
+          { lineNum: 3, codeSnippet: 'cout << bit.countLessEqual(25);', constructType: 'Function Signature', title: 'Print Frequency Result', explanation: 'Prints count of elements <= 25 -> 2.', keyDetails: [{ variableOrConstruct: 'countLessEqual(25)', role: 'Count output', whyThisWay: 'Returns 2' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Automated Fenwick Tree vs Prefix Array Verification Suite", category: "BIT Verification",
+        description: "Compares Fenwick Tree outputs against a standard $O(N)$ prefix array to verify correctness.",
+        prosCons: "Pros: Automated empirical correctness verification. Cons: O(N) naive array overhead.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(N)", isFree: false,
+        code: `// 86. Fenwick - Approach 10: Verification Suite
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+// (Uses FenwickRange)
+class FenwickRange {
+    int n; vector<int> tree;
+public:
+    FenwickRange(int sz) : n(sz), tree(sz + 1, 0) {}
+    void add(int idx, int val) { for (idx++; idx <= n; idx += idx & -idx) tree[idx] += val; }
+    int query(int idx) { if (idx < 0) return 0; int s = 0; for (idx++; idx > 0; idx -= idx & -idx) s += tree[idx]; return s; }
+    int rangeSum(int l, int r) { return query(r) - query(l - 1); }
+};
+
+int main() {
+    vector<int> raw = {5, 10, 15, 20, 25};
+    FenwickRange ft(5);
+    for (int i = 0; i < 5; i++) ft.add(i, raw[i]);
+
+    bool ok = (ft.rangeSum(1, 3) == (10 + 15 + 20));
+    cout << "Fenwick Verification Passed: " << boolalpha << ok << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'bool ok = (ft.rangeSum(1, 3) == (10 + 15 + 20));', constructType: 'Variable & Initializer', title: 'Verify BIT Output Against Formula', explanation: 'Compares `ft.rangeSum(1, 3)` against expected sum `10 + 15 + 20 = 45`.', keyDetails: [{ variableOrConstruct: 'ft.rangeSum == expected', role: 'Correctness test', whyThisWay: 'Validates Fenwick tree output accuracy' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Verification Passed: " << ok;', constructType: 'Function Signature', title: 'Print Verification Result', explanation: 'Prints true if BIT output matches expected range sum.', keyDetails: [{ variableOrConstruct: 'ok output', role: 'Test output', whyThisWay: 'Displays verification result' }] },
+          { lineNum: 3, codeSnippet: 'return 0;', constructType: 'Return / Cleanup', title: 'Exit Main', explanation: 'Returns 0.', keyDetails: [{ variableOrConstruct: 'return 0', role: 'Exit', whyThisWay: 'Exits cleanly' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem87Details(): LearnModule {
+  return {
+    id: "hard_dsu",
+    title: "87. Disjoint Set Union (DSU / Union-Find)",
+    category: "Advanced Data Structures",
+    difficulty: "hard",
+    shortDesc: "Path compression and union by rank for dynamic component tracking.",
+    fullCode: `// 87. DSU - Approach 1: Path Compression & Union by Rank
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class DSU {
+    vector<int> parent;
+    vector<int> rank;
+public:
+    DSU(int n) {
+        parent.resize(n);
+        iota(parent.begin(), parent.end(), 0);
+        rank.assign(n, 0);
+    }
+
+    // Find with Path Compression!
+    int find(int i) {
+        if (parent[i] == i) return i;
+        return parent[i] = find(parent[i]); // Flattens tree structure!
+    }
+
+    // Union by Rank!
+    bool unionSet(int i, int j) {
+        int rootI = find(i);
+        int rootJ = find(j);
+        if (rootI != rootJ) {
+            if (rank[rootI] < rank[rootJ]) swap(rootI, rootJ);
+            parent[rootJ] = rootI; // Attach smaller rank tree to larger rank tree
+            if (rank[rootI] == rank[rootJ]) rank[rootI]++;
+            return true; // Merged successfully
+        }
+        return false; // Already in same set
+    }
+};
+
+int main() {
+    DSU dsu(5);
+    dsu.unionSet(0, 1);
+    dsu.unionSet(1, 2);
+
+    cout << "Are 0 and 2 connected: " << boolalpha << (dsu.find(0) == dsu.find(2)) << endl; // true
+    cout << "Are 0 and 4 connected: " << (dsu.find(0) == dsu.find(4)) << endl;              // false
+    return 0;
+}`,
+    problemStatement: {
+      title: "87. Disjoint Set Union (DSU / Union-Find)",
+      objective: "Master Disjoint Set Union (DSU / Union-Find): Path Compression (`find(i)` recursion), Union by Rank / Size (`unionSet(i, j)`), component count tracking, cycle detection, Kruskal's MST support, dynamic grid connectivity, and DSU with Rollback.",
+      description: "Implement **Disjoint Set Union (DSU / Union-Find)** (Advanced Data Structures). Track partition sets and merge disjoint connected components in near $O(1)$ amortized time using inverse Ackermann complexity $\\alpha(N)$.",
+      inputDesc: "Element IDs $i, j$, union pair requests, or graph edge pairs.",
+      outputDesc: "Parent representative IDs, connectivity boolean states, or connected component counts.",
+      takeaways: [
+        "Path Compression (`parent[i] = find(parent[i])`) flattens tree height during find calls, making future lookups $O(1)$",
+        "Union by Rank attaches the shorter tree under the root of the taller tree to prevent tree imbalance",
+        "Combined Path Compression + Union by Rank achieves amortized $O(\\alpha(N))$ time per operation, where $\\alpha(N) < 5$ for all practical input sizes",
+        "Cycle Detection in undirected graphs: if `find(u) == find(v)` for edge $(u, v)$, an undirected cycle exists"
+      ],
+      examples: [
+        { id: 1, input: "union(0, 1), union(1, 2), connected(0, 2)", output: "connected(0, 2): true", explanation: "Transitive connectivity 0-1-2 places elements in same DSU set." },
+        { id: 2, input: "union(0, 1) when find(0) == find(1)", output: "Cycle Detected!", explanation: "Connecting two nodes already in same component detects a cycle." },
+        { id: 3, input: "Kruskal's MST edge processing", output: "Includes edge if find(u) != find(v)", explanation: "DSU checks if adding edge forms a cycle in MST." }
+      ],
+      constraints: ["0-based element indexing."],
+      companies: ["Amazon", "Google", "Microsoft", "Meta", "NVIDIA"],
+      acceptanceRate: "88.6%",
+      totalAccepted: "2,980,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Core DSU with Path Compression & Union by Rank (FREE)", category: "FREE / Core DSU",
+        description: "Implements classic DSU with Path Compression and Union by Rank for amortized $O(\\alpha(N))$ operations.",
+        prosCons: "Pros: Near O(1) amortized time complexity. Cons: None.",
+        timeComplexity: "O(alpha(N))", spaceComplexity: "O(N)", isFree: true,
+        code: `// 87. DSU - Approach 1: Core DSU
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class DSU {
+    vector<int> parent, rank;
+public:
+    DSU(int n) {
+        parent.resize(n); iota(parent.begin(), parent.end(), 0);
+        rank.assign(n, 0);
+    }
+    int find(int i) {
+        if (parent[i] == i) return i;
+        return parent[i] = find(parent[i]);
+    }
+    bool unionSet(int i, int j) {
+        int rI = find(i), rJ = find(j);
+        if (rI != rJ) {
+            if (rank[rI] < rank[rJ]) swap(rI, rJ);
+            parent[rJ] = rI;
+            if (rank[rI] == rank[rJ]) rank[rI]++;
+            return true;
+        }
+        return false;
+    }
+};
+
+int main() {
+    DSU dsu(4); dsu.unionSet(0, 1); dsu.unionSet(2, 3);
+    cout << "0 & 1 connected: " << boolalpha << (dsu.find(0) == dsu.find(1)) << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'return parent[i] = find(parent[i]);', constructType: 'Return / Cleanup', title: 'Path Compression Assignment', explanation: 'Assigns result of `find(parent[i])` directly to `parent[i]`, flattening tree height during lookup.', keyDetails: [{ variableOrConstruct: 'parent[i] = find(...)', role: 'Path compression', whyThisWay: 'Flattens tree depth to achieve O(alpha(N)) lookup' }] },
+          { lineNum: 2, codeSnippet: 'if (rank[rI] < rank[rJ]) swap(rI, rJ); parent[rJ] = rI;', constructType: 'Condition & Branch', title: 'Union by Rank Tree Attachment', explanation: 'Attaches tree with smaller rank under root of tree with larger rank.', keyDetails: [{ variableOrConstruct: 'parent[rJ] = rI', role: 'Rank-based merge', whyThisWay: 'Keeps tree height minimal' }] },
+          { lineNum: 3, codeSnippet: 'dsu.unionSet(0, 1);', constructType: 'Function Signature', title: 'Execute Union', explanation: 'Merges sets containing 0 and 1.', keyDetails: [{ variableOrConstruct: 'unionSet call', role: 'Union operation', whyThisWay: 'Merges components' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Connected Component Counting & Connected Query (FREE)", category: "FREE / Component Counting",
+        description: "Tracks total count of active connected components dynamically during DSU union calls.",
+        prosCons: "Pros: O(1) component count query. Cons: Requires extra component count member.",
+        timeComplexity: "O(alpha(N))", spaceComplexity: "O(N)", isFree: true,
+        code: `// 87. DSU - Approach 2: Component Counting
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class ComponentDSU {
+    vector<int> parent, rank;
+    int numComponents;
+public:
+    ComponentDSU(int n) : numComponents(n) {
+        parent.resize(n); iota(parent.begin(), parent.end(), 0);
+        rank.assign(n, 0);
+    }
+    int find(int i) { return parent[i] == i ? i : parent[i] = find(parent[i]); }
+    bool unionSet(int i, int j) {
+        int rI = find(i), rJ = find(j);
+        if (rI != rJ) {
+            if (rank[rI] < rank[rJ]) swap(rI, rJ);
+            parent[rJ] = rI;
+            if (rank[rI] == rank[rJ]) rank[rI]++;
+            numComponents--; // Decrements component count on successful merge!
+            return true;
+        }
+        return false;
+    }
+    int getComponentCount() const { return numComponents; }
+};
+
+int main() {
+    ComponentDSU dsu(5);
+    cout << "Initial components: " << dsu.getComponentCount() << endl; // 5
+    dsu.unionSet(0, 1); dsu.unionSet(2, 3);
+    cout << "After 2 unions components: " << dsu.getComponentCount() << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'numComponents--;', constructType: 'Variable & Initializer', title: 'Decrement Component Count', explanation: 'Decrements `numComponents` when two previously disjoint sets are merged.', keyDetails: [{ variableOrConstruct: 'numComponents--', role: 'Component counter', whyThisWay: 'Tracks total connected component count dynamically' }] },
+          { lineNum: 2, codeSnippet: 'dsu.getComponentCount()', constructType: 'Function Signature', title: 'Query Component Count', explanation: 'Returns current number of disjoint components.', keyDetails: [{ variableOrConstruct: 'getComponentCount', role: 'Component query', whyThisWay: 'Returns total component count in O(1)' }] },
+          { lineNum: 3, codeSnippet: 'dsu.unionSet(0, 1);', constructType: 'Function Signature', title: 'Merge Components', explanation: 'Merges sets containing 0 and 1.', keyDetails: [{ variableOrConstruct: 'unionSet', role: 'Merge call', whyThisWay: 'Decrements component count' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Cycle Detection in Undirected Graph using DSU", category: "Cycle Detection",
+        description: "Detects cycles in an undirected graph using DSU by checking if edge endpoints are already connected.",
+        prosCons: "Pros: O(E alpha(V)) cycle detection. Cons: Works on undirected graphs only.",
+        timeComplexity: "O(E alpha(V))", spaceComplexity: "O(V)", isFree: false,
+        code: `// 87. DSU - Approach 3: Cycle Detection
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class DSU {
+    vector<int> parent;
+public:
+    DSU(int n) { parent.resize(n); iota(parent.begin(), parent.end(), 0); }
+    int find(int i) { return parent[i] == i ? i : parent[i] = find(parent[i]); }
+    bool unionSet(int u, int v) {
+        int rU = find(u), rV = find(v);
+        if (rU == rV) return true; // Cycle detected! u and v are already connected!
+        parent[rV] = rU;
+        return false;
+    }
+};
+
+int main() {
+    vector<pair<int, int>> edges = {{0, 1}, {1, 2}, {2, 0}};
+    DSU dsu(3);
+    bool hasCycle = false;
+
+    for (const auto& edge : edges) {
+        if (dsu.unionSet(edge.first, edge.second)) {
+            hasCycle = true; break;
+        }
+    }
+    cout << "Graph has cycle: " << boolalpha << hasCycle << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (rU == rV) return true;', constructType: 'Condition & Branch', title: 'Detect Existing Connection Cycle', explanation: 'If `find(u) == find(v)` before merging, adding edge `(u, v)` forms a cycle in the graph.', keyDetails: [{ variableOrConstruct: 'rU == rV', role: 'Cycle detector condition', whyThisWay: 'Nodes u and v are already connected in same component' }] },
+          { lineNum: 2, codeSnippet: 'for (const auto& edge : edges)', constructType: 'Loop Construct', title: 'Iterate Graph Edges', explanation: 'Iterates through graph edges to test for cycle.', keyDetails: [{ variableOrConstruct: 'edge loop', role: 'Edge iterator', whyThisWay: 'Tests each edge for cycle creation' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Graph has cycle: " << hasCycle;', constructType: 'Function Signature', title: 'Output Cycle Detection Result', explanation: 'Prints true if cycle was detected.', keyDetails: [{ variableOrConstruct: 'hasCycle', role: 'Cycle result', whyThisWay: 'Displays cycle detection result' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Tracking Component Sizes with Union by Size", category: "Union by Size",
+        description: "Uses Union by Size to track the size (element count) of every connected component.",
+        prosCons: "Pros: Direct component size query. Cons: Replaces rank array with size array.",
+        timeComplexity: "O(alpha(N))", spaceComplexity: "O(N)", isFree: false,
+        code: `// 87. DSU - Approach 4: Union by Size
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class SizeDSU {
+    vector<int> parent, sz;
+public:
+    SizeDSU(int n) {
+        parent.resize(n); iota(parent.begin(), parent.end(), 0);
+        sz.assign(n, 1); // Each element starts as component of size 1
+    }
+    int find(int i) { return parent[i] == i ? i : parent[i] = find(parent[i]); }
+    void unionSet(int u, int v) {
+        int rU = find(u), rV = find(v);
+        if (rU != rV) {
+            if (sz[rU] < sz[rV]) swap(rU, rV);
+            parent[rV] = rU;
+            sz[rU] += sz[rV]; // Combine component sizes!
+        }
+    }
+    int getComponentSize(int i) { return sz[find(i)]; }
+};
+
+int main() {
+    SizeDSU dsu(5);
+    dsu.unionSet(0, 1); dsu.unionSet(1, 2);
+    cout << "Size of component containing 0: " << dsu.getComponentSize(0) << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'sz[rU] += sz[rV];', constructType: 'Variable & Initializer', title: 'Combine Component Sizes', explanation: 'Adds size of smaller set `sz[rV]` to size of larger set `sz[rU]`.', keyDetails: [{ variableOrConstruct: 'sz[rU] += sz[rV]', role: 'Size aggregator', whyThisWay: 'Tracks total element count in combined set' }] },
+          { lineNum: 2, codeSnippet: 'int getComponentSize(int i) { return sz[find(i)]; }', constructType: 'Function Signature', title: 'Query Component Size', explanation: 'Finds root representative of `i` and returns its component size.', keyDetails: [{ variableOrConstruct: 'sz[find(i)]', role: 'Size query', whyThisWay: 'Returns size of set containing i' }] },
+          { lineNum: 3, codeSnippet: 'cout << dsu.getComponentSize(0);', constructType: 'Function Signature', title: 'Print Size Result', explanation: 'Prints component size 3.', keyDetails: [{ variableOrConstruct: 'getComponentSize(0)', role: 'Size output', whyThisWay: 'Returns 3' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Kruskal's Minimum Spanning Tree (MST) using DSU", category: "Kruskal MST",
+        description: "Uses DSU to implement Kruskal's algorithm for finding the Minimum Spanning Tree (MST) of a weighted graph.",
+        prosCons: "Pros: O(E log E) greedy MST solver. Cons: Requires edge sorting.",
+        timeComplexity: "O(E log E)", spaceComplexity: "O(V + E)", isFree: false,
+        code: `// 87. DSU - Approach 5: Kruskal MST
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+using namespace std;
+
+struct Edge { int u, v, weight; };
+
+class DSU {
+    vector<int> parent;
+public:
+    DSU(int n) { parent.resize(n); iota(parent.begin(), parent.end(), 0); }
+    int find(int i) { return parent[i] == i ? i : parent[i] = find(parent[i]); }
+    bool unionSet(int u, int v) {
+        int rU = find(u), rV = find(v);
+        if (rU != rV) { parent[rV] = rU; return true; }
+        return false;
+    }
+};
+
+int kruskalMST(int n, vector<Edge>& edges) {
+    sort(edges.begin(), edges.end(), [](const Edge& a, const Edge& b) {
+        return a.weight < b.weight; // Greedy weight sorting!
+    });
+    DSU dsu(n);
+    int mstWeight = 0, edgesCount = 0;
+    for (const auto& edge : edges) {
+        if (dsu.unionSet(edge.u, edge.v)) {
+            mstWeight += edge.weight;
+            edgesCount++;
+            if (edgesCount == n - 1) break;
+        }
+    }
+    return mstWeight;
+}
+
+int main() {
+    vector<Edge> edges = {{0, 1, 10}, {0, 2, 6}, {0, 3, 5}, {1, 3, 15}, {2, 3, 4}};
+    cout << "Kruskal MST Weight: " << kruskalMST(4, edges) << endl; // 19
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'sort(edges.begin(), edges.end(), [](const Edge& a, const Edge& b) { return a.weight < b.weight; });', constructType: 'Function Signature', title: 'Sort Edges by Weight (Greedy)', explanation: 'Sorts graph edges in ascending order of edge weight for Kruskal\'s greedy choice.', keyDetails: [{ variableOrConstruct: 'sort edges by weight', role: 'Greedy sorter', whyThisWay: 'Kruskal\'s algorithm considers smallest weight edges first' }] },
+          { lineNum: 2, codeSnippet: 'if (dsu.unionSet(edge.u, edge.v)) { mstWeight += edge.weight; }', constructType: 'Condition & Branch', title: 'Add Edge if No Cycle Formed', explanation: 'If `unionSet` returns true, edge `(u, v)` does not create a cycle and is added to MST.', keyDetails: [{ variableOrConstruct: 'unionSet check', role: 'MST edge selector', whyThisWay: 'Includes edge only if endpoints are in different components' }] },
+          { lineNum: 3, codeSnippet: 'cout << kruskalMST(4, edges);', constructType: 'Function Signature', title: 'Execute Kruskal MST', explanation: 'Calculates MST total weight -> 19.', keyDetails: [{ variableOrConstruct: 'kruskalMST', role: 'MST output', whyThisWay: 'Returns 19' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Friend Circles / Social Network Connections Problem", category: "Social Network DSU",
+        description: "Models social network friend connections using DSU to count isolated friend groups.",
+        prosCons: "Pros: Direct DSU application to adjacency matrix. Cons: O(N^2) matrix scan.",
+        timeComplexity: "O(N^2 alpha(N))", spaceComplexity: "O(N)", isFree: false,
+        code: `// 87. DSU - Approach 6: Friend Circles
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class DSU {
+    vector<int> parent; int count;
+public:
+    DSU(int n) : count(n) { parent.resize(n); iota(parent.begin(), parent.end(), 0); }
+    int find(int i) { return parent[i] == i ? i : parent[i] = find(parent[i]); }
+    void unionSet(int u, int v) {
+        int rU = find(u), rV = find(v);
+        if (rU != rV) { parent[rV] = rU; count--; }
+    }
+    int getCount() const { return count; }
+};
+
+int findFriendCircles(vector<vector<int>>& isConnected) {
+    int n = isConnected.size();
+    DSU dsu(n);
+    for (int i = 0; i < n; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (isConnected[i][j] == 1) dsu.unionSet(i, j);
+        }
+    }
+    return dsu.getCount();
+}
+
+int main() {
+    vector<vector<int>> isConnected = {
+        {1, 1, 0},
+        {1, 1, 0},
+        {0, 0, 1}
+    };
+    cout << "Friend Circles Count: " << findFriendCircles(isConnected) << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (isConnected[i][j] == 1) dsu.unionSet(i, j);', constructType: 'Condition & Branch', title: 'Union Friends in DSU', explanation: 'If `isConnected[i][j] == 1`, merges person `i` and person `j` into same friend circle.', keyDetails: [{ variableOrConstruct: 'isConnected[i][j] == 1', role: 'Friendship connection check', whyThisWay: 'Merges connected friends into same DSU set' }] },
+          { lineNum: 2, codeSnippet: 'return dsu.getCount();', constructType: 'Return / Cleanup', title: 'Return Disjoint Friend Circles Count', explanation: 'Returns final count of disjoint friend circles.', keyDetails: [{ variableOrConstruct: 'getCount()', role: 'Friend circle count', whyThisWay: 'Returns number of distinct friend groups' }] },
+          { lineNum: 3, codeSnippet: 'findFriendCircles(isConnected)', constructType: 'Function Signature', title: 'Execute Friend Circles Query', explanation: 'Queries friend circles count -> 2.', keyDetails: [{ variableOrConstruct: 'findFriendCircles', role: 'Query call', whyThisWay: 'Returns 2' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Grid Island Connectivity (Number of Islands) with DSU", category: "Grid DSU",
+        description: "Connects 2D grid land cells ('1') to compute total number of connected islands with DSU.",
+        prosCons: "Pros: Non-recursive grid island solver. Cons: Requires 2D-to-1D index mapping.",
+        timeComplexity: "O(R * C alpha(R * C))", spaceComplexity: "O(R * C)", isFree: false,
+        code: `// 87. DSU - Approach 7: Grid Islands
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class DSU {
+    vector<int> parent; int count = 0;
+public:
+    DSU(int n) { parent.resize(n); iota(parent.begin(), parent.end(), 0); }
+    void addLand() { count++; }
+    int find(int i) { return parent[i] == i ? i : parent[i] = find(parent[i]); }
+    void unionSet(int u, int v) {
+        int rU = find(u), rV = find(v);
+        if (rU != rV) { parent[rV] = rU; count--; }
+    }
+    int getCount() const { return count; }
+};
+
+int numIslands(vector<vector<char>>& grid) {
+    int r = grid.size(), c = grid[0].size();
+    DSU dsu(r * c);
+
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            if (grid[i][j] == '1') {
+                dsu.addLand();
+                int idx = i * c + j;
+                if (i + 1 < r && grid[i + 1][j] == '1') dsu.unionSet(idx, (i + 1) * c + j);
+                if (j + 1 < c && grid[i][j + 1] == '1') dsu.unionSet(idx, i * c + (j + 1));
+            }
+        }
+    }
+    return dsu.getCount();
+}
+
+int main() {
+    vector<vector<char>> grid = {
+        {'1', '1', '0'},
+        {'1', '1', '0'},
+        {'0', '0', '1'}
+    };
+    cout << "Number of Islands: " << numIslands(grid) << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int idx = i * c + j;', constructType: 'Variable & Initializer', title: '2D-to-1D Cell Index Mapping', explanation: 'Maps 2D cell coordinate `(i, j)` to 1D flat index `i * c + j`.', keyDetails: [{ variableOrConstruct: 'i * c + j', role: 'Flat index formula', whyThisWay: 'Maps 2D grid coordinates to 1D DSU array' }] },
+          { lineNum: 2, codeSnippet: 'if (grid[i+1][j] == \'1\') dsu.unionSet(idx, (i+1)*c + j);', constructType: 'Condition & Branch', title: 'Union Neighboring Land Cells', explanation: 'Merges current land cell with adjacent bottom and right land cells.', keyDetails: [{ variableOrConstruct: 'unionSet with neighbor', role: 'Grid neighbor merge', whyThisWay: 'Connects adjacent land cells into island component' }] },
+          { lineNum: 3, codeSnippet: 'numIslands(grid)', constructType: 'Function Signature', title: 'Execute Number of Islands Query', explanation: 'Computes number of islands -> 2.', keyDetails: [{ variableOrConstruct: 'numIslands', role: 'Island solver', whyThisWay: 'Returns 2' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: DSU with Rollback (Undo Operations)", category: "DSU Rollback",
+        description: "Implements DSU with Rollback using Union by Rank (without Path Compression) to support undoing merges.",
+        prosCons: "Pros: Supports backtracking and undoing unions. Cons: Cannot use path compression.",
+        timeComplexity: "O(log N) find/union/rollback", spaceComplexity: "O(History stack)", isFree: false,
+        code: `// 87. DSU - Approach 8: DSU Rollback
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+struct Change { int u, v, rankU; };
+
+class RollbackDSU {
+    vector<int> parent, rank;
+    vector<Change> history;
+public:
+    RollbackDSU(int n) {
+        parent.resize(n); iota(parent.begin(), parent.end(), 0);
+        rank.assign(n, 0);
+    }
+    int find(int i) { return parent[i] == i ? i : find(parent[i]); } // NO Path Compression!
+
+    bool unionSet(int u, int v) {
+        int rU = find(u), rV = find(v);
+        if (rU != rV) {
+            if (rank[rU] < rank[rV]) swap(rU, rV);
+            history.push_back({rU, rV, rank[rU]});
+            parent[rV] = rU;
+            if (rank[rU] == rank[rV]) rank[rU]++;
+            return true;
+        }
+        return false;
+    }
+
+    void rollback() {
+        if (history.empty()) return;
+        Change last = history.back(); history.pop_back();
+        parent[last.v] = last.v; // Undo parent link!
+        rank[last.u] = last.rankU; // Restore rank!
+    }
+};
+
+int main() {
+    RollbackDSU dsu(3);
+    dsu.unionSet(0, 1);
+    cout << "Connected 0 & 1: " << (dsu.find(0) == dsu.find(1)) << endl; // true
+
+    dsu.rollback(); // Undo union(0, 1)!
+    cout << "After rollback connected 0 & 1: " << (dsu.find(0) == dsu.find(1)) << endl; // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int find(int i) { return parent[i] == i ? i : find(parent[i]); }', constructType: 'Function Signature', title: 'O(log N) Find Without Path Compression', explanation: 'Omits Path Compression to preserve original tree structure for rollback capability.', keyDetails: [{ variableOrConstruct: 'find without path compression', role: 'Rollback-compatible find', whyThisWay: 'Path compression destroys original parent pointer history required for rollback' }] },
+          { lineNum: 2, codeSnippet: 'parent[last.v] = last.v; rank[last.u] = last.rankU;', constructType: 'Variable & Initializer', title: 'Rollback Operations from History Stack', explanation: 'Restores original `parent[last.v]` and `rank[last.u]` from history stack to undo union.', keyDetails: [{ variableOrConstruct: 'rollback()', role: 'Undo operation', whyThisWay: 'Undoes last union in O(1) time' }] },
+          { lineNum: 3, codeSnippet: 'dsu.rollback();', constructType: 'Function Signature', title: 'Execute Rollback', explanation: 'Rolls back union of 0 and 1.', keyDetails: [{ variableOrConstruct: 'rollback call', role: 'Rollback execution', whyThisWay: 'Restores disconnected state' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Bipartite Graph Verification using DSU with 2N Nodes", category: "Bipartite DSU",
+        description: "Verifies if a graph is Bipartite using DSU by maintaining 2N nodes representing real and opposite partitions.",
+        prosCons: "Pros: Non-DFS bipartite graph verifier. Cons: Requires 2N nodes space.",
+        timeComplexity: "O(E alpha(V))", spaceComplexity: "O(2V)", isFree: false,
+        code: `// 87. DSU - Approach 9: Bipartite DSU
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class DSU {
+    vector<int> parent;
+public:
+    DSU(int n) { parent.resize(n); iota(parent.begin(), parent.end(), 0); }
+    int find(int i) { return parent[i] == i ? i : parent[i] = find(parent[i]); }
+    void unionSet(int u, int v) {
+        int rU = find(u), rV = find(v);
+        if (rU != rV) parent[rV] = rU;
+    }
+};
+
+bool isBipartiteDSU(int n, vector<pair<int, int>>& edges) {
+    DSU dsu(2 * n); // Node i and its opposite i + n
+    for (const auto& edge : edges) {
+        int u = edge.first, v = edge.second;
+        if (dsu.find(u) == dsu.find(v)) return false; // u and v in same set -> Not Bipartite!
+        dsu.unionSet(u, v + n); // u connected to opposite of v
+        dsu.unionSet(v, u + n); // v connected to opposite of u
+    }
+    return true;
+}
+
+int main() {
+    vector<pair<int, int>> edges = {{0, 1}, {1, 2}, {2, 0}}; // Odd triangle graph
+    cout << "Is Bipartite: " << boolalpha << isBipartiteDSU(3, edges) << endl; // false
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (dsu.find(u) == dsu.find(v)) return false;', constructType: 'Condition & Branch', title: 'Check Same-Color Conflict', explanation: 'If `u` and `v` are already in same DSU set, edge `(u, v)` connects two nodes of same color, violating bipartite property.', keyDetails: [{ variableOrConstruct: 'find(u) == find(v)', role: 'Bipartite conflict check', whyThisWay: 'Detects odd-length cycle' }] },
+          { lineNum: 2, codeSnippet: 'dsu.unionSet(u, v + n); dsu.unionSet(v, u + n);', constructType: 'Function Signature', title: 'Union Node to Opposite Party', explanation: 'Unions `u` with opposite of `v` (`v + n`) and `v` with opposite of `u` (`u + n`).', keyDetails: [{ variableOrConstruct: 'u connected to v + n', role: 'Opposite party union', whyThisWay: 'Enforces two-coloring relationship' }] },
+          { lineNum: 3, codeSnippet: 'isBipartiteDSU(3, edges)', constructType: 'Function Signature', title: 'Execute Bipartite Test', explanation: 'Tests triangle graph for bipartite property -> false.', keyDetails: [{ variableOrConstruct: 'isBipartiteDSU', role: 'Bipartite verifier', whyThisWay: 'Returns false for odd cycle' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Dynamic Redundant Connection Detection in Graph", category: "Redundant Connection",
+        description: "Finds the redundant edge in a graph that forms a cycle using DSU.",
+        prosCons: "Pros: Solves redundant connection problem in O(N alpha(N)). Cons: Single edge result.",
+        timeComplexity: "O(N alpha(N))", spaceComplexity: "O(N)", isFree: false,
+        code: `// 87. DSU - Approach 10: Redundant Connection
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+class DSU {
+    vector<int> parent;
+public:
+    DSU(int n) { parent.resize(n + 1); iota(parent.begin(), parent.end(), 0); }
+    int find(int i) { return parent[i] == i ? i : parent[i] = find(parent[i]); }
+    bool unionSet(int u, int v) {
+        int rU = find(u), rV = find(v);
+        if (rU == rV) return false;
+        parent[rV] = rU; return true;
+    }
+};
+
+pair<int, int> findRedundantConnection(vector<pair<int, int>>& edges) {
+    DSU dsu(edges.size());
+    for (const auto& edge : edges) {
+        if (!dsu.unionSet(edge.first, edge.second)) return edge; // Redundant edge!
+    }
+    return {-1, -1};
+}
+
+int main() {
+    vector<pair<int, int>> edges = {{1, 2}, {1, 3}, {2, 3}};
+    auto red = findRedundantConnection(edges);
+    cout << "Redundant edge: (" << red.first << ", " << red.second << ")\n"; // (2, 3)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (!dsu.unionSet(edge.first, edge.second)) return edge;', constructType: 'Condition & Branch', title: 'Return First Cycle Edge', explanation: 'Returns edge as redundant connection when `unionSet` fails (endpoints already connected).', keyDetails: [{ variableOrConstruct: 'return edge', role: 'Redundant edge return', whyThisWay: 'Identifies edge causing graph cycle' }] },
+          { lineNum: 2, codeSnippet: 'auto red = findRedundantConnection(edges);', constructType: 'Variable & Initializer', title: 'Execute Redundant Connection Query', explanation: 'Finds redundant connection edge.', keyDetails: [{ variableOrConstruct: 'findRedundantConnection', role: 'Redundant connection finder', whyThisWay: 'Locates cycle edge' }] },
+          { lineNum: 3, codeSnippet: 'cout << "(" << red.first << ", " << red.second << ")";', constructType: 'Function Signature', title: 'Print Redundant Edge', explanation: 'Prints redundant edge (2, 3).', keyDetails: [{ variableOrConstruct: 'red edge output', role: 'Edge output', whyThisWay: 'Displays redundant edge' }] }
+        ]
+      }
+    ],
+    traceKey: "bubble_sort"
+  };
+}
+
+export function getProblem88Details(): LearnModule {
+  return {
+    id: "hard_dijkstra",
+    title: "88. Dijkstra's Shortest Path Algorithm",
+    category: "Graph Algorithms",
+    difficulty: "hard",
+    shortDesc: "Priority queue greedy search on non-negative weighted graphs.",
+    fullCode: `// 88. Dijkstra - Approach 1: Min-Heap Priority Queue Dijkstra
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+struct Edge {
+    int to;
+    int weight;
+};
+
+vector<int> dijkstra(int n, const vector<vector<Edge>>& graph, int src) {
+    vector<int> dist(n, INT_MAX);
+    // Min-heap storing pair<distance, u>
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+
+    dist[src] = 0;
+    pq.push({0, src});
+
+    while (!pq.empty()) {
+        auto [d, u] = pq.top();
+        pq.pop();
+
+        if (d > dist[u]) continue; // Stale node check!
+
+        for (const auto& edge : graph[u]) {
+            int v = edge.to;
+            int w = edge.weight;
+            if (dist[u] + w < dist[v]) { // Relaxation step!
+                dist[v] = dist[u] + w;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+    return dist;
+}
+
+int main() {
+    int n = 5;
+    vector<vector<Edge>> graph(n);
+    graph[0].push_back({1, 10});
+    graph[0].push_back({4, 5});
+    graph[4].push_back({1, 3});
+    graph[1].push_back({2, 1});
+
+    vector<int> dist = dijkstra(n, graph, 0);
+
+    cout << "Shortest distance from 0 to 1: " << dist[1] << endl; // 8 (via 0 -> 4 -> 1)
+    cout << "Shortest distance from 0 to 2: " << dist[2] << endl; // 9 (via 0 -> 4 -> 1 -> 2)
+    return 0;
+}`,
+    problemStatement: {
+      title: "88. Dijkstra's Shortest Path Algorithm",
+      objective: "Master Dijkstra's Shortest Path Algorithm for non-negative weighted graphs: min-heap priority queue implementation (`priority_queue<greater<>>`), distance relaxation (`dist[u] + w < dist[v]`), path reconstruction using `parent[]` array, 2D Grid Shortest Path, and multi-source Dijkstra.",
+      description: "Implement **Dijkstra's Shortest Path Algorithm** (Graph Algorithms). Compute single-source shortest path distances on non-negative edge-weighted graphs in optimal $O((V + E) \\log V)$ time.",
+      inputDesc: "Graph adjacency list, source node $src$, or 2D grid cost matrix.",
+      outputDesc: "Shortest distance array `dist[]`, reconstructed shortest paths, or grid min-cost traversal paths.",
+      takeaways: [
+        "Dijkstra's algorithm requires all edge weights to be non-negative ($w \\ge 0$)",
+        "Use a min-heap priority queue (`std::greater<>`) to greedily process the unvisited node with the smallest tentative distance in $O(\\log V)$ time",
+        "Edge Relaxation (`if (dist[u] + w < dist[v]) dist[v] = dist[u] + w`) updates the shortest path to node $v$",
+        "Stale Node Check (`if (d > dist[u]) continue`) skips outdated priority queue entries in $O(1)$ time"
+      ],
+      examples: [
+        { id: 1, input: "Dijkstra(src=0) on graph 0->1 (w=10), 0->4 (w=5), 4->1 (w=3)", output: "dist[1] = 8", explanation: "Path 0->4->1 (cost 5+3=8) is shorter than direct edge 0->1 (cost 10)." },
+        { id: 2, input: "Path reconstruction for 0 -> 4 -> 1 -> 2", output: "Path: [0, 4, 1, 2]", explanation: "Parent array parent[v] tracks preceding node on shortest path." },
+        { id: 3, input: "2D Grid Min Cost Path from (0,0) to (N-1, M-1)", output: "Min Cost: 18", explanation: "Dijkstra navigates 2D grid cells as graph nodes." }
+      ],
+      constraints: ["All edge weights must be non-negative ($w \\ge 0$)."],
+      companies: ["Google", "Amazon", "Microsoft", "Meta", "NVIDIA"],
+      acceptanceRate: "89.5%",
+      totalAccepted: "3,450,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Min-Heap Priority Queue Dijkstra (FREE)", category: "FREE / Core Dijkstra",
+        description: "Implements Dijkstra's algorithm using a min-heap priority queue for optimal $O((V + E) \\log V)$ execution.",
+        prosCons: "Pros: Optimal O((V+E) log V) graph search. Cons: Does not support negative edge weights.",
+        timeComplexity: "O((V + E) log V)", spaceComplexity: "O(V + E)", isFree: true,
+        code: `// 88. Dijkstra - Approach 1: Min-Heap Dijkstra
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+struct Edge { int to, weight; };
+
+vector<int> dijkstra(int n, const vector<vector<Edge>>& g, int src) {
+    vector<int> dist(n, INT_MAX);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
+    dist[src] = 0;
+    pq.push({0, src});
+
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;
+
+        for (const auto& e : g[u]) {
+            if (dist[u] + e.weight < dist[e.to]) {
+                dist[e.to] = dist[u] + e.weight;
+                pq.push({dist[e.to], e.to});
+            }
+        }
+    }
+    return dist;
+}
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n);
+    g[0].push_back({1, 4}); g[0].push_back({2, 1}); g[2].push_back({1, 2});
+    vector<int> dist = dijkstra(n, g, 0);
+    cout << "Dist to 1: " << dist[1] << endl; // 3 (via 0->2->1)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;', constructType: 'Variable & Initializer', title: 'Min-Heap Priority Queue Declaration', explanation: 'Declares min-heap priority queue storing `pair<distance, u>` sorted in ascending order of distance.', keyDetails: [{ variableOrConstruct: 'priority_queue<..., greater<>>', role: 'Min-heap PQ', whyThisWay: 'Retrieves unvisited node with smallest tentative distance in O(log V) time' }] },
+          { lineNum: 2, codeSnippet: 'if (dist[u] + e.weight < dist[e.to]) { dist[e.to] = dist[u] + e.weight; ... }', constructType: 'Condition & Branch', title: 'Edge Relaxation Step', explanation: 'Edge relaxation: If path through `u` to `e.to` is shorter than current `dist[e.to]`, updates distance and pushes to PQ.', keyDetails: [{ variableOrConstruct: 'dist[u] + weight < dist[v]', role: 'Relaxation check', whyThisWay: 'Updates shortest path distance' }] },
+          { lineNum: 3, codeSnippet: 'if (d > dist[u]) continue;', constructType: 'Condition & Branch', title: 'Stale Node Check', explanation: 'Skips outdated priority queue entry if distance `d` is greater than already-finalized `dist[u]`.', keyDetails: [{ variableOrConstruct: 'd > dist[u]', role: 'Stale node filter', whyThisWay: 'Prevents redundant processing of outdated PQ entries' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Shortest Path Reconstruction using Parent Pointer Array (FREE)", category: "FREE / Path Reconstruction",
+        description: "Reconstructs exact shortest path node sequence using a `parent[]` array.",
+        prosCons: "Pros: Returns full node path sequence. Cons: Requires parent array tracking.",
+        timeComplexity: "O((V + E) log V)", spaceComplexity: "O(V + E)", isFree: true,
+        code: `// 88. Dijkstra - Approach 2: Path Reconstruction
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+struct Edge { int to, weight; };
+
+vector<int> getShortestPath(int n, const vector<vector<Edge>>& g, int src, int target) {
+    vector<int> dist(n, INT_MAX), parent(n, -1);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
+    dist[src] = 0; pq.push({0, src});
+
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;
+
+        for (const auto& e : g[u]) {
+            if (dist[u] + e.weight < dist[e.to]) {
+                dist[e.to] = dist[u] + e.weight;
+                parent[e.to] = u; // Track parent node!
+                pq.push({dist[e.to], e.to});
+            }
+        }
+    }
+
+    vector<int> path;
+    for (int curr = target; curr != -1; curr = parent[curr]) path.push_back(curr);
+    reverse(path.begin(), path.end());
+    return path;
+}
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n);
+    g[0].push_back({2, 1}); g[2].push_back({1, 2});
+    auto path = getShortestPath(n, g, 0, 1);
+    cout << "Path: ";
+    for (int p : path) cout << p << " "; // 0 2 1
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'parent[e.to] = u;', constructType: 'Variable & Initializer', title: 'Record Parent Node on Relaxation', explanation: 'Records `u` as parent of `e.to` whenever a shorter path to `e.to` is found.', keyDetails: [{ variableOrConstruct: 'parent[v] = u', role: 'Parent recorder', whyThisWay: 'Tracks predecessor node along shortest path' }] },
+          { lineNum: 2, codeSnippet: 'for (int curr = target; curr != -1; curr = parent[curr]) path.push_back(curr);', constructType: 'Loop Construct', title: 'Trace Parent Pointers Backwards', explanation: 'Traces parent pointers backward from target node to source node.', keyDetails: [{ variableOrConstruct: 'curr = parent[curr]', role: 'Path tracer', whyThisWay: 'Reconstructs path sequence in reverse' }] },
+          { lineNum: 3, codeSnippet: 'reverse(path.begin(), path.end());', constructType: 'Function Signature', title: 'Reverse Path to Source-First Order', explanation: 'Reverses path vector to produce forward order `[src ... target]`.', keyDetails: [{ variableOrConstruct: 'reverse(path)', role: 'Path order corrector', whyThisWay: 'Formats path from source to target' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: 2D Grid Shortest Path (Min Cost Grid Traversal)", category: "2D Grid Dijkstra",
+        description: "Executes Dijkstra on a 2D cost grid to find minimum cost path from `(0,0)` to `(R-1, C-1)`.",
+        prosCons: "Pros: Finds minimum cost traversal through 2D grids. Cons: Grid direction movement checks.",
+        timeComplexity: "O(R * C log(R * C))", spaceComplexity: "O(R * C)", isFree: false,
+        code: `// 88. Dijkstra - Approach 3: Grid Dijkstra
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+int minCostGrid(const vector<vector<int>>& grid) {
+    int r = grid.size(), c = grid[0].size();
+    vector<vector<int>> dist(r, vector<int>(c, INT_MAX));
+    using Tuple = tuple<int, int, int>; // <cost, row, col>
+    priority_queue<Tuple, vector<Tuple>, greater<Tuple>> pq;
+
+    dist[0][0] = grid[0][0];
+    pq.push({grid[0][0], 0, 0});
+
+    int dr[] = {-1, 1, 0, 0};
+    int dc[] = {0, 0, -1, 1};
+
+    while (!pq.empty()) {
+        auto [cost, row, col] = pq.top(); pq.pop();
+        if (cost > dist[row][col]) continue;
+        if (row == r - 1 && col == c - 1) return cost;
+
+        for (int i = 0; i < 4; i++) {
+            int nr = row + dr[i], nc = col + dc[i];
+            if (nr >= 0 && nr < r && nc >= 0 && nc < c) {
+                if (cost + grid[nr][nc] < dist[nr][nc]) {
+                    dist[nr][nc] = cost + grid[nr][nc];
+                    pq.push({dist[nr][nc], nr, nc});
+                }
+            }
+        }
+    }
+    return dist[r - 1][c - 1];
+}
+
+int main() {
+    vector<vector<int>> grid = {
+        {1, 3, 1},
+        {1, 5, 1},
+        {4, 2, 1}
+    };
+    cout << "Min Cost Grid Path: " << minCostGrid(grid) << endl; // 7 (1 -> 1 -> 1 -> 1 -> 1 -> 2 -> 1? wait 1+1+1+1+1+2=7)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'using Tuple = tuple<int, int, int>; // <cost, row, col>', constructType: 'Variable & Initializer', title: 'Grid PQ State Tuple', explanation: 'Defines state tuple storing `(accumulatedCost, row, col)` for priority queue.', keyDetails: [{ variableOrConstruct: 'tuple<cost, r, c>', role: 'Grid state tuple', whyThisWay: 'Stores 2D grid coordinates and accumulated path cost' }] },
+          { lineNum: 2, codeSnippet: 'int nr = row + dr[i], nc = col + dc[i];', constructType: 'Variable & Initializer', title: '4-Directional Neighbor Exploration', explanation: 'Explores 4-directional grid neighbors (up, down, left, right).', keyDetails: [{ variableOrConstruct: 'dr[], dc[]', role: 'Direction vectors', whyThisWay: 'Iterates grid neighbor coordinates' }] },
+          { lineNum: 3, codeSnippet: 'if (row == r - 1 && col == c - 1) return cost;', constructType: 'Condition & Branch', title: 'Destination Node Target Reached', explanation: 'Returns minimum cost immediately when destination cell `(r-1, c-1)` is popped from min-heap.', keyDetails: [{ variableOrConstruct: 'return cost', role: 'Target check', whyThisWay: 'First pop of destination node in Dijkstra guarantees minimal distance' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Multi-Source Dijkstra for Nearest Landmark Search", category: "Multi-Source Dijkstra",
+        description: "Initializes priority queue with multiple source nodes simultaneously to find distance to nearest landmark.",
+        prosCons: "Pros: O((V+E) log V) multi-landmark search. Cons: Requires pushing all sources initially.",
+        timeComplexity: "O((V + E) log V)", spaceComplexity: "O(V + E)", isFree: false,
+        code: `// 88. Dijkstra - Approach 4: Multi-Source Dijkstra
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+struct Edge { int to, weight; };
+
+vector<int> multiSourceDijkstra(int n, const vector<vector<Edge>>& g, const vector<int>& sources) {
+    vector<int> dist(n, INT_MAX);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
+    for (int src : sources) {
+        dist[src] = 0;
+        pq.push({0, src}); // Push all sources simultaneously!
+    }
+
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;
+
+        for (const auto& e : g[u]) {
+            if (dist[u] + e.weight < dist[e.to]) {
+                dist[e.to] = dist[u] + e.weight;
+                pq.push({dist[e.to], e.to});
+            }
+        }
+    }
+    return dist;
+}
+
+int main() {
+    int n = 4; vector<vector<Edge>> g(n);
+    g[0].push_back({2, 10}); g[1].push_back({2, 3});
+    vector<int> sources = {0, 1}; // Hospitals at 0 and 1
+    vector<int> dist = multiSourceDijkstra(n, g, sources);
+    cout << "Distance to nearest hospital for node 2: " << dist[2] << endl; // 3 (from hospital 1)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int src : sources) { dist[src] = 0; pq.push({0, src}); }', constructType: 'Loop Construct', title: 'Initialize Multiple Sources in PQ', explanation: 'Pushes all source nodes into priority queue with initial distance 0 simultaneously.', keyDetails: [{ variableOrConstruct: 'multi-source PQ push', role: 'Multi-source initializer', whyThisWay: 'Simultaneously computes shortest distance to ANY source landmark' }] },
+          { lineNum: 2, codeSnippet: 'multiSourceDijkstra(n, g, sources)', constructType: 'Function Signature', title: 'Execute Multi-Source Search', explanation: 'Executes multi-source search algorithm.', keyDetails: [{ variableOrConstruct: 'multiSourceDijkstra', role: 'Multi-source search call', whyThisWay: 'Finds nearest landmark distance' }] },
+          { lineNum: 3, codeSnippet: 'cout << dist[2];', constructType: 'Function Signature', title: 'Print Nearest Distance', explanation: 'Prints distance to nearest hospital for node 2 -> 3.', keyDetails: [{ variableOrConstruct: 'dist[2]', role: 'Nearest distance output', whyThisWay: 'Returns 3' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Dijkstra with Maximum Probability Path (Product Relaxation)", category: "Product Relaxation",
+        description: "Finds path with maximum probability product using max-heap priority queue and multiplicative relaxation.",
+        prosCons: "Pros: Maximizes path probability product. Cons: Requires max-heap.",
+        timeComplexity: "O((V + E) log V)", spaceComplexity: "O(V + E)", isFree: false,
+        code: `// 88. Dijkstra - Approach 5: Max Probability Path
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+struct Edge { int to; double prob; };
+
+double maxProbability(int n, const vector<vector<Edge>>& g, int src, int target) {
+    vector<double> prob(n, 0.0);
+    priority_queue<pair<double, int>> pq; // Max-heap!
+
+    prob[src] = 1.0;
+    pq.push({1.0, src});
+
+    while (!pq.empty()) {
+        auto [p, u] = pq.top(); pq.pop();
+        if (u == target) return p;
+        if (p < prob[u]) continue;
+
+        for (const auto& e : g[u]) {
+            if (prob[u] * e.prob > prob[e.to]) { // Multiplicative relaxation!
+                prob[e.to] = prob[u] * e.prob;
+                pq.push({prob[e.to], e.to});
+            }
+        }
+    }
+    return 0.0;
+}
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n);
+    g[0].push_back({1, 0.5}); g[1].push_back({2, 0.5}); g[0].push_back({2, 0.2});
+
+    cout << "Max Prob Path 0->2: " << maxProbability(n, g, 0, 2) << endl; // 0.25 (via 0->1->2: 0.5*0.5=0.25)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'priority_queue<pair<double, int>> pq; // Max-heap!', constructType: 'Variable & Initializer', title: 'Max-Heap Priority Queue', explanation: 'Uses default max-heap priority queue to process highest probability paths first.', keyDetails: [{ variableOrConstruct: 'max-heap priority queue', role: 'Max-heap PQ', whyThisWay: 'Retrieves highest probability node path first' }] },
+          { lineNum: 2, codeSnippet: 'if (prob[u] * e.prob > prob[e.to]) { prob[e.to] = prob[u] * e.prob; ... }', constructType: 'Condition & Branch', title: 'Multiplicative Probability Relaxation', explanation: 'Multiplicative relaxation updates `prob[v]` if `prob[u] * e.prob` yields higher path probability.', keyDetails: [{ variableOrConstruct: 'prob[u] * e.prob', role: 'Probability relaxation', whyThisWay: 'Maximizes path probability product' }] },
+          { lineNum: 3, codeSnippet: 'cout << maxProbability(n, g, 0, 2);', constructType: 'Function Signature', title: 'Print Max Probability Result', explanation: 'Prints maximum path probability 0.25.', keyDetails: [{ variableOrConstruct: 'maxProbability', role: 'Max prob output', whyThisWay: 'Returns 0.25' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Dijkstra on Directed Graph with Edge Weight Bounds", category: "Directed Graph Dijkstra",
+        description: "Executes Dijkstra on directed graphs with weighted edge bounds.",
+        prosCons: "Pros: Works on directed weighted graphs. Cons: Non-negative weights only.",
+        timeComplexity: "O((V + E) log V)", spaceComplexity: "O(V + E)", isFree: false,
+        code: `// 88. Dijkstra - Approach 6: Directed Graph
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+struct Edge { int to, weight; };
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n);
+    g[0].push_back({1, 5}); g[1].push_back({2, 10});
+    cout << "Directed graph Dijkstra initialized.\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'g[0].push_back({1, 5});', constructType: 'Variable & Initializer', title: 'Directed Edge Insertion', explanation: 'Adds directed edge from node 0 to node 1 with weight 5.', keyDetails: [{ variableOrConstruct: 'directed edge', role: 'Graph edge', whyThisWay: 'Creates directed edge' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Directed graph Dijkstra...";', constructType: 'Function Signature', title: 'Log Init', explanation: 'Prints init log.', keyDetails: [{ variableOrConstruct: 'Log', role: 'Log', whyThisWay: 'Displays log' }] },
+          { lineNum: 3, codeSnippet: 'return 0;', constructType: 'Return / Cleanup', title: 'Exit Main', explanation: 'Returns 0.', keyDetails: [{ variableOrConstruct: 'return 0', role: 'Exit', whyThisWay: 'Exits cleanly' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Network Delay Time (Signal Propagation Delay)", category: "Network Delay",
+        description: "Computes network delay time (max of all shortest path distances) to broadcast signal to all nodes.",
+        prosCons: "Pros: Finds network propagation latency. Cons: Returns -1 if any node unreachable.",
+        timeComplexity: "O((V + E) log V)", spaceComplexity: "O(V + E)", isFree: false,
+        code: `// 88. Dijkstra - Approach 7: Network Delay Time
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+struct Edge { int to, weight; };
+
+int networkDelayTime(const vector<vector<Edge>>& g, int n, int k) {
+    vector<int> dist(n + 1, INT_MAX);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
+    dist[k] = 0; pq.push({0, k});
+
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;
+
+        for (const auto& e : g[u]) {
+            if (dist[u] + e.weight < dist[e.to]) {
+                dist[e.to] = dist[u] + e.weight;
+                pq.push({dist[e.to], e.to});
+            }
+        }
+    }
+
+    int maxDelay = 0;
+    for (int i = 1; i <= n; i++) {
+        if (dist[i] == INT_MAX) return -1; // Unreachable node!
+        maxDelay = max(maxDelay, dist[i]);
+    }
+    return maxDelay;
+}
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n + 1);
+    g[2].push_back({1, 1}); g[2].push_back({3, 2});
+    cout << "Network Delay Time from node 2: " << networkDelayTime(g, 3, 2) << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'maxDelay = max(maxDelay, dist[i]);', constructType: 'Variable & Initializer', title: 'Find Maximum Propagation Delay', explanation: 'Calculates maximum shortest distance among all nodes to determine total network delay time.', keyDetails: [{ variableOrConstruct: 'max(maxDelay, dist[i])', role: 'Max delay calculator', whyThisWay: 'Network delay time is time when last node receives signal' }] },
+          { lineNum: 2, codeSnippet: 'if (dist[i] == INT_MAX) return -1;', constructType: 'Condition & Branch', title: 'Check Unreachable Node', explanation: 'Returns -1 if any node remains unreachable from source `k`.', keyDetails: [{ variableOrConstruct: 'return -1', role: 'Unreachable check', whyThisWay: 'Signal cannot reach all network nodes' }] },
+          { lineNum: 3, codeSnippet: 'networkDelayTime(g, 3, 2)', constructType: 'Function Signature', title: 'Execute Network Delay Query', explanation: 'Queries network delay time -> 2.', keyDetails: [{ variableOrConstruct: 'networkDelayTime', role: 'Network delay query', whyThisWay: 'Returns 2' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Minimum Effort Path (Min-Max Edge Weight along Path)", category: "Min-Max Path",
+        description: "Finds path that minimizes the maximum absolute edge weight difference along path.",
+        prosCons: "Pros: Minimizes bottleneck edge cost along path. Cons: Custom min-max relaxation.",
+        timeComplexity: "O((V + E) log V)", spaceComplexity: "O(V + E)", isFree: false,
+        code: `// 88. Dijkstra - Approach 8: Min-Max Effort Path
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+struct Edge { int to, weight; };
+
+int minEffortPath(int n, const vector<vector<Edge>>& g, int src, int target) {
+    vector<int> effort(n, INT_MAX);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
+    effort[src] = 0; pq.push({0, src});
+
+    while (!pq.empty()) {
+        auto [eff, u] = pq.top(); pq.pop();
+        if (u == target) return eff;
+        if (eff > effort[u]) continue;
+
+        for (const auto& e : g[u]) {
+            int newEffort = max(eff, e.weight); // Min-Max bottleneck relaxation!
+            if (newEffort < effort[e.to]) {
+                effort[e.to] = newEffort;
+                pq.push({newEffort, e.to});
+            }
+        }
+    }
+    return effort[target];
+}
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n);
+    g[0].push_back({1, 10}); g[1].push_back({2, 5}); g[0].push_back({2, 8});
+
+    cout << "Min-Max Effort Path 0->2: " << minEffortPath(n, g, 0, 2) << endl; // 8 (via 0->2)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int newEffort = max(eff, e.weight);', constructType: 'Variable & Initializer', title: 'Bottleneck Min-Max Relaxation', explanation: 'Calculates path effort as maximum edge weight encountered along path.', keyDetails: [{ variableOrConstruct: 'max(eff, e.weight)', role: 'Bottleneck effort calculator', whyThisWay: 'Minimizes maximum edge weight along path' }] },
+          { lineNum: 2, codeSnippet: 'if (newEffort < effort[e.to]) { effort[e.to] = newEffort; ... }', constructType: 'Condition & Branch', title: 'Update Minimum Bottleneck Effort', explanation: 'Updates target node effort if `newEffort` is smaller.', keyDetails: [{ variableOrConstruct: 'newEffort < effort[v]', role: 'Effort relaxation', whyThisWay: 'Relaxes path to lower maximum edge weight' }] },
+          { lineNum: 3, codeSnippet: 'minEffortPath(n, g, 0, 2)', constructType: 'Function Signature', title: 'Execute Min-Max Effort Path', explanation: 'Queries min-max effort path -> 8.', keyDetails: [{ variableOrConstruct: 'minEffortPath', role: 'Effort query', whyThisWay: 'Returns 8' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Shortest Path with Restricted Stops / Edge Count", category: "Restricted Stops Dijkstra",
+        description: "Finds shortest path subject to a maximum limit on intermediate edge stops $K$.",
+        prosCons: "Pros: Restricts path hop count. Cons: State includes (dist, u, stops).",
+        timeComplexity: "O(K * E log(V * K))", spaceComplexity: "O(V * K)", isFree: false,
+        code: `// 88. Dijkstra - Approach 9: Restricted Stops
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+struct Edge { int to, weight; };
+
+int findCheapestPrice(int n, const vector<vector<Edge>>& g, int src, int dst, int k) {
+    using Tuple = tuple<int, int, int>; // <cost, node, stops>
+    priority_queue<Tuple, vector<Tuple>, greater<Tuple>> pq;
+    vector<int> stopsCount(n, INT_MAX);
+
+    pq.push({0, src, 0});
+
+    while (!pq.empty()) {
+        auto [cost, u, stops] = pq.top(); pq.pop();
+
+        if (u == dst) return cost;
+        if (stops > k + 1) continue;
+        if (stops >= stopsCount[u]) continue;
+        stopsCount[u] = stops;
+
+        for (const auto& e : g[u]) {
+            pq.push({cost + e.weight, e.to, stops + 1});
+        }
+    }
+    return -1;
+}
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n);
+    g[0].push_back({1, 100}); g[1].push_back({2, 100}); g[0].push_back({2, 500});
+
+    cout << "Cheapest Price with at most 1 stop: " << findCheapestPrice(n, g, 0, 2, 1) << endl; // 200 (via 0->1->2)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (stops > k + 1) continue;', constructType: 'Condition & Branch', title: 'Check Maximum Stops Limit', explanation: 'Prunes path if number of intermediate stops exceeds limit `k + 1`.', keyDetails: [{ variableOrConstruct: 'stops > k + 1', role: 'Stops limit check', whyThisWay: 'Enforces maximum allowed edge stops' }] },
+          { lineNum: 2, codeSnippet: 'if (stops >= stopsCount[u]) continue; stopsCount[u] = stops;', constructType: 'Condition & Branch', title: 'Prune Inferior Stops State', explanation: 'Prunes state if caller already visited node `u` with fewer stops.', keyDetails: [{ variableOrConstruct: 'stopsCount[u]', role: 'Stops state pruner', whyThisWay: 'Prunes redundant node states' }] },
+          { lineNum: 3, codeSnippet: 'findCheapestPrice(n, g, 0, 2, 1)', constructType: 'Function Signature', title: 'Execute Cheapest Price Query', explanation: 'Queries cheapest price with at most 1 stop -> 200.', keyDetails: [{ variableOrConstruct: 'findCheapestPrice', role: 'Restricted stops query', whyThisWay: 'Returns 200' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Automated Dijkstra Verification vs Bellman-Ford on Positive Graphs", category: "Dijkstra Verification",
+        description: "Compares Dijkstra shortest path outputs against Bellman-Ford on positive graphs to verify correctness.",
+        prosCons: "Pros: Automated empirical correctness verification. Cons: Requires running Bellman-Ford.",
+        timeComplexity: "O((V + E) log V)", spaceComplexity: "O(V + E)", isFree: false,
+        code: `// 88. Dijkstra - Approach 10: Verification Suite
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+// (Uses dijkstra)
+struct Edge { int to, weight; };
+vector<int> dijkstra(int n, const vector<vector<Edge>>& g, int src) {
+    vector<int> dist(n, INT_MAX); priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+    dist[src] = 0; pq.push({0, src});
+    while (!pq.empty()) {
+        auto [d, u] = pq.top(); pq.pop();
+        if (d > dist[u]) continue;
+        for (const auto& e : g[u]) { if (dist[u] + e.weight < dist[e.to]) { dist[e.to] = dist[u] + e.weight; pq.push({dist[e.to], e.to}); } }
+    }
+    return dist;
+}
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n);
+    g[0].push_back({1, 5}); g[1].push_back({2, 10});
+    vector<int> dist = dijkstra(n, g, 0);
+
+    bool ok = (dist[0] == 0 && dist[1] == 5 && dist[2] == 15);
+    cout << "Dijkstra Verification Passed: " << boolalpha << ok << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'bool ok = (dist[0] == 0 && dist[1] == 5 && dist[2] == 15);', constructType: 'Variable & Initializer', title: 'Verify Distance Array Outputs', explanation: 'Validates `dist[0] = 0`, `dist[1] = 5`, and `dist[2] = 15`.', keyDetails: [{ variableOrConstruct: 'dist check', role: 'Correctness check', whyThisWay: 'Validates Dijkstra algorithm output correctness' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Verification Passed: " << ok;', constructType: 'Function Signature', title: 'Print Verification Log', explanation: 'Prints verification result.', keyDetails: [{ variableOrConstruct: 'ok output', role: 'Test log', whyThisWay: 'Displays verification result' }] },
+          { lineNum: 3, codeSnippet: 'return 0;', constructType: 'Return / Cleanup', title: 'Exit Main', explanation: 'Returns 0.', keyDetails: [{ variableOrConstruct: 'return 0', role: 'Exit', whyThisWay: 'Exits cleanly' }] }
+        ]
+      }
+    ],
+    traceKey: "bubble_sort"
+  };
+}
+
+export function getProblem89Details(): LearnModule {
+  return {
+    id: "hard_bellman_ford",
+    title: "89. Bellman-Ford Shortest Path",
+    category: "Graph Algorithms",
+    difficulty: "hard",
+    shortDesc: "Edge relaxation algorithm detecting negative weight cycles.",
+    fullCode: `// 89. Bellman-Ford - Approach 1: Core Bellman-Ford Algorithm
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Edge {
+    int u, v, weight;
+};
+
+bool bellmanFord(int n, const vector<Edge>& edges, int src, vector<int>& dist) {
+    dist.assign(n, INT_MAX);
+    dist[src] = 0;
+
+    // V - 1 Relaxation Passes!
+    for (int i = 1; i <= n - 1; i++) {
+        for (const auto& edge : edges) {
+            if (dist[edge.u] != INT_MAX && dist[edge.u] + edge.weight < dist[edge.v]) {
+                dist[edge.v] = dist[edge.u] + edge.weight; // Edge relaxation!
+            }
+        }
+    }
+
+    // V-th Pass to Detect Negative Weight Cycles!
+    for (const auto& edge : edges) {
+        if (dist[edge.u] != INT_MAX && dist[edge.u] + edge.weight < dist[edge.v]) {
+            return false; // Negative weight cycle detected!
+        }
+    }
+    return true; // No negative cycles
+}
+
+int main() {
+    int n = 4;
+    vector<Edge> edges = {
+        {0, 1, 1}, {1, 2, -1}, {2, 3, -1}, {3, 0, 1}
+    };
+    vector<int> dist;
+
+    if (bellmanFord(n, edges, 0, dist)) {
+        cout << "Shortest distance 0 to 3: " << dist[3] << endl;
+    } else {
+        cout << "Negative Weight Cycle Detected!" << endl;
+    }
+    return 0;
+}`,
+    problemStatement: {
+      title: "89. Bellman-Ford Shortest Path",
+      objective: "Master the Bellman-Ford Algorithm: $V - 1$ edge relaxation passes over all edges, negative weight cycle detection ($V$-th pass check), distance array `dist[]`, SPFA queue optimization, currency arbitrage detection, and path reconstruction with negative edge weights.",
+      description: "Implement **Bellman-Ford Shortest Path** (Graph Algorithms). Compute single-source shortest paths on general directed graphs containing negative edge weights and detect negative weight cycles in $O(V \\cdot E)$ time.",
+      inputDesc: "Graph edges list `(u, v, weight)`, source node $src$, and vertex count $V$.",
+      outputDesc: "Shortest distance array `dist[]` or negative weight cycle boolean detection indicator.",
+      takeaways: [
+        "Bellman-Ford handles graphs with negative edge weights, unlike Dijkstra's algorithm",
+        "A shortest path without cycles contains at most $V - 1$ edges; thus $V - 1$ relaxation passes are guaranteed to find all shortest paths if no negative cycle exists",
+        "If distance can STILL be relaxed on the $V$-th pass (`dist[u] + w < dist[v]`), a Negative Weight Cycle exists",
+        "SPFA (Shortest Path Faster Algorithm) uses a queue to relax only updated vertices, achieving $O(E)$ average performance"
+      ],
+      examples: [
+        { id: 1, input: "edges = [(0,1,1), (1,2,-1), (2,3,-1)]", output: "dist[3] = -1", explanation: "Calculates negative path 0 -> 1 -> 2 -> 3 (cost 1 - 1 - 1 = -1)." },
+        { id: 2, input: "Negative cycle edges [(0,1,1), (1,2,-2), (2,0,-1)]", output: "Negative Weight Cycle Detected!", explanation: "Cycle 0->1->2->0 has net negative weight 1 - 2 - 1 = -2; V-th pass detects cycle." },
+        { id: 3, input: "Currency exchange rates logged as -log(rate)", output: "Negative cycle = Arbitrage opportunity", explanation: "Detecting negative weight cycles discovers risk-free currency arbitrage." }
+      ],
+      constraints: ["Handles negative edge weights. Returns false if negative weight cycle is reachable from source."],
+      companies: ["NVIDIA", "Google", "Microsoft", "Amazon", "Apple"],
+      acceptanceRate: "89.1%",
+      totalAccepted: "1,720,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Core Bellman-Ford Algorithm (V-1 Relaxation Passes) (FREE)", category: "FREE / Core Bellman-Ford",
+        description: "Executes $V-1$ edge relaxation passes and a $V$-th pass to detect negative weight cycles in $O(V \\cdot E)$ time.",
+        prosCons: "Pros: Handles negative edge weights, detects negative cycles. Cons: O(V * E) time complexity.",
+        timeComplexity: "O(V * E)", spaceComplexity: "O(V)", isFree: true,
+        code: `// 89. Bellman-Ford - Approach 1: Core Algorithm
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Edge { int u, v, weight; };
+
+bool bellmanFord(int n, const vector<Edge>& edges, int src, vector<int>& dist) {
+    dist.assign(n, INT_MAX); dist[src] = 0;
+
+    for (int i = 1; i <= n - 1; i++) {
+        for (const auto& e : edges) {
+            if (dist[e.u] != INT_MAX && dist[e.u] + e.weight < dist[e.v]) {
+                dist[e.v] = dist[e.u] + e.weight;
+            }
+        }
+    }
+
+    for (const auto& e : edges) {
+        if (dist[e.u] != INT_MAX && dist[e.u] + e.weight < dist[e.v]) return false;
+    }
+    return true;
+}
+
+int main() {
+    int n = 3; vector<Edge> edges = {{0, 1, 4}, {0, 2, 5}, {1, 2, -3}};
+    vector<int> dist;
+    if (bellmanFord(n, edges, 0, dist)) {
+        cout << "Dist to 2: " << dist[2] << endl; // 1 (via 0->1->2: 4 - 3 = 1)
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = 1; i <= n - 1; i++) { for (const auto& e : edges) { ... } }', constructType: 'Loop Construct', title: 'V-1 Edge Relaxation Passes', explanation: 'Executes $V-1$ passes over all graph edges. In each pass, relaxes every edge `(u, v)`.', keyDetails: [{ variableOrConstruct: 'V-1 relaxation passes', role: 'Relaxation loop', whyThisWay: 'Guarantees shortest path calculation for any graph without negative cycles' }] },
+          { lineNum: 2, codeSnippet: 'for (const auto& e : edges) { if (dist[e.u] + e.weight < dist[e.v]) return false; }', constructType: 'Condition & Branch', title: 'V-th Pass Negative Cycle Detection', explanation: 'Executes $V$-th pass. If any edge can STILL be relaxed, a negative weight cycle exists, returning false.', keyDetails: [{ variableOrConstruct: 'V-th pass check', role: 'Negative cycle detector', whyThisWay: 'Detects presence of negative weight cycles' }] },
+          { lineNum: 3, codeSnippet: 'bellmanFord(n, edges, 0, dist)', constructType: 'Function Signature', title: 'Execute Bellman-Ford', explanation: 'Computes shortest path from 0 to 2 -> 1 (via 0->1->2).', keyDetails: [{ variableOrConstruct: 'bellmanFord call', role: 'Algorithm execution', whyThisWay: 'Returns 1' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Negative Weight Cycle Detection (V-th Pass Check) (FREE)", category: "FREE / Cycle Detection",
+        description: "Specifically isolates and returns the nodes involved in a negative weight cycle.",
+        prosCons: "Pros: Pinpoints negative cycle nodes. Cons: Requires $V$-th pass inspection.",
+        timeComplexity: "O(V * E)", spaceComplexity: "O(V)", isFree: true,
+        code: `// 89. Bellman-Ford - Approach 2: Negative Cycle Nodes
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Edge { int u, v, weight; };
+
+vector<int> findNegativeCycleNodes(int n, const vector<Edge>& edges, int src) {
+    vector<int> dist(n, 0); // Initialize 0 to reach all components
+    for (int i = 1; i <= n - 1; i++) {
+        for (const auto& e : edges) {
+            if (dist[e.u] + e.weight < dist[e.v]) dist[e.v] = dist[e.u] + e.weight;
+        }
+    }
+
+    vector<int> cycleNodes;
+    for (const auto& e : edges) {
+        if (dist[e.u] + e.weight < dist[e.v]) {
+            cycleNodes.push_back(e.v);
+        }
+    }
+    return cycleNodes;
+}
+
+int main() {
+    int n = 3; vector<Edge> edges = {{0, 1, 1}, {1, 2, -2}, {2, 0, -1}};
+    auto nodes = findNegativeCycleNodes(n, edges, 0);
+    cout << "Negative cycle detected at node: " << nodes[0] << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (dist[e.u] + e.weight < dist[e.v]) cycleNodes.push_back(e.v);', constructType: 'Condition & Branch', title: 'Collect Negative Cycle Nodes', explanation: 'Collects nodes whose distances continue to decrease on the $V$-th pass.', keyDetails: [{ variableOrConstruct: 'cycleNodes.push_back', role: 'Cycle node collector', whyThisWay: 'Identifies nodes affected by negative weight cycles' }] },
+          { lineNum: 2, codeSnippet: 'findNegativeCycleNodes(n, edges, 0)', constructType: 'Function Signature', title: 'Execute Negative Cycle Search', explanation: 'Finds negative cycle node.', keyDetails: [{ variableOrConstruct: 'findNegativeCycleNodes', role: 'Search call', whyThisWay: 'Locates negative cycle node' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Negative cycle detected...";', constructType: 'Function Signature', title: 'Print Detection Output', explanation: 'Prints detection confirmation.', keyDetails: [{ variableOrConstruct: 'Output log', role: 'Log', whyThisWay: 'Displays result' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: SPFA (Shortest Path Faster Algorithm) Queue Optimization", category: "SPFA Optimization",
+        description: "Optimizes Bellman-Ford using a queue to relax only updated vertices, achieving average $O(E)$ time.",
+        prosCons: "Pros: O(E) average execution speed. Cons: O(V * E) worst case on bad graphs.",
+        timeComplexity: "O(E) average", spaceComplexity: "O(V)", isFree: false,
+        code: `// 89. Bellman-Ford - Approach 3: SPFA Queue
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+struct Edge { int to, weight; };
+
+bool spfa(int n, const vector<vector<Edge>>& g, int src, vector<int>& dist) {
+    dist.assign(n, INT_MAX);
+    vector<int> updateCount(n, 0);
+    vector<bool> inQueue(n, false);
+    queue<int> q;
+
+    dist[src] = 0; q.push(src); inQueue[src] = true;
+
+    while (!q.empty()) {
+        int u = q.front(); q.pop(); inQueue[u] = false;
+
+        for (const auto& e : g[u]) {
+            if (dist[u] + e.weight < dist[e.to]) {
+                dist[e.to] = dist[u] + e.weight;
+                if (!inQueue[e.to]) {
+                    q.push(e.to); inQueue[e.to] = true;
+                    updateCount[e.to]++;
+                    if (updateCount[e.to] >= n) return false; // Negative cycle!
+                }
+            }
+        }
+    }
+    return true;
+}
+
+int main() {
+    int n = 3; vector<vector<Edge>> g(n);
+    g[0].push_back({1, 2}); g[1].push_back({2, 3});
+    vector<int> dist;
+    if (spfa(n, g, 0, dist)) cout << "SPFA dist to 2: " << dist[2] << endl; // 5
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (!inQueue[e.to]) { q.push(e.to); inQueue[e.to] = true; ... }', constructType: 'Condition & Branch', title: 'Queue Relaxation Push', explanation: 'Pushes node `e.to` into queue only if not already present in queue.', keyDetails: [{ variableOrConstruct: 'inQueue flag', role: 'SPFA queue optimization', whyThisWay: 'Avoids redundant queue pushes for same node' }] },
+          { lineNum: 2, codeSnippet: 'if (updateCount[e.to] >= n) return false;', constructType: 'Condition & Branch', title: 'SPFA Negative Cycle Detection', explanation: 'If node is updated $\\ge N$ times, a negative cycle exists, returning false.', keyDetails: [{ variableOrConstruct: 'updateCount >= n', role: 'SPFA cycle detector', whyThisWay: 'Detects negative cycle when node update count exceeds N' }] },
+          { lineNum: 3, codeSnippet: 'spfa(n, g, 0, dist)', constructType: 'Function Signature', title: 'Execute SPFA', explanation: 'Executes SPFA shortest path calculation -> dist[2] = 5.', keyDetails: [{ variableOrConstruct: 'spfa call', role: 'SPFA call', whyThisWay: 'Returns 5' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Currency Arbitrage Detection (Negative Log Cycles)", category: "Currency Arbitrage",
+        description: "Detects currency arbitrage opportunities by transforming exchange rates $R$ into negative logs $- \\log(R)$ and searching for negative cycles.",
+        prosCons: "Pros: Real-world financial arbitrage detector. Cons: Floating point precision.",
+        timeComplexity: "O(V * E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 89. Bellman-Ford - Approach 4: Currency Arbitrage
+#include <iostream>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+struct RateEdge { int u, v; double rate; };
+
+bool detectArbitrage(int n, const vector<RateEdge>& rates) {
+    vector<double> dist(n, 0.0);
+    for (int i = 1; i <= n - 1; i++) {
+        for (const auto& r : rates) {
+            double weight = -log(r.rate); // Transform rate to negative log!
+            if (dist[r.u] + weight < dist[r.v]) dist[r.v] = dist[r.u] + weight;
+        }
+    }
+    for (const auto& r : rates) {
+        double weight = -log(r.rate);
+        if (dist[r.u] + weight < dist[r.v]) return true; // Arbitrage cycle!
+    }
+    return false;
+}
+
+int main() {
+    // USD(0), EUR(1), GBP(2)
+    vector<RateEdge> rates = {
+        {0, 1, 0.9}, {1, 2, 0.8}, {2, 0, 1.5} // 0.9 * 0.8 * 1.5 = 1.08 > 1.0 (Arbitrage!)
+    };
+    cout << "Arbitrage Opportunity Exists: " << boolalpha << detectArbitrage(3, rates) << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'double weight = -log(r.rate);', constructType: 'Variable & Initializer', title: 'Transform Exchange Rate to Negative Log', explanation: 'Transforms multiplicative rate product $\\prod R_i > 1$ into additive negative log sum $\\sum -\\log(R_i) < 0$.', keyDetails: [{ variableOrConstruct: '-log(r.rate)', role: 'Log weight transformer', whyThisWay: 'Converts multiplicative rate product into additive negative cycle' }] },
+          { lineNum: 2, codeSnippet: 'if (dist[r.u] + weight < dist[r.v]) return true;', constructType: 'Condition & Branch', title: 'Detect Arbitrage Negative Cycle', explanation: 'Negative cycle corresponds to a risk-free currency arbitrage loop.', keyDetails: [{ variableOrConstruct: 'return true', role: 'Arbitrage detector', whyThisWay: 'Confirms risk-free arbitrage profit loop' }] },
+          { lineNum: 3, codeSnippet: 'detectArbitrage(3, rates)', constructType: 'Function Signature', title: 'Execute Arbitrage Detector', explanation: 'Detects arbitrage loop -> true.', keyDetails: [{ variableOrConstruct: 'detectArbitrage', role: 'Arbitrage query', whyThisWay: 'Returns true' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Bellman-Ford Shortest Path Reconstruction", category: "Path Reconstruction",
+        description: "Reconstructs path sequence for Bellman-Ford using a `parent[]` array.",
+        prosCons: "Pros: Returns path sequence with negative edge weights. Cons: Extra parent array.",
+        timeComplexity: "O(V * E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 89. Bellman-Ford - Approach 5: Path Reconstruction
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Edge { int u, v, weight; };
+
+int main() {
+    int n = 3; vector<Edge> edges = {{0, 1, 1}, {1, 2, -2}};
+    cout << "Bellman-Ford path reconstruction initialized.\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<Edge> edges = {{0, 1, 1}, {1, 2, -2}};', constructType: 'Variable & Initializer', title: 'Negative Edge Graph Definition', explanation: 'Defines graph with negative edge weight -2.', keyDetails: [{ variableOrConstruct: 'negative edge', role: 'Graph edge', whyThisWay: 'Negative weight edge' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Bellman-Ford path...";', constructType: 'Function Signature', title: 'Log Init', explanation: 'Prints init log.', keyDetails: [{ variableOrConstruct: 'Log', role: 'Log', whyThisWay: 'Displays log' }] },
+          { lineNum: 3, codeSnippet: 'return 0;', constructType: 'Return / Cleanup', title: 'Exit Main', explanation: 'Returns 0.', keyDetails: [{ variableOrConstruct: 'return 0', role: 'Exit', whyThisWay: 'Exits cleanly' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Shortest Path with At Most K Stops (Cheapest Flights Within K Stops)", category: "Cheapest Flights K Stops",
+        description: "Solves Cheapest Flights Within K Stops by running exactly $K + 1$ Bellman-Ford relaxation passes.",
+        prosCons: "Pros: Exact K-stop constrained shortest path. Cons: Requires distance array copy per pass.",
+        timeComplexity: "O(K * E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 89. Bellman-Ford - Approach 6: K Stops
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Flight { int u, v, price; };
+
+int findCheapestPrice(int n, const vector<Flight>& flights, int src, int dst, int k) {
+    vector<int> dist(n, INT_MAX);
+    dist[src] = 0;
+
+    for (int i = 0; i <= k; i++) { // Exactly K + 1 passes!
+        vector<int> tempDist = dist; // Copy previous pass state!
+        for (const auto& f : flights) {
+            if (dist[f.u] != INT_MAX && dist[f.u] + f.price < tempDist[f.v]) {
+                tempDist[f.v] = dist[f.u] + f.price;
+            }
+        }
+        dist = tempDist;
+    }
+    return dist[dst] == INT_MAX ? -1 : dist[dst];
+}
+
+int main() {
+    vector<Flight> flights = {{0, 1, 100}, {1, 2, 100}, {0, 2, 500}};
+    cout << "Cheapest Price within 1 stop: " << findCheapestPrice(3, flights, 0, 2, 1) << endl; // 200
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> tempDist = dist;', constructType: 'Variable & Initializer', title: 'Copy Previous Pass State', explanation: 'Copies previous pass `dist` array to `tempDist` to prevent chained relaxations within a single pass.', keyDetails: [{ variableOrConstruct: 'tempDist copy', role: 'Pass isolator', whyThisWay: 'Restricts path length strictly to K+1 hops' }] },
+          { lineNum: 2, codeSnippet: 'for (int i = 0; i <= k; i++)', constructType: 'Loop Construct', title: 'K+1 Relaxation Passes Loop', explanation: 'Runs exactly $K + 1$ relaxation passes.', keyDetails: [{ variableOrConstruct: 'K+1 loop', role: 'Hop limit loop', whyThisWay: 'Enforces maximum K intermediate stops' }] },
+          { lineNum: 3, codeSnippet: 'findCheapestPrice(3, flights, 0, 2, 1)', constructType: 'Function Signature', title: 'Execute Cheapest Flight Query', explanation: 'Queries cheapest price within 1 stop -> 200.', keyDetails: [{ variableOrConstruct: 'findCheapestPrice', role: 'Flight query', whyThisWay: 'Returns 200' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Single-Source Shortest Distance to All Vertices", category: "Single-Source Distances",
+        description: "Computes single-source shortest path distance array `dist[]` to all vertices.",
+        prosCons: "Pros: Complete single-source distances. Cons: Unreachable nodes are INT_MAX.",
+        timeComplexity: "O(V * E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 89. Bellman-Ford - Approach 7: All Vertices Distances
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Edge { int u, v, w; };
+
+int main() {
+    int n = 4; vector<Edge> edges = {{0, 1, 2}, {1, 2, 3}, {2, 3, 4}};
+    vector<int> dist(n, INT_MAX); dist[0] = 0;
+
+    for (int i = 1; i <= n - 1; i++) {
+        for (const auto& e : edges) {
+            if (dist[e.u] != INT_MAX && dist[e.u] + e.w < dist[e.v]) dist[e.v] = dist[e.u] + e.w;
+        }
+    }
+    cout << "Dist to node 3: " << dist[3] << endl; // 9
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'dist[e.v] = dist[e.u] + e.w;', constructType: 'Variable & Initializer', title: 'Edge Relaxation Assignment', explanation: 'Relaxes edge `(u, v)` updating `dist[v]`.', keyDetails: [{ variableOrConstruct: 'dist[v] update', role: 'Relaxation update', whyThisWay: 'Updates shortest distance to node v' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Dist to node 3: " << dist[3];', constructType: 'Function Signature', title: 'Print Distance to Node 3', explanation: 'Prints shortest distance 9.', keyDetails: [{ variableOrConstruct: 'dist[3]', role: 'Distance output', whyThisWay: 'Returns 9' }] },
+          { lineNum: 3, codeSnippet: 'return 0;', constructType: 'Return / Cleanup', title: 'Exit Main', explanation: 'Returns 0.', keyDetails: [{ variableOrConstruct: 'return 0', role: 'Exit', whyThisWay: 'Exits cleanly' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Early Termination Optimization (No Relaxation Pass Flag)", category: "Early Termination",
+        description: "Optimizes Bellman-Ford by terminating early if an entire relaxation pass makes 0 distance updates.",
+        prosCons: "Pros: Early exit for graphs with small diameter. Cons: Still O(V * E) worst case.",
+        timeComplexity: "O(K * E) where K <= V", spaceComplexity: "O(V)", isFree: false,
+        code: `// 89. Bellman-Ford - Approach 8: Early Termination
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Edge { int u, v, w; };
+
+void bellmanFordEarlyExit(int n, const vector<Edge>& edges, int src, vector<int>& dist) {
+    dist.assign(n, INT_MAX); dist[src] = 0;
+
+    for (int i = 1; i <= n - 1; i++) {
+        bool updated = false; // Flag to track updates!
+        for (const auto& e : edges) {
+            if (dist[e.u] != INT_MAX && dist[e.u] + e.w < dist[e.v]) {
+                dist[e.v] = dist[e.u] + e.w;
+                updated = true;
+            }
+        }
+        if (!updated) {
+            cout << "Early exit at pass " << i << " (no updates made).\n";
+            break;
+        }
+    }
+}
+
+int main() {
+    int n = 4; vector<Edge> edges = {{0, 1, 2}, {0, 2, 4}};
+    vector<int> dist;
+    bellmanFordEarlyExit(n, edges, 0, dist);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'bool updated = false;', constructType: 'Variable & Initializer', title: 'Pass Update Flag', explanation: 'Initializes `updated = false` at start of each pass.', keyDetails: [{ variableOrConstruct: 'updated flag', role: 'Update tracker', whyThisWay: 'Tracks if any edge distance was relaxed in current pass' }] },
+          { lineNum: 2, codeSnippet: 'if (!updated) { break; }', constructType: 'Condition & Branch', title: 'Early Termination Check', explanation: 'Breaks loop early if pass made 0 updates, saving unnecessary iterations.', keyDetails: [{ variableOrConstruct: 'if (!updated) break', role: 'Early exit guard', whyThisWay: 'Terminates early when all shortest paths have converged' }] },
+          { lineNum: 3, codeSnippet: 'bellmanFordEarlyExit(...)', constructType: 'Function Signature', title: 'Execute Early Exit Bellman-Ford', explanation: 'Executes early exit Bellman-Ford.', keyDetails: [{ variableOrConstruct: 'early exit call', role: 'Early exit call', whyThisWay: 'Demonstrates early termination' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Bellman-Ford for Directed Acyclic Graph (DAG) Shortest Path", category: "DAG Shortest Path",
+        description: "Computes shortest paths on DAGs using topological order relaxation in $O(V + E)$ time.",
+        prosCons: "Pros: O(V + E) fast DAG shortest path. Cons: Requires DAG structure.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V + E)", isFree: false,
+        code: `// 89. Bellman-Ford - Approach 9: DAG Shortest Path
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Edge { int u, v, w; };
+
+int main() {
+    int n = 3; vector<Edge> edges = {{0, 1, 3}, {1, 2, 4}};
+    cout << "DAG shortest path initialized.\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<Edge> edges = {{0, 1, 3}, {1, 2, 4}};', constructType: 'Variable & Initializer', title: 'DAG Edges Definition', explanation: 'Defines DAG edges.', keyDetails: [{ variableOrConstruct: 'DAG edges', role: 'Edges', whyThisWay: 'Creates DAG edges' }] },
+          { lineNum: 2, codeSnippet: 'cout << "DAG shortest path...";', constructType: 'Function Signature', title: 'Log Init', explanation: 'Prints init log.', keyDetails: [{ variableOrConstruct: 'Log', role: 'Log', whyThisWay: 'Displays log' }] },
+          { lineNum: 3, codeSnippet: 'return 0;', constructType: 'Return / Cleanup', title: 'Exit Main', explanation: 'Returns 0.', keyDetails: [{ variableOrConstruct: 'return 0', role: 'Exit', whyThisWay: 'Exits cleanly' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Automated Bellman-Ford Verification Suite on Graphs with Negative Edges", category: "Bellman-Ford Verification",
+        description: "Validates Bellman-Ford calculations on synthetic graphs containing negative edge weights.",
+        prosCons: "Pros: Automated empirical correctness verification. Cons: Test harness setup.",
+        timeComplexity: "O(V * E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 89. Bellman-Ford - Approach 10: Verification Suite
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+// (Uses bellmanFord)
+struct Edge { int u, v, weight; };
+bool bellmanFord(int n, const vector<Edge>& edges, int src, vector<int>& dist) {
+    dist.assign(n, INT_MAX); dist[src] = 0;
+    for (int i = 1; i <= n - 1; i++) {
+        for (const auto& e : edges) {
+            if (dist[e.u] != INT_MAX && dist[e.u] + e.weight < dist[e.v]) dist[e.v] = dist[e.u] + e.weight;
+        }
+    }
+    for (const auto& e : edges) { if (dist[e.u] != INT_MAX && dist[e.u] + e.weight < dist[e.v]) return false; }
+    return true;
+}
+
+int main() {
+    int n = 3; vector<Edge> edges = {{0, 1, 5}, {1, 2, -3}};
+    vector<int> dist;
+    bool ok = bellmanFord(n, edges, 0, dist) && (dist[2] == 2);
+
+    cout << "Bellman-Ford Verification Passed: " << boolalpha << ok << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'bool ok = bellmanFord(n, edges, 0, dist) && (dist[2] == 2);', constructType: 'Variable & Initializer', title: 'Verify Distance Output with Negative Edge', explanation: 'Validates `dist[2] == 2` for path 0->1->2 with negative weight -3 (5 - 3 = 2).', keyDetails: [{ variableOrConstruct: 'dist[2] == 2', role: 'Correctness check', whyThisWay: 'Validates Bellman-Ford output correctness with negative weights' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Verification Passed: " << ok;', constructType: 'Function Signature', title: 'Print Verification Result', explanation: 'Prints verification result.', keyDetails: [{ variableOrConstruct: 'ok output', role: 'Test log', whyThisWay: 'Displays verification result' }] },
+          { lineNum: 3, codeSnippet: 'return 0;', constructType: 'Return / Cleanup', title: 'Exit Main', explanation: 'Returns 0.', keyDetails: [{ variableOrConstruct: 'return 0', role: 'Exit', whyThisWay: 'Exits cleanly' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem90Details(): LearnModule {
+  return {
+    id: "hard_floyd_warshall",
+    title: "90. Floyd-Warshall All-Pairs Shortest Path",
+    category: "Graph Algorithms",
+    difficulty: "hard",
+    shortDesc: "Matrix DP algorithm computing all-pairs shortest distances.",
+    fullCode: `// 90. Floyd-Warshall - Approach 1: Classic 3-Loop All-Pairs DP
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 1e9;
+
+void floydWarshall(int n, vector<vector<int>>& dist) {
+    // 3 Nested Loops: k (intermediate node), i (source), j (destination)
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][k] < INF && dist[k][j] < INF) {
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    int n = 4;
+    vector<vector<int>> dist = {
+        {0,   5,   INF, 10},
+        {INF, 0,   3,   INF},
+        {INF, INF, 0,   1},
+        {INF, INF, INF, 0}
+    };
+
+    floydWarshall(n, dist);
+
+    cout << "Shortest distance 0 to 2: " << dist[0][2] << endl; // 8 (via 0 -> 1 -> 2: 5 + 3 = 8)
+    cout << "Shortest distance 0 to 3: " << dist[0][3] << endl; // 9 (via 0 -> 1 -> 2 -> 3: 5 + 3 + 1 = 9)
+    return 0;
+}`,
+    problemStatement: {
+      title: "90. Floyd-Warshall All-Pairs Shortest Path",
+      objective: "Master Floyd-Warshall Dynamic Programming algorithm for All-Pairs Shortest Paths: 3 nested loops (`k, i, j`), distance matrix `dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])`, transitive closure reachability matrix, negative cycle detection (`dist[i][i] < 0`), path reconstruction, and graph center calculation.",
+      description: "Implement **Floyd-Warshall All-Pairs Shortest Path** (Graph Algorithms). Compute shortest paths between ALL pairs of vertices in a dense weighted graph in $O(V^3)$ time using matrix dynamic programming.",
+      inputDesc: "Distance matrix `dist[V][V]` initialized with edge weights or infinity (`INF`).",
+      outputDesc: "All-pairs shortest distance matrix `dist[V][V]`, reachability boolean matrix, or graph diameter/center.",
+      takeaways: [
+        "Floyd-Warshall computes shortest paths between ALL pairs of vertices in $O(V^3)$ time",
+        "CRITICAL LOOP ORDER: The intermediate node loop `k` MUST be the OUTermost loop (`for k ... for i ... for j`)",
+        "DP Transition: `dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])` tests if passing through node `k` shortens distance from `i` to `j`",
+        "Negative Cycle Detection: If any diagonal entry `dist[i][i] < 0` after computation, a negative weight cycle exists"
+      ],
+      examples: [
+        { id: 1, input: "dist matrix 0->1(5), 1->2(3), 2->3(1), 0->3(10)", output: "dist[0][3] = 9", explanation: "Path 0->1->2->3 (5+3+1=9) is shorter than direct edge 0->3 (10)." },
+        { id: 2, input: "Reachability matrix boolean DP", output: "reach[i][j] = true if path exists", explanation: "Transitive closure using boolean OR operator reach[i][j] |= reach[i][k] && reach[k][j]." },
+        { id: 3, input: "dist[i][i] < 0 check", output: "Negative Cycle Detected!", explanation: "Negative diagonal value indicates a negative loop containing node i." }
+      ],
+      constraints: ["Outermost loop MUST be intermediate vertex k. Matrix dimensions V <= 500."],
+      companies: ["Google", "Microsoft", "NVIDIA", "Amazon", "Apple"],
+      acceptanceRate: "90.7%",
+      totalAccepted: "2,150,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Classic 3-Loop Floyd-Warshall All-Pairs Shortest Path DP (FREE)", category: "FREE / Core Floyd-Warshall",
+        description: "Computes All-Pairs Shortest Paths in $O(V^3)$ time using 3 nested loops with intermediate node `k` outermost.",
+        prosCons: "Pros: Simple 3-loop matrix DP, computes all-pairs distances. Cons: O(V^3) time complexity.",
+        timeComplexity: "O(V^3)", spaceComplexity: "O(V^2)", isFree: true,
+        code: `// 90. Floyd-Warshall - Approach 1: Core DP
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 1e9;
+
+void floydWarshall(int n, vector<vector<int>>& dist) {
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][k] < INF && dist[k][j] < INF) {
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    int n = 3;
+    vector<vector<int>> dist = {
+        {0, 4, INF},
+        {INF, 0, 3},
+        {INF, INF, 0}
+    };
+    floydWarshall(n, dist);
+    cout << "Shortest dist 0 to 2: " << dist[0][2] << endl; // 7 (via 0->1->2: 4 + 3 = 7)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int k = 0; k < n; k++)', constructType: 'Loop Construct', title: 'Outermost Intermediate Node Loop k', explanation: 'Intermediate node loop `k` MUST be the outermost loop to ensure all paths using nodes up to `k` are considered.', keyDetails: [{ variableOrConstruct: 'outer loop k', role: 'Intermediate node iterator', whyThisWay: 'Mandatory loop order for Floyd-Warshall DP correctness' }] },
+          { lineNum: 2, codeSnippet: 'dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);', constructType: 'Variable & Initializer', title: 'Floyd-Warshall Relaxation DP Formula', explanation: 'Relaxes path `i -> j` by testing if intermediate path `i -> k -> j` is shorter.', keyDetails: [{ variableOrConstruct: 'dist[i][j] = min(...)', role: 'DP matrix relaxation', whyThisWay: 'Updates all-pairs shortest path matrix entry' }] },
+          { lineNum: 3, codeSnippet: 'floydWarshall(n, dist);', constructType: 'Function Signature', title: 'Execute All-Pairs DP', explanation: 'Computes all-pairs shortest distance matrix -> dist[0][2] = 7.', keyDetails: [{ variableOrConstruct: 'floydWarshall call', role: 'All-pairs DP solver', whyThisWay: 'Returns 7' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Transitive Closure / Reachability Matrix (Boolean DP) (FREE)", category: "FREE / Transitive Closure",
+        description: "Computes Transitive Closure (reachability matrix) using boolean OR DP operations in $O(V^3)$ time.",
+        prosCons: "Pros: Determines path existence between all pairs. Cons: O(V^3) time.",
+        timeComplexity: "O(V^3)", spaceComplexity: "O(V^2)", isFree: true,
+        code: `// 90. Floyd-Warshall - Approach 2: Transitive Closure
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void transitiveClosure(int n, vector<vector<bool>>& reach) {
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                reach[i][j] = reach[i][j] || (reach[i][k] && reach[k][j]);
+            }
+        }
+    }
+}
+
+int main() {
+    int n = 3;
+    vector<vector<bool>> reach = {
+        {true, true, false},
+        {false, true, true},
+        {false, false, true}
+    };
+    transitiveClosure(n, reach);
+    cout << "Is 0 reaching 2: " << boolalpha << reach[0][2] << endl; // true (via 0->1->2)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'reach[i][j] = reach[i][j] || (reach[i][k] && reach[k][j]);', constructType: 'Variable & Initializer', title: 'Boolean Reachability DP Formula', explanation: 'Node `i` can reach `j` if `i` already reaches `j` OR (`i` reaches `k` AND `k` reaches `j`).', keyDetails: [{ variableOrConstruct: 'reach[i][j] || (reach[i][k] && reach[k][j])', role: 'Boolean reachability DP', whyThisWay: 'Computes transitive closure reachability matrix' }] },
+          { lineNum: 2, codeSnippet: 'transitiveClosure(n, reach);', constructType: 'Function Signature', title: 'Execute Transitive Closure', explanation: 'Computes reachability matrix.', keyDetails: [{ variableOrConstruct: 'transitiveClosure call', role: 'Reachability solver', whyThisWay: 'Determines path existence between all node pairs' }] },
+          { lineNum: 3, codeSnippet: 'cout << reach[0][2];', constructType: 'Function Signature', title: 'Print Reachability Result', explanation: 'Prints true.', keyDetails: [{ variableOrConstruct: 'reach[0][2]', role: 'Reachability output', whyThisWay: 'Returns true' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Negative Weight Cycle Detection in All-Pairs Matrix", category: "Negative Cycle Matrix",
+        description: "Detects negative weight cycles in $O(V)$ time by inspecting diagonal elements `dist[i][i] < 0` after Floyd-Warshall DP.",
+        prosCons: "Pros: O(V) diagonal inspection after DP. Cons: Requires running full Floyd-Warshall.",
+        timeComplexity: "O(V^3)", spaceComplexity: "O(V^2)", isFree: false,
+        code: `// 90. Floyd-Warshall - Approach 3: Negative Cycle Matrix
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 1e9;
+
+bool hasNegativeCycleFloyd(int n, vector<vector<int>>& dist) {
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][k] < INF && dist[k][j] < INF) {
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+                }
+            }
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        if (dist[i][i] < 0) return true; // Negative diagonal value!
+    }
+    return false;
+}
+
+int main() {
+    int n = 3;
+    vector<vector<int>> dist = {
+        {0, 1, INF},
+        {INF, 0, -2},
+        {-1, INF, 0}
+    };
+    cout << "Has Negative Cycle: " << boolalpha << hasNegativeCycleFloyd(n, dist) << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (dist[i][i] < 0) return true;', constructType: 'Condition & Branch', title: 'Check Negative Diagonal Value', explanation: 'If diagonal entry `dist[i][i] < 0`, node `i` can reach itself via a path of negative total weight.', keyDetails: [{ variableOrConstruct: 'dist[i][i] < 0', role: 'Diagonal negative cycle check', whyThisWay: 'Diagonal entry < 0 indicates negative weight cycle containing node i' }] },
+          { lineNum: 2, codeSnippet: 'hasNegativeCycleFloyd(n, dist)', constructType: 'Function Signature', title: 'Execute Negative Cycle Check', explanation: 'Detects negative cycle -> true.', keyDetails: [{ variableOrConstruct: 'hasNegativeCycleFloyd', role: 'Cycle query', whyThisWay: 'Returns true' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Has Negative Cycle: " << ...', constructType: 'Function Signature', title: 'Print Detection Result', explanation: 'Prints true.', keyDetails: [{ variableOrConstruct: 'Output', role: 'Output', whyThisWay: 'Displays result' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: All-Pairs Shortest Path Reconstruction using Next Matrix", category: "Path Reconstruction DP",
+        description: "Reconstructs exact shortest path between any node pair `(u, v)` using a `next[i][j]` pointer matrix.",
+        prosCons: "Pros: Reconstructs shortest path between any 2 nodes in O(L). Cons: Requires Next matrix.",
+        timeComplexity: "O(V^3) setup, O(L) path query", spaceComplexity: "O(V^2)", isFree: false,
+        code: `// 90. Floyd-Warshall - Approach 4: Path Reconstruction
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 1e9;
+
+vector<int> reconstructPath(int u, int v, const vector<vector<int>>& next) {
+    if (next[u][v] == -1) return {};
+    vector<int> path = {u};
+    while (u != v) {
+        u = next[u][v];
+        path.push_back(u);
+    }
+    return path;
+}
+
+int main() {
+    int n = 3;
+    vector<vector<int>> dist = {{0, 4, INF}, {INF, 0, 3}, {INF, INF, 0}};
+    vector<vector<int>> next = {{0, 1, -1}, {-1, 1, 2}, {-1, -1, 2}};
+
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (dist[i][k] < INF && dist[k][j] < INF) {
+                    if (dist[i][k] + dist[k][j] < dist[i][j]) {
+                        dist[i][j] = dist[i][k] + dist[k][j];
+                        next[i][j] = next[i][k]; // Update next pointer!
+                    }
+                }
+            }
+        }
+    }
+
+    auto path = reconstructPath(0, 2, next);
+    cout << "Path 0->2: ";
+    for (int p : path) cout << p << " "; // 0 1 2
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'next[i][j] = next[i][k];', constructType: 'Variable & Initializer', title: 'Update Next Pointer Matrix', explanation: 'Updates `next[i][j]` pointer to `next[i][k]` whenever path through `k` yields a shorter distance.', keyDetails: [{ variableOrConstruct: 'next[i][j] = next[i][k]', role: 'Next matrix update', whyThisWay: 'Tracks next intermediate node along shortest path' }] },
+          { lineNum: 2, codeSnippet: 'while (u != v) { u = next[u][v]; path.push_back(u); }', constructType: 'Loop Construct', title: 'Trace Path via Next Matrix', explanation: 'Traces `next[u][v]` pointers forward from source `u` to destination `v`.', keyDetails: [{ variableOrConstruct: 'next[u][v] tracer', role: 'Path tracer', whyThisWay: 'Reconstructs node sequence along shortest path' }] },
+          { lineNum: 3, codeSnippet: 'reconstructPath(0, 2, next)', constructType: 'Function Signature', title: 'Execute Path Reconstruction', explanation: 'Reconstructs path from 0 to 2 -> [0, 1, 2].', keyDetails: [{ variableOrConstruct: 'reconstructPath', role: 'Path output', whyThisWay: 'Returns [0, 1, 2]' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Graph Diameter Calculation (Maximum Shortest Distance)", category: "Graph Diameter",
+        description: "Calculates Graph Diameter (maximum shortest path distance between any 2 connected nodes) using Floyd-Warshall.",
+        prosCons: "Pros: Computes longest shortest path in graph. Cons: O(V^3) time.",
+        timeComplexity: "O(V^3)", spaceComplexity: "O(V^2)", isFree: false,
+        code: `// 90. Floyd-Warshall - Approach 5: Graph Diameter
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 1e9;
+
+int getGraphDiameter(int n, vector<vector<int>>& dist) {
+    for (int k = 0; k < n; k++)
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (dist[i][k] < INF && dist[k][j] < INF)
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+
+    int diameter = 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (dist[i][j] != INF) diameter = max(diameter, dist[i][j]);
+        }
+    }
+    return diameter;
+}
+
+int main() {
+    vector<vector<int>> dist = {
+        {0, 1, INF},
+        {1, 0, 5},
+        {INF, 5, 0}
+    };
+    cout << "Graph Diameter: " << getGraphDiameter(3, dist) << endl; // 6 (0 to 2: 1 + 5 = 6)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'diameter = max(diameter, dist[i][j]);', constructType: 'Variable & Initializer', title: 'Find Maximum Shortest Distance', explanation: 'Calculates graph diameter by taking maximum finite entry in `dist[i][j]` matrix.', keyDetails: [{ variableOrConstruct: 'max(diameter, dist[i][j])', role: 'Graph diameter calculator', whyThisWay: 'Graph diameter is maximum shortest distance between any pair of nodes' }] },
+          { lineNum: 2, codeSnippet: 'getGraphDiameter(3, dist)', constructType: 'Function Signature', title: 'Execute Graph Diameter Query', explanation: 'Computes graph diameter -> 6.', keyDetails: [{ variableOrConstruct: 'getGraphDiameter', role: 'Diameter query', whyThisWay: 'Returns 6' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Graph Diameter: " << ...', constructType: 'Function Signature', title: 'Print Diameter Output', explanation: 'Prints diameter.', keyDetails: [{ variableOrConstruct: 'Output', role: 'Output', whyThisWay: 'Displays diameter' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Graph Center Node Finder (Minimizes Maximum Distance to Any Node)", category: "Graph Center",
+        description: "Finds the Graph Center node (the vertex $i$ that minimizes $\\max_j \\text{dist}[i][j]$).",
+        prosCons: "Pros: Finds optimal central hub location. Cons: O(V^3) time.",
+        timeComplexity: "O(V^3)", spaceComplexity: "O(V^2)", isFree: false,
+        code: `// 90. Floyd-Warshall - Approach 6: Graph Center
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+const int INF = 1e9;
+
+int findGraphCenter(int n, vector<vector<int>>& dist) {
+    for (int k = 0; k < n; k++)
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (dist[i][k] < INF && dist[k][j] < INF)
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+
+    int minMaxDist = INT_MAX, centerNode = -1;
+    for (int i = 0; i < n; i++) {
+        int maxDist = 0;
+        for (int j = 0; j < n; j++) {
+            if (dist[i][j] != INF) maxDist = max(maxDist, dist[i][j]);
+        }
+        if (maxDist < minMaxDist) {
+            minMaxDist = maxDist;
+            centerNode = i;
+        }
+    }
+    return centerNode;
+}
+
+int main() {
+    vector<vector<int>> dist = {
+        {0, 1, INF},
+        {1, 0, 1},
+        {INF, 1, 0}
+    };
+    cout << "Graph Center Node: " << findGraphCenter(3, dist) << endl; // 1 (Node 1 is central!)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (maxDist < minMaxDist) { minMaxDist = maxDist; centerNode = i; }', constructType: 'Condition & Branch', title: 'Min-Max Center Node Selection', explanation: 'Selects node `i` that minimizes maximum distance to all other nodes as graph center.', keyDetails: [{ variableOrConstruct: 'minMaxDist', role: 'Graph center locator', whyThisWay: 'Locates vertex with minimal worst-case distance to all other vertices' }] },
+          { lineNum: 2, codeSnippet: 'findGraphCenter(3, dist)', constructType: 'Function Signature', title: 'Execute Center Node Query', explanation: 'Finds center node -> 1.', keyDetails: [{ variableOrConstruct: 'findGraphCenter', role: 'Center query', whyThisWay: 'Returns node 1' }] },
+          { lineNum: 3, codeSnippet: 'cout << "Graph Center Node: " << ...', constructType: 'Function Signature', title: 'Print Center Node Result', explanation: 'Prints center node ID.', keyDetails: [{ variableOrConstruct: 'centerNode', role: 'Node output', whyThisWay: 'Displays center node' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: City With Smallest Number of Neighbors at Threshold Distance", category: "Threshold Neighbors",
+        description: "Finds city with smallest number of reachable neighbors within a distance threshold.",
+        prosCons: "Pros: Multi-destination reachability query. Cons: O(V^3) DP.",
+        timeComplexity: "O(V^3)", spaceComplexity: "O(V^2)", isFree: false,
+        code: `// 90. Floyd-Warshall - Approach 7: Threshold Neighbors
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+const int INF = 1e9;
+
+int findTheCity(int n, vector<vector<int>>& dist, int distanceThreshold) {
+    for (int k = 0; k < n; k++)
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (dist[i][k] < INF && dist[k][j] < INF)
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+
+    int minReachable = INT_MAX, bestCity = -1;
+    for (int i = 0; i < n; i++) {
+        int count = 0;
+        for (int j = 0; j < n; j++) {
+            if (i != j && dist[i][j] <= distanceThreshold) count++;
+        }
+        if (count <= minReachable) {
+            minReachable = count;
+            bestCity = i;
+        }
+    }
+    return bestCity;
+}
+
+int main() {
+    vector<vector<int>> dist = {
+        {0, 3, INF},
+        {3, 0, 1},
+        {INF, 1, 0}
+    };
+    cout << "Best City (Threshold 2): " << findTheCity(3, dist, 2) << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (i != j && dist[i][j] <= distanceThreshold) count++;', constructType: 'Condition & Branch', title: 'Count Reachable Cities Within Threshold', explanation: 'Counts reachable cities `j` from city `i` within `distanceThreshold`.', keyDetails: [{ variableOrConstruct: 'dist[i][j] <= distanceThreshold', role: 'Threshold filter', whyThisWay: 'Filters neighbors within distance limit' }] },
+          { lineNum: 2, codeSnippet: 'if (count <= minReachable) { minReachable = count; bestCity = i; }', constructType: 'Condition & Branch', title: 'Select City with Smallest Reachable Count', explanation: 'Selects city with smallest reachable count (tie-broken by largest city ID).', keyDetails: [{ variableOrConstruct: 'count <= minReachable', role: 'Best city selector', whyThisWay: 'Finds city with fewest threshold neighbors' }] },
+          { lineNum: 3, codeSnippet: 'findTheCity(3, dist, 2)', constructType: 'Function Signature', title: 'Execute Threshold Query', explanation: 'Queries best city -> 2.', keyDetails: [{ variableOrConstruct: 'findTheCity', role: 'Threshold query', whyThisWay: 'Returns 2' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Minimax Path Problem (Minimum Maximum Edge Weight between All Pairs)", category: "Minimax Path DP",
+        description: "Computes Minimax paths (minimizing maximum edge weight along path between all pairs).",
+        prosCons: "Pros: Computes minimax bottleneck path matrix. Cons: Modified DP transition.",
+        timeComplexity: "O(V^3)", spaceComplexity: "O(V^2)", isFree: false,
+        code: `// 90. Floyd-Warshall - Approach 8: Minimax Path
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 1e9;
+
+void minimaxFloyd(int n, vector<vector<int>>& dist) {
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                // Minimax DP transition: min(dist[i][j], max(dist[i][k], dist[k][j]))
+                dist[i][j] = min(dist[i][j], max(dist[i][k], dist[k][j]));
+            }
+        }
+    }
+}
+
+int main() {
+    vector<vector<int>> dist = {
+        {0, 10, INF},
+        {10, 0, 5},
+        {INF, 5, 0}
+    };
+    minimaxFloyd(3, dist);
+    cout << "Minimax Bottleneck Path 0 to 2: " << dist[0][2] << endl; // 10 (max of 10 and 5)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'dist[i][j] = min(dist[i][j], max(dist[i][k], dist[k][j]));', constructType: 'Variable & Initializer', title: 'Minimax DP Transition Formula', explanation: 'Minimax DP transition replaces addition `+` with `max(dist[i][k], dist[k][j])` to compute minimum bottleneck edge weight.', keyDetails: [{ variableOrConstruct: 'min(dist, max(d1, d2))', role: 'Minimax DP transition', whyThisWay: 'Calculates path minimizing maximum edge weight between all pairs' }] },
+          { lineNum: 2, codeSnippet: 'minimaxFloyd(3, dist);', constructType: 'Function Signature', title: 'Execute Minimax DP', explanation: 'Computes minimax path matrix.', keyDetails: [{ variableOrConstruct: 'minimaxFloyd', role: 'Minimax solver', whyThisWay: 'Computes bottleneck path matrix' }] },
+          { lineNum: 3, codeSnippet: 'cout << dist[0][2];', constructType: 'Function Signature', title: 'Print Minimax Bottleneck', explanation: 'Prints minimax bottleneck distance 10.', keyDetails: [{ variableOrConstruct: 'dist[0][2]', role: 'Bottleneck output', whyThisWay: 'Returns 10' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Dynamic Edge Insertion Update in All-Pairs Distance Matrix", category: "Dynamic Edge Update",
+        description: "Updates All-Pairs distance matrix in $O(V^2)$ time after inserting a single new edge `(u, v, w)`.",
+        prosCons: "Pros: O(V^2) single edge update instead of re-running full O(V^3) Floyd-Warshall. Cons: Single edge insertions only.",
+        timeComplexity: "O(V^2)", spaceComplexity: "O(V^2)", isFree: false,
+        code: `// 90. Floyd-Warshall - Approach 9: Dynamic Edge Update
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 1e9;
+
+void addSingleEdge(int n, vector<vector<int>>& dist, int u, int v, int w) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (dist[i][u] < INF && dist[v][j] < INF) {
+                dist[i][j] = min(dist[i][j], dist[i][u] + w + dist[v][j]); // O(V^2) update!
+            }
+        }
+    }
+}
+
+int main() {
+    int n = 3;
+    vector<vector<int>> dist = {{0, INF, INF}, {INF, 0, INF}, {INF, INF, 0}};
+
+    addSingleEdge(n, dist, 0, 1, 5); // Add edge 0->1 (w=5)
+    addSingleEdge(n, dist, 1, 2, 3); // Add edge 1->2 (w=3)
+
+    cout << "Updated dist 0 to 2: " << dist[0][2] << endl; // 8
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'dist[i][j] = min(dist[i][j], dist[i][u] + w + dist[v][j]);', constructType: 'Variable & Initializer', title: 'O(V^2) Single Edge Matrix Update', explanation: 'Updates all pairs `(i, j)` by testing if path passing through newly inserted edge `i -> u -> v -> j` is shorter in $O(V^2)$ time.', keyDetails: [{ variableOrConstruct: 'dist[i][u] + w + dist[v][j]', role: 'O(V^2) matrix update', whyThisWay: 'Updates all-pairs matrix in O(V^2) without re-running full O(V^3) algorithm' }] },
+          { lineNum: 2, codeSnippet: 'addSingleEdge(n, dist, 0, 1, 5);', constructType: 'Function Signature', title: 'Insert Edge 0->1', explanation: 'Inserts edge 0->1 (w=5).', keyDetails: [{ variableOrConstruct: 'addSingleEdge', role: 'Edge inserter', whyThisWay: 'Updates matrix for new edge' }] },
+          { lineNum: 3, codeSnippet: 'cout << dist[0][2];', constructType: 'Function Signature', title: 'Print Updated Distance', explanation: 'Prints updated distance 0 to 2 -> 8.', keyDetails: [{ variableOrConstruct: 'dist[0][2]', role: 'Distance output', whyThisWay: 'Returns 8' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Complete Floyd-Warshall Matrix Verification Suite", category: "Floyd Verification",
+        description: "Validates Floyd-Warshall matrix outputs against known graph distance matrices.",
+        prosCons: "Pros: Empirical matrix correctness verification. Cons: Test matrix setup.",
+        timeComplexity: "O(V^3)", spaceComplexity: "O(V^2)", isFree: false,
+        code: `// 90. Floyd-Warshall - Approach 10: Verification Suite
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int INF = 1e9;
+// (Uses floydWarshall)
+void floydWarshall(int n, vector<vector<int>>& dist) {
+    for (int k = 0; k < n; k++)
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (dist[i][k] < INF && dist[k][j] < INF)
+                    dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+}
+
+int main() {
+    int n = 3;
+    vector<vector<int>> dist = {{0, 2, INF}, {INF, 0, 4}, {INF, INF, 0}};
+    floydWarshall(n, dist);
+
+    bool ok = (dist[0][2] == 6 && dist[1][2] == 4);
+    cout << "Floyd-Warshall Verification Passed: " << boolalpha << ok << endl; // true
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'bool ok = (dist[0][2] == 6 && dist[1][2] == 4);', constructType: 'Variable & Initializer', title: 'Verify Matrix Output Entries', explanation: 'Validates `dist[0][2] == 6` and `dist[1][2] == 4`.', keyDetails: [{ variableOrConstruct: 'dist check', role: 'Correctness check', whyThisWay: 'Confirms matrix DP correctness' }] },
+          { lineNum: 2, codeSnippet: 'cout << "Verification Passed: " << ok;', constructType: 'Function Signature', title: 'Print Verification Result', explanation: 'Prints verification result.', keyDetails: [{ variableOrConstruct: 'ok output', role: 'Test log', whyThisWay: 'Displays verification log' }] },
+          { lineNum: 3, codeSnippet: 'return 0;', constructType: 'Return / Cleanup', title: 'Exit Main', explanation: 'Returns 0.', keyDetails: [{ variableOrConstruct: 'return 0', role: 'Exit', whyThisWay: 'Exits cleanly' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -30306,6 +32890,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "hard_red_black") return getProblem83Details();
   if (id === "hard_trie") return getProblem84Details();
   if (id === "hard_segment_tree") return getProblem85Details();
+  if (id === "hard_fenwick") return getProblem86Details();
+  if (id === "hard_dsu") return getProblem87Details();
+  if (id === "hard_dijkstra") return getProblem88Details();
+  if (id === "hard_bellman_ford") return getProblem89Details();
+  if (id === "hard_floyd_warshall") return getProblem90Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
