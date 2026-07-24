@@ -2,11 +2,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Sun, Moon } from "lucide-react";
+import { useStore } from "@/lib/store";
 
 interface NavUser { name: string; avatar: string; provider: string; }
 
 export default function Navbar() {
   const path = usePathname();
+  const { theme, setTheme } = useStore();
   const [user, setUser] = useState<NavUser | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -16,6 +19,14 @@ export default function Navbar() {
       if (u) setUser(JSON.parse(u));
     } catch {}
   }, []);
+
+  const toggleTheme = () => {
+    if (theme.type === 'light') {
+      setTheme('dark-plus');
+    } else {
+      setTheme('github-light');
+    }
+  };
 
   const logout = () => {
     localStorage.removeItem("execium_user");
@@ -165,6 +176,28 @@ export default function Navbar() {
           }} />
           <span style={{ fontSize: 11.5, color: "#34d399", fontFamily: "'JetBrains Mono', monospace", fontWeight: 800 }}>LIVE</span>
         </div>
+
+        {/* Interactive Theme Switcher Button */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            width: 48, height: 48, borderRadius: 14, border: "1.5px solid rgba(255,255,255,0.12)",
+            background: "rgba(255,255,255,0.04)", display: "flex", alignItems: "center",
+            justifyContent: "center", cursor: "pointer", transition: "all 0.2s ease",
+            color: theme?.type === 'light' ? "#f59e0b" : "#a855f7"
+          }}
+          title={theme?.type === 'light' ? "Switch to Dark Mode" : "Switch to Light Mode"}
+          onMouseEnter={e => {
+            e.currentTarget.style.borderColor = "rgba(168,85,247,0.6)";
+            e.currentTarget.style.background = "rgba(168,85,247,0.2)";
+          }}
+          onMouseLeave={e => {
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+            e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+          }}
+        >
+          {theme?.type === 'light' ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
 
         {/* Scaled Settings Button */}
         <Link href="/settings" style={{

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import FeedbackModal from "@/components/FeedbackModal";
 
+import { useStore } from "@/lib/store";
+
 interface Settings {
   fontSize: number; fontFamily: string; tabSize: number;
   wordWrap: boolean; minimap: boolean; theme: string;
@@ -11,17 +13,23 @@ interface Settings {
 
 const DEFAULT: Settings = {
   fontSize: 14, fontFamily: "JetBrains Mono", tabSize: 4,
-  wordWrap: false, minimap: false, theme: "dark-plus",
+  wordWrap: false, minimap: false, theme: "github-light",
   notifications: true, autoSave: true, animationsEnabled: true,
 };
 
 const FONTS = ["JetBrains Mono", "Fira Code", "Cascadia Code", "Source Code Pro", "Consolas"];
 const THEMES = [
-  { id: "dark-plus", label: "Dark+" }, { id: "github-dark", label: "GitHub Dark" },
-  { id: "dracula", label: "Dracula" }, { id: "one-dark", label: "One Dark" },
-  { id: "tokyo-night", label: "Tokyo Night" }, { id: "monokai", label: "Monokai" },
-  { id: "nord", label: "Nord" }, { id: "ayu-dark", label: "Ayu Dark" },
-  { id: "github-light", label: "GitHub Light" }, { id: "solarized-light", label: "Solarized Light" },
+  { id: "github-light", label: "GitHub Light (Default)" },
+  { id: "solarized-light", label: "Solarized Light" },
+  { id: "light-plus", label: "Light+" },
+  { id: "dark-plus", label: "Dark+" },
+  { id: "github-dark", label: "GitHub Dark" },
+  { id: "dracula", label: "Dracula" },
+  { id: "one-dark", label: "One Dark" },
+  { id: "tokyo-night", label: "Tokyo Night" },
+  { id: "monokai", label: "Monokai" },
+  { id: "nord", label: "Nord" },
+  { id: "ayu-dark", label: "Ayu Dark" },
 ];
 
 function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
@@ -56,6 +64,7 @@ function Row({ label, sub, children }: { label: string; sub?: string; children: 
 }
 
 export default function SettingsPage() {
+  const { setTheme: updateGlobalTheme } = useStore();
   const [s, setS] = useState<Settings>(DEFAULT);
   const [saved, setSaved] = useState(false);
   const [user, setUser] = useState<{ name: string; provider: string } | null>(null);
@@ -64,19 +73,33 @@ export default function SettingsPage() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem("execium_settings");
-      if (stored) setS({ ...DEFAULT, ...JSON.parse(stored) });
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setS({ ...DEFAULT, ...parsed });
+        if (parsed.theme) updateGlobalTheme(parsed.theme);
+      } else {
+        updateGlobalTheme("github-light");
+      }
       const u = localStorage.getItem("execium_user");
       if (u) setUser(JSON.parse(u));
     } catch {}
-  }, []);
+  }, [updateGlobalTheme]);
 
   const save = () => {
     localStorage.setItem("execium_settings", JSON.stringify(s));
+    localStorage.setItem("execium_theme", s.theme);
+    updateGlobalTheme(s.theme);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const set = <K extends keyof Settings>(k: K, v: Settings[K]) => setS(prev => ({ ...prev, [k]: v }));
+  const set = <K extends keyof Settings>(k: K, v: Settings[K]) => {
+    setS(prev => ({ ...prev, [k]: v }));
+    if (k === "theme") {
+      updateGlobalTheme(v as string);
+      localStorage.setItem("execium_theme", v as string);
+    }
+  };
 
   const selectStyle = {
     background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)",

@@ -78,13 +78,29 @@ const INITIAL_TAB: TabItem = {
   activeLearnModuleId: null
 };
 
+function getInitialTheme(): VSTheme {
+  try {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("execium_theme");
+      if (savedTheme && THEMES[savedTheme]) return THEMES[savedTheme];
+
+      const savedSettings = localStorage.getItem("execium_settings");
+      if (savedSettings) {
+        const parsed = JSON.parse(savedSettings);
+        if (parsed.theme && THEMES[parsed.theme]) return THEMES[parsed.theme];
+      }
+    }
+  } catch {}
+  return THEMES[DEFAULT_THEME_ID] || THEMES['github-light'];
+}
+
 export const useStore = create<Store>((set,get)=>({
   pid:'untitled',
   code: DEFAULT_UNTITLED_CODE,
   steps: PROGRAMS.for_loop.steps,
   cur:0, playback:'idle', speed:1400,
   aiMode:'beginner', showAI:false, activePanel:'memory', _timer:null,
-  theme: THEMES[DEFAULT_THEME_ID],
+  theme: getInitialTheme(),
   isCollapsed: true,
   projectName: 'Untitled Project',
   projectId: null,
@@ -319,7 +335,15 @@ export const useStore = create<Store>((set,get)=>({
   setAIMode(m:AIMode){set({aiMode:m})},
   toggleAI(){set(s=>({showAI:!s.showAI}))},
   setPanel(p:Panel){set({activePanel:p})},
-  setTheme(id:string){set({theme:THEMES[id]??THEMES[DEFAULT_THEME_ID]})},
+  setTheme(id: string) {
+    const selected = THEMES[id] ?? THEMES[DEFAULT_THEME_ID] ?? THEMES['github-light'];
+    set({ theme: selected });
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("execium_theme", id);
+      }
+    } catch {}
+  },
   setCollapsed(collapsed){set({isCollapsed:collapsed})},
   toggleCollapsed(){set(s=>({isCollapsed:!s.isCollapsed}))},
 
