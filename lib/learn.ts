@@ -14131,6 +14131,2688 @@ int main() {
   };
 }
 
+
+export function getProblem51Details(): LearnModule {
+  return {
+    id: "med_bst",
+    title: "51. Binary Search Tree (BST)",
+    category: "Data Structures",
+    difficulty: "medium",
+    shortDesc: "Insert, search, and delete nodes maintaining BST property.",
+    fullCode: `// 51. Binary Search Tree - Approach 1: Recursive Insert & Search
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+BSTNode* insert(BSTNode* root, int val) {
+    if (!root) return new BSTNode(val);
+    if (val < root->val) root->left = insert(root->left, val);
+    else if (val > root->val) root->right = insert(root->right, val);
+    return root;
+}
+
+bool search(BSTNode* root, int target) {
+    if (!root) return false;
+    if (root->val == target) return true;
+    if (target < root->val) return search(root->left, target);
+    return search(root->right, target);
+}
+
+int main() {
+    BSTNode* root = nullptr;
+    root = insert(root, 50);
+    insert(root, 30);
+    insert(root, 70);
+    insert(root, 20);
+    insert(root, 40);
+
+    cout << "Search 30: " << (search(root, 30) ? "Found" : "Not Found") << endl;
+    cout << "Search 90: " << (search(root, 90) ? "Found" : "Not Found") << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "51. Binary Search Tree (BST)",
+      objective: "Master Binary Search Tree fundamentals: maintaining the BST invariant (left < root < right), recursive/iterative search, node insertion, node deletion, range validation, successor lookup, and BST reconstruction.",
+      description: "Implement **Binary Search Tree (BST)** (Data Structures). Construct a dynamic BST supporting efficient O(log N) average-time search, insertion, deletion, and validation operations.",
+      inputDesc: "Sequence of key values for insertion, search target queries, node deletion requests, or sorted array boundaries.",
+      outputDesc: "Boolean search results, sorted inorder output sequences, updated node structures, or validated BST properties.",
+      takeaways: [
+        "In a BST, every left subtree node has a value smaller than the root, and every right subtree node has a value larger",
+        "Inorder traversal of a valid BST always produces keys in strictly increasing sorted order",
+        "Deletion requires handling 3 distinct cases: leaf node, single child node, and node with two children (using inorder successor)",
+        "BST operations are O(log N) average time for balanced trees, but degrade to O(N) for unskewed trees"
+      ],
+      examples: [
+        { id: 1, input: "insert keys: [50, 30, 70, 20, 40]; search(30)", output: "Search 30: Found", explanation: "30 is located in the left subtree of 50 and right child of 20." },
+        { id: 2, input: "deleteNode(root, 30) on BST with 30 having children 20 & 40", output: "Node 30 removed, 40 replaces 30", explanation: "Node 30 has two children; replaced by its inorder successor (40)." },
+        { id: 3, input: "sortedArrayToBST([1, 2, 3, 4, 5, 6, 7])", output: "Root: 4, Left: 2, Right: 6", explanation: "Middle element 4 becomes root, recursively forming a balanced BST of height 2." }
+      ],
+      constraints: ["Node values are integers. Duplicate keys are ignored or placed consistently."],
+      companies: ["Google", "Amazon", "Microsoft", "Meta", "Bloomberg"],
+      acceptanceRate: "89.4%",
+      totalAccepted: "4,120,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Recursive BST Insert & Search (FREE)", category: "FREE / Core BST",
+        description: "Implements classic recursive insert and search functions using the left < root < right BST invariant.",
+        prosCons: "Pros: Clean and concise code. Cons: Stack space depends on tree height O(H).",
+        timeComplexity: "O(log N) avg, O(N) worst", spaceComplexity: "O(H)", isFree: true,
+        code: `// 51. BST - Approach 1: Recursive Insert & Search
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+BSTNode* insert(BSTNode* root, int val) {
+    if (!root) return new BSTNode(val);
+    if (val < root->val) root->left = insert(root->left, val);
+    else if (val > root->val) root->right = insert(root->right, val);
+    return root;
+}
+
+bool search(BSTNode* root, int target) {
+    if (!root) return false;
+    if (root->val == target) return true;
+    if (target < root->val) return search(root->left, target);
+    return search(root->right, target);
+}
+
+int main() {
+    BSTNode* root = nullptr;
+    root = insert(root, 50);
+    insert(root, 30);
+    insert(root, 70);
+    cout << "Search 30: " << (search(root, 30) ? "Found" : "Not Found") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'BSTNode* insert(BSTNode* root, int val)', constructType: 'Function Signature', title: 'Recursive Insert Declaration', explanation: 'Takes the current subtree root pointer and value to insert, returning the updated subtree root pointer.', keyDetails: [{ variableOrConstruct: 'BSTNode* root', role: 'Subtree root pointer', whyThisWay: 'Returning BSTNode* allows clean recursive re-assignment of child pointers' }] },
+          { lineNum: 2, codeSnippet: 'if (!root) return new BSTNode(val);', constructType: 'Condition & Branch', title: 'Base Case Insertion Point', explanation: 'When a null pointer is reached, the correct insertion location has been found. Creates a new node and returns it.', keyDetails: [{ variableOrConstruct: 'new BSTNode(val)', role: 'Node creation', whyThisWay: 'Allocates new node on heap when empty spot is found' }] },
+          { lineNum: 3, codeSnippet: 'if (val < root->val) root->left = insert(root->left, val);', constructType: 'Condition & Branch', title: 'BST Invariant Navigation', explanation: 'If the value is smaller than current root, navigate left. If larger, navigate right. Re-attaches returned pointer to maintain structure.', keyDetails: [{ variableOrConstruct: 'val < root->val', role: 'BST property check', whyThisWay: 'Directs search space reduction by half each step in balanced trees' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Iterative BST Search & Insert (FREE)", category: "FREE / Iterative",
+        description: "Uses a while loop to navigate the tree without recursion, saving stack overhead and achieving O(1) auxiliary space.",
+        prosCons: "Pros: O(1) auxiliary space, no stack overflow risk. Cons: Slightly more pointer tracking for insertion.",
+        timeComplexity: "O(log N) avg, O(N) worst", spaceComplexity: "O(1)", isFree: true,
+        code: `// 51. BST - Approach 2: Iterative Insert & Search
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+bool searchIterative(BSTNode* root, int target) {
+    BSTNode* curr = root;
+    while (curr) {
+        if (curr->val == target) return true;
+        if (target < curr->val) curr = curr->left;
+        else curr = curr->right;
+    }
+    return false;
+}
+
+BSTNode* insertIterative(BSTNode* root, int val) {
+    if (!root) return new BSTNode(val);
+    BSTNode* curr = root;
+    BSTNode* parent = nullptr;
+    while (curr) {
+        parent = curr;
+        if (val < curr->val) curr = curr->left;
+        else if (val > curr->val) curr = curr->right;
+        else return root;
+    }
+    if (val < parent->val) parent->left = new BSTNode(val);
+    else parent->right = new BSTNode(val);
+    return root;
+}
+
+int main() {
+    BSTNode* root = nullptr;
+    root = insertIterative(root, 40);
+    insertIterative(root, 20);
+    insertIterative(root, 60);
+    cout << "Iterative Search 20: " << (searchIterative(root, 20) ? "Found" : "Not Found") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (curr) { ... curr = curr->left; }', constructType: 'Loop Construct', title: 'Iterative Search Loop', explanation: 'Navigates down the tree using a simple pointer reassignment loop until finding the target or hitting nullptr.', keyDetails: [{ variableOrConstruct: 'curr = curr->left', role: 'Pointer traversal', whyThisWay: 'Replaces stack frame allocations with a single pointer mutation' }] },
+          { lineNum: 2, codeSnippet: 'BSTNode* parent = nullptr;', constructType: 'Variable & Initializer', title: 'Parent Pointer Tracking', explanation: 'Tracks the last non-null node during traversal so the new node can be attached as its left or right child once null is reached.', keyDetails: [{ variableOrConstruct: 'parent', role: 'Trailing pointer', whyThisWay: 'Needed for insertion because curr becomes nullptr at insertion spot' }] },
+          { lineNum: 3, codeSnippet: 'if (val < parent->val) parent->left = new BSTNode(val);', constructType: 'Condition & Branch', title: 'Link New Node to Parent', explanation: 'Compares the new value against parent value to determine whether to attach as left or right child.', keyDetails: [{ variableOrConstruct: 'parent->left', role: 'Child linkage', whyThisWay: 'Establishes the final pointer connection in constant space' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Find Min and Max Values in BST", category: "BST Properties",
+        description: "Finds the minimum value by traversing left-most pointers and maximum value by traversing right-most pointers.",
+        prosCons: "Pros: Extremely fast O(H) operations. Cons: Relies entirely on valid BST structure.",
+        timeComplexity: "O(H)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 51. BST - Approach 3: Find Min & Max
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+int findMin(BSTNode* root) {
+    if (!root) throw runtime_error("Tree is empty");
+    while (root->left) root = root->left;
+    return root->val;
+}
+
+int findMax(BSTNode* root) {
+    if (!root) throw runtime_error("Tree is empty");
+    while (root->right) root = root->right;
+    return root->val;
+}
+
+int main() {
+    BSTNode* root = new BSTNode(50);
+    root->left = new BSTNode(25);
+    root->right = new BSTNode(75);
+    root->left->left = new BSTNode(10);
+    root->right->right = new BSTNode(90);
+
+    cout << "Minimum: " << findMin(root) << endl;
+    cout << "Maximum: " << findMax(root) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'while (root->left) root = root->left;', constructType: 'Loop Construct', title: 'Traverse to Leftmost Node', explanation: 'Follows left pointers iteratively until a node with no left child is encountered. That node contains the minimum value in the BST.', keyDetails: [{ variableOrConstruct: 'root->left', role: 'Leftward traversal', whyThisWay: 'By BST property, all smaller elements lie strictly to the left' }] },
+          { lineNum: 2, codeSnippet: 'while (root->right) root = root->right;', constructType: 'Loop Construct', title: 'Traverse to Rightmost Node', explanation: 'Follows right pointers iteratively until a node with no right child is encountered. That node contains the maximum value in the BST.', keyDetails: [{ variableOrConstruct: 'root->right', role: 'Rightward traversal', whyThisWay: 'By BST property, all larger elements lie strictly to the right' }] },
+          { lineNum: 3, codeSnippet: 'return root->val;', constructType: 'Return / Cleanup', title: 'Return Extreme Value', explanation: 'Returns the payload value stored at the extreme node reached.', keyDetails: [{ variableOrConstruct: 'root->val', role: 'Result payload', whyThisWay: 'Directly retrieves min/max value without visiting unrelated nodes' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Inorder Successor in BST", category: "Navigation",
+        description: "Finds the inorder successor (next larger element) of a given node in a BST.",
+        prosCons: "Pros: Crucial helper for deletion and iteration. Cons: Requires parent link or tree root search.",
+        timeComplexity: "O(H)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 51. BST - Approach 4: Inorder Successor
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+BSTNode* findMinNode(BSTNode* node) {
+    while (node && node->left) node = node->left;
+    return node;
+}
+
+BSTNode* inorderSuccessor(BSTNode* root, BSTNode* target) {
+    if (!target) return nullptr;
+    if (target->right) return findMinNode(target->right);
+
+    BSTNode* successor = nullptr;
+    BSTNode* ancestor = root;
+    while (ancestor != target) {
+        if (target->val < ancestor->val) {
+            successor = ancestor;
+            ancestor = ancestor->left;
+        } else {
+            ancestor = ancestor->right;
+        }
+    }
+    return successor;
+}
+
+int main() {
+    BSTNode* root = new BSTNode(20);
+    root->left = new BSTNode(8);
+    root->right = new BSTNode(22);
+    root->left->left = new BSTNode(4);
+    root->left->right = new BSTNode(12);
+    root->left->right->left = new BSTNode(10);
+    root->left->right->right = new BSTNode(14);
+
+    BSTNode* succ = inorderSuccessor(root, root->left); // target = 8
+    cout << "Successor of 8 is: " << (succ ? to_string(succ->val) : "None") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (target->right) return findMinNode(target->right);', constructType: 'Condition & Branch', title: 'Case 1: Right Subtree Exists', explanation: 'If the target node has a right child, its inorder successor is simply the minimum node in its right subtree.', keyDetails: [{ variableOrConstruct: 'findMinNode(target->right)', role: 'Right-min lookup', whyThisWay: 'Next largest element after target is the leftmost child of target right child' }] },
+          { lineNum: 2, codeSnippet: 'if (target->val < ancestor->val) { successor = ancestor; ancestor = ancestor->left; }', constructType: 'Condition & Branch', title: 'Case 2: Deepest Left Ancestor Search', explanation: 'When target has no right child, traverse from root down to target, recording the last node where we turned left. That recorded node is the successor.', keyDetails: [{ variableOrConstruct: 'successor = ancestor', role: 'Ancestor tracking', whyThisWay: 'The lowest ancestor whose left child is also an ancestor of target is the successor' }] },
+          { lineNum: 3, codeSnippet: 'return successor;', constructType: 'Return / Cleanup', title: 'Return Found Successor', explanation: 'Returns the pointer to the successor node (or nullptr if target is the largest value in tree).', keyDetails: [{ variableOrConstruct: 'successor', role: 'Successor node pointer', whyThisWay: 'Provides exact in-order successor in O(H) time' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Complete Node Deletion from BST", category: "Node Deletion",
+        description: "Deletes a node from a BST while handling 3 cases: leaf node, 1 child, and 2 children (swapping with inorder successor).",
+        prosCons: "Pros: Complete BST mutation logic. Cons: Multi-branch logic needs careful pointer updates.",
+        timeComplexity: "O(H)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 51. BST - Approach 5: Delete Node
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+BSTNode* findMin(BSTNode* node) {
+    while (node->left) node = node->left;
+    return node;
+}
+
+BSTNode* deleteNode(BSTNode* root, int key) {
+    if (!root) return nullptr;
+    if (key < root->val) root->left = deleteNode(root->left, key);
+    else if (key > root->val) root->right = deleteNode(root->right, key);
+    else {
+        if (!root->left) {
+            BSTNode* temp = root->right;
+            delete root;
+            return temp;
+        } else if (!root->right) {
+            BSTNode* temp = root->left;
+            delete root;
+            return temp;
+        }
+        BSTNode* temp = findMin(root->right);
+        root->val = temp->val;
+        root->right = deleteNode(root->right, temp->val);
+    }
+    return root;
+}
+
+void printInorder(BSTNode* root) {
+    if (!root) return;
+    printInorder(root->left);
+    cout << root->val << " ";
+    printInorder(root->right);
+}
+
+int main() {
+    BSTNode* root = new BSTNode(50);
+    root->left = new BSTNode(30); root->right = new BSTNode(70);
+    root->left->left = new BSTNode(20); root->left->right = new BSTNode(40);
+
+    root = deleteNode(root, 30);
+    cout << "Inorder after deleting 30: ";
+    printInorder(root);
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (!root->left) { BSTNode* temp = root->right; delete root; return temp; }', constructType: 'Condition & Branch', title: 'Case 1 & 2: Leaf or One Child', explanation: 'If left child is missing, replace current node with right child and free memory. If right child missing, replace with left child.', keyDetails: [{ variableOrConstruct: 'delete root', role: 'Memory deallocation', whyThisWay: 'Directly frees node and promotes single child to maintain tree continuity' }] },
+          { lineNum: 2, codeSnippet: 'BSTNode* temp = findMin(root->right);', constructType: 'Variable & Initializer', title: 'Case 3: Two Children Successor Lookup', explanation: 'Finds the minimum node in right subtree (inorder successor) to replace current node value.', keyDetails: [{ variableOrConstruct: 'findMin(root->right)', role: 'Successor resolution', whyThisWay: 'Successor maintains BST invariant because it is larger than left subtree and smaller than right' }] },
+          { lineNum: 3, codeSnippet: 'root->val = temp->val; root->right = deleteNode(root->right, temp->val);', constructType: 'Function Signature', title: 'Swap Value & Delete Successor', explanation: 'Copies successor value to current node, then recursively deletes the successor node from right subtree.', keyDetails: [{ variableOrConstruct: 'root->val = temp->val', role: 'Value replacement', whyThisWay: 'Transforms two-child deletion into a simpler single/leaf deletion in right subtree' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Validate BST Property (Range Bounds)", category: "Validation",
+        description: "Validates whether a binary tree is a valid BST using recursive [min, max] range constraints.",
+        prosCons: "Pros: O(N) time complexity, catches subtle invalid subtree ordering. Cons: Uses LONG_MIN / LONG_MAX bounds.",
+        timeComplexity: "O(N)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 51. BST - Approach 6: Validate BST
+#include <iostream>
+#include <climits>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+bool isValidBSTHelper(BSTNode* root, long long minVal, long long maxVal) {
+    if (!root) return true;
+    if (root->val <= minVal || root->val >= maxVal) return false;
+    return isValidBSTHelper(root->left, minVal, root->val) &&
+           isValidBSTHelper(root->right, root->val, maxVal);
+}
+
+bool isValidBST(BSTNode* root) {
+    return isValidBSTHelper(root, LLONG_MIN, LLONG_MAX);
+}
+
+int main() {
+    BSTNode* root = new BSTNode(10);
+    root->left = new BSTNode(5);
+    root->right = new BSTNode(15);
+    root->right->left = new BSTNode(6); // Invalid: 6 is in right subtree of 10 but < 10
+
+    cout << "Is Valid BST: " << (isValidBST(root) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (root->val <= minVal || root->val >= maxVal) return false;', constructType: 'Condition & Branch', title: 'Range Validation Check', explanation: 'Validates that current node value strictly satisfies allowed lower and upper bounds derived from parent nodes.', keyDetails: [{ variableOrConstruct: 'minVal / maxVal', role: 'Allowed range bounds', whyThisWay: 'Checking only immediate children is insufficient; whole subtrees must respect ancestor bounds' }] },
+          { lineNum: 2, codeSnippet: 'isValidBSTHelper(root->left, minVal, root->val)', constructType: 'Function Signature', title: 'Left Child Range Narrowing', explanation: 'Recurses left, updating upper bound to current node value (all left nodes must be < current val).', keyDetails: [{ variableOrConstruct: 'maxVal = root->val', role: 'Upper bound tightening', whyThisWay: 'Ensures all left descendants are smaller than current node' }] },
+          { lineNum: 3, codeSnippet: 'isValidBSTHelper(root->right, root->val, maxVal)', constructType: 'Function Signature', title: 'Right Child Range Narrowing', explanation: 'Recurses right, updating lower bound to current node value (all right nodes must be > current val).', keyDetails: [{ variableOrConstruct: 'minVal = root->val', role: 'Lower bound tightening', whyThisWay: 'Ensures all right descendants are larger than current node' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Lowest Common Ancestor (LCA) in BST", category: "LCA",
+        description: "Leverages BST ordering properties to find the Lowest Common Ancestor of two nodes in O(H) time.",
+        prosCons: "Pros: O(H) time, no extra storage required. Cons: Assumes both values exist in BST.",
+        timeComplexity: "O(H)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 51. BST - Approach 7: LCA in BST
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+BSTNode* lowestCommonAncestor(BSTNode* root, int p, int q) {
+    BSTNode* curr = root;
+    while (curr) {
+        if (p < curr->val && q < curr->val) curr = curr->left;
+        else if (p > curr->val && q > curr->val) curr = curr->right;
+        else return curr;
+    }
+    return nullptr;
+}
+
+int main() {
+    BSTNode* root = new BSTNode(20);
+    root->left = new BSTNode(8); root->right = new BSTNode(22);
+    root->left->left = new BSTNode(4); root->left->right = new BSTNode(12);
+
+    BSTNode* lca = lowestCommonAncestor(root, 4, 12);
+    cout << "LCA of 4 and 12 is: " << (lca ? to_string(lca->val) : "None") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (p < curr->val && q < curr->val) curr = curr->left;', constructType: 'Condition & Branch', title: 'Navigate Left Subtree', explanation: 'If both p and q are strictly less than current node, the common ancestor must lie in left subtree.', keyDetails: [{ variableOrConstruct: 'p < curr->val && q < curr->val', role: 'Left split condition', whyThisWay: 'Both nodes belong to left subtree' }] },
+          { lineNum: 2, codeSnippet: 'else if (p > curr->val && q > curr->val) curr = curr->right;', constructType: 'Condition & Branch', title: 'Navigate Right Subtree', explanation: 'If both p and q are strictly greater than current node, the common ancestor must lie in right subtree.', keyDetails: [{ variableOrConstruct: 'p > curr->val && q > curr->val', role: 'Right split condition', whyThisWay: 'Both nodes belong to right subtree' }] },
+          { lineNum: 3, codeSnippet: 'else return curr;', constructType: 'Return / Cleanup', title: 'Found Split Point (LCA)', explanation: 'When p and q split (one left, one right, or one equals current node), current node is the LCA.', keyDetails: [{ variableOrConstruct: 'return curr', role: 'LCA node', whyThisWay: 'First node where paths to p and q diverge is by definition the LCA' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Range Query / Range Sum in BST", category: "Range Query",
+        description: "Calculates the sum of all node values within range [low, high] by pruning subtrees outside range.",
+        prosCons: "Pros: Prunes invalid subtrees for fast queries. Cons: Depends on range size.",
+        timeComplexity: "O(K + H)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 51. BST - Approach 8: Range Sum
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+int rangeSumBST(BSTNode* root, int low, int high) {
+    if (!root) return 0;
+    if (root->val < low) return rangeSumBST(root->right, low, high);
+    if (root->val > high) return rangeSumBST(root->left, low, high);
+
+    return root->val + rangeSumBST(root->left, low, high) + rangeSumBST(root->right, low, high);
+}
+
+int main() {
+    BSTNode* root = new BSTNode(10);
+    root->left = new BSTNode(5); root->right = new BSTNode(15);
+    root->left->left = new BSTNode(3); root->left->right = new BSTNode(7);
+    root->right->right = new BSTNode(18);
+
+    cout << "Range Sum [7, 15]: " << rangeSumBST(root, 7, 15) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (root->val < low) return rangeSumBST(root->right, low, high);', constructType: 'Condition & Branch', title: 'Prune Left Subtree', explanation: 'If current value is below lower bound, all left descendants are also below bound; prune left subtree and search right.', keyDetails: [{ variableOrConstruct: 'root->val < low', role: 'Left subtree pruning', whyThisWay: 'Avoids visiting nodes guaranteed to be out of range' }] },
+          { lineNum: 2, codeSnippet: 'if (root->val > high) return rangeSumBST(root->left, low, high);', constructType: 'Condition & Branch', title: 'Prune Right Subtree', explanation: 'If current value is above upper bound, all right descendants are also above bound; prune right subtree and search left.', keyDetails: [{ variableOrConstruct: 'root->val > high', role: 'Right subtree pruning', whyThisWay: 'Eliminates right subtree from calculation' }] },
+          { lineNum: 3, codeSnippet: 'return root->val + rangeSumBST(root->left, low, high) + rangeSumBST(root->right, low, high);', constructType: 'Return / Cleanup', title: 'Include In-Range Node Value', explanation: 'Current node is within [low, high]; add its value and recursively search both subtrees.', keyDetails: [{ variableOrConstruct: 'root->val', role: 'Valid range accumulator', whyThisWay: 'Sums valid payload and aggregates results from children' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Convert Sorted Array to Balanced BST", category: "BST Construction",
+        description: "Recursively picks the middle element of a sorted array to build a height-balanced BST in O(N) time.",
+        prosCons: "Pros: Guarantees minimal height O(log N). Cons: Requires sorted array as input.",
+        timeComplexity: "O(N)", spaceComplexity: "O(log N)", isFree: false,
+        code: `// 51. BST - Approach 9: Sorted Array to Balanced BST
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+BSTNode* sortedArrayToBSTHelper(const vector<int>& nums, int left, int right) {
+    if (left > right) return nullptr;
+    int mid = left + (right - left) / 2;
+    BSTNode* root = new BSTNode(nums[mid]);
+    root->left = sortedArrayToBSTHelper(nums, left, mid - 1);
+    root->right = sortedArrayToBSTHelper(nums, mid + 1, right);
+    return root;
+}
+
+BSTNode* sortedArrayToBST(const vector<int>& nums) {
+    return sortedArrayToBSTHelper(nums, 0, (int)nums.size() - 1);
+}
+
+void printPreorder(BSTNode* root) {
+    if (!root) return;
+    cout << root->val << " ";
+    printPreorder(root->left);
+    printPreorder(root->right);
+}
+
+int main() {
+    vector<int> nums = {-10, -3, 0, 5, 9};
+    BSTNode* root = sortedArrayToBST(nums);
+    cout << "Preorder of Balanced BST: ";
+    printPreorder(root);
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int mid = left + (right - left) / 2;', constructType: 'Variable & Initializer', title: 'Find Subarray Midpoint', explanation: 'Calculates the middle element of current subarray range to use as root, ensuring left and right subtrees have equal node counts.', keyDetails: [{ variableOrConstruct: 'mid', role: 'Subarray middle index', whyThisWay: 'Choosing midpoint balances left and right subtree heights' }] },
+          { lineNum: 2, codeSnippet: 'root->left = sortedArrayToBSTHelper(nums, left, mid - 1);', constructType: 'Function Signature', title: 'Recursive Left Subtree Build', explanation: 'Recursively constructs left subtree from elements left of mid.', keyDetails: [{ variableOrConstruct: 'left to mid - 1', role: 'Left partition range', whyThisWay: 'All elements < nums[mid] form left subtree' }] },
+          { lineNum: 3, codeSnippet: 'root->right = sortedArrayToBSTHelper(nums, mid + 1, right);', constructType: 'Function Signature', title: 'Recursive Right Subtree Build', explanation: 'Recursively constructs right subtree from elements right of mid.', keyDetails: [{ variableOrConstruct: 'mid + 1 to right', role: 'Right partition range', whyThisWay: 'All elements > nums[mid] form right subtree' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Kth Smallest Element in BST", category: "Inorder Traversal",
+        description: "Uses inorder traversal to find the Kth smallest element in a BST in O(H + K) time.",
+        prosCons: "Pros: Early exit when Kth element is reached. Cons: Requires tracking counter during traversal.",
+        timeComplexity: "O(H + K)", spaceComplexity: "O(H)", isFree: false,
+        code: `// 51. BST - Approach 10: Kth Smallest Element
+#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int val;
+    BSTNode* left;
+    BSTNode* right;
+    BSTNode(int v) : val(v), left(nullptr), right(nullptr) {}
+};
+
+void kthSmallestHelper(BSTNode* root, int& k, int& result) {
+    if (!root) return;
+    kthSmallestHelper(root->left, k, result);
+    k--;
+    if (k == 0) {
+        result = root->val;
+        return;
+    }
+    if (k > 0) kthSmallestHelper(root->right, k, result);
+}
+
+int kthSmallest(BSTNode* root, int k) {
+    int result = -1;
+    kthSmallestHelper(root, k, result);
+    return result;
+}
+
+int main() {
+    BSTNode* root = new BSTNode(5);
+    root->left = new BSTNode(3); root->right = new BSTNode(6);
+    root->left->left = new BSTNode(2); root->left->right = new BSTNode(4);
+    root->left->left->left = new BSTNode(1);
+
+    cout << "3rd Smallest: " << kthSmallest(root, 3) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'kthSmallestHelper(root->left, k, result);', constructType: 'Function Signature', title: 'Inorder Left Traversal', explanation: 'Traverses left subtree first because smallest elements reside on left.', keyDetails: [{ variableOrConstruct: 'root->left', role: 'Inorder first step', whyThisWay: 'Processes nodes in ascending order' }] },
+          { lineNum: 2, codeSnippet: 'k--; if (k == 0) { result = root->val; return; }', constructType: 'Condition & Branch', title: 'Counter Decrement & Target Check', explanation: 'Decrements k for each visited node. When k hits 0, current node is the Kth smallest element.', keyDetails: [{ variableOrConstruct: 'k == 0', role: 'Kth element check', whyThisWay: 'Identifies target element in ascending order sequence' }] },
+          { lineNum: 3, codeSnippet: 'if (k > 0) kthSmallestHelper(root->right, k, result);', constructType: 'Condition & Branch', title: 'Inorder Right Traversal Guard', explanation: 'Only traverses right subtree if k is still > 0, achieving early termination.', keyDetails: [{ variableOrConstruct: 'k > 0', role: 'Early termination guard', whyThisWay: 'Avoids visiting remaining nodes once Kth element is found' }] }
+        ]
+      }
+    ],
+    traceKey: "binary_search"
+  };
+}
+
+export function getProblem52Details(): LearnModule {
+  return {
+    id: "med_heap",
+    title: "52. Min-Heap & Max-Heap Arrays",
+    category: "Data Structures",
+    difficulty: "medium",
+    shortDesc: "Binary heap implementation with sift-up and sift-down operations.",
+    fullCode: `// 52. Heap - Approach 1: Max-Heap Array Implementation
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class MaxHeap {
+    vector<int> heap;
+    void siftUp(int i) {
+        while (i > 0) {
+            int p = (i - 1) / 2;
+            if (heap[i] > heap[p]) {
+                swap(heap[i], heap[p]);
+                i = p;
+            } else break;
+        }
+    }
+    void siftDown(int i) {
+        int n = heap.size();
+        while (2 * i + 1 < n) {
+            int left = 2 * i + 1, right = 2 * i + 2, largest = i;
+            if (left < n && heap[left] > heap[largest]) largest = left;
+            if (right < n && heap[right] > heap[largest]) largest = right;
+            if (largest != i) {
+                swap(heap[i], heap[largest]);
+                i = largest;
+            } else break;
+        }
+    }
+public:
+    void push(int val) {
+        heap.push_back(val);
+        siftUp(heap.size() - 1);
+    }
+    int pop() {
+        if (heap.empty()) throw runtime_error("Heap empty");
+        int maxVal = heap[0];
+        heap[0] = heap.back();
+        heap.pop_back();
+        if (!heap.empty()) siftDown(0);
+        return maxVal;
+    }
+    int top() const { return heap.at(0); }
+    bool empty() const { return heap.empty(); }
+};
+
+int main() {
+    MaxHeap h;
+    h.push(10); h.push(40); h.push(20); h.push(30);
+    cout << "Max element: " << h.pop() << endl;
+    cout << "Next max: " << h.pop() << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "52. Min-Heap & Max-Heap Arrays",
+      objective: "Master binary heap array representations: array indexing math (parent = (i-1)/2, left = 2i+1, right = 2i+2), siftUp, siftDown, buildHeap in O(N), push, pop, and heapsort.",
+      description: "Implement **Min-Heap & Max-Heap Arrays** (Data Structures). Build a priority structure over contiguous memory using 0-indexed vectors, maintaining heap ordering invariants.",
+      inputDesc: "Sequence of values pushed into the heap, raw array to heapify, or top element extraction requests.",
+      outputDesc: "Extracted maximum/minimum elements, array state after siftUp/siftDown, or in-place sorted array output.",
+      takeaways: [
+        "A binary heap is a complete binary tree stored compactly in an array without pointer overhead",
+        "For index i, left child is 2*i + 1, right child is 2*i + 2, and parent is (i - 1) / 2",
+        "Building a heap bottom-up with siftDown takes O(N) time, whereas inserting N elements one-by-one takes O(N log N)",
+        "Max-Heap maintains parent >= children; Min-Heap maintains parent <= children"
+      ],
+      examples: [
+        { id: 1, input: "push values [10, 40, 20, 30] into MaxHeap; pop()", output: "Max element: 40", explanation: "40 sifts up to root (index 0); pop returns 40 and sifts down last element." },
+        { id: 2, input: "buildHeap([3, 1, 6, 5, 2, 4]) as MinHeap", output: "Heap array: [1, 2, 4, 5, 3, 6]", explanation: "Bottom-up siftDown from last non-leaf node transforms array in O(N) time." },
+        { id: 3, input: "heapsort([4, 10, 3, 5, 1])", output: "Sorted: [1, 3, 4, 5, 10]", explanation: "Builds Max-Heap, repeatedly swaps root with last element and reduces heap size." }
+      ],
+      constraints: ["Supported operations should handle empty heap access safely."],
+      companies: ["Amazon", "Microsoft", "Uber", "Google", "Apple"],
+      acceptanceRate: "91.0%",
+      totalAccepted: "3,750,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Max-Heap Array Implementation (FREE)", category: "FREE / Heap Core",
+        description: "Complete Max-Heap class built on std::vector<int> with siftUp and siftDown helper functions.",
+        prosCons: "Pros: Contiguous memory access, O(1) max lookup. Cons: Dynamic array reallocation on push.",
+        timeComplexity: "O(log N) push/pop, O(1) top", spaceComplexity: "O(N)", isFree: true,
+        code: `// 52. Heap - Approach 1: Max-Heap Class
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class MaxHeap {
+    vector<int> heap;
+    void siftUp(int i) {
+        while (i > 0) {
+            int p = (i - 1) / 2;
+            if (heap[i] > heap[p]) {
+                swap(heap[i], heap[p]);
+                i = p;
+            } else break;
+        }
+    }
+    void siftDown(int i) {
+        int n = heap.size();
+        while (2 * i + 1 < n) {
+            int left = 2 * i + 1, right = 2 * i + 2, largest = i;
+            if (left < n && heap[left] > heap[largest]) largest = left;
+            if (right < n && heap[right] > heap[largest]) largest = right;
+            if (largest != i) {
+                swap(heap[i], heap[largest]);
+                i = largest;
+            } else break;
+        }
+    }
+public:
+    void push(int val) { heap.push_back(val); siftUp(heap.size() - 1); }
+    int pop() {
+        int maxVal = heap[0];
+        heap[0] = heap.back(); heap.pop_back();
+        if (!heap.empty()) siftDown(0);
+        return maxVal;
+    }
+    int top() const { return heap[0]; }
+};
+
+int main() {
+    MaxHeap h;
+    h.push(15); h.push(30); h.push(10);
+    cout << "Top: " << h.top() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int p = (i - 1) / 2;', constructType: 'Variable & Initializer', title: 'Parent Index Math', explanation: 'Calculates the parent index of element at index i in a 0-indexed binary heap array.', keyDetails: [{ variableOrConstruct: '(i - 1) / 2', role: 'Parent index calculation', whyThisWay: 'Binary tree mapping formula for array storage' }] },
+          { lineNum: 2, codeSnippet: 'if (heap[i] > heap[p]) { swap(heap[i], heap[p]); i = p; }', constructType: 'Condition & Branch', title: 'Sift-Up Swap Condition', explanation: 'If child is greater than parent, swaps them to restore Max-Heap property and moves up to parent index.', keyDetails: [{ variableOrConstruct: 'heap[i] > heap[p]', role: 'Max-Heap invariant check', whyThisWay: 'Ensures parent is always >= children' }] },
+          { lineNum: 3, codeSnippet: 'heap[0] = heap.back(); heap.pop_back(); siftDown(0);', constructType: 'Function Signature', title: 'Root Extraction & Sift-Down', explanation: 'Replaces root with last element, deletes last element, then sifts down new root to restore heap structure.', keyDetails: [{ variableOrConstruct: 'siftDown(0)', role: 'Heap restructuring', whyThisWay: 'Restores heap ordering from root in O(log N) time' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Min-Heap Array Implementation (FREE)", category: "FREE / Min-Heap",
+        description: "Complete Min-Heap implementation where root always contains the smallest value in the structure.",
+        prosCons: "Pros: Fast O(1) minimum retrieval. Cons: Min-heap inverted logic from max-heap.",
+        timeComplexity: "O(log N) push/pop, O(1) top", spaceComplexity: "O(N)", isFree: true,
+        code: `// 52. Heap - Approach 2: Min-Heap Class
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class MinHeap {
+    vector<int> heap;
+    void siftUp(int i) {
+        while (i > 0) {
+            int p = (i - 1) / 2;
+            if (heap[i] < heap[p]) {
+                swap(heap[i], heap[p]);
+                i = p;
+            } else break;
+        }
+    }
+    void siftDown(int i) {
+        int n = heap.size();
+        while (2 * i + 1 < n) {
+            int left = 2 * i + 1, right = 2 * i + 2, smallest = i;
+            if (left < n && heap[left] < heap[smallest]) smallest = left;
+            if (right < n && heap[right] < heap[smallest]) smallest = right;
+            if (smallest != i) {
+                swap(heap[i], heap[smallest]);
+                i = smallest;
+            } else break;
+        }
+    }
+public:
+    void push(int val) { heap.push_back(val); siftUp(heap.size() - 1); }
+    int pop() {
+        int minVal = heap[0];
+        heap[0] = heap.back(); heap.pop_back();
+        if (!heap.empty()) siftDown(0);
+        return minVal;
+    }
+    int top() const { return heap[0]; }
+};
+
+int main() {
+    MinHeap h;
+    h.push(40); h.push(10); h.push(30);
+    cout << "Min element: " << h.pop() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (heap[i] < heap[p]) { swap(heap[i], heap[p]); i = p; }', constructType: 'Condition & Branch', title: 'Min-Heap Sift-Up Condition', explanation: 'Checks if child value is smaller than parent. Swaps upward if parent is larger.', keyDetails: [{ variableOrConstruct: 'heap[i] < heap[p]', role: 'Min-Heap invariant check', whyThisWay: 'Ensures parent is always <= children' }] },
+          { lineNum: 2, codeSnippet: 'if (left < n && heap[left] < heap[smallest]) smallest = left;', constructType: 'Condition & Branch', title: 'Smallest Child Resolution', explanation: 'Finds the smaller of left and right children to determine swap candidate during siftDown.', keyDetails: [{ variableOrConstruct: 'smallest', role: 'Candidate index', whyThisWay: 'Swapping with smaller child ensures new parent is smaller than both children' }] },
+          { lineNum: 3, codeSnippet: 'int minVal = heap[0];', constructType: 'Variable & Initializer', title: 'Root Min Element Retrieval', explanation: 'Accesses index 0 which is guaranteed to be the minimum element.', keyDetails: [{ variableOrConstruct: 'heap[0]', role: 'Min element', whyThisWay: 'Min-heap property guarantees root is minimum' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Build Heap in O(N) Time (Bottom-Up Heapify)", category: "O(N) Build",
+        description: "Transforms an arbitrary array into a valid Max-Heap in O(N) time by sifting down from last non-leaf node.",
+        prosCons: "Pros: O(N) time building is faster than O(N log N) individual pushes. Cons: In-place array mutation.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 52. Heap - Approach 3: Build Heap O(N)
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void siftDown(vector<int>& heap, int n, int i) {
+    while (2 * i + 1 < n) {
+        int left = 2 * i + 1, right = 2 * i + 2, largest = i;
+        if (left < n && heap[left] > heap[largest]) largest = left;
+        if (right < n && heap[right] > heap[largest]) largest = right;
+        if (largest != i) {
+            swap(heap[i], heap[largest]);
+            i = largest;
+        } else break;
+    }
+}
+
+void buildMaxHeap(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = (n / 2) - 1; i >= 0; i--) {
+        siftDown(arr, n, i);
+    }
+}
+
+int main() {
+    vector<int> arr = {3, 9, 2, 1, 4, 5};
+    buildMaxHeap(arr);
+    cout << "Max-Heap Array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = (n / 2) - 1; i >= 0; i--)', constructType: 'Loop Construct', title: 'Iterate Non-Leaf Nodes Bottom-Up', explanation: 'Starts from the last internal node (n/2 - 1) and moves backward to root, sifting down each node.', keyDetails: [{ variableOrConstruct: '(n / 2) - 1', role: 'Last non-leaf index', whyThisWay: 'Leaves (n/2 to n-1) already satisfy heap property trivially' }] },
+          { lineNum: 2, codeSnippet: 'siftDown(arr, n, i);', constructType: 'Function Signature', title: 'Sift Down Node i', explanation: 'Restores heap property for subtree rooted at index i.', keyDetails: [{ variableOrConstruct: 'siftDown', role: 'Subtree heapify', whyThisWay: 'Bottom-up order ensures child subtrees are already valid heaps' }] },
+          { lineNum: 3, codeSnippet: 'buildMaxHeap(arr);', constructType: 'Function Signature', title: 'O(N) Heap Conversion', explanation: 'Mathematical sum of height steps proves total work is bounded by O(N) operations.', keyDetails: [{ variableOrConstruct: 'O(N) complexity', role: 'Optimal heap build', whyThisWay: 'Most nodes are near bottom with short sift-down paths' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Heapsort Algorithm In-Place", category: "Sorting",
+        description: "Sorts an array in-place in O(N log N) time using Max-Heap property.",
+        prosCons: "Pros: In-place O(1) space, O(N log N) worst-case guarantee. Cons: Not a stable sort.",
+        timeComplexity: "O(N log N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 52. Heap - Approach 4: Heapsort In-Place
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void siftDown(vector<int>& arr, int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    if (left < n && arr[left] > arr[largest]) largest = left;
+    if (right < n && arr[right] > arr[largest]) largest = right;
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+        siftDown(arr, n, largest);
+    }
+}
+
+void heapSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = n / 2 - 1; i >= 0; i--) siftDown(arr, n, i);
+    for (int i = n - 1; i > 0; i--) {
+        swap(arr[0], arr[i]);
+        siftDown(arr, i, 0);
+    }
+}
+
+int main() {
+    vector<int> arr = {12, 11, 13, 5, 6, 7};
+    heapSort(arr);
+    cout << "Sorted array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = n / 2 - 1; i >= 0; i--) siftDown(arr, n, i);', constructType: 'Loop Construct', title: 'Phase 1: Build Max-Heap', explanation: 'Converts raw array into Max-Heap so largest element is at index 0.', keyDetails: [{ variableOrConstruct: 'Build Max-Heap', role: 'Initial heap construction', whyThisWay: 'Puts max element at root ready for extraction' }] },
+          { lineNum: 2, codeSnippet: 'swap(arr[0], arr[i]);', constructType: 'Variable & Initializer', title: 'Phase 2: Extract Max to End', explanation: 'Swaps current max (index 0) with last unsorted element at index i.', keyDetails: [{ variableOrConstruct: 'swap(arr[0], arr[i])', role: 'Element placement', whyThisWay: 'Places largest remaining element in its final sorted position at end' }] },
+          { lineNum: 3, codeSnippet: 'siftDown(arr, i, 0);', constructType: 'Function Signature', title: 'Restore Reduced Heap', explanation: 'Sifts down new root over reduced heap size i to restore Max-Heap property.', keyDetails: [{ variableOrConstruct: 'size = i', role: 'Heap size reduction', whyThisWay: 'Excludes already sorted elements at end of array' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: Heap Extract Top & Decrease Key", category: "Heap Mutation",
+        description: "Implements decrease key operation and heap modification in an explicit Min-Heap array.",
+        prosCons: "Pros: Essential for Dijkstra graph algorithm. Cons: Finding index by key takes O(N) without map index lookup.",
+        timeComplexity: "O(log N) update", spaceComplexity: "O(N)", isFree: false,
+        code: `// 52. Heap - Approach 5: Decrease Key
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class IndexedMinHeap {
+    vector<int> heap;
+    void siftUp(int i) {
+        while (i > 0 && heap[i] < heap[(i - 1) / 2]) {
+            swap(heap[i], heap[(i - 1) / 2]);
+            i = (i - 1) / 2;
+        }
+    }
+public:
+    void push(int val) { heap.push_back(val); siftUp(heap.size() - 1); }
+    void decreaseKey(int idx, int newVal) {
+        if (newVal > heap[idx]) return;
+        heap[idx] = newVal;
+        siftUp(idx);
+    }
+    int top() const { return heap[0]; }
+};
+
+int main() {
+    IndexedMinHeap h;
+    h.push(50); h.push(30); h.push(40);
+    cout << "Top before decrease: " << h.top() << endl;
+    h.decreaseKey(2, 10); // Decrease index 2 (val 40) to 10
+    cout << "Top after decrease: " << h.top() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'heap[idx] = newVal;', constructType: 'Variable & Initializer', title: 'Update Value at Target Index', explanation: 'Assigns new smaller value to specified target index in heap array.', keyDetails: [{ variableOrConstruct: 'heap[idx] = newVal', role: 'Key modification', whyThisWay: 'Updates weight/priority directly at array slot' }] },
+          { lineNum: 2, codeSnippet: 'siftUp(idx);', constructType: 'Function Signature', title: 'Sift Up Decreased Key', explanation: 'Since key decreased, it can only violate Min-Heap property upwards; calls siftUp.', keyDetails: [{ variableOrConstruct: 'siftUp', role: 'Invariant restoration', whyThisWay: 'Smaller value moves up toward root' }] },
+          { lineNum: 3, codeSnippet: 'while (i > 0 && heap[i] < heap[(i - 1) / 2])', constructType: 'Loop Construct', title: 'Upward Comparison Loop', explanation: 'Bubbles up target element until parent is smaller or root is reached.', keyDetails: [{ variableOrConstruct: 'heap[i] < heap[parent]', role: 'Min condition', whyThisWay: 'Restores Min-Heap ordering' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Kth Largest Element using Min-Heap Array", category: "Stream / Top K",
+        description: "Maintains a Min-Heap of size K to find the Kth largest element in an array in O(N log K) time.",
+        prosCons: "Pros: O(K) space complexity, optimal for streaming data. Cons: Requires heap size constraint management.",
+        timeComplexity: "O(N log K)", spaceComplexity: "O(K)", isFree: false,
+        code: `// 52. Heap - Approach 6: Kth Largest Element
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+int findKthLargest(const vector<int>& nums, int k) {
+    priority_queue<int, vector<int>, greater<int>> minHeap;
+    for (int num : nums) {
+        minHeap.push(num);
+        if ((int)minHeap.size() > k) {
+            minHeap.pop();
+        }
+    }
+    return minHeap.top();
+}
+
+int main() {
+    vector<int> nums = {3, 2, 1, 5, 6, 4};
+    cout << "2nd Largest: " << findKthLargest(nums, 2) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'priority_queue<int, vector<int>, greater<int>> minHeap;', constructType: 'Variable & Initializer', title: 'Min-Heap Declaration', explanation: 'Declares min-heap container where smallest element stays at top.', keyDetails: [{ variableOrConstruct: 'greater<int>', role: 'Min-heap comparator', whyThisWay: 'Keeps smallest of top-K elements at top for easy eviction' }] },
+          { lineNum: 2, codeSnippet: 'if ((int)minHeap.size() > k) minHeap.pop();', constructType: 'Condition & Branch', title: 'Maintain Size K Constraint', explanation: 'When heap size exceeds K, evicts smallest element. Remaining K elements are the largest seen so far.', keyDetails: [{ variableOrConstruct: 'minHeap.pop()', role: 'Smallest element eviction', whyThisWay: 'Guarantees heap contains only top K largest elements' }] },
+          { lineNum: 3, codeSnippet: 'return minHeap.top();', constructType: 'Return / Cleanup', title: 'Return Kth Largest Element', explanation: 'The top of Min-Heap of size K is the Kth largest element overall.', keyDetails: [{ variableOrConstruct: 'minHeap.top()', role: 'Kth largest result', whyThisWay: 'Smallest of K largest elements is Kth largest overall' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Check if Array represents a Valid Max-Heap", category: "Validation",
+        description: "Validates whether a raw vector satisfies the Max-Heap ordering property for all internal nodes.",
+        prosCons: "Pros: Linear time O(N) verification. Cons: Read-only validation.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 52. Heap - Approach 7: Validate Heap Array
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool isMaxHeap(const vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i <= (n - 2) / 2; i++) {
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
+        if (left < n && arr[i] < arr[left]) return false;
+        if (right < n && arr[i] < arr[right]) return false;
+    }
+    return true;
+}
+
+int main() {
+    vector<int> h1 = {90, 15, 10, 7, 12, 2};
+    vector<int> h2 = {90, 15, 100, 7, 12, 2};
+    cout << "h1 is MaxHeap: " << (isMaxHeap(h1) ? "Yes" : "No") << endl;
+    cout << "h2 is MaxHeap: " << (isMaxHeap(h2) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = 0; i <= (n - 2) / 2; i++)', constructType: 'Loop Construct', title: 'Iterate Internal Nodes Only', explanation: 'Iterates through parent nodes up to last internal node index (n-2)/2.', keyDetails: [{ variableOrConstruct: '(n - 2) / 2', role: 'Parent index limit', whyThisWay: 'Leaf nodes have no children to validate' }] },
+          { lineNum: 2, codeSnippet: 'if (left < n && arr[i] < arr[left]) return false;', constructType: 'Condition & Branch', title: 'Left Child Invariant Check', explanation: 'Returns false if parent is smaller than left child.', keyDetails: [{ variableOrConstruct: 'arr[i] < arr[left]', role: 'Violation check', whyThisWay: 'Max-heap requires parent >= left child' }] },
+          { lineNum: 3, codeSnippet: 'if (right < n && arr[i] < arr[right]) return false;', constructType: 'Condition & Branch', title: 'Right Child Invariant Check', explanation: 'Returns false if parent is smaller than right child.', keyDetails: [{ variableOrConstruct: 'arr[i] < arr[right]', role: 'Violation check', whyThisWay: 'Max-heap requires parent >= right child' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Merge K Sorted Arrays using Heap", category: "K-Way Merge",
+        description: "Merges K sorted arrays using a Min-Heap tracking (value, arrayIdx, elemIdx) tuples.",
+        prosCons: "Pros: O(N log K) time complexity where N is total elements across arrays. Cons: O(K) heap space.",
+        timeComplexity: "O(N log K)", spaceComplexity: "O(K)", isFree: false,
+        code: `// 52. Heap - Approach 8: Merge K Sorted Arrays
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+struct Element {
+    int val, arrIdx, elemIdx;
+    bool operator>(const Element& other) const { return val > other.val; }
+};
+
+vector<int> mergeKSortedArrays(const vector<vector<int>>& arrays) {
+    priority_queue<Element, vector<Element>, greater<Element>> minHeap;
+    for (int i = 0; i < (int)arrays.size(); i++) {
+        if (!arrays[i].empty()) {
+            minHeap.push({arrays[i][0], i, 0});
+        }
+    }
+    vector<int> result;
+    while (!minHeap.empty()) {
+        Element curr = minHeap.top(); minHeap.pop();
+        result.push_back(curr.val);
+        if (curr.elemIdx + 1 < (int)arrays[curr.arrIdx].size()) {
+            minHeap.push({arrays[curr.arrIdx][curr.elemIdx + 1], curr.arrIdx, curr.elemIdx + 1});
+        }
+    }
+    return result;
+}
+
+int main() {
+    vector<vector<int>> arrays = {{1, 4, 7}, {2, 5, 8}, {3, 6, 9}};
+    vector<int> merged = mergeKSortedArrays(arrays);
+    cout << "Merged array: ";
+    for (int x : merged) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct Element { int val, arrIdx, elemIdx; ... };', constructType: 'Variable & Initializer', title: 'Element Tuple Struct', explanation: 'Stores element value, originating array index, and current element index in that array.', keyDetails: [{ variableOrConstruct: 'Element struct', role: 'Heap node payload', whyThisWay: 'Tracks pointer origin so next element from same array can be pushed' }] },
+          { lineNum: 2, codeSnippet: 'minHeap.push({arrays[i][0], i, 0});', constructType: 'Function Signature', title: 'Initialize Heap with First Elements', explanation: 'Pushes first element of each non-empty array into Min-Heap.', keyDetails: [{ variableOrConstruct: 'minHeap.push', role: 'Heap initialization', whyThisWay: 'Populates heap with minimum candidate from each array' }] },
+          { lineNum: 3, codeSnippet: 'if (curr.elemIdx + 1 < arrays[curr.arrIdx].size()) minHeap.push(...);', constructType: 'Condition & Branch', title: 'Push Next Element from Same Array', explanation: 'When element is popped to result, pushes next element from same source array into heap.', keyDetails: [{ variableOrConstruct: 'elemIdx + 1', role: 'K-way pointer advance', whyThisWay: 'Maintains exactly 1 candidate from each active array in heap' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Median in Data Stream (Two Heaps Concept)", category: "Dual Heap",
+        description: "Tracks dynamic median of numerical stream using a Max-Heap for lower half and Min-Heap for upper half.",
+        prosCons: "Pros: O(log N) insertion, O(1) median query. Cons: Dual heap balancing logic required.",
+        timeComplexity: "O(log N) add, O(1) find", spaceComplexity: "O(N)", isFree: false,
+        code: `// 52. Heap - Approach 9: Median Tracker
+#include <iostream>
+#include <queue>
+using namespace std;
+
+class MedianFinder {
+    priority_queue<int> maxHeap; // Lower half
+    priority_queue<int, vector<int>, greater<int>> minHeap; // Upper half
+public:
+    void addNum(int num) {
+        maxHeap.push(num);
+        minHeap.push(maxHeap.top());
+        maxHeap.pop();
+
+        if (minHeap.size() > maxHeap.size()) {
+            maxHeap.push(minHeap.top());
+            minHeap.pop();
+        }
+    }
+    double findMedian() const {
+        if (maxHeap.size() > minHeap.size()) return maxHeap.top();
+        return (maxHeap.top() + minHeap.top()) / 2.0;
+    }
+};
+
+int main() {
+    MedianFinder mf;
+    mf.addNum(1); mf.addNum(2);
+    cout << "Median [1, 2]: " << mf.findMedian() << endl;
+    mf.addNum(3);
+    cout << "Median [1, 2, 3]: " << mf.findMedian() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'maxHeap.push(num); minHeap.push(maxHeap.top()); maxHeap.pop();', constructType: 'Function Signature', title: 'Route Value Through Max to Min Heap', explanation: 'Pushes number to maxHeap, then moves largest lower-half value to minHeap to maintain order split.', keyDetails: [{ variableOrConstruct: 'Two-step routing', role: 'Partition balance', whyThisWay: 'Ensures max element of lower half is <= min element of upper half' }] },
+          { lineNum: 2, codeSnippet: 'if (minHeap.size() > maxHeap.size()) { maxHeap.push(minHeap.top()); minHeap.pop(); }', constructType: 'Condition & Branch', title: 'Rebalance Heap Sizes', explanation: 'Maintains size invariant: maxHeap size is equal to or 1 greater than minHeap size.', keyDetails: [{ variableOrConstruct: 'size invariant', role: 'Size balancing', whyThisWay: 'Allows median to be calculated directly from tops of heaps' }] },
+          { lineNum: 3, codeSnippet: 'return (maxHeap.top() + minHeap.top()) / 2.0;', constructType: 'Return / Cleanup', title: 'Calculate Even Size Median', explanation: 'If total elements count is even, median is average of max lower value and min upper value.', keyDetails: [{ variableOrConstruct: '2.0 division', role: 'Double precision median', whyThisWay: 'Computes exact arithmetic mean for even number of elements' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Convert Min-Heap to Max-Heap Array In-Place", category: "Heap Inversion",
+        description: "Converts an existing Min-Heap array into a Max-Heap array in O(N) time.",
+        prosCons: "Pros: In-place conversion O(1) extra space. Cons: Overwrites previous heap structure.",
+        timeComplexity: "O(N)", spaceComplexity: "O(1)", isFree: false,
+        code: `// 52. Heap - Approach 10: Convert Min-Heap to Max-Heap
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+void maxSiftDown(vector<int>& arr, int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    if (left < n && arr[left] > arr[largest]) largest = left;
+    if (right < n && arr[right] > arr[largest]) largest = right;
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+        maxSiftDown(arr, n, largest);
+    }
+}
+
+void convertMinToMaxHeap(vector<int>& minHeap) {
+    int n = minHeap.size();
+    for (int i = (n - 2) / 2; i >= 0; i--) {
+        maxSiftDown(minHeap, n, i);
+    }
+}
+
+int main() {
+    vector<int> minHeap = {3, 5, 9, 6, 8, 20}; // Valid min heap
+    convertMinToMaxHeap(minHeap);
+    cout << "Converted Max-Heap Array: ";
+    for (int x : minHeap) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = (n - 2) / 2; i >= 0; i--)', constructType: 'Loop Construct', title: 'Bottom-Up Max Heapify Loop', explanation: 'Applies max-heapify starting from last internal node moving up to index 0.', keyDetails: [{ variableOrConstruct: '(n - 2) / 2', role: 'Last internal node', whyThisWay: 'Ignores leaves and rebuilds max-heap structure in O(N)' }] },
+          { lineNum: 2, codeSnippet: 'maxSiftDown(minHeap, n, i);', constructType: 'Function Signature', title: 'Max-Heap Sift Down', explanation: 'Sifts down node using max-heap ordering rules.', keyDetails: [{ variableOrConstruct: 'maxSiftDown', role: 'Max heapify step', whyThisWay: 'Replaces min-heap invariant with max-heap invariant' }] },
+          { lineNum: 3, codeSnippet: 'convertMinToMaxHeap(minHeap);', constructType: 'Function Signature', title: 'In-Place Heap Transformation', explanation: 'Transforms min-heap vector into valid max-heap vector in O(N) time.', keyDetails: [{ variableOrConstruct: 'In-place conversion', role: 'Algorithm transformation', whyThisWay: 'Avoids allocating second heap array' }] }
+        ]
+      }
+    ],
+    traceKey: "bubble_sort"
+  };
+}
+
+export function getProblem53Details(): LearnModule {
+  return {
+    id: "med_priority_queue",
+    title: "53. Priority Queue Comparators",
+    category: "Data Structures",
+    difficulty: "medium",
+    shortDesc: "std::priority_queue with custom struct comparators.",
+    fullCode: `// 53. Priority Queue - Approach 1: Basic Max and Min Priority Queue
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int main() {
+    // Default Max-Heap
+    priority_queue<int> maxPQ;
+    maxPQ.push(30); maxPQ.push(10); maxPQ.push(50);
+    cout << "Max-Heap Top: " << maxPQ.top() << endl;
+
+    // Min-Heap using std::greater<int>
+    priority_queue<int, vector<int>, greater<int>> minPQ;
+    minPQ.push(30); minPQ.push(10); minPQ.push(50);
+    cout << "Min-Heap Top: " << minPQ.top() << endl;
+    return 0;
+}`,
+    problemStatement: {
+      title: "53. Priority Queue Comparators",
+      objective: "Master STL std::priority_queue templating and custom comparators: max-heap vs min-heap, custom struct operator(), lambda comparators with decltype, pair/tuple ordering, custom task scheduling, and top K element queries.",
+      description: "Implement **Priority Queue Comparators** (Data Structures). Leverage standard C++ std::priority_queue with custom comparison functions to order complex object types and custom structures.",
+      inputDesc: "Objects, structs, pairs, or raw values pushed into std::priority_queue under specific sorting requirements.",
+      outputDesc: "Prioritized sequence of elements retrieved via top() and pop() according to custom comparative logic.",
+      takeaways: [
+        "Default std::priority_queue<T> uses std::less<T> which creates a MAX-HEAP (largest element at top)",
+        "To create a MIN-HEAP for primitives, specify container and comparator: std::priority_queue<T, vector<T>, greater<T>>",
+        "For custom structs, define functor struct with bool operator()(const T& a, const T& b) returning true if 'a' has LOWER priority than 'b'",
+        "Lambda comparators require passing the lambda instance to constructor and decltype(comp) as 3rd template parameter"
+      ],
+      examples: [
+        { id: 1, input: "push [30, 10, 50] to priority_queue<int>", output: "Top: 50", explanation: "Default max-heap places largest integer 50 at top." },
+        { id: 2, input: "Task priority queue with Tasks {id:1, prio:2}, {id:2, prio:9}", output: "Pop: Task 2 (prio 9)", explanation: "Custom comparator struct orders Tasks by priority field descending." },
+        { id: 3, input: "Lambda comparator priority queue for points closest to origin", output: "Top: Point (1, 1)", explanation: "Lambda compares Euclidean distances; min-heap returns closest point." }
+      ],
+      constraints: ["Comparator must satisfy strict weak ordering (return false for equal elements)."],
+      companies: ["Amazon", "Microsoft", "Google", "Meta", "Apple"],
+      acceptanceRate: "90.2%",
+      totalAccepted: "3,420,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Basic Max and Min Priority Queue (FREE)", category: "FREE / Core STL",
+        description: "Uses standard std::priority_queue for primitive types: default max-heap and std::greater<int> min-heap.",
+        prosCons: "Pros: Zero boilerplate for primitives. Cons: Limited to built-in comparators.",
+        timeComplexity: "O(log N) push/pop, O(1) top", spaceComplexity: "O(N)", isFree: true,
+        code: `// 53. PQ - Approach 1: Max & Min Priority Queue
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int main() {
+    priority_queue<int> maxPQ;
+    maxPQ.push(10); maxPQ.push(30); maxPQ.push(20);
+    cout << "Max-PQ top: " << maxPQ.top() << endl; // 30
+
+    priority_queue<int, vector<int>, greater<int>> minPQ;
+    minPQ.push(10); minPQ.push(30); minPQ.push(20);
+    cout << "Min-PQ top: " << minPQ.top() << endl; // 10
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'priority_queue<int> maxPQ;', constructType: 'Variable & Initializer', title: 'Default Max-Heap Declaration', explanation: 'Declares max-heap using default std::vector<int> underlying container and std::less<int> comparator.', keyDetails: [{ variableOrConstruct: 'priority_queue<int>', role: 'Max-heap queue', whyThisWay: 'Default C++ behavior puts largest element at top' }] },
+          { lineNum: 2, codeSnippet: 'priority_queue<int, vector<int>, greater<int>> minPQ;', constructType: 'Variable & Initializer', title: 'Min-Heap Declaration', explanation: 'Explicitly passes underlying container type and std::greater<int> comparator to construct min-heap.', keyDetails: [{ variableOrConstruct: 'greater<int>', role: 'Min-heap functor', whyThisWay: 'Inverts comparator so smallest element stays at top' }] },
+          { lineNum: 3, codeSnippet: 'cout << minPQ.top();', constructType: 'Function Signature', title: 'Top Element Inspection', explanation: 'Accesses highest priority element in O(1) time.', keyDetails: [{ variableOrConstruct: 'minPQ.top()', role: 'Priority element access', whyThisWay: 'Reads root element of underlying heap' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Custom Struct Comparator for Task Scheduling (FREE)", category: "FREE / Functor Struct",
+        description: "Defines a custom struct Task and a functor struct CompareTask with operator() for priority scheduling.",
+        prosCons: "Pros: Clean OOP design, reusable functor type. Cons: Requires separate comparator struct declaration.",
+        timeComplexity: "O(log N) push/pop, O(1) top", spaceComplexity: "O(N)", isFree: true,
+        code: `// 53. PQ - Approach 2: Struct Comparator
+#include <iostream>
+#include <queue>
+#include <string>
+using namespace std;
+
+struct Task {
+    string name;
+    int priority;
+};
+
+struct CompareTask {
+    bool operator()(const Task& a, const Task& b) const {
+        return a.priority < b.priority; // Higher priority number comes out first
+    }
+};
+
+int main() {
+    priority_queue<Task, vector<Task>, CompareTask> taskPQ;
+    taskPQ.push({"Write Docs", 2});
+    taskPQ.push({"Fix Critical Bug", 10});
+    taskPQ.push({"Refactor Code", 5});
+
+    while (!taskPQ.empty()) {
+        cout << taskPQ.top().name << " (Prio: " << taskPQ.top().priority << ")" << endl;
+        taskPQ.pop();
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct CompareTask { bool operator()(const Task& a, const Task& b) const { ... } };', constructType: 'Variable & Initializer', title: 'Functor Struct Definition', explanation: 'Defines operator() returning true if a has LOWER priority than b (meaning b should be placed above a in heap).', keyDetails: [{ variableOrConstruct: 'a.priority < b.priority', role: 'Weak order comparison', whyThisWay: 'Returning true means "a" is less prioritized than "b"' }] },
+          { lineNum: 2, codeSnippet: 'priority_queue<Task, vector<Task>, CompareTask> taskPQ;', constructType: 'Variable & Initializer', title: 'Priority Queue with Functor Parameter', explanation: 'Instantiates priority_queue templated on Task type, vector container, and CompareTask functor.', keyDetails: [{ variableOrConstruct: 'CompareTask', role: 'Custom comparator type', whyThisWay: 'Instructs priority queue how to compare Task objects' }] },
+          { lineNum: 3, codeSnippet: 'cout << taskPQ.top().name; taskPQ.pop();', constructType: 'Loop Construct', title: 'Process Tasks in Priority Order', explanation: 'Retrieves highest priority task first and pops it from queue until empty.', keyDetails: [{ variableOrConstruct: 'taskPQ.top()', role: 'Highest priority item', whyThisWay: 'Outputs tasks strictly ordered by priority score descending' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Lambda Comparator with decltype", category: "Modern C++ / Lambda",
+        description: "Uses a C++ lambda function as a custom comparator for std::priority_queue with decltype.",
+        prosCons: "Pros: Inline comparator definition, concise logic. Cons: Requires passing lambda instance to constructor.",
+        timeComplexity: "O(log N) push/pop", spaceComplexity: "O(N)", isFree: false,
+        code: `// 53. PQ - Approach 3: Lambda Comparator
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+int main() {
+    auto comp = [](int a, int b) {
+        return (a % 10) > (b % 10); // Min-heap based on last digit
+    };
+
+    priority_queue<int, vector<int>, decltype(comp)> pq(comp);
+    pq.push(48); pq.push(12); pq.push(35);
+
+    while (!pq.empty()) {
+        cout << pq.top() << " "; // 12 (last digit 2), 35 (last digit 5), 48 (last digit 8)
+        pq.pop();
+    }
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto comp = [](int a, int b) { return (a % 10) > (b % 10); };', constructType: 'Variable & Initializer', title: 'Lambda Comparator Definition', explanation: 'Creates lambda comparing numbers based on their last digit (mod 10), ordering smaller last digit at top.', keyDetails: [{ variableOrConstruct: '(a % 10) > (b % 10)', role: 'Min-heap mod rule', whyThisWay: 'Inverts comparison so smaller last digit gets higher priority' }] },
+          { lineNum: 2, codeSnippet: 'priority_queue<int, vector<int>, decltype(comp)> pq(comp);', constructType: 'Variable & Initializer', title: 'Instantiate Queue with Lambda Type & Object', explanation: 'Uses decltype(comp) for template parameter and passes actual comp object to constructor.', keyDetails: [{ variableOrConstruct: 'decltype(comp)', role: 'Lambda type extraction', whyThisWay: 'Lambdas have unique unnameable closure types requiring decltype' }] },
+          { lineNum: 3, codeSnippet: 'while (!pq.empty()) { cout << pq.top(); pq.pop(); }', constructType: 'Loop Construct', title: 'Pop in Custom Lambda Order', explanation: 'Pops elements in order of increasing last digits.', keyDetails: [{ variableOrConstruct: 'pq.top()', role: 'Lambda-ordered retrieval', whyThisWay: 'Demonstrates inline custom ordering flexibility' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Priority Queue of Pairs for Weighted Edges", category: "Graph Applications",
+        description: "Uses std::pair<int, int> in std::priority_queue for Dijkstra weighted graph processing.",
+        prosCons: "Pros: Uses built-in std::pair lexicographical comparison. Cons: Pair order (weight, u) can be confusing.",
+        timeComplexity: "O(log N) per edge", spaceComplexity: "O(E)", isFree: false,
+        code: `// 53. PQ - Approach 4: Pair Priority Queue (Dijkstra Style)
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+// Store pairs as (distance, vertex_id)
+typedef pair<int, int> pii;
+
+int main() {
+    priority_queue<pii, vector<pii>, greater<pii>> pq;
+    pq.push({10, 1}); // Dist 10 to node 1
+    pq.push({3, 2});  // Dist 3 to node 2
+    pq.push({7, 3});  // Dist 7 to node 3
+
+    while (!pq.empty()) {
+        auto [dist, u] = pq.top(); pq.pop();
+        cout << "Node " << u << " at distance " << dist << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'typedef pair<int, int> pii;', constructType: 'Variable & Initializer', title: 'Pair Type Alias', explanation: 'Defines pii as pair<int, int> storing (distance, node_id).', keyDetails: [{ variableOrConstruct: 'pair<int, int>', role: 'Distance-Node tuple', whyThisWay: 'std::pair compares first element (distance) by default' }] },
+          { lineNum: 2, codeSnippet: 'priority_queue<pii, vector<pii>, greater<pii>> pq;', constructType: 'Variable & Initializer', title: 'Min-Heap of Pairs', explanation: 'Constructs min-heap using greater<pii> so shortest distance pair is extracted first.', keyDetails: [{ variableOrConstruct: 'greater<pii>', role: 'Min-heap comparator for pairs', whyThisWay: 'Puts node with smallest distance value at top' }] },
+          { lineNum: 3, codeSnippet: 'auto [dist, u] = pq.top();', constructType: 'Variable & Initializer', title: 'Structured Binding Extraction', explanation: 'Deconstructs pair into distance and node ID using C++17 structured bindings.', keyDetails: [{ variableOrConstruct: '[dist, u]', role: 'Structured binding', whyThisWay: 'Clean modern C++ syntax for unpacking pairs' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: K Closest Points to Origin", category: "Geometry / Top K",
+        description: "Finds the K points closest to the origin (0, 0) using a Max-Heap priority queue of size K.",
+        prosCons: "Pros: O(N log K) time, avoids sorting all N points. Cons: Custom distance calculation needed.",
+        timeComplexity: "O(N log K)", spaceComplexity: "O(K)", isFree: false,
+        code: `// 53. PQ - Approach 5: K Closest Points
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+struct Point {
+    int x, y;
+    int distSq() const { return x * x + y * y; }
+};
+
+struct ComparePoint {
+    bool operator()(const Point& a, const Point& b) const {
+        return a.distSq() < b.distSq(); // Max-heap: furthest point at top
+    }
+};
+
+vector<Point> kClosest(const vector<Point>& points, int k) {
+    priority_queue<Point, vector<Point>, ComparePoint> maxPQ;
+    for (const auto& p : points) {
+        maxPQ.push(p);
+        if ((int)maxPQ.size() > k) maxPQ.pop();
+    }
+    vector<Point> res;
+    while (!maxPQ.empty()) {
+        res.push_back(maxPQ.top());
+        maxPQ.pop();
+    }
+    return res;
+}
+
+int main() {
+    vector<Point> pts = {{1, 3}, {-2, 2}, {5, 8}, {0, 1}};
+    vector<Point> closest = kClosest(pts, 2);
+    cout << "2 Closest points to origin:\n";
+    for (auto p : closest) cout << "(" << p.x << ", " << p.y << ")\n";
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int distSq() const { return x * x + y * y; }', constructType: 'Function Signature', title: 'Squared Distance Calculation', explanation: 'Computes x^2 + y^2 to compare Euclidean distance without expensive sqrt calls.', keyDetails: [{ variableOrConstruct: 'x * x + y * y', role: 'Distance metric', whyThisWay: 'Monotonic squared distance avoids floating point sqrt' }] },
+          { lineNum: 2, codeSnippet: 'bool operator()(const Point& a, const Point& b) { return a.distSq() < b.distSq(); }', constructType: 'Function Signature', title: 'Max-Heap Point Comparator', explanation: 'Returns true if point a is closer than b, placing furthest point at top of max-heap.', keyDetails: [{ variableOrConstruct: 'a.distSq() < b.distSq()', role: 'Max-heap order', whyThisWay: 'Keeps largest distance at top so it gets evicted when size > K' }] },
+          { lineNum: 3, codeSnippet: 'if ((int)maxPQ.size() > k) maxPQ.pop();', constructType: 'Condition & Branch', title: 'Evict Furthest Point', explanation: 'Evicts the point with maximum distance when size exceeds K.', keyDetails: [{ variableOrConstruct: 'maxPQ.pop()', role: 'Eviction', whyThisWay: 'Preserves only the K closest points in heap' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Reorganize String by Highest Frequencies", category: "Greedy / Frequency",
+        description: "Reorganizes a string so no two adjacent characters are identical using a frequency Max-Heap.",
+        prosCons: "Pros: O(N log A) time where A is alphabet size. Cons: Requires tracking previous popped character.",
+        timeComplexity: "O(N log A)", spaceComplexity: "O(A)", isFree: false,
+        code: `// 53. PQ - Approach 6: Reorganize String
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <queue>
+using namespace std;
+
+string reorganizeString(string s) {
+    unordered_map<char, int> freq;
+    for (char c : s) freq[c]++;
+
+    priority_queue<pair<int, char>> maxPQ;
+    for (auto [ch, count] : freq) maxPQ.push({count, ch});
+
+    pair<int, char> prev = {0, '#'};
+    string result = "";
+
+    while (!maxPQ.empty()) {
+        auto [count, ch] = maxPQ.top(); maxPQ.pop();
+        result += ch;
+
+        if (prev.first > 0) maxPQ.push(prev);
+
+        prev = {count - 1, ch};
+    }
+    return result.length() == s.length() ? result : "";
+}
+
+int main() {
+    cout << "Reorganize 'aab': " << reorganizeString("aab") << endl;
+    cout << "Reorganize 'aaab': " << (reorganizeString("aaab").empty() ? "Impossible" : reorganizeString("aaab")) << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'priority_queue<pair<int, char>> maxPQ;', constructType: 'Variable & Initializer', title: 'Frequency Max-Heap', explanation: 'Max-heap storing (count, char) pairs so character with highest remaining frequency is placed at top.', keyDetails: [{ variableOrConstruct: 'pair<int, char>', role: 'Frequency payload', whyThisWay: 'Orders by count descending' }] },
+          { lineNum: 2, codeSnippet: 'if (prev.first > 0) maxPQ.push(prev);', constructType: 'Condition & Branch', title: 'Re-insert Previous Character', explanation: 'Re-inserts previous character back into heap after skipping 1 step to ensure non-adjacency.', keyDetails: [{ variableOrConstruct: 'maxPQ.push(prev)', role: 'Cool-down re-insertion', whyThisWay: 'Prevents placing identical character twice in a row' }] },
+          { lineNum: 3, codeSnippet: 'prev = {count - 1, ch};', constructType: 'Variable & Initializer', title: 'Update Previous Character State', explanation: 'Decrements used character count and holds it in cool-down state until next iteration.', keyDetails: [{ variableOrConstruct: 'prev', role: 'Cool-down buffer', whyThisWay: 'Holds recently used character out of heap for 1 step' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Find K Pairs with Smallest Sums", category: "Multi-Track Search",
+        description: "Finds K pairs with smallest sums from two sorted arrays using a Min-Heap of indices.",
+        prosCons: "Pros: O(K log K) time efficiency. Cons: Requires managing 2D array index coordinates.",
+        timeComplexity: "O(K log K)", spaceComplexity: "O(K)", isFree: false,
+        code: `// 53. PQ - Approach 7: K Pairs Smallest Sums
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+vector<pair<int, int>> kSmallestPairs(vector<int>& u, vector<int>& v, int k) {
+    auto comp = [&](const pair<int, int>& a, const pair<int, int>& b) {
+        return (u[a.first] + v[a.second]) > (u[b.first] + v[b.second]);
+    };
+    priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(comp)> minPQ(comp);
+
+    for (int i = 0; i < min(k, (int)u.size()); i++) minPQ.push({i, 0});
+
+    vector<pair<int, int>> res;
+    while (k-- > 0 && !minPQ.empty()) {
+        auto [i, j] = minPQ.top(); minPQ.pop();
+        res.push_back({u[i], v[j]});
+        if (j + 1 < (int)v.size()) minPQ.push({i, j + 1});
+    }
+    return res;
+}
+
+int main() {
+    vector<int> u = {1, 7, 11}, v = {2, 4, 6};
+    auto pairs = kSmallestPairs(u, v, 3);
+    cout << "3 Smallest sum pairs:\n";
+    for (auto [a, b] : pairs) cout << "[" << a << ", " << b << "] ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'auto comp = [&](...) { return (u[a.first] + v[a.second]) > ... };', constructType: 'Variable & Initializer', title: 'Sum Comparison Lambda', explanation: 'Compares pair sum u[i] + v[j] to build a min-heap.', keyDetails: [{ variableOrConstruct: 'u[i] + v[j]', role: 'Pair sum metric', whyThisWay: 'Orders pairs by their combined sum ascending' }] },
+          { lineNum: 2, codeSnippet: 'for (int i = 0; i < min(k, (int)u.size()); i++) minPQ.push({i, 0});', constructType: 'Loop Construct', title: 'Initialize Frontier', explanation: 'Seeds heap with first column pairs (i, 0) up to min(k, u.size()).', keyDetails: [{ variableOrConstruct: '{i, 0}', role: 'Frontier initialization', whyThisWay: 'Establishes initial candidate pairs' }] },
+          { lineNum: 3, codeSnippet: 'if (j + 1 < (int)v.size()) minPQ.push({i, j + 1});', constructType: 'Condition & Branch', title: 'Expand Next Column Element', explanation: 'Advances column index j -> j+1 for popped row i.', keyDetails: [{ variableOrConstruct: '{i, j + 1}', role: 'Frontier expansion', whyThisWay: 'Explores next smallest potential sum pair in row i' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Merge K Sorted Lists via priority_queue", category: "Linked List Merge",
+        description: "Merges K sorted singly linked lists using a Min-Heap storing head pointers.",
+        prosCons: "Pros: O(N log K) time where N is total nodes. Cons: Pointer management across nodes.",
+        timeComplexity: "O(N log K)", spaceComplexity: "O(K)", isFree: false,
+        code: `// 53. PQ - Approach 8: Merge K Sorted Lists
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+struct Node {
+    int val;
+    Node* next;
+    Node(int v) : val(v), next(nullptr) {}
+};
+
+struct CompareNode {
+    bool operator()(const Node* a, const Node* b) const {
+        return a->val > b->val; // Min-heap
+    }
+};
+
+Node* mergeKLists(vector<Node*>& lists) {
+    priority_queue<Node*, vector<Node*>, CompareNode> minPQ;
+    for (auto l : lists) if (l) minPQ.push(l);
+
+    Node dummy(0);
+    Node* tail = &dummy;
+
+    while (!minPQ.empty()) {
+        Node* curr = minPQ.top(); minPQ.pop();
+        tail->next = curr;
+        tail = tail->next;
+        if (curr->next) minPQ.push(curr->next);
+    }
+    return dummy.next;
+}
+
+int main() {
+    Node* l1 = new Node(1); l1->next = new Node(4);
+    Node* l2 = new Node(2); l2->next = new Node(3);
+    vector<Node*> lists = {l1, l2};
+
+    Node* merged = mergeKLists(lists);
+    cout << "Merged List: ";
+    for (Node* c = merged; c; c = c->next) cout << c->val << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'struct CompareNode { bool operator()(const Node* a, const Node* b) { return a->val > b->val; } };', constructType: 'Variable & Initializer', title: 'Node Pointer Min-Heap Comparator', explanation: 'Compares values pointed to by Node pointers to order min-heap.', keyDetails: [{ variableOrConstruct: 'a->val > b->val', role: 'Pointer dereference comparison', whyThisWay: 'Orders node pointers by node data value ascending' }] },
+          { lineNum: 2, codeSnippet: 'tail->next = curr; tail = tail->next;', constructType: 'Variable & Initializer', title: 'Append Min Node to Result', explanation: 'Appends smallest node among list heads to result chain.', keyDetails: [{ variableOrConstruct: 'tail->next = curr', role: 'Chain linkage', whyThisWay: 'Constructs merged linked list in sorted order' }] },
+          { lineNum: 3, codeSnippet: 'if (curr->next) minPQ.push(curr->next);', constructType: 'Condition & Branch', title: 'Push Next Node from Same List', explanation: 'Pushes successor of popped node into min-heap to keep list active.', keyDetails: [{ variableOrConstruct: 'curr->next', role: 'List traversal advance', whyThisWay: 'Replaces popped node with next node from same list' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Dynamic Median Tracker (Dual Priority Queues)", category: "Dual PQ",
+        description: "Uses std::priority_queue max-heap and min-heap to track running median of a data stream.",
+        prosCons: "Pros: Standard C++ STL implementation. Cons: Size balancing checks after every insert.",
+        timeComplexity: "O(log N) push, O(1) median", spaceComplexity: "O(N)", isFree: false,
+        code: `// 53. PQ - Approach 9: Dual Priority Queue Median
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+class StreamMedian {
+    priority_queue<int> lowerHalf; // Max-heap
+    priority_queue<int, vector<int>, greater<int>> upperHalf; // Min-heap
+public:
+    void add(int num) {
+        if (lowerHalf.empty() || num <= lowerHalf.top()) lowerHalf.push(num);
+        else upperHalf.push(num);
+
+        if (lowerHalf.size() > upperHalf.size() + 1) {
+            upperHalf.push(lowerHalf.top()); lowerHalf.pop();
+        } else if (upperHalf.size() > lowerHalf.size()) {
+            lowerHalf.push(upperHalf.top()); upperHalf.pop();
+        }
+    }
+    double getMedian() const {
+        if (lowerHalf.size() > upperHalf.size()) return lowerHalf.top();
+        return (lowerHalf.top() + upperHalf.top()) / 2.0;
+    }
+};
+
+int main() {
+    StreamMedian sm;
+    sm.add(5); sm.add(15); sm.add(10);
+    cout << "Median [5, 15, 10]: " << sm.getMedian() << endl; // 10
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'priority_queue<int> lowerHalf; priority_queue<int, vector<int>, greater<int>> upperHalf;', constructType: 'Variable & Initializer', title: 'Dual Priority Queue Declaration', explanation: 'Declares lower half max-heap and upper half min-heap.', keyDetails: [{ variableOrConstruct: 'lowerHalf / upperHalf', role: 'Partition heaps', whyThisWay: 'Splits elements around median value' }] },
+          { lineNum: 2, codeSnippet: 'if (lowerHalf.size() > upperHalf.size() + 1) { ... }', constructType: 'Condition & Branch', title: 'Rebalance Partition Sizes', explanation: 'Ensures lowerHalf size is either equal to upperHalf or exactly 1 element larger.', keyDetails: [{ variableOrConstruct: 'size rebalancing', role: 'Invariant preservation', whyThisWay: 'Keeps median element at top of lowerHalf' }] },
+          { lineNum: 3, codeSnippet: 'return (lowerHalf.top() + upperHalf.top()) / 2.0;', constructType: 'Return / Cleanup', title: 'Average Even Partition Tops', explanation: 'Computes mean of partition tops when total element count is even.', keyDetails: [{ variableOrConstruct: '2.0', role: 'Double precision mean', whyThisWay: 'Handles even length median calculation' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Custom Container Priority Queue (std::deque backing)", category: "Custom Container",
+        description: "Constructs std::priority_queue backed by std::deque instead of default std::vector.",
+        prosCons: "Pros: Avoids full vector reallocations. Cons: Deque has slightly higher random access overhead.",
+        timeComplexity: "O(log N) push/pop", spaceComplexity: "O(N)", isFree: false,
+        code: `// 53. PQ - Approach 10: Deque Container Backing
+#include <iostream>
+#include <queue>
+#include <deque>
+using namespace std;
+
+int main() {
+    priority_queue<int, deque<int>> dequePQ;
+    dequePQ.push(100);
+    dequePQ.push(300);
+    dequePQ.push(200);
+
+    cout << "Deque-backed PQ Top: " << dequePQ.top() << endl;
+    dequePQ.pop();
+    cout << "Next Top: " << dequePQ.top() << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'priority_queue<int, deque<int>> dequePQ;', constructType: 'Variable & Initializer', title: 'Deque-Backed Priority Queue', explanation: 'Passes std::deque<int> as 2nd template argument for underlying heap array.', keyDetails: [{ variableOrConstruct: 'deque<int>', role: 'Underlying container', whyThisWay: 'Demonstrates container flexibility of std::priority_queue' }] },
+          { lineNum: 2, codeSnippet: 'dequePQ.push(300);', constructType: 'Function Signature', title: 'Push into Deque Priority Queue', explanation: 'Pushes element into deque container and heapifies upward.', keyDetails: [{ variableOrConstruct: 'push', role: 'Insertion', whyThisWay: 'Uses deque push_back and heap algorithm' }] },
+          { lineNum: 3, codeSnippet: 'cout << dequePQ.top();', constructType: 'Function Signature', title: 'Read Top Element', explanation: 'Accesses root element stored at front of deque container.', keyDetails: [{ variableOrConstruct: 'top', role: 'Max retrieval', whyThisWay: 'Identical interface regardless of underlying container' }] }
+        ]
+      }
+    ],
+    traceKey: "bubble_sort"
+  };
+}
+
+export function getProblem54Details(): LearnModule {
+  return {
+    id: "med_graph_bfs",
+    title: "54. Graph BFS (Breadth-First)",
+    category: "Graph Algorithms",
+    difficulty: "medium",
+    shortDesc: "Level-by-level queue traversal for shortest unweighted paths.",
+    fullCode: `// 54. Graph BFS - Approach 1: Adjacency List BFS
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+void bfs(int start, const vector<vector<int>>& adj, int n) {
+    vector<bool> visited(n, false);
+    queue<int> q;
+
+    visited[start] = true;
+    q.push(start);
+
+    cout << "BFS Traversal: ";
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        cout << u << " ";
+
+        for (int v : adj[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    int n = 5;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2};
+    adj[1] = {0, 3, 4};
+    adj[2] = {0};
+    adj[3] = {1};
+    adj[4] = {1};
+
+    bfs(0, adj, n);
+    return 0;
+}`,
+    problemStatement: {
+      title: "54. Graph BFS (Breadth-First)",
+      objective: "Master Graph Breadth-First Search: adjacency lists, visited state tracking, level-by-level queue processing, unweighted shortest paths, bipartite graph testing, multi-source BFS, and topological sorting via Kahn's algorithm.",
+      description: "Implement **Graph BFS (Breadth-First)** (Graph Algorithms). Traverse graph vertices level-by-level using a FIFO queue, guaranteeing shortest path discovery in unweighted networks.",
+      inputDesc: "Graph represented as adjacency list or 2D grid matrix, starting node, and target query parameters.",
+      outputDesc: "BFS traversal order, shortest path distance array, connected component count, or topological ordering.",
+      takeaways: [
+        "BFS explores nodes in increasing order of distance from the source vertex",
+        "Unweighted shortest path from source to target is guaranteed by BFS on first node visit",
+        "Visited tracking (visited array) is mandatory to prevent infinite loops in cyclic graphs",
+        "Kahn's Algorithm uses BFS combined with vertex in-degree tracking to generate topological order"
+      ],
+      examples: [
+        { id: 1, input: "Graph 0->1, 0->2, 1->3; BFS(0)", output: "BFS Traversal: 0 1 2 3", explanation: "Level 0: [0], Level 1: [1, 2], Level 2: [3]." },
+        { id: 2, input: "Unweighted graph, shortest path from 0 to 4", output: "Shortest distance: 2", explanation: "Path 0 -> 1 -> 4 has 2 edges, found on 2nd queue level." },
+        { id: 3, input: "Topological sort via Kahn's BFS on DAG with edges (0,1), (0,2), (1,3)", output: "Topo order: 0 1 2 3", explanation: "In-degree 0 nodes pushed first; queue pops produce valid topological sequence." }
+      ],
+      constraints: ["Vertices are numbered 0 to N-1. Handles disconnected graph components."],
+      companies: ["Google", "Amazon", "Meta", "Microsoft", "Uber"],
+      acceptanceRate: "88.6%",
+      totalAccepted: "4,890,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Adjacency List BFS Traversal (FREE)", category: "FREE / Core BFS",
+        description: "Classic BFS traversal on an adjacency list graph using std::queue and visited boolean array.",
+        prosCons: "Pros: Simple level-order exploration, O(V + E) time. Cons: O(V) auxiliary space.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: true,
+        code: `// 54. Graph BFS - Approach 1: Adjacency List BFS
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+void bfs(int start, const vector<vector<int>>& adj, int n) {
+    vector<bool> visited(n, false);
+    queue<int> q;
+
+    visited[start] = true;
+    q.push(start);
+
+    cout << "BFS Traversal: ";
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        cout << u << " ";
+
+        for (int v : adj[u]) {
+            if (!visited[v]) {
+                visited[v] = true;
+                q.push(v);
+            }
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    int n = 4;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2}; adj[1] = {2}; adj[2] = {0, 3}; adj[3] = {3};
+    bfs(2, adj, n);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'visited[start] = true; q.push(start);', constructType: 'Variable & Initializer', title: 'Mark & Enqueue Start Node', explanation: 'Marks starting node as visited immediately when pushing into queue to prevent duplicate enqueuing.', keyDetails: [{ variableOrConstruct: 'visited[start] = true', role: 'Pre-enqueue mark', whyThisWay: 'Marking visited on push avoids duplicate queue entries' }] },
+          { lineNum: 2, codeSnippet: 'int u = q.front(); q.pop();', constructType: 'Variable & Initializer', title: 'Dequeue Front Vertex', explanation: 'Retrieves next vertex in FIFO level order.', keyDetails: [{ variableOrConstruct: 'q.front()', role: 'FIFO dequeue', whyThisWay: 'Guarantees level-by-level exploration order' }] },
+          { lineNum: 3, codeSnippet: 'if (!visited[v]) { visited[v] = true; q.push(v); }', constructType: 'Condition & Branch', title: 'Enqueue Unvisited Neighbors', explanation: 'Iterates through adjacency list of u and enqueues unvisited neighbors.', keyDetails: [{ variableOrConstruct: 'visited[v]', role: 'Neighbor exploration', whyThisWay: 'Ensures each edge is traversed at most twice (undirected) or once (directed)' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Unweighted Shortest Path Finding via BFS (FREE)", category: "FREE / Shortest Path",
+        description: "Computes shortest distance array from source to all reachable nodes in an unweighted graph.",
+        prosCons: "Pros: Optimal O(V + E) for unweighted graphs. Cons: Does not support weighted edges.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: true,
+        code: `// 54. Graph BFS - Approach 2: Shortest Path
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+vector<int> shortestPathBFS(int src, const vector<vector<int>>& adj, int n) {
+    vector<int> dist(n, -1);
+    queue<int> q;
+
+    dist[src] = 0;
+    q.push(src);
+
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        for (int v : adj[u]) {
+            if (dist[v] == -1) {
+                dist[v] = dist[u] + 1;
+                q.push(v);
+            }
+        }
+    }
+    return dist;
+}
+
+int main() {
+    int n = 5;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2}; adj[1] = {0, 3, 4}; adj[2] = {0, 4}; adj[3] = {1}; adj[4] = {1, 2};
+
+    vector<int> dist = shortestPathBFS(0, adj, n);
+    cout << "Distance from 0 to 3: " << dist[3] << endl; // 2
+    cout << "Distance from 0 to 4: " << dist[4] << endl; // 2
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'vector<int> dist(n, -1); dist[src] = 0;', constructType: 'Variable & Initializer', title: 'Distance Array Initialization', explanation: 'Initializes distance array with -1 (unvisited). Source node distance is 0.', keyDetails: [{ variableOrConstruct: 'dist array', role: 'Dual distance & visited tracker', whyThisWay: '-1 serves as unvisited marker and distance accumulator' }] },
+          { lineNum: 2, codeSnippet: 'if (dist[v] == -1) { dist[v] = dist[u] + 1; q.push(v); }', constructType: 'Condition & Branch', title: 'Distance Update Rule', explanation: 'Sets neighbor distance to dist[u] + 1 on first discovery.', keyDetails: [{ variableOrConstruct: 'dist[u] + 1', role: 'Unweighted distance increment', whyThisWay: 'First time node is reached is guaranteed to be shortest path' }] },
+          { lineNum: 3, codeSnippet: 'return dist;', constructType: 'Return / Cleanup', title: 'Return Shortest Distance Array', explanation: 'Returns array containing shortest path distance from src to every node.', keyDetails: [{ variableOrConstruct: 'dist', role: 'Shortest path result', whyThisWay: 'Provides all-pairs distances from single source in O(V + E)' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Connected Components Count in Undirected Graph", category: "Graph Analysis",
+        description: "Counts total connected components by launching BFS from every unvisited node.",
+        prosCons: "Pros: Works on disconnected graphs. Cons: Scans all nodes 0..N-1.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 54. Graph BFS - Approach 3: Connected Components
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+int countComponents(int n, const vector<vector<int>>& adj) {
+    vector<bool> visited(n, false);
+    int components = 0;
+
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            components++;
+            queue<int> q;
+            visited[i] = true;
+            q.push(i);
+            while (!q.empty()) {
+                int u = q.front(); q.pop();
+                for (int v : adj[u]) {
+                    if (!visited[v]) {
+                        visited[v] = true;
+                        q.push(v);
+                    }
+                }
+            }
+        }
+    }
+    return components;
+}
+
+int main() {
+    int n = 5;
+    vector<vector<int>> adj(n);
+    adj[0] = {1}; adj[1] = {0}; // Component 1
+    adj[2] = {3}; adj[3] = {2}; // Component 2
+    // node 4 isolated -> Component 3
+
+    cout << "Total Components: " << countComponents(n, adj) << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int i = 0; i < n; i++) { if (!visited[i]) { components++; ... } }', constructType: 'Loop Construct', title: 'Outer Component Scan Loop', explanation: 'Scans all vertices 0..N-1. Whenever an unvisited vertex is found, increments component count and starts BFS.', keyDetails: [{ variableOrConstruct: 'components++', role: 'Component counter', whyThisWay: 'Each unvisited vertex indicates a new disconnected component' }] },
+          { lineNum: 2, codeSnippet: 'visited[v] = true; q.push(v);', constructType: 'Variable & Initializer', title: 'Component Flood Fill BFS', explanation: 'BFS marks all nodes in current component as visited so outer loop skips them.', keyDetails: [{ variableOrConstruct: 'flood fill', role: 'Component marking', whyThisWay: 'Exhausts entire connected component in one BFS run' }] },
+          { lineNum: 3, codeSnippet: 'return components;', constructType: 'Return / Cleanup', title: 'Return Total Components', explanation: 'Returns final count of disconnected subgraphs.', keyDetails: [{ variableOrConstruct: 'components', role: 'Total count', whyThisWay: 'Linear time component counting' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Bipartite Graph Check (Two-Coloring BFS)", category: "Coloring",
+        description: "Determines if a graph is Bipartite by attempting 2-coloring via BFS.",
+        prosCons: "Pros: Catches odd-length cycles. Cons: Requires color state array (0, 1, -1).",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 54. Graph BFS - Approach 4: Bipartite Check
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+bool isBipartite(int n, const vector<vector<int>>& adj) {
+    vector<int> color(n, -1);
+
+    for (int i = 0; i < n; i++) {
+        if (color[i] == -1) {
+            color[i] = 0;
+            queue<int> q;
+            q.push(i);
+            while (!q.empty()) {
+                int u = q.front(); q.pop();
+                for (int v : adj[u]) {
+                    if (color[v] == -1) {
+                        color[v] = 1 - color[u];
+                        q.push(v);
+                    } else if (color[v] == color[u]) {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+int main() {
+    int n = 4;
+    vector<vector<int>> adj(n);
+    // Square graph (bipartite)
+    adj[0] = {1, 3}; adj[1] = {0, 2}; adj[2] = {1, 3}; adj[3] = {0, 2};
+    cout << "Is Bipartite: " << (isBipartite(n, adj) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'color[v] = 1 - color[u];', constructType: 'Variable & Initializer', title: 'Opposite Color Assignment', explanation: 'Assigns neighbor v opposite color of u (0 -> 1 or 1 -> 0).', keyDetails: [{ variableOrConstruct: '1 - color[u]', role: 'Color toggle', whyThisWay: 'Adjacent vertices in bipartite graph must have different colors' }] },
+          { lineNum: 2, codeSnippet: 'else if (color[v] == color[u]) return false;', constructType: 'Condition & Branch', title: 'Color Conflict Check', explanation: 'If neighbor already colored with same color as u, graph contains odd cycle and is NOT bipartite.', keyDetails: [{ variableOrConstruct: 'color[v] == color[u]', role: 'Bipartite violation', whyThisWay: 'Odd cycle detected; 2-coloring impossible' }] },
+          { lineNum: 3, codeSnippet: 'return true;', constructType: 'Return / Cleanup', title: 'Return Bipartite Result', explanation: 'Returns true if all components successfully 2-colored without conflicts.', keyDetails: [{ variableOrConstruct: 'true', role: 'Success flag', whyThisWay: 'Graph is bipartite' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: 2D Matrix Grid Shortest Path BFS", category: "Grid BFS",
+        description: "Executes BFS on a 2D grid matrix to find shortest path from top-left (0,0) to bottom-right (M-1, N-1).",
+        prosCons: "Pros: Handles grid obstacles cleanly. Cons: 4-directional direction arrays needed.",
+        timeComplexity: "O(R * C)", spaceComplexity: "O(R * C)", isFree: false,
+        code: `// 54. Graph BFS - Approach 5: 2D Grid Shortest Path
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+int shortestPathGrid(const vector<vector<int>>& grid) {
+    int r = grid.size(), c = grid[0].size();
+    if (grid[0][0] == 1 || grid[r-1][c-1] == 1) return -1;
+
+    vector<vector<int>> dist(r, vector<int>(c, -1));
+    queue<pair<int, int>> q;
+
+    int dr[] = {-1, 1, 0, 0};
+    int dc[] = {0, 0, -1, 1};
+
+    dist[0][0] = 1;
+    q.push({0, 0});
+
+    while (!q.empty()) {
+        auto [cr, cc] = q.front(); q.pop();
+        if (cr == r - 1 && cc == c - 1) return dist[cr][cc];
+
+        for (int i = 0; i < 4; i++) {
+            int nr = cr + dr[i], nc = cc + dc[i];
+            if (nr >= 0 && nr < r && nc >= 0 && nc < c && grid[nr][nc] == 0 && dist[nr][nc] == -1) {
+                dist[nr][nc] = dist[cr][cc] + 1;
+                q.push({nr, nc});
+            }
+        }
+    }
+    return -1;
+}
+
+int main() {
+    vector<vector<int>> grid = {
+        {0, 0, 0},
+        {1, 1, 0},
+        {0, 0, 0}
+    };
+    cout << "Shortest Path Length: " << shortestPathGrid(grid) << endl; // 5
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int dr[] = {-1, 1, 0, 0}; int dc[] = {0, 0, -1, 1};', constructType: 'Variable & Initializer', title: '4-Directional Delta Arrays', explanation: 'Defines row/column offset shifts for UP, DOWN, LEFT, RIGHT neighbor lookups.', keyDetails: [{ variableOrConstruct: 'dr[] / dc[]', role: 'Grid neighbor offsets', whyThisWay: 'Simplifies 4-directional grid neighbor iteration in loop' }] },
+          { lineNum: 2, codeSnippet: 'if (nr >= 0 && nr < r && nc >= 0 && nc < c ...)', constructType: 'Condition & Branch', title: 'Grid Bounds & Obstacle Check', explanation: 'Validates neighbor coordinates stay within matrix boundaries and cell is non-blocked.', keyDetails: [{ variableOrConstruct: 'grid[nr][nc] == 0', role: 'Obstacle check', whyThisWay: 'Ensures path only travels through open cells' }] },
+          { lineNum: 3, codeSnippet: 'if (cr == r - 1 && cc == c - 1) return dist[cr][cc];', constructType: 'Condition & Branch', title: 'Target Destination Hit', explanation: 'Returns shortest step count immediately upon reaching target cell (r-1, c-1).', keyDetails: [{ variableOrConstruct: 'r-1, c-1', role: 'Destination check', whyThisWay: 'First queue hit guarantees minimal path length' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Cycle Detection in Undirected Graph using BFS", category: "Cycle Detection",
+        description: "Detects cycles in an undirected graph using BFS by tracking (node, parent) pairs in queue.",
+        prosCons: "Pros: Non-recursive cycle check. Cons: Requires parent tracking pair.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 54. Graph BFS - Approach 6: Undirected Cycle Detection
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+bool hasCycleBFS(int n, const vector<vector<int>>& adj) {
+    vector<bool> visited(n, false);
+
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            queue<pair<int, int>> q; // (curr, parent)
+            visited[i] = true;
+            q.push({i, -1});
+
+            while (!q.empty()) {
+                auto [u, parent] = q.front(); q.pop();
+                for (int v : adj[u]) {
+                    if (!visited[v]) {
+                        visited[v] = true;
+                        q.push({v, u});
+                    } else if (v != parent) {
+                        return true; // Visited node that is not parent -> Cycle!
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+int main() {
+    int n = 3;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2}; adj[1] = {0, 2}; adj[2] = {0, 1}; // Triangle graph
+    cout << "Has Cycle: " << (hasCycleBFS(n, adj) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'queue<pair<int, int>> q; // (curr, parent)', constructType: 'Variable & Initializer', title: 'Queue with Parent Tracking', explanation: 'Pushes (node, parent) pair so traversal knows which edge was just crossed.', keyDetails: [{ variableOrConstruct: '(curr, parent)', role: 'Parent tracking', whyThisWay: 'Distinguishes backward traversal to parent from true cycle edge' }] },
+          { lineNum: 2, codeSnippet: 'else if (v != parent) return true;', constructType: 'Condition & Branch', title: 'Non-Parent Visited Check', explanation: 'If neighbor v is already visited AND is not the immediate parent, a cycle exists.', keyDetails: [{ variableOrConstruct: 'v != parent', role: 'Cycle condition', whyThisWay: 'Revisiting a non-parent node proves existence of a loop' }] },
+          { lineNum: 3, codeSnippet: 'return false;', constructType: 'Return / Cleanup', title: 'No Cycle Found', explanation: 'Returns false if all components traversed without encountering cross edges.', keyDetails: [{ variableOrConstruct: 'false', role: 'Acyclic result', whyThisWay: 'Graph is a forest/tree' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Multi-Source BFS (Simultaneous Outbreak)", category: "Multi-Source BFS",
+        description: "Pushes all initial source nodes into queue at start to perform simultaneous multi-source BFS.",
+        prosCons: "Pros: Solves rotting oranges / spreading fire problems in O(R*C). Cons: Requires multi-push initialization.",
+        timeComplexity: "O(R * C)", spaceComplexity: "O(R * C)", isFree: false,
+        code: `// 54. Graph BFS - Approach 7: Multi-Source BFS
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+int orangesRotting(vector<vector<int>>& grid) {
+    int r = grid.size(), c = grid[0].size();
+    queue<pair<int, int>> q;
+    int freshCount = 0;
+
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            if (grid[i][j] == 2) q.push({i, j}); // Rotten source
+            else if (grid[i][j] == 1) freshCount++;
+        }
+    }
+
+    if (freshCount == 0) return 0;
+    int minutes = 0;
+    int dr[] = {-1, 1, 0, 0}, dc[] = {0, 0, -1, 1};
+
+    while (!q.empty() && freshCount > 0) {
+        int sz = q.size();
+        minutes++;
+        for (int k = 0; k < sz; k++) {
+            auto [cr, cc] = q.front(); q.pop();
+            for (int i = 0; i < 4; i++) {
+                int nr = cr + dr[i], nc = cc + dc[i];
+                if (nr >= 0 && nr < r && nc >= 0 && nc < c && grid[nr][nc] == 1) {
+                    grid[nr][nc] = 2;
+                    freshCount--;
+                    q.push({nr, nc});
+                }
+            }
+        }
+    }
+    return freshCount == 0 ? minutes : -1;
+}
+
+int main() {
+    vector<vector<int>> grid = {
+        {2, 1, 1},
+        {1, 1, 0},
+        {0, 1, 1}
+    };
+    cout << "Minutes to rot all oranges: " << orangesRotting(grid) << endl; // 4
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (grid[i][j] == 2) q.push({i, j});', constructType: 'Condition & Branch', title: 'Multi-Source Initial Enqueue', explanation: 'Pushes ALL initial rotten orange positions (value 2) into queue before starting BFS loop.', keyDetails: [{ variableOrConstruct: 'q.push rotten', role: 'Multi-source seeding', whyThisWay: 'Simulates simultaneous spreading from all outbreak sources' }] },
+          { lineNum: 2, codeSnippet: 'grid[nr][nc] = 2; freshCount--; q.push({nr, nc});', constructType: 'Variable & Initializer', title: 'Rot Fresh Orange & Enqueue', explanation: 'Rots fresh orange cell, decrements remaining fresh count, and enqueues new rotten source.', keyDetails: [{ variableOrConstruct: 'freshCount--', role: 'Fresh counter update', whyThisWay: 'Tracks remaining uninfected target count' }] },
+          { lineNum: 3, codeSnippet: 'return freshCount == 0 ? minutes : -1;', constructType: 'Return / Cleanup', title: 'Return Total Outbreak Duration', explanation: 'Returns elapsed minutes if all oranges rotted, or -1 if isolated fresh oranges remain.', keyDetails: [{ variableOrConstruct: 'minutes', role: 'Time result', whyThisWay: 'Level count equals elapsed time steps' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Topological Sort using Kahn's Algorithm (In-Degree BFS)", category: "Topological Sort",
+        description: "Computes topological ordering of a Directed Acyclic Graph (DAG) using vertex in-degrees and BFS queue.",
+        prosCons: "Pros: Detects directed cycles automatically. Cons: Applicable only to DAGs.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 54. Graph BFS - Approach 8: Kahn's Algorithm
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+vector<int> kahnsTopologicalSort(int n, const vector<vector<int>>& adj) {
+    vector<int> inDegree(n, 0);
+    for (int u = 0; u < n; u++) {
+        for (int v : adj[u]) inDegree[v]++;
+    }
+
+    queue<int> q;
+    for (int i = 0; i < n; i++) {
+        if (inDegree[i] == 0) q.push(i);
+    }
+
+    vector<int> topoOrder;
+    while (!q.empty()) {
+        int u = q.front(); q.pop();
+        topoOrder.push_back(u);
+
+        for (int v : adj[u]) {
+            inDegree[v]--;
+            if (inDegree[v] == 0) q.push(v);
+        }
+    }
+
+    if ((int)topoOrder.size() != n) return {}; // Cycle detected!
+    return topoOrder;
+}
+
+int main() {
+    int n = 6;
+    vector<vector<int>> adj(n);
+    adj[5] = {2, 0}; adj[4] = {0, 1}; adj[2] = {3}; adj[3] = {1};
+    vector<int> topo = kahnsTopologicalSort(n, adj);
+    cout << "Topological Order: ";
+    for (int x : topo) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (int v : adj[u]) inDegree[v]++;', constructType: 'Loop Construct', title: 'Compute In-Degrees', explanation: 'Calculates number of incoming edges for every vertex.', keyDetails: [{ variableOrConstruct: 'inDegree[v]++', role: 'Dependency counter', whyThisWay: 'In-degree 0 means node has no prerequisite dependencies' }] },
+          { lineNum: 2, codeSnippet: 'if (inDegree[i] == 0) q.push(i);', constructType: 'Condition & Branch', title: 'Enqueue Zero In-Degree Nodes', explanation: 'Pushes all vertices with 0 incoming dependencies into queue as initial candidates.', keyDetails: [{ variableOrConstruct: 'inDegree == 0', role: 'Dependency free check', whyThisWay: 'Nodes ready to execute first' }] },
+          { lineNum: 3, codeSnippet: 'inDegree[v]--; if (inDegree[v] == 0) q.push(v);', constructType: 'Condition & Branch', title: 'Decrement Neighbor In-Degrees', explanation: 'Removes outgoing edges from u. If neighbor in-degree reaches 0, enqueues neighbor.', keyDetails: [{ variableOrConstruct: 'inDegree[v]--', role: 'Dependency removal', whyThisWay: 'Unlocks dependent nodes as prerequisites complete' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Minimum Knight Moves on Chessboard BFS", category: "Implicit Graph",
+        description: "Finds minimum knight steps on an infinite chessboard from (0,0) to target (x,y) using 8-directional BFS.",
+        prosCons: "Pros: Demonstrates implicit graph modeling. Cons: Visited set/hash table overhead.",
+        timeComplexity: "O(K) steps", spaceComplexity: "O(K)", isFree: false,
+        code: `// 54. Graph BFS - Approach 9: Knight Moves BFS
+#include <iostream>
+#include <queue>
+#include <set>
+using namespace std;
+
+int minKnightMoves(int targetX, int targetY) {
+    int dx[] = {-2, -2, -1, -1, 1, 1, 2, 2};
+    int dy[] = {-1, 1, -2, 2, -2, 2, -1, 1};
+
+    queue<pair<int, int>> q;
+    set<pair<int, int>> visited;
+
+    q.push({0, 0});
+    visited.insert({0, 0});
+    int moves = 0;
+
+    while (!q.empty()) {
+        int sz = q.size();
+        for (int k = 0; k < sz; k++) {
+            auto [cx, cy] = q.front(); q.pop();
+            if (cx == targetX && cy == targetY) return moves;
+
+            for (int i = 0; i < 8; i++) {
+                int nx = cx + dx[i], ny = cy + dy[i];
+                if (visited.find({nx, ny}) == visited.end()) {
+                    visited.insert({nx, ny});
+                    q.push({nx, ny});
+                }
+            }
+        }
+        moves++;
+    }
+    return -1;
+}
+
+int main() {
+    cout << "Min moves to (2, 1): " << minKnightMoves(2, 1) << endl; // 1
+    cout << "Min moves to (5, 5): " << minKnightMoves(5, 5) << endl; // 4
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int dx[] = {-2, -2, -1, -1, 1, 1, 2, 2}; int dy[] = ...', constructType: 'Variable & Initializer', title: '8 Knight Jump Direction Deltas', explanation: 'Defines 8 L-shaped jump move offsets available to a chess knight.', keyDetails: [{ variableOrConstruct: 'dx[] / dy[]', role: 'Knight moves', whyThisWay: 'Encodes 8 valid chess knight move displacements' }] },
+          { lineNum: 2, codeSnippet: 'if (cx == targetX && cy == targetY) return moves;', constructType: 'Condition & Branch', title: 'Target Coordinate Match', explanation: 'Returns move count as soon as knight lands on target coordinates.', keyDetails: [{ variableOrConstruct: 'targetX, targetY', role: 'Target check', whyThisWay: 'First queue hit guarantees shortest move count' }] },
+          { lineNum: 3, codeSnippet: 'moves++;', constructType: 'Variable & Initializer', title: 'Increment Step Level Counter', explanation: 'Increments move counter after completing processing for current level.', keyDetails: [{ variableOrConstruct: 'moves++', role: 'Step tracking', whyThisWay: 'Level distance counter for BFS tree' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Word Ladder Transformation BFS", category: "String Graph",
+        description: "Finds shortest mutation sequence length from beginWord to endWord where each step changes 1 letter.",
+        prosCons: "Pros: Classic interview string BFS problem. Cons: Character substitution loop O(L * 26).",
+        timeComplexity: "O(N * L * 26)", spaceComplexity: "O(N * L)", isFree: false,
+        code: `// 54. Graph BFS - Approach 10: Word Ladder
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_set>
+#include <queue>
+using namespace std;
+
+int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
+    unordered_set<string> dict(wordList.begin(), wordList.end());
+    if (dict.find(endWord) == dict.end()) return 0;
+
+    queue<string> q;
+    q.push(beginWord);
+    int level = 1;
+
+    while (!q.empty()) {
+        int sz = q.size();
+        for (int k = 0; k < sz; k++) {
+            string word = q.front(); q.pop();
+            if (word == endWord) return level;
+
+            for (int i = 0; i < (int)word.length(); i++) {
+                char orig = word[i];
+                for (char c = 'a'; c <= 'z'; c++) {
+                    word[i] = c;
+                    if (dict.find(word) != dict.end()) {
+                        dict.erase(word);
+                        q.push(word);
+                    }
+                }
+                word[i] = orig;
+            }
+        }
+        level++;
+    }
+    return 0;
+}
+
+int main() {
+    vector<string> wordList = {"hot", "dot", "dog", "lot", "log", "cog"};
+    cout << "Word ladder hit -> cog length: " << ladderLength("hit", "cog", wordList) << endl; // 5
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'for (char c = \'a\'; c <= \'z\'; c++) { word[i] = c; ... }', constructType: 'Loop Construct', title: 'Generate 1-Letter Mutations', explanation: 'Tries replacing letter i with all 26 lowercase English letters to find valid 1-edit distance neighbors.', keyDetails: [{ variableOrConstruct: 'word[i] = c', role: 'Mutation trial', whyThisWay: 'Generates all potential adjacent words in graph' }] },
+          { lineNum: 2, codeSnippet: 'if (dict.find(word) != dict.end()) { dict.erase(word); q.push(word); }', constructType: 'Condition & Branch', title: 'Dictionary Lookup & Erase Visited', explanation: 'If mutated word exists in dictionary, erases it (to mark visited) and enqueues it.', keyDetails: [{ variableOrConstruct: 'dict.erase(word)', role: 'Visited tracking via set erasure', whyThisWay: 'Erasing from set prevents revisiting same word in future levels' }] },
+          { lineNum: 3, codeSnippet: 'if (word == endWord) return level;', constructType: 'Condition & Branch', title: 'Target Word Found', explanation: 'Returns current sequence length when target endWord is reached.', keyDetails: [{ variableOrConstruct: 'word == endWord', role: 'Target match', whyThisWay: 'Guarantees minimal transformation steps' }] }
+        ]
+      }
+    ],
+    traceKey: "for_loop"
+  };
+}
+
+export function getProblem55Details(): LearnModule {
+  return {
+    id: "med_graph_dfs",
+    title: "55. Graph DFS (Depth-First)",
+    category: "Graph Algorithms",
+    difficulty: "medium",
+    shortDesc: "Recursive depth-first graph traversal and component counting.",
+    fullCode: `// 55. Graph DFS - Approach 1: Recursive Adjacency List DFS
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void dfsHelper(int u, const vector<vector<int>>& adj, vector<bool>& visited) {
+    visited[u] = true;
+    cout << u << " ";
+    for (int v : adj[u]) {
+        if (!visited[v]) {
+            dfsHelper(v, adj, visited);
+        }
+    }
+}
+
+void dfs(int start, const vector<vector<int>>& adj, int n) {
+    vector<bool> visited(n, false);
+    cout << "DFS Traversal: ";
+    dfsHelper(start, adj, visited);
+    cout << endl;
+}
+
+int main() {
+    int n = 5;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2};
+    adj[1] = {0, 3, 4};
+    adj[2] = {0};
+    adj[3] = {1};
+    adj[4] = {1};
+
+    dfs(0, adj, n);
+    return 0;
+}`,
+    problemStatement: {
+      title: "55. Graph DFS (Depth-First)",
+      objective: "Master Graph Depth-First Search: recursive traversal, explicit stack iteration, 2D matrix flood fill island counting, directed graph cycle detection (3-color state), path finding, topological sorting via post-order stack, and Kosaraju's strongly connected components.",
+      description: "Implement **Graph DFS (Depth-First)** (Graph Algorithms). Traverse graph paths as deep as possible along each branch before backtracking, enabling path discovery, connectivity analysis, and cycle detection.",
+      inputDesc: "Adjacency list or 2D matrix grid, starting vertex, target destination, or edge direction specs.",
+      outputDesc: "DFS traversal order, island counts, path existence booleans, or topological order sequences.",
+      takeaways: [
+        "DFS explores deeply down a branch before backtracking, utilizing the call stack or an explicit LIFO stack",
+        "Flood fill algorithms (like counting islands on 2D grids) are naturally implemented with recursive DFS",
+        "Cycle detection in directed graphs requires 3 states: 0=unvisited, 1=visiting (on current stack), 2=visited",
+        "Topological sorting with DFS pushes vertices onto a stack after exploring all their descendants (post-order)"
+      ],
+      examples: [
+        { id: 1, input: "Graph 0->1, 1->3, 0->2; DFS(0)", output: "DFS Traversal: 0 1 3 2", explanation: "Explores deep branch 0 -> 1 -> 3 first before backtracking to visit 2." },
+        { id: 2, input: "2D Grid of '1' (land) and '0' (water)", output: "Number of Islands: 3", explanation: "DFS flood fill flips connected '1's to '0's for each island discovered." },
+        { id: 3, input: "Directed graph with cycle 0->1->2->0", output: "Has Directed Cycle: Yes", explanation: "DFS encounters node with state 1 (currently on recursion stack), proving cycle." }
+      ],
+      constraints: ["Vertices 0 to N-1. Recursive depth bounded by V; handle large graphs without stack overflow."],
+      companies: ["Google", "Amazon", "Meta", "Microsoft", "Apple"],
+      acceptanceRate: "89.1%",
+      totalAccepted: "4,650,000"
+    },
+    approaches: [
+      {
+        id: 1, name: "Approach 1: Recursive Adjacency List DFS (FREE)", category: "FREE / Core DFS",
+        description: "Classic recursive DFS traversal on an adjacency list graph tracking visited vertices.",
+        prosCons: "Pros: Extremely clean recursive structure. Cons: O(V) stack frames may cause overflow on deep paths.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V) call stack", isFree: true,
+        code: `// 55. Graph DFS - Approach 1: Recursive DFS
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void dfsHelper(int u, const vector<vector<int>>& adj, vector<bool>& visited) {
+    visited[u] = true;
+    cout << u << " ";
+    for (int v : adj[u]) {
+        if (!visited[v]) {
+            dfsHelper(v, adj, visited);
+        }
+    }
+}
+
+void dfs(int start, const vector<vector<int>>& adj, int n) {
+    vector<bool> visited(n, false);
+    cout << "DFS: ";
+    dfsHelper(start, adj, visited);
+    cout << endl;
+}
+
+int main() {
+    int n = 4;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2}; adj[1] = {2}; adj[2] = {0, 3}; adj[3] = {3};
+    dfs(2, adj, n);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'visited[u] = true; cout << u << " ";', constructType: 'Variable & Initializer', title: 'Mark Node Visited', explanation: 'Marks current vertex u as visited upon entering recursive call frame.', keyDetails: [{ variableOrConstruct: 'visited[u] = true', role: 'Visited tracking', whyThisWay: 'Prevents infinite recursion in cyclic graphs' }] },
+          { lineNum: 2, codeSnippet: 'for (int v : adj[u]) { if (!visited[v]) dfsHelper(v, adj, visited); }', constructType: 'Loop Construct', title: 'Recursive Deep Exploration', explanation: 'Iterates through neighbors of u and immediately recurses into first unvisited neighbor.', keyDetails: [{ variableOrConstruct: 'dfsHelper(v...)', role: 'Recursive dive', whyThisWay: 'Explores path as deep as possible before returning' }] },
+          { lineNum: 3, codeSnippet: 'dfsHelper(start, adj, visited);', constructType: 'Function Signature', title: 'Trigger Recursive Root DFS', explanation: 'Invokes recursive helper function starting at start vertex.', keyDetails: [{ variableOrConstruct: 'dfsHelper', role: 'DFS entry point', whyThisWay: 'Initiates stack depth traversal' }] }
+        ]
+      },
+      {
+        id: 2, name: "Approach 2: Iterative Graph DFS (Explicit Stack) (FREE)", category: "FREE / Iterative DFS",
+        description: "Replaces call stack recursion with an explicit std::stack to perform iterative DFS traversal.",
+        prosCons: "Pros: Avoids call stack overflow for deep graphs. Cons: Order of visited neighbors reversed unless pushed backward.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: true,
+        code: `// 55. Graph DFS - Approach 2: Iterative DFS
+#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+void dfsIterative(int start, const vector<vector<int>>& adj, int n) {
+    vector<bool> visited(n, false);
+    stack<int> stk;
+
+    stk.push(start);
+
+    cout << "Iterative DFS: ";
+    while (!stk.empty()) {
+        int u = stk.top(); stk.pop();
+        if (!visited[u]) {
+            visited[u] = true;
+            cout << u << " ";
+            for (int v : adj[u]) {
+                if (!visited[v]) {
+                    stk.push(v);
+                }
+            }
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    int n = 5;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2}; adj[1] = {0, 3, 4}; adj[2] = {0}; adj[3] = {1}; adj[4] = {1};
+    dfsIterative(0, adj, n);
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'stack<int> stk; stk.push(start);', constructType: 'Variable & Initializer', title: 'Initialize Explicit LIFO Stack', explanation: 'Seeds explicit stack with starting vertex.', keyDetails: [{ variableOrConstruct: 'stack<int>', role: 'Explicit LIFO stack', whyThisWay: 'Replaces system call stack for stack-overflow safe DFS' }] },
+          { lineNum: 2, codeSnippet: 'int u = stk.top(); stk.pop();', constructType: 'Variable & Initializer', title: 'Pop Top Vertex from Stack', explanation: 'Pops top element from stack to explore most recently discovered path.', keyDetails: [{ variableOrConstruct: 'stk.top()', role: 'LIFO pop', whyThisWay: 'Ensures depth-first exploration preference' }] },
+          { lineNum: 3, codeSnippet: 'if (!visited[u]) { visited[u] = true; ... stk.push(v); }', constructType: 'Condition & Branch', title: 'Mark Visited & Push Neighbors', explanation: 'Checks visited state on pop, marks visited, and pushes unvisited neighbors onto stack.', keyDetails: [{ variableOrConstruct: 'stk.push(v)', role: 'Neighbor push', whyThisWay: 'Accumulates deep path exploration candidates' }] }
+        ]
+      },
+      {
+        id: 3, name: "Approach 3: Number of Islands on 2D Matrix (DFS Flood Fill)", category: "Grid DFS",
+        description: "Counts connected land components ('1's) on a 2D matrix using recursive DFS flood fill.",
+        prosCons: "Pros: Classic interview problem, in-place grid mutation. Cons: Modifies input grid matrix.",
+        timeComplexity: "O(R * C)", spaceComplexity: "O(R * C) stack", isFree: false,
+        code: `// 55. Graph DFS - Approach 3: Number of Islands
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void floodFillDFS(vector<vector<char>>& grid, int r, int c, int R, int C) {
+    if (r < 0 || r >= R || c < 0 || c >= C || grid[r][c] != '1') return;
+    grid[r][c] = '0'; // Sink land cell
+    floodFillDFS(grid, r - 1, c, R, C);
+    floodFillDFS(grid, r + 1, c, R, C);
+    floodFillDFS(grid, r, c - 1, R, C);
+    floodFillDFS(grid, r, c + 1, R, C);
+}
+
+int numIslands(vector<vector<char>>& grid) {
+    if (grid.empty()) return 0;
+    int R = grid.size(), C = grid[0].size();
+    int islands = 0;
+
+    for (int r = 0; r < R; r++) {
+        for (int c = 0; c < C; c++) {
+            if (grid[r][c] == '1') {
+                islands++;
+                floodFillDFS(grid, r, c, R, C);
+            }
+        }
+    }
+    return islands;
+}
+
+int main() {
+    vector<vector<char>> grid = {
+        {'1', '1', '0', '0', '0'},
+        {'1', '1', '0', '0', '0'},
+        {'0', '0', '1', '0', '0'},
+        {'0', '0', '0', '1', '1'}
+    };
+    cout << "Number of Islands: " << numIslands(grid) << endl; // 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'if (r < 0 || r >= R || c < 0 || c >= C || grid[r][c] != \'1\') return;', constructType: 'Condition & Branch', title: 'Grid Bounds & Water Guard', explanation: 'Base case returns if cell coordinates are out of bounds or cell is not land (\'1\').', keyDetails: [{ variableOrConstruct: 'grid[r][c] != \'1\'', role: 'Base case guard', whyThisWay: 'Stops recursion at matrix borders or water cells' }] },
+          { lineNum: 2, codeSnippet: 'grid[r][c] = \'0\'; // Sink land cell', constructType: 'Variable & Initializer', title: 'In-Place Land Sinking', explanation: 'Overwrites land cell \'1\' to \'0\' (water) to mark cell visited without extra memory.', keyDetails: [{ variableOrConstruct: 'grid[r][c] = \'0\'', role: 'In-place visited sinking', whyThisWay: 'Avoids allocating separate visited matrix' }] },
+          { lineNum: 3, codeSnippet: 'floodFillDFS(grid, r-1, c...); floodFillDFS(grid, r+1, c...); ...', constructType: 'Function Signature', title: '4-Directional Recursive Flood Fill', explanation: 'Recursively sinks all adjacent connected land cells in 4 cardinal directions.', keyDetails: [{ variableOrConstruct: '4-directional calls', role: 'Component erasure', whyThisWay: 'Erases whole island component in single search pass' }] }
+        ]
+      },
+      {
+        id: 4, name: "Approach 4: Cycle Detection in Directed Graph (3-Color State)", category: "Cycle Detection",
+        description: "Detects back-edges and cycles in a directed graph using 3-color states (UNVISITED=0, VISITING=1, VISITED=2).",
+        prosCons: "Pros: Essential for directed graph cycle detection. Cons: 2-state visited array is insufficient for directed graphs.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 55. Graph DFS - Approach 4: Directed Cycle 3-Coloring
+#include <iostream>
+#include <vector>
+using namespace std;
+
+enum State { UNVISITED = 0, VISITING = 1, VISITED = 2 };
+
+bool dfsHasCycle(int u, const vector<vector<int>>& adj, vector<State>& state) {
+    state[u] = VISITING;
+    for (int v : adj[u]) {
+        if (state[v] == VISITING) return true; // Back-edge found!
+        if (state[v] == UNVISITED && dfsHasCycle(v, adj, state)) return true;
+    }
+    state[u] = VISITED;
+    return false;
+}
+
+bool hasDirectedCycle(int n, const vector<vector<int>>& adj) {
+    vector<State> state(n, UNVISITED);
+    for (int i = 0; i < n; i++) {
+        if (state[i] == UNVISITED) {
+            if (dfsHasCycle(i, adj, state)) return true;
+        }
+    }
+    return false;
+}
+
+int main() {
+    int n = 4;
+    vector<vector<int>> adj(n);
+    adj[0] = {1}; adj[1] = {2}; adj[2] = {3}; adj[3] = {1}; // Cycle 1->2->3->1
+    cout << "Has Directed Cycle: " << (hasDirectedCycle(n, adj) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'state[u] = VISITING;', constructType: 'Variable & Initializer', title: 'Mark Node Active on Recursion Stack', explanation: 'Sets node state to VISITING (1) while its call frame is active on the stack.', keyDetails: [{ variableOrConstruct: 'VISITING', role: 'Active stack marker', whyThisWay: 'Identifies ancestor nodes currently in active path' }] },
+          { lineNum: 2, codeSnippet: 'if (state[v] == VISITING) return true;', constructType: 'Condition & Branch', title: 'Back-Edge Cycle Detection', explanation: 'If neighbor v is VISITING, a back-edge to an active ancestor has been discovered, proving cycle existence.', keyDetails: [{ variableOrConstruct: 'state[v] == VISITING', role: 'Back-edge check', whyThisWay: 'Revisiting an active ancestor proves a directed cycle' }] },
+          { lineNum: 3, codeSnippet: 'state[u] = VISITED;', constructType: 'Variable & Initializer', title: 'Mark Node Fully Processed', explanation: 'Sets node state to VISITED (2) upon returning from recursive call, taking it off active stack.', keyDetails: [{ variableOrConstruct: 'VISITED', role: 'Finished marker', whyThisWay: 'Ensures node is never re-processed' }] }
+        ]
+      },
+      {
+        id: 5, name: "Approach 5: All Paths from Source to Target Node (DFS Backtracking)", category: "Backtracking",
+        description: "Finds all distinct paths from source node to target node using DFS with path tracking and backtracking.",
+        prosCons: "Pros: Finds all valid routes. Cons: Exponential worst-case path count O(2^V).",
+        timeComplexity: "O(2^V)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 55. Graph DFS - Approach 5: All Paths (Backtracking)
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void allPathsDFS(int u, int target, const vector<vector<int>>& graph, vector<int>& currentPath, vector<vector<int>>& result) {
+    currentPath.push_back(u);
+    if (u == target) {
+        result.push_back(currentPath);
+    } else {
+        for (int v : graph[u]) {
+            allPathsDFS(v, target, graph, currentPath, result);
+        }
+    }
+    currentPath.pop_back(); // Backtrack
+}
+
+vector<vector<int>> allPathsSourceTarget(const vector<vector<int>>& graph) {
+    vector<vector<int>> result;
+    vector<int> currentPath;
+    allPathsDFS(0, (int)graph.size() - 1, graph, currentPath, result);
+    return result;
+}
+
+int main() {
+    vector<vector<int>> graph = {{1, 2}, {3}, {3}, {}};
+    vector<vector<int>> paths = allPathsSourceTarget(graph);
+    cout << "All paths 0 -> 3:\n";
+    for (const auto& p : paths) {
+        for (int node : p) cout << node << " ";
+        cout << endl;
+    }
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'currentPath.push_back(u);', constructType: 'Variable & Initializer', title: 'Append Node to Current Path', explanation: 'Adds vertex u to active path vector as DFS advances.', keyDetails: [{ variableOrConstruct: 'currentPath.push_back', role: 'Path accumulation', whyThisWay: 'Records traversal sequence' }] },
+          { lineNum: 2, codeSnippet: 'if (u == target) result.push_back(currentPath);', constructType: 'Condition & Branch', title: 'Target Destination Path Record', explanation: 'Saves a copy of currentPath to result list when target node is reached.', keyDetails: [{ variableOrConstruct: 'u == target', role: 'Destination check', whyThisWay: 'Captures full path from source to target' }] },
+          { lineNum: 3, codeSnippet: 'currentPath.pop_back(); // Backtrack', constructType: 'Return / Cleanup', title: 'Backtrack Path State', explanation: 'Pops last node from currentPath upon returning to restore caller state.', keyDetails: [{ variableOrConstruct: 'currentPath.pop_back()', role: 'Backtracking undo', whyThisWay: 'Restores path state for exploring alternative branches' }] }
+        ]
+      },
+      {
+        id: 6, name: "Approach 6: Topological Sort using DFS and Post-Order Stack", category: "Topological Sort",
+        description: "Computes topological ordering of a DAG by pushing vertices onto a stack after exploring all descendants.",
+        prosCons: "Pros: Elegant post-order recursion. Cons: Requires reversing stack or pushing to vector end.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 55. Graph DFS - Approach 6: Topological Sort DFS
+#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+void topoDFS(int u, const vector<vector<int>>& adj, vector<bool>& visited, stack<int>& stk) {
+    visited[u] = true;
+    for (int v : adj[u]) {
+        if (!visited[v]) {
+            topoDFS(v, adj, visited, stk);
+        }
+    }
+    stk.push(u); // Post-order push
+}
+
+vector<int> topologicalSortDFS(int n, const vector<vector<int>>& adj) {
+    vector<bool> visited(n, false);
+    stack<int> stk;
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) topoDFS(i, adj, visited, stk);
+    }
+    vector<int> order;
+    while (!stk.empty()) {
+        order.push_back(stk.top());
+        stk.pop();
+    }
+    return order;
+}
+
+int main() {
+    int n = 4;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2}; adj[1] = {3}; adj[2] = {3};
+    vector<int> order = topologicalSortDFS(n, adj);
+    cout << "Topological Order (DFS): ";
+    for (int x : order) cout << x << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'topoDFS(v, adj, visited, stk);', constructType: 'Function Signature', title: 'Recurse Subtree Descendants', explanation: 'Recursively explores all dependent child branches first.', keyDetails: [{ variableOrConstruct: 'topoDFS', role: 'Descendant traversal', whyThisWay: 'Ensures all prerequisites/dependencies are processed' }] },
+          { lineNum: 2, codeSnippet: 'stk.push(u); // Post-order push', constructType: 'Variable & Initializer', title: 'Post-Order Stack Push', explanation: 'Pushes current node onto stack AFTER all its child descendants are completely finished.', keyDetails: [{ variableOrConstruct: 'stk.push(u)', role: 'Post-order recording', whyThisWay: 'When popped from stack, u will appear BEFORE its descendants' }] },
+          { lineNum: 3, codeSnippet: 'order.push_back(stk.top()); stk.pop();', constructType: 'Loop Construct', title: 'Unwind Stack to Result Order', explanation: 'Pops nodes from stack to output list, producing valid topological ordering.', keyDetails: [{ variableOrConstruct: 'stk.pop()', role: 'Order extraction', whyThisWay: 'Reverses post-order sequence to form correct topological order' }] }
+        ]
+      },
+      {
+        id: 7, name: "Approach 7: Connected Component Size & Count (DFS)", category: "Component Size",
+        description: "Calculates the exact vertex count (size) of each connected component in an undirected graph using DFS.",
+        prosCons: "Pros: Computes component size distribution. Cons: Modifies visited array globally.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 55. Graph DFS - Approach 7: Component Sizes
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int dfsComponentSize(int u, const vector<vector<int>>& adj, vector<bool>& visited) {
+    visited[u] = true;
+    int count = 1;
+    for (int v : adj[u]) {
+        if (!visited[v]) {
+            count += dfsComponentSize(v, adj, visited);
+        }
+    }
+    return count;
+}
+
+vector<int> getComponentSizes(int n, const vector<vector<int>>& adj) {
+    vector<bool> visited(n, false);
+    vector<int> sizes;
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            sizes.push_back(dfsComponentSize(i, adj, visited));
+        }
+    }
+    return sizes;
+}
+
+int main() {
+    int n = 6;
+    vector<vector<int>> adj(n);
+    adj[0] = {1}; adj[1] = {0, 2}; adj[2] = {1}; // Component of size 3
+    adj[3] = {4}; adj[4] = {3};                 // Component of size 2
+    // node 5 isolated -> Component of size 1
+
+    vector<int> sizes = getComponentSizes(n, adj);
+    cout << "Component sizes: ";
+    for (int s : sizes) cout << s << " ";
+    cout << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'int count = 1;', constructType: 'Variable & Initializer', title: 'Initialize Component Counter', explanation: 'Starts count at 1 for current vertex u.', keyDetails: [{ variableOrConstruct: 'count = 1', role: 'Self node count', whyThisWay: 'Current node counts as 1 element in component' }] },
+          { lineNum: 2, codeSnippet: 'count += dfsComponentSize(v, adj, visited);', constructType: 'Function Signature', title: 'Accumulate Subtree Node Counts', explanation: 'Adds node count returned by each unvisited neighbor subtree.', keyDetails: [{ variableOrConstruct: 'count += ...', role: 'Size accumulation', whyThisWay: 'Sums sizes of all sub-branches in component' }] },
+          { lineNum: 3, codeSnippet: 'return count;', constructType: 'Return / Cleanup', title: 'Return Total Component Size', explanation: 'Returns total count of reachable vertices in component.', keyDetails: [{ variableOrConstruct: 'count', role: 'Component size', whyThisWay: 'Returns exact total vertex count' }] }
+        ]
+      },
+      {
+        id: 8, name: "Approach 8: Bipartite Graph Check using Recursive DFS", category: "Coloring",
+        description: "Checks if a graph is Bipartite using recursive DFS two-coloring (colors 0 and 1).",
+        prosCons: "Pros: Recursive formulation of bipartite test. Cons: Stack space O(V).",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 55. Graph DFS - Approach 8: Bipartite DFS
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool dfsBipartite(int u, int c, const vector<vector<int>>& adj, vector<int>& color) {
+    color[u] = c;
+    for (int v : adj[u]) {
+        if (color[v] == -1) {
+            if (!dfsBipartite(v, 1 - c, adj, color)) return false;
+        } else if (color[v] == color[u]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isBipartiteDFS(int n, const vector<vector<int>>& adj) {
+    vector<int> color(n, -1);
+    for (int i = 0; i < n; i++) {
+        if (color[i] == -1) {
+            if (!dfsBipartite(i, 0, adj, color)) return false;
+        }
+    }
+    return true;
+}
+
+int main() {
+    int n = 4;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 3}; adj[1] = {0, 2}; adj[2] = {1, 3}; adj[3] = {0, 2};
+    cout << "Is Bipartite (DFS): " << (isBipartiteDFS(n, adj) ? "Yes" : "No") << endl;
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'color[u] = c;', constructType: 'Variable & Initializer', title: 'Color Assignment', explanation: 'Assigns color c (0 or 1) to vertex u.', keyDetails: [{ variableOrConstruct: 'color[u] = c', role: 'Node coloring', whyThisWay: 'Marks node with one of two partition colors' }] },
+          { lineNum: 2, codeSnippet: 'dfsBipartite(v, 1 - c, adj, color)', constructType: 'Function Signature', title: 'Recurse with Inverted Color', explanation: 'Recurses into neighbor v passing opposite color 1 - c.', keyDetails: [{ variableOrConstruct: '1 - c', role: 'Color toggle', whyThisWay: 'Enforces alternate coloring across edges' }] },
+          { lineNum: 3, codeSnippet: 'else if (color[v] == color[u]) return false;', constructType: 'Condition & Branch', title: 'Color Conflict Check', explanation: 'Returns false if adjacent neighbor has same color.', keyDetails: [{ variableOrConstruct: 'color[v] == color[u]', role: 'Conflict detection', whyThisWay: 'Proves graph cannot be 2-colored (odd cycle present)' }] }
+        ]
+      },
+      {
+        id: 9, name: "Approach 9: Find Bridges / Critical Connections (Tarjan/DFS)", category: "Tarjan Bridges",
+        description: "Finds critical bridge edges in an undirected graph using DFS discovery time tin[] and low-link low[] arrays.",
+        prosCons: "Pros: Linear time O(V + E) bridge identification. Cons: Requires low-link tracking algorithm logic.",
+        timeComplexity: "O(V + E)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 55. Graph DFS - Approach 9: Find Bridges (Tarjan)
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int timer = 0;
+
+void bridgeDFS(int u, int p, const vector<vector<int>>& adj, vector<int>& tin, vector<int>& low, vector<pair<int, int>>& bridges) {
+    tin[u] = low[u] = ++timer;
+    for (int v : adj[u]) {
+        if (v == p) continue;
+        if (tin[v]) {
+            low[u] = min(low[u], tin[v]); // Back-edge
+        } else {
+            bridgeDFS(v, u, adj, tin, low, bridges);
+            low[u] = min(low[u], low[v]);
+            if (low[v] > tin[u]) {
+                bridges.push_back({u, v}); // Bridge found!
+            }
+        }
+    }
+}
+
+vector<pair<int, int>> findBridges(int n, const vector<vector<int>>& adj) {
+    vector<int> tin(n, 0), low(n, 0);
+    vector<pair<int, int>> bridges;
+    timer = 0;
+    for (int i = 0; i < n; i++) {
+        if (!tin[i]) bridgeDFS(i, -1, adj, tin, low, bridges);
+    }
+    return bridges;
+}
+
+int main() {
+    int n = 4;
+    vector<vector<int>> adj(n);
+    adj[0] = {1, 2}; adj[1] = {0, 2}; adj[2] = {0, 1, 3}; adj[3] = {2};
+    auto bridges = findBridges(n, adj);
+    cout << "Bridges found:\n";
+    for (auto [u, v] : bridges) cout << u << " -- " << v << endl; // 2 -- 3
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'tin[u] = low[u] = ++timer;', constructType: 'Variable & Initializer', title: 'Initialize Discovery & Low-Link Values', explanation: 'Assigns global timer value to discovery time tin[u] and initial low-link low[u].', keyDetails: [{ variableOrConstruct: 'tin / low', role: 'Tarjan tracking values', whyThisWay: 'tin is entry timestamp; low is lowest reachable discovery timestamp' }] },
+          { lineNum: 2, codeSnippet: 'low[u] = min(low[u], low[v]);', constructType: 'Variable & Initializer', title: 'Update Low-Link from Subtree', explanation: 'Propagates lowest reachable timestamp back up from child subtree v.', keyDetails: [{ variableOrConstruct: 'low[u] = min(...)', role: 'Low-link propagation', whyThisWay: 'Passes back-edge reachability upward' }] },
+          { lineNum: 3, codeSnippet: 'if (low[v] > tin[u]) bridges.push_back({u, v});', constructType: 'Condition & Branch', title: 'Bridge Condition Check', explanation: 'If child v cannot reach u or any ancestor of u, edge (u, v) is a critical bridge.', keyDetails: [{ variableOrConstruct: 'low[v] > tin[u]', role: 'Bridge condition', whyThisWay: 'No back-edge exists from v subtree to u or above; removing edge disconnects graph' }] }
+        ]
+      },
+      {
+        id: 10, name: "Approach 10: Tree Diameter Calculation (Double DFS)", category: "Tree Metrics",
+        description: "Calculates the maximum distance between any two nodes in a tree using 2 consecutive DFS runs.",
+        prosCons: "Pros: Extremely fast O(V) diameter calculation. Cons: Requires tree topology (no cycles).",
+        timeComplexity: "O(V)", spaceComplexity: "O(V)", isFree: false,
+        code: `// 55. Graph DFS - Approach 10: Tree Diameter
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void findFarthestDFS(int u, int dist, int p, const vector<vector<int>>& adj, int& maxDist, int& farthestNode) {
+    if (dist > maxDist) {
+        maxDist = dist;
+        farthestNode = u;
+    }
+    for (int v : adj[u]) {
+        if (v != p) {
+            findFarthestDFS(v, dist + 1, u, adj, maxDist, farthestNode);
+        }
+    }
+}
+
+int treeDiameter(int n, const vector<vector<int>>& adj) {
+    int maxDist = -1, farthestNode = 0;
+    // 1st DFS: Find farthest node from node 0
+    findFarthestDFS(0, 0, -1, adj, maxDist, farthestNode);
+
+    int startNode = farthestNode;
+    maxDist = -1;
+    // 2nd DFS: Find farthest node from startNode
+    findFarthestDFS(startNode, 0, -1, adj, maxDist, farthestNode);
+
+    return maxDist;
+}
+
+int main() {
+    int n = 5;
+    vector<vector<int>> adj(n);
+    adj[0] = {1}; adj[1] = {0, 2, 3}; adj[2] = {1, 4}; adj[3] = {1}; adj[4] = {2};
+    cout << "Tree Diameter: " << treeDiameter(n, adj) << endl; // 3 (path 3-1-2-4)
+    return 0;
+}`,
+        lineBreakdown: [
+          { lineNum: 1, codeSnippet: 'findFarthestDFS(0, 0, -1, adj, maxDist, farthestNode);', constructType: 'Function Signature', title: '1st DFS: Find Extreme Node A', explanation: 'First DFS from arbitrary node 0 finds node A that is furthest from node 0.', keyDetails: [{ variableOrConstruct: '1st DFS', role: 'Peripheral node finder', whyThisWay: 'Furthest node from any arbitrary point in a tree is always an endpoint of tree diameter' }] },
+          { lineNum: 2, codeSnippet: 'findFarthestDFS(startNode, 0, -1, adj, maxDist, farthestNode);', constructType: 'Function Signature', title: '2nd DFS: Find Distance from A to B', explanation: 'Second DFS starting from node A finds node B furthest from A.', keyDetails: [{ variableOrConstruct: '2nd DFS', role: 'Diameter calculation', whyThisWay: 'Distance between A and B is the exact maximum tree diameter' }] },
+          { lineNum: 3, codeSnippet: 'return maxDist;', constructType: 'Return / Cleanup', title: 'Return Maximum Tree Diameter', explanation: 'Returns total edge length of longest path in tree.', keyDetails: [{ variableOrConstruct: 'maxDist', role: 'Tree diameter result', whyThisWay: 'Double DFS computes exact diameter in 2 * O(V) time' }] }
+        ]
+      }
+    ],
+    traceKey: "factorial"
+  };
+}
+
 export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "easy_hello") return getProblem1Details();
   if (id === "easy_vars") return getProblem2Details();
@@ -14182,6 +16864,11 @@ export function getLearnModuleDetails(id: string): LearnModule {
   if (id === "med_linked_list") return getProblem48Details();
   if (id === "med_doubly_linked") return getProblem49Details();
   if (id === "med_binary_tree") return getProblem50Details();
+  if (id === "med_bst") return getProblem51Details();
+  if (id === "med_heap") return getProblem52Details();
+  if (id === "med_priority_queue") return getProblem53Details();
+  if (id === "med_graph_bfs") return getProblem54Details();
+  if (id === "med_graph_dfs") return getProblem55Details();
   const meta = RAW_MODULE_TOPICS.find(m => m.id === id) || RAW_MODULE_TOPICS[0];
   const cleanTitle = meta.title.replace(/^[0-9]+\.\s*/, '');
   const fnTag = sanitizeFnName(cleanTitle);
