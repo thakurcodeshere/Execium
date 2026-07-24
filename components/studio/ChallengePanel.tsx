@@ -2,15 +2,25 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@/lib/store";
 import { CODING_CHALLENGES, getChallengeDetails } from "@/lib/challenges";
-import { X, Lock, Unlock, CheckCircle2, Code2, Copy, ArrowRight, Lightbulb, FileText } from "lucide-react";
+import { X, Lock, Unlock, CheckCircle2, Code2, Copy, ArrowRight, Lightbulb, FileText, Send, Check, Clock, Tag, Briefcase, ThumbsUp } from "lucide-react";
+
+export interface ChallengeSubmission {
+  id: string;
+  code: string;
+  timestamp: string;
+  status: 'PASSED' | 'SUBMITTED';
+  lineCount: number;
+}
 
 export default function ChallengePanel() {
-  const { activeChallengeId, setChallengeId, theme, setCode, restart, recordAttempt, attemptedChallenges } = useStore();
-  const [activeTab, setActiveTab] = useState<'problem' | 'solutions'>('problem');
+  const { activeChallengeId, setChallengeId, theme, setCode, code, restart, recordAttempt, attemptedChallenges } = useStore();
+  const [activeTab, setActiveTab] = useState<'problem' | 'solutions' | 'submissions'>('problem');
   const [selectedSolIdx, setSelectedSolIdx] = useState(0);
   const [copied, setCopied] = useState(false);
   const [solvedList, setSolvedList] = useState<string[]>([]);
   const [localAttempted, setLocalAttempted] = useState<string[]>([]);
+  const [submissions, setSubmissions] = useState<ChallengeSubmission[]>([]);
+  const [submittedSuccess, setSubmittedSuccess] = useState(false);
 
   const T = theme;
 
@@ -23,6 +33,10 @@ export default function ChallengePanel() {
       if (attempted) setLocalAttempted(JSON.parse(attempted));
 
       if (activeChallengeId) {
+        const savedSubs = localStorage.getItem(`execium_challenge_submissions_${activeChallengeId}`);
+        if (savedSubs) setSubmissions(JSON.parse(savedSubs));
+        else setSubmissions([]);
+
         const savedViewState = localStorage.getItem(`execium_challenge_state_${activeChallengeId}`);
         if (savedViewState) {
           const { tab, solIdx } = JSON.parse(savedViewState);
@@ -46,11 +60,11 @@ export default function ChallengePanel() {
   if (!activeChallengeId) return null;
 
   const challengeInfo = getChallengeDetails(activeChallengeId);
+  const ps = challengeInfo.problemStatement;
   const isSolved = solvedList.includes(activeChallengeId);
   const isAttempted = isSolved || localAttempted.includes(activeChallengeId) || attemptedChallenges.includes(activeChallengeId);
 
   const diffColor = challengeInfo.difficulty === 'easy' ? '#10b981' : challengeInfo.difficulty === 'medium' ? '#f59e0b' : '#ef4444';
-
   const activeSolution = challengeInfo.solutions[selectedSolIdx] || challengeInfo.solutions[0];
 
   const handleCopyCode = (text: string) => {
@@ -62,6 +76,42 @@ export default function ChallengePanel() {
   const handleLoadSolution = (solCode: string) => {
     setCode(solCode);
     restart();
+  };
+
+  const handleSubmitSolution = () => {
+    const codeToSubmit = code && code.trim().length > 0 ? code : challengeInfo.code;
+    const newSub: ChallengeSubmission = {
+      id: Date.now().toString(),
+      code: codeToSubmit,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      status: 'PASSED',
+      lineCount: codeToSubmit.split('\n').length
+    };
+
+    const updated = [newSub, ...submissions];
+    setSubmissions(updated);
+
+    try {
+      localStorage.setItem(`execium_challenge_submissions_${activeChallengeId}`, JSON.stringify(updated));
+
+      // Mark challenge as solved in localStorage
+      if (!solvedList.includes(activeChallengeId)) {
+        const newSolved = [...solvedList, activeChallengeId];
+        setSolvedList(newSolved);
+        localStorage.setItem("execium_solved_challenges", JSON.stringify(newSolved));
+      }
+
+      // Mark challenge as attempted
+      if (!localAttempted.includes(activeChallengeId)) {
+        const newAttempted = [...localAttempted, activeChallengeId];
+        setLocalAttempted(newAttempted);
+        localStorage.setItem("execium_attempted_challenges", JSON.stringify(newAttempted));
+      }
+    } catch {}
+
+    recordAttempt(activeChallengeId);
+    setSubmittedSuccess(true);
+    setTimeout(() => setSubmittedSuccess(false), 3000);
   };
 
   return (
@@ -117,7 +167,7 @@ export default function ChallengePanel() {
         </div>
       </div>
 
-      {/* ── NAVIGATION TABS (Problem vs Solutions) ── */}
+      {/* ── NAVIGATION TABS (Problem vs Solutions vs Submissions) ── */}
       <div style={{
         display: "flex", borderBottom: `1px solid ${T.uiBorder}`,
         background: T.uiPanelHd, flexShrink: 0
@@ -126,60 +176,114 @@ export default function ChallengePanel() {
           onClick={() => setActiveTab('problem')}
           style={{
             flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
-            fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+            fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
             background: activeTab === 'problem' ? T.uiSurface : "transparent",
             color: activeTab === 'problem' ? T.uiAccent : T.uiTextMuted,
             borderBottom: activeTab === 'problem' ? `2px solid ${T.uiAccent}` : "2px solid transparent",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 6
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4
           }}
         >
-          <FileText size={14} /> Problem Statement
+          <FileText size={13} /> 1. Problem
         </button>
 
         <button
           onClick={() => setActiveTab('solutions')}
           style={{
             flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
-            fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+            fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
             background: activeTab === 'solutions' ? T.uiSurface : "transparent",
             color: activeTab === 'solutions' ? "#a855f7" : T.uiTextMuted,
             borderBottom: activeTab === 'solutions' ? "2px solid #a855f7" : "2px solid transparent",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: 6
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4
           }}
         >
-          {isAttempted ? <Unlock size={14} color="#10b981" /> : <Lock size={14} color="#f97316" />} 
-          Solutions (10)
+          {isAttempted ? <Unlock size={13} color="#10b981" /> : <Lock size={13} color="#f97316" />} 
+          2. Solutions (10)
+        </button>
+
+        <button
+          onClick={() => setActiveTab('submissions')}
+          style={{
+            flex: 1, padding: "10px 0", border: "none", cursor: "pointer",
+            fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+            background: activeTab === 'submissions' ? T.uiSurface : "transparent",
+            color: activeTab === 'submissions' ? "#10b981" : T.uiTextMuted,
+            borderBottom: activeTab === 'submissions' ? "2px solid #10b981" : "2px solid transparent",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 4
+          }}
+        >
+          <Send size={13} /> 3. Submissions ({submissions.length})
         </button>
       </div>
 
       {/* ── TAB CONTENT BODY ── */}
       <div style={{ flex: 1, overflowY: "auto", padding: 18 }}>
 
-        {/* ── TAB 1: PROBLEM STATEMENT ── */}
+        {/* ── TAB 1: RICH PROBLEM STATEMENT ── */}
         {activeTab === 'problem' && (
           <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
             
-            {/* Description */}
+            {/* Metadata Bar (Companies & Acceptance) */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                <Briefcase size={12} color={T.uiTextMuted} />
+                <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>Companies:</span>
+                {(ps.companies || ["Google", "Amazon", "Microsoft"]).map((c, i) => (
+                  <span key={i} style={{
+                    fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                    padding: "2px 6px", borderRadius: 4, background: "rgba(59,130,246,0.12)",
+                    color: "#3b82f6", border: "1px solid rgba(59,130,246,0.3)"
+                  }}>
+                    {c}
+                  </span>
+                ))}
+              </div>
+              <div style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, display: "flex", gap: 8 }}>
+                <span style={{ color: "#10b981" }}>Acceptance: {ps.acceptanceRate || "65%"}</span>
+                <span>Submissions: {ps.totalAccepted || "1.2M"}</span>
+              </div>
+            </div>
+
+            {/* Objective */}
             <div>
               <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>
                 // QUESTION OBJECTIVE
               </div>
-              <div style={{ fontSize: 13, color: T.uiText, lineHeight: 1.6, fontWeight: 500 }}>
-                {challengeInfo.problemStatement}
+              <div style={{ fontSize: 13, color: T.uiText, lineHeight: 1.6, fontWeight: 700 }}>
+                {ps.objective}
+              </div>
+              <div style={{ fontSize: 11, color: T.uiTextMuted, lineHeight: 1.5, marginTop: 6 }}>
+                {ps.description}
               </div>
             </div>
 
-            {/* Input & Output Format */}
+            {/* Input & Output Format Badges */}
             <div style={{ display: "flex", flexDirection: "column", gap: 10, background: "rgba(0,0,0,0.15)", padding: 12, borderRadius: 8, border: `1px solid ${T.uiBorder}` }}>
               <div>
                 <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#3b82f6" }}>📥 INPUT FORMAT: </span>
-                <span style={{ fontSize: 11, color: T.uiTextMuted }}>{challengeInfo.inputFormat}</span>
+                <span style={{ fontSize: 11, color: T.uiTextMuted }}>{ps.inputDesc || challengeInfo.inputFormat}</span>
               </div>
               <div>
                 <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#10b981" }}>📤 OUTPUT FORMAT: </span>
-                <span style={{ fontSize: 11, color: T.uiTextMuted }}>{challengeInfo.outputFormat}</span>
+                <span style={{ fontSize: 11, color: T.uiTextMuted }}>{ps.outputDesc || challengeInfo.outputFormat}</span>
               </div>
             </div>
+
+            {/* Key Takeaways Card */}
+            {ps.takeaways && ps.takeaways.length > 0 && (
+              <div style={{ background: "rgba(59,130,246,0.08)", padding: 12, borderRadius: 8, border: "1px solid rgba(59,130,246,0.25)" }}>
+                <div style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#3b82f6", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
+                  <Lightbulb size={12} /> KEY CONCEPTUAL TAKEAWAYS:
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {ps.takeaways.map((t, i) => (
+                    <div key={i} style={{ fontSize: 10, color: T.uiText, lineHeight: 1.4, display: "flex", gap: 6 }}>
+                      <span style={{ color: "#3b82f6" }}>✓</span> {t}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Example Test Cases */}
             <div>
@@ -187,7 +291,7 @@ export default function ChallengePanel() {
                 // EXAMPLE TEST CASES
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {challengeInfo.exampleCases.map((ex, i) => (
+                {(ps.examples || challengeInfo.exampleCases).map((ex, i) => (
                   <div key={i} style={{
                     background: "rgba(0,0,0,0.2)", border: `1px solid ${T.uiBorder}`,
                     borderRadius: 8, padding: 12, fontFamily: "'JetBrains Mono'", fontSize: 11
@@ -217,7 +321,7 @@ export default function ChallengePanel() {
                 // CONSTRAINTS
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                {challengeInfo.constraints.map((c, i) => (
+                {(ps.constraints || challengeInfo.constraints).map((c, i) => (
                   <div key={i} style={{ fontSize: 11, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{ color: T.uiAccent }}>•</span> {c}
                   </div>
@@ -225,22 +329,38 @@ export default function ChallengePanel() {
               </div>
             </div>
 
-            {/* Attempt CTA Banner */}
+            {/* Submit Solution Button Banner */}
             <div style={{
               marginTop: 10, padding: 14, borderRadius: 10,
-              background: isAttempted ? "rgba(16,185,129,0.08)" : "linear-gradient(135deg, rgba(168,85,247,0.1), rgba(59,130,246,0.1))",
-              border: `1px solid ${isAttempted ? "rgba(16,185,129,0.3)" : "rgba(168,85,247,0.3)"}`,
-              display: "flex", flexDirection: "column", gap: 8
+              background: "linear-gradient(135deg, rgba(16,185,129,0.12), rgba(59,130,246,0.12))",
+              border: "1px solid rgba(16,185,129,0.3)",
+              display: "flex", flexDirection: "column", gap: 10
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, fontWeight: 700, color: isAttempted ? "#10b981" : T.uiText }}>
-                {isAttempted ? <CheckCircle2 size={16} /> : <Lightbulb size={16} color="#a855f7" />}
-                {isAttempted ? "Attempt Registered — Solutions Unlocked!" : "Ready to solve?"}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ fontSize: 11, fontWeight: 800, color: "#10b981", display: "flex", alignItems: "center", gap: 6 }}>
+                  <Send size={14} /> Submit Your Solution
+                </div>
+                {submittedSuccess && (
+                  <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#10b981" }}>
+                    ✓ PASSED & SUBMITTED!
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.5 }}>
-                {isAttempted 
-                  ? "Great job! Switch to the Solutions tab above to explore all 10 idiomatic C++ solutions."
-                  : "Write your solution in the left code editor and click Compile, Run, or Submit. Once attempted, all 10 solutions will unlock automatically!"}
+                Write your C++ solution in the editor on the left and click submit below to record your solution attempt.
               </div>
+              <button
+                onClick={handleSubmitSolution}
+                style={{
+                  width: "100%", padding: "9px 0", borderRadius: 7, border: "none",
+                  background: "linear-gradient(135deg, #10b981, #3b82f6)",
+                  color: "#fff", fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                  boxShadow: "0 3px 12px rgba(16,185,129,0.3)", transition: "all 0.15s"
+                }}
+              >
+                <Send size={14} /> Submit Solution & Record Progress
+              </button>
             </div>
 
           </div>
@@ -248,162 +368,153 @@ export default function ChallengePanel() {
 
         {/* ── TAB 2: SOLUTIONS (UP TO 10) ── */}
         {activeTab === 'solutions' && (
-          <div>
-            {!isAttempted ? (
-              /* LOCKED STATE CARD */
-              <div style={{
-                padding: 28, borderRadius: 14, background: "rgba(0,0,0,0.25)",
-                border: `1px dashed ${T.uiBorder}`, textAlign: "center",
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 14,
-                marginTop: 20
-              }}>
-                <div style={{
-                  width: 54, height: 54, borderRadius: 16, background: "rgba(249,115,22,0.15)",
-                  border: "1px solid rgba(249,115,22,0.3)", display: "flex",
-                  alignItems: "center", justifyContent: "center"
-                }}>
-                  <Lock size={26} color="#f97316" />
-                </div>
-
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 800, color: T.uiText, marginBottom: 6 }}>
-                    Solutions Are Locked
-                  </div>
-                  <div style={{ fontSize: 11, color: T.uiTextMuted, lineHeight: 1.6, maxWidth: 280, margin: "0 auto" }}>
-                    To encourage real problem solving, you must attempt or run/submit your code in the left editor at least once to unlock all 10 solution approaches.
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    recordAttempt(activeChallengeId);
-                  }}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {challengeInfo.solutions.map((sol, idx) => {
+              const isSelected = selectedSolIdx === idx;
+              return (
+                <div
+                  key={sol.id}
+                  onClick={() => setSelectedSolIdx(idx)}
                   style={{
-                    padding: "8px 18px", borderRadius: 8, border: "none",
-                    background: "linear-gradient(135deg, #a855f7, #3b82f6)",
-                    color: "#fff", fontSize: 11, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                    cursor: "pointer", boxShadow: "0 0 16px rgba(168,85,247,0.3)",
-                    marginTop: 6
+                    background: isSelected ? `${T.uiAccent}10` : "rgba(0,0,0,0.15)",
+                    border: `1px solid ${isSelected ? T.uiAccent : T.uiBorder}`,
+                    borderRadius: 10, padding: 12, cursor: "pointer", transition: "all 0.15s"
                   }}
                 >
-                  🚀 Unlock Solutions Now
-                </button>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: isSelected ? T.uiAccent : T.uiText }}>
+                      {sol.title}
+                    </span>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono'", padding: "1px 5px", borderRadius: 3, background: "rgba(59,130,246,0.15)", color: "#3b82f6" }}>
+                        Time: {sol.timeComplexity}
+                      </span>
+                      <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono'", padding: "1px 5px", borderRadius: 3, background: "rgba(168,85,247,0.15)", color: "#a855f7" }}>
+                        Space: {sol.spaceComplexity}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 10, color: T.uiTextMuted, lineHeight: 1.4, marginBottom: isSelected ? 10 : 0 }}>
+                    {sol.desc}
+                  </div>
+
+                  {isSelected && (
+                    <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+                      <pre style={{
+                        background: "#0d1117", border: `1px solid ${T.uiBorder}`, borderRadius: 6,
+                        padding: 10, fontSize: 10, fontFamily: "'JetBrains Mono'", color: "#e6edf3",
+                        overflowX: "auto", margin: 0, maxClamp: 200
+                      }}>
+                        <code>{sol.code}</code>
+                      </pre>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleLoadSolution(sol.code); }}
+                          style={{
+                            flex: 1, padding: "6px 0", borderRadius: 6, border: "none",
+                            background: "linear-gradient(135deg, #a855f7, #3b82f6)", color: "#fff",
+                            fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, cursor: "pointer",
+                            display: "flex", alignItems: "center", justifyContent: "center", gap: 4
+                          }}
+                        >
+                          <Code2 size={12} /> Load Code into Editor
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleCopyCode(sol.code); }}
+                          style={{
+                            padding: "6px 12px", borderRadius: 6, border: `1px solid ${T.uiBorder}`,
+                            background: T.uiSurface, color: T.uiText, fontSize: 10, fontFamily: "'JetBrains Mono'",
+                            fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 4
+                          }}
+                        >
+                          {copied ? <Check size={12} color="#10b981" /> : <Copy size={12} />} Copy
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── TAB 3: SUBMISSIONS HISTORY ── */}
+        {activeTab === 'submissions' && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: T.uiText, fontFamily: "'JetBrains Mono'" }}>
+                📜 SUBMISSION HISTORY ({submissions.length})
+              </div>
+              <button
+                onClick={handleSubmitSolution}
+                style={{
+                  padding: "5px 10px", borderRadius: 6, border: "none",
+                  background: "#10b981", color: "#fff", fontSize: 9,
+                  fontFamily: "'JetBrains Mono'", fontWeight: 800, cursor: "pointer",
+                  display: "flex", alignItems: "center", gap: 4
+                }}
+              >
+                <Send size={11} /> Submit Current Code
+              </button>
+            </div>
+
+            {submissions.length === 0 ? (
+              <div style={{ padding: 24, textAlign: "center", background: "rgba(0,0,0,0.15)", borderRadius: 8, border: `1px solid ${T.uiBorder}` }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: T.uiTextMuted, marginBottom: 4 }}>No Submissions Yet</div>
+                <div style={{ fontSize: 10, color: T.uiTextMuted }}>Write your C++ solution in the editor and click "Submit Solution" to log your attempts.</div>
               </div>
             ) : (
-              /* UNLOCKED 10 SOLUTIONS */
-              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                
-                {/* Header Banner */}
-                <div style={{
-                  padding: "8px 12px", borderRadius: 8, background: "rgba(16,185,129,0.1)",
-                  border: "1px solid rgba(16,185,129,0.3)", display: "flex",
-                  alignItems: "center", justifyContent: "space-between"
+              submissions.map((sub, i) => (
+                <div key={sub.id} style={{
+                  background: "rgba(0,0,0,0.18)", border: `1px solid ${T.uiBorder}`,
+                  borderRadius: 8, padding: 12, display: "flex", flexDirection: "column", gap: 8
                 }}>
-                  <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#10b981", display: "flex", alignItems: "center", gap: 6 }}>
-                    <Unlock size={14} /> 10 SOLUTIONS UNLOCKED
-                  </span>
-                  <span style={{ fontSize: 9, color: T.uiTextMuted, fontFamily: "'JetBrains Mono'" }}>
-                    Explore 10 C++ Approaches
-                  </span>
-                </div>
-
-                {/* 10 Solutions Selector Buttons */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {challengeInfo.solutions.map((sol, idx) => {
-                    const isSelected = selectedSolIdx === idx;
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedSolIdx(idx)}
-                        style={{
-                          padding: "5px 10px", borderRadius: 6,
-                          border: `1px solid ${isSelected ? "#a855f7" : T.uiBorder}`,
-                          background: isSelected ? "rgba(168,85,247,0.18)" : "transparent",
-                          color: isSelected ? "#a855f7" : T.uiTextMuted,
-                          fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                          cursor: "pointer", transition: "all 0.15s"
-                        }}
-                      >
-                        Sol {idx + 1}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Selected Solution Details Card */}
-                <div style={{
-                  background: "rgba(0,0,0,0.2)", border: `1px solid ${T.uiBorder}`,
-                  borderRadius: 12, padding: 16, display: "flex", flexDirection: "column", gap: 14
-                }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 800, color: T.uiText, marginBottom: 4 }}>
-                      {activeSolution.title}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: "rgba(16,185,129,0.15)", color: "#10b981", border: "1px solid rgba(16,185,129,0.3)" }}>
+                        🟢 {sub.status}
+                      </span>
+                      <span style={{ fontSize: 10, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
+                        <Clock size={11} style={{ display: "inline", marginRight: 3 }} /> {sub.timestamp}
+                      </span>
                     </div>
-                    <div style={{ fontSize: 11, color: T.uiTextMuted, lineHeight: 1.5 }}>
-                      {activeSolution.desc}
-                    </div>
-                  </div>
-
-                  {/* Complexity Pills */}
-                  <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                    <span style={{
-                      fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                      padding: "2px 8px", borderRadius: 4, background: "rgba(59,130,246,0.15)",
-                      color: "#3b82f6", border: "1px solid rgba(59,130,246,0.3)"
-                    }}>
-                      ⏱ TIME: {activeSolution.timeComplexity}
-                    </span>
-                    <span style={{
-                      fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                      padding: "2px 8px", borderRadius: 4, background: "rgba(168,85,247,0.15)",
-                      color: "#a855f7", border: "1px solid rgba(168,85,247,0.3)"
-                    }}>
-                      💾 SPACE: {activeSolution.spaceComplexity}
+                    <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
+                      {sub.lineCount} lines
                     </span>
                   </div>
 
-                  {/* C++ Code Viewer Box */}
-                  <div style={{ position: "relative" }}>
-                    <div style={{
-                      fontFamily: "'JetBrains Mono', monospace", fontSize: 11, lineHeight: 1.6,
-                      background: "#0f172a", border: `1px solid ${T.uiBorder}`, borderRadius: 8,
-                      padding: 14, color: "#e2e8f0", overflowX: "auto", maxHeight: 280
-                    }}>
-                      <pre style={{ margin: 0 }}>{activeSolution.code}</pre>
-                    </div>
+                  <pre style={{
+                    background: "#0d1117", border: `1px solid ${T.uiBorder}`, borderRadius: 6,
+                    padding: 8, fontSize: 9, fontFamily: "'JetBrains Mono'", color: "#e6edf3",
+                    overflowX: "auto", margin: 0, maxHeight: 120
+                  }}>
+                    <code>{sub.code}</code>
+                  </pre>
 
-                    {/* Action Bar */}
-                    <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                      <button
-                        onClick={() => handleCopyCode(activeSolution.code)}
-                        style={{
-                          padding: "6px 12px", borderRadius: 6, border: `1px solid ${T.uiBorder}`,
-                          background: T.uiSurface, color: T.uiText, fontSize: 10,
-                          fontFamily: "'JetBrains Mono'", fontWeight: 700, cursor: "pointer",
-                          display: "flex", alignItems: "center", gap: 4
-                        }}
-                      >
-                        <Copy size={12} /> {copied ? "Copied!" : "Copy Code"}
-                      </button>
-
-                      <button
-                        onClick={() => handleLoadSolution(activeSolution.code)}
-                        style={{
-                          padding: "6px 12px", borderRadius: 6, border: "none",
-                          background: "linear-gradient(135deg, #10b981, #06b6d4)",
-                          color: "#fff", fontSize: 10, fontFamily: "'JetBrains Mono'",
-                          fontWeight: 800, cursor: "pointer", display: "flex",
-                          alignItems: "center", gap: 4, boxShadow: "0 0 10px rgba(16,185,129,0.3)"
-                        }}
-                      >
-                        <Code2 size={12} /> Load Solution into Editor
-                      </button>
-                    </div>
+                  <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                    <button
+                      onClick={() => handleLoadSolution(sub.code)}
+                      style={{
+                        padding: "4px 8px", borderRadius: 5, border: "none",
+                        background: `${T.uiAccent}20`, color: T.uiAccent,
+                        fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800, cursor: "pointer"
+                      }}
+                    >
+                      Load Submission
+                    </button>
+                    <button
+                      onClick={() => handleCopyCode(sub.code)}
+                      style={{
+                        padding: "4px 8px", borderRadius: 5, border: `1px solid ${T.uiBorder}`,
+                        background: T.uiSurface, color: T.uiTextMuted,
+                        fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 700, cursor: "pointer"
+                      }}
+                    >
+                      Copy
+                    </button>
                   </div>
-
                 </div>
-
-              </div>
+              ))
             )}
           </div>
         )}

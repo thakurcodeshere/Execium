@@ -50,7 +50,27 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
   const [renamingName, setRenamingName] = useState("");
 
   const [solvedChallenges, setSolvedChallenges] = useState<string[]>([]);
+  const [attemptedChallengesList, setAttemptedChallengesList] = useState<string[]>([]);
   const [activeDiff, setActiveDiff] = useState<'easy' | 'medium' | 'hard'>('easy');
+  const [challengeStatusTab, setChallengeStatusTab] = useState<'all' | 'unsolved' | 'attempted' | 'solved'>('all');
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [timeUntilReset, setTimeUntilReset] = useState({ hours: 0, mins: 0, secs: 0 });
+
+  // Live countdown timer for Daily Challenge Reset
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      const diffMs = Math.max(0, tomorrow.getTime() - now.getTime());
+      const hours = Math.floor(diffMs / (1000 * 60 * 60));
+      const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diffMs % (1000 * 60)) / 1000);
+      setTimeUntilReset({ hours, mins, secs });
+    };
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Keyboard navigation focus indices & refs
   const [focusedLearnIdx, setFocusedLearnIdx] = useState(0);
@@ -64,7 +84,7 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
 
   useEffect(() => {
     setFocusedChallengeIdx(0);
-  }, [activeDiff]);
+  }, [activeDiff, challengeStatusTab]);
 
   // Global Keyboard Navigation Listener for Arrow Keys & Enter
   useEffect(() => {
@@ -672,11 +692,12 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                 <span style={{ fontSize: 11, fontWeight: 800, color: T.uiText, fontFamily: "'JetBrains Mono'" }}>✍️ CODING CHALLENGES</span>
               </div>
 
-              {/* Today's Daily Challenge Featured Card */}
+              {/* Today's Daily Challenge Featured Card & Date Navigator */}
               {(() => {
-                const dailyInfo = getDailyChallenge();
+                const dailyInfo = getDailyChallenge(selectedDate);
                 const isDailySolved = solvedChallenges.includes(dailyInfo.challenge.id);
                 const diffColor = dailyInfo.challenge.difficulty === 'easy' ? '#10b981' : dailyInfo.challenge.difficulty === 'medium' ? '#f59e0b' : '#ef4444';
+                const isToday = selectedDate.toDateString() === new Date().toDateString();
                 return (
                   <div style={{
                     padding: "12px 14px",
@@ -684,14 +705,35 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                     borderBottom: `1px solid ${T.uiBorder}`,
                     position: "relative"
                   }}>
+                    {/* Date Navigation & Live Countdown Timer */}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                      <button
+                        onClick={() => setSelectedDate(d => new Date(d.getTime() - 86400000))}
+                        style={{ background: "transparent", border: "none", color: "#f97316", cursor: "pointer", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800 }}
+                      >
+                        ‹ Prev
+                      </button>
                       <span style={{ fontSize: 9, fontFamily: "'JetBrains Mono'", fontWeight: 800, color: "#f97316", display: "flex", alignItems: "center", gap: 4 }}>
-                        <Flame size={12} fill="#f97316" color="#f97316" /> TODAY&apos;S DAILY PICK • {dailyInfo.formattedDate}
+                        <Flame size={12} fill="#f97316" color="#f97316" /> {isToday ? "TODAY'S PICK" : "DAILY PICK"} • {dailyInfo.formattedDate}
+                      </span>
+                      <button
+                        onClick={() => setSelectedDate(d => new Date(d.getTime() + 86400000))}
+                        style={{ background: "transparent", border: "none", color: "#f97316", cursor: "pointer", fontSize: 10, fontFamily: "'JetBrains Mono'", fontWeight: 800 }}
+                      >
+                        Next ›
+                      </button>
+                    </div>
+
+                    {/* Live Reset Timer */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                      <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted }}>
+                        Reset in: <strong style={{ color: T.uiText }}>{String(timeUntilReset.hours).padStart(2,'0')}:{String(timeUntilReset.mins).padStart(2,'0')}:{String(timeUntilReset.secs).padStart(2,'0')}</strong>
                       </span>
                       <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800, padding: "1px 5px", borderRadius: 4, background: `${diffColor}20`, color: diffColor }}>
                         {dailyInfo.challenge.difficulty.toUpperCase()}
                       </span>
                     </div>
+
                     <div style={{ fontSize: 13, fontWeight: 800, color: T.uiText, marginBottom: 4 }}>
                       {dailyInfo.challenge.title}
                     </div>
@@ -709,11 +751,46 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                         boxShadow: isDailySolved ? "none" : "0 2px 10px rgba(249,115,22,0.3)"
                       }}
                     >
-                      {isDailySolved ? "✓ Solved Today" : "⚡ Solve Today's Challenge"}
+                      {isDailySolved ? "✓ Solved Daily Challenge" : "⚡ Solve Daily Challenge"}
                     </button>
                   </div>
                 );
               })()}
+
+              {/* Status Filter Tabs (ALL / UNSOLVED / ATTEMPTED / SOLVED) */}
+              <div style={{
+                padding: "6px 8px", borderBottom: `1px solid ${T.uiBorder}`,
+                background: "rgba(0,0,0,0.2)", display: "flex", gap: 4
+              }}>
+                {(['all', 'unsolved', 'attempted', 'solved'] as const).map(st => {
+                  const isActive = challengeStatusTab === st;
+                  const count = CODING_CHALLENGES.filter(c => {
+                    const isSolved = solvedChallenges.includes(c.id);
+                    const isAttempted = isSolved || attemptedChallengesList.includes(c.id);
+                    if (st === 'unsolved') return !isAttempted;
+                    if (st === 'attempted') return isAttempted && !isSolved;
+                    if (st === 'solved') return isSolved;
+                    return true;
+                  }).length;
+                  const color = st === 'solved' ? '#10b981' : st === 'attempted' ? '#f59e0b' : st === 'unsolved' ? '#3b82f6' : T.uiAccent;
+
+                  return (
+                    <button
+                      key={st}
+                      onClick={() => setChallengeStatusTab(st)}
+                      style={{
+                        flex: 1, padding: "4px 0", borderRadius: 5, border: `1px solid ${isActive ? color : "transparent"}`,
+                        background: isActive ? `${color}20` : "transparent",
+                        color: isActive ? color : T.uiTextMuted,
+                        fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                        cursor: "pointer", textTransform: "uppercase"
+                      }}
+                    >
+                      {st} ({count})
+                    </button>
+                  );
+                })}
+              </div>
 
               {/* Progress Tracker Card */}
               {(() => {
@@ -721,8 +798,8 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
                 const totalCount = CODING_CHALLENGES.length;
                 const solvedPct = totalCount > 0 ? Math.round((solvedCount / totalCount) * 100) : 0;
                 return (
-                  <div style={{ padding: "10px 14px", background: "rgba(0,0,0,0.15)", borderBottom: `1px solid ${T.uiBorder}` }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, marginBottom: 6 }}>
+                  <div style={{ padding: "8px 14px", background: "rgba(0,0,0,0.15)", borderBottom: `1px solid ${T.uiBorder}` }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 9, fontFamily: "'JetBrains Mono'", color: T.uiTextMuted, marginBottom: 5 }}>
                       <span>PROGRESS STATUS</span>
                       <span style={{ color: T.uiText, fontWeight: 700 }}>{solvedCount}/{totalCount} ({solvedPct}%)</span>
                     </div>
@@ -763,49 +840,71 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
 
               {/* Challenges list */}
               <div style={{ maxHeight: 240, overflowY: "auto" }}>
-                {CODING_CHALLENGES.filter(c => c.difficulty === activeDiff).map((c, idx) => {
-                  const isFocused = idx === focusedChallengeIdx;
-                  const isSolved = solvedChallenges.includes(c.id);
-                  const isTodayDaily = c.id === getDailyChallenge().challenge.id;
-                  return (
-                    <button
-                      key={c.id}
-                      ref={el => { challengeItemRefs.current[idx] = el; }}
-                      onClick={() => handleSelectQuestion(c)}
-                      onMouseEnter={() => setFocusedChallengeIdx(idx)}
-                      style={{
-                        width: "100%", padding: "12px 14px", display: "flex", flexDirection: "column",
-                        background: isFocused ? `${T.uiAccent}1f` : activeChallengeId === c.id ? `${T.uiAccent}10` : "transparent",
-                        border: "none", cursor: "pointer", textAlign: "left",
-                        borderBottom: `1px solid ${T.uiBorder}`, transition: "all 0.12s ease",
-                        boxSizing: "border-box", outline: "none",
-                        boxShadow: isFocused ? `inset 3px 0 0 0 ${T.uiAccent}` : "none"
-                      }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-                        <div style={{ fontSize: 12, fontWeight: isFocused ? 800 : 700, color: isFocused ? T.uiAccent : T.uiText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
-                          {isFocused ? "▶ " : ""}{c.title}
-                          {isTodayDaily && (
-                            <span style={{ fontSize: 8, padding: "1px 4px", borderRadius: 4, background: "rgba(249,115,22,0.2)", color: "#f97316", fontFamily: "'JetBrains Mono'", fontWeight: 800 }}>🔥 DAILY</span>
-                          )}
+                {(() => {
+                  const filtered = CODING_CHALLENGES.filter(c => {
+                    const matchDiff = c.difficulty === activeDiff;
+                    const isSolved = solvedChallenges.includes(c.id);
+                    const isAttempted = isSolved || attemptedChallengesList.includes(c.id);
+                    if (!matchDiff) return false;
+                    if (challengeStatusTab === 'unsolved') return !isAttempted;
+                    if (challengeStatusTab === 'attempted') return isAttempted && !isSolved;
+                    if (challengeStatusTab === 'solved') return isSolved;
+                    return true;
+                  });
+
+                  if (filtered.length === 0) {
+                    return (
+                      <div style={{ padding: 20, textAlign: "center", fontSize: 10, color: T.uiTextMuted, fontFamily: "'JetBrains Mono'" }}>
+                        No {challengeStatusTab} {activeDiff} challenges
+                      </div>
+                    );
+                  }
+
+                  return filtered.map((c, idx) => {
+                    const isFocused = idx === focusedChallengeIdx;
+                    const isSolved = solvedChallenges.includes(c.id);
+                    const isAttempted = isSolved || attemptedChallengesList.includes(c.id);
+                    const isTodayDaily = c.id === getDailyChallenge(selectedDate).challenge.id;
+                    return (
+                      <button
+                        key={c.id}
+                        ref={el => { challengeItemRefs.current[idx] = el; }}
+                        onClick={() => handleSelectQuestion(c)}
+                        onMouseEnter={() => setFocusedChallengeIdx(idx)}
+                        style={{
+                          width: "100%", padding: "12px 14px", display: "flex", flexDirection: "column",
+                          background: isFocused ? `${T.uiAccent}1f` : activeChallengeId === c.id ? `${T.uiAccent}10` : "transparent",
+                          border: "none", cursor: "pointer", textAlign: "left",
+                          borderBottom: `1px solid ${T.uiBorder}`, transition: "all 0.12s ease",
+                          boxSizing: "border-box", outline: "none",
+                          boxShadow: isFocused ? `inset 3px 0 0 0 ${T.uiAccent}` : "none"
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                          <div style={{ fontSize: 12, fontWeight: isFocused ? 800 : 700, color: isFocused ? T.uiAccent : T.uiText, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: 6 }}>
+                            {isFocused ? "▶ " : ""}{c.title}
+                            {isTodayDaily && (
+                              <span style={{ fontSize: 8, padding: "1px 4px", borderRadius: 4, background: "rgba(249,115,22,0.2)", color: "#f97316", fontFamily: "'JetBrains Mono'", fontWeight: 800 }}>🔥 DAILY</span>
+                            )}
+                          </div>
+                          {/* Solved vs Unsolved Status badge */}
+                          <span style={{
+                            fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
+                            padding: "2px 6px", borderRadius: 4,
+                            background: isSolved ? "rgba(16,185,129,.12)" : isAttempted ? "rgba(245,158,11,.12)" : "rgba(255,255,255,.03)",
+                            color: isSolved ? "#10b981" : isAttempted ? "#f59e0b" : T.uiTextMuted,
+                            border: `1px solid ${isSolved ? "rgba(16,185,129,.25)" : isAttempted ? "rgba(245,158,11,.25)" : T.uiBorder}`
+                          }}>
+                            {isSolved ? "SOLVED" : isAttempted ? "ATTEMPTED" : "TODO"}
+                          </span>
                         </div>
-                        {/* Solved vs Unsolved Status badge */}
-                        <span style={{
-                          fontSize: 8, fontFamily: "'JetBrains Mono'", fontWeight: 800,
-                          padding: "2px 6px", borderRadius: 4,
-                          background: isSolved ? "rgba(16,185,129,.12)" : "rgba(255,255,255,.03)",
-                          color: isSolved ? "#10b981" : T.uiTextMuted,
-                          border: `1px solid ${isSolved ? "rgba(16,185,129,.25)" : T.uiBorder}`
-                        }}>
-                          {isSolved ? "SOLVED" : "TODO"}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 9, color: isFocused ? T.uiText : T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>
-                        {c.desc}
-                      </div>
-                    </button>
-                  );
-                })}
+                        <div style={{ fontSize: 9, color: isFocused ? T.uiText : T.uiTextMuted, marginTop: 4, lineHeight: 1.4 }}>
+                          {c.desc}
+                        </div>
+                      </button>
+                    );
+                  });
+                })()}
               </div>
 
               {/* Keyboard Shortcuts Helper Footer */}
