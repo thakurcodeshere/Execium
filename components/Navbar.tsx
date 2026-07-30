@@ -58,57 +58,59 @@ export default function Navbar() {
       fontFamily: "'Inter', sans-serif",
       boxShadow: "0 10px 40px rgba(0, 0, 0, 0.6)"
     }}>
-      {/* ── DOUBLE THICKNESS BRAND LOGO ICON & TYPOGRAPHY ── */}
+      {/* ── SUPREME HIGH-IMPACT EXECIUM BRAND LOGO ICON & TYPOGRAPHY ── */}
       <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 16 }}>
-        {/* Scaled Quantum Omega SVG Icon Badge */}
+        {/* Supreme Hyper-Highlighted Quantum Omega Badge */}
         <div style={{
-          width: 54, height: 54, borderRadius: 16,
-          background: "linear-gradient(135deg, rgba(168,85,247,0.4), rgba(59,130,246,0.3), rgba(6,182,212,0.25))",
-          border: "1.5px solid rgba(255, 255, 255, 0.3)",
+          width: 58, height: 58, borderRadius: 16,
+          background: "linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%)",
+          border: "2px solid #ffffff",
+          outline: "3px solid rgba(168, 85, 247, 0.6)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          boxShadow: "0 0 35px rgba(168,85,247,0.6), inset 0 1.5px 2px rgba(255,255,255,0.5)",
-          position: "relative", overflow: "hidden", transition: "all 0.3s ease"
+          boxShadow: "0 0 35px #a855f7, 0 0 65px rgba(59,130,246,0.7), inset 0 2px 4px rgba(255,255,255,0.8)",
+          position: "relative", overflow: "hidden", transition: "all 0.3s ease",
+          cursor: "pointer", flexShrink: 0
         }}>
-          {/* Inner Ambient Glow Dot */}
+          {/* Pulsing Core Energy Orb */}
           <div style={{
-            position: "absolute", width: 30, height: 30, borderRadius: "50%",
-            background: "radial-gradient(circle, #a855f7 0%, #3b82f6 70%, transparent 100%)",
-            filter: "blur(6px)", opacity: 0.85
+            position: "absolute", width: 40, height: 40, borderRadius: "50%",
+            background: "radial-gradient(circle, #ffffff 0%, #e9d5ff 40%, transparent 100%)",
+            filter: "blur(6px)", opacity: 0.9
           }} />
 
-          {/* Scaled Glowing Quantum Omega + Infinity SVG Logo */}
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ zIndex: 2 }}>
+          {/* Bold Supreme Quantum Omega SVG Emblem */}
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ zIndex: 3, filter: "drop-shadow(0 3px 6px rgba(0,0,0,0.8))" }}>
             <path
-              d="M12 4C8.13401 4 5 7.13401 5 11C5 13.8241 6.67138 16.2573 9.07007 17.3621L6 20H9.5L11.5 17.5H12.5L14.5 20H18L14.9299 17.3621C17.3286 16.2573 19 13.8241 19 11C19 7.13401 15.866 4 12 4ZM12 6.5C14.4853 6.5 16.5 8.51472 16.5 11C16.5 12.8252 15.4116 14.396 13.8447 15.1055L12 13.2L10.1553 15.1055C8.58841 14.396 7.5 12.8252 7.5 11C7.5 8.51472 9.51472 6.5 12 6.5Z"
-              fill="url(#execium-logo-grad-lg)"
+              d="M12 2C6.47715 2 2 6.47715 2 12C2 15.8906 4.22541 19.2605 7.4878 20.8711L3.5 22H9L11.5 19H12.5L15 22H20.5L16.5122 20.8711C19.7746 19.2605 22 15.8906 22 12C22 6.47715 17.5228 2 12 2ZM12 5.5C15.5899 5.5 18.5 8.41015 18.5 12C18.5 14.5422 17.0392 16.7423 14.9316 17.7842L12 14.8L9.06836 17.7842C6.96084 16.7423 5.5 14.5422 5.5 12C5.5 8.41015 8.41015 5.5 12 5.5Z"
+              fill="#ffffff"
             />
+            <circle cx="12" cy="12" r="3.5" fill="url(#supreme-core-grad)" />
             <defs>
-              <linearGradient id="execium-logo-grad-lg" x1="5" y1="4" x2="19" y2="20" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#ffffff" />
-                <stop offset="0.5" stopColor="#e9d5ff" />
-                <stop offset="1" stopColor="#38bdf8" />
+              <linearGradient id="supreme-core-grad" x1="8.5" y1="8.5" x2="15.5" y2="15.5" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#a855f7" />
+                <stop offset="1" stopColor="#06b6d4" />
               </linearGradient>
             </defs>
           </svg>
         </div>
 
         <div>
-          {/* Scaled Logo Title */}
+          {/* Supreme Logo Title */}
           <div style={{
-            fontFamily: "'JetBrains Mono', monospace", fontWeight: 900, fontSize: 22,
+            fontFamily: "'JetBrains Mono', monospace", fontWeight: 900, fontSize: 24,
             letterSpacing: "-0.5px",
-            background: "linear-gradient(90deg, #ffffff 0%, #e9d5ff 40%, #60a5fa 75%, #38bdf8 100%)",
+            background: "linear-gradient(90deg, #ffffff 0%, #f3e8ff 35%, #93c5fd 70%, #38bdf8 100%)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             display: "flex", alignItems: "center", gap: 6,
-            filter: "drop-shadow(0 0 16px rgba(168,85,247,0.4))"
+            filter: "drop-shadow(0 0 20px rgba(168,85,247,0.6))"
           }}>
-            Execium <span style={{ fontSize: 15, color: "#a855f7", WebkitTextFillColor: "#a855f7" }}>Ω∞</span>
+            Execium <span style={{ fontSize: 16, color: "#c084fc", WebkitTextFillColor: "#c084fc", fontWeight: 900 }}>Ω∞</span>
           </div>
 
-          {/* Scaled Subtitle */}
+          {/* Subtitle */}
           <div style={{
-            fontSize: 10.5, color: "#818cf8", fontFamily: "'JetBrains Mono', monospace",
-            letterSpacing: 2.2, fontWeight: 800, textTransform: "uppercase", marginTop: 2
+            fontSize: 10.5, color: "#a5b4fc", fontFamily: "'JetBrains Mono', monospace",
+            letterSpacing: 2.4, fontWeight: 900, textTransform: "uppercase", marginTop: 2
           }}>
             COMPUTATIONAL REALITY OS
           </div>
