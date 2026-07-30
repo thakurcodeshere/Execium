@@ -463,17 +463,41 @@ export default function LBarVertical({ width, setWidth, onStartResize }: LBarVer
         padding: isExpanded ? "0 14px" : "0 8px", width: "100%"
       }}>
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
+          {/* New Quantum Omega SVG Icon Badge */}
           <div style={{
-            width: 34, height: 34, borderRadius: 8,
-            background: "linear-gradient(135deg, #a855f7, #3b82f6)",
+            width: 38, height: 38, borderRadius: 11,
+            background: "linear-gradient(135deg, rgba(168,85,247,0.4), rgba(59,130,246,0.3), rgba(6,182,212,0.2))",
+            border: "1px solid rgba(255, 255, 255, 0.25)",
             display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: 16, fontWeight: 900, color: "#fff", cursor: "pointer",
-            boxShadow: "0 0 14px rgba(168,85,247,.4)",
-          }}>Ω</div>
+            boxShadow: "0 0 20px rgba(168,85,247,0.5), inset 0 1px 1px rgba(255,255,255,0.4)",
+            position: "relative", overflow: "hidden", cursor: "pointer", flexShrink: 0
+          }}>
+            <div style={{
+              position: "absolute", width: 20, height: 20, borderRadius: "50%",
+              background: "radial-gradient(circle, #a855f7 0%, #3b82f6 70%, transparent 100%)",
+              filter: "blur(4px)", opacity: 0.8
+            }} />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ zIndex: 2 }}>
+              <path
+                d="M12 4C8.13401 4 5 7.13401 5 11C5 13.8241 6.67138 16.2573 9.07007 17.3621L6 20H9.5L11.5 17.5H12.5L14.5 20H18L14.9299 17.3621C17.3286 16.2573 19 13.8241 19 11C19 7.13401 15.866 4 12 4ZM12 6.5C14.4853 6.5 16.5 8.51472 16.5 11C16.5 12.8252 15.4116 14.396 13.8447 15.1055L12 13.2L10.1553 15.1055C8.58841 14.396 7.5 12.8252 7.5 11C7.5 8.51472 9.51472 6.5 12 6.5Z"
+                fill="url(#studio-logo-grad)"
+              />
+              <defs>
+                <linearGradient id="studio-logo-grad" x1="5" y1="4" x2="19" y2="20" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="#ffffff" />
+                  <stop offset="0.5" stopColor="#e9d5ff" />
+                  <stop offset="1" stopColor="#38bdf8" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
           {isExpanded && (
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: 12, fontWeight: 800, color: T.uiText, fontFamily: "'JetBrains Mono'" }}>Execium</span>
-              <span style={{ fontSize: 7, color: T.uiTextMuted, letterSpacing: 0.5 }}>COMPUTATIONAL OS</span>
+              <span style={{ fontSize: 13, fontWeight: 900, color: T.uiText, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.3px", display: "flex", alignItems: "center", gap: 3 }}>
+                Execium <span style={{ fontSize: 10, color: "#a855f7" }}>Ω∞</span>
+              </span>
+              <span style={{ fontSize: 7.5, color: T.uiTextMuted, letterSpacing: 1, fontWeight: 800 }}>COMPUTATIONAL OS</span>
             </div>
           )}
         </Link>
